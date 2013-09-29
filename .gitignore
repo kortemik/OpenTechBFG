@@ -1,0 +1,8 @@
+# Folders
+build
+
+# File types
+*.user
+*.opensdf
+*.sdf
+*.suo
