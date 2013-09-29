@@ -32,8 +32,13 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __QGL_H__
 #define __QGL_H__
 
-
+#ifdef ID_WIN32
 #include <gl/gl.h>
+#elif defined(ID_QNX)
+#include <EGL/egl.h>
+#include <GLES/gl.h>
+#include <GLES/glext.h>
+#endif
 
 
 #ifndef APIENTRY

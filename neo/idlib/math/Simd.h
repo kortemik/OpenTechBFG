@@ -57,7 +57,15 @@ public:
 ===============================================================================
 */
 
+#ifdef ID_WIN32
 #define VPCALL __fastcall
+#elif defined(ID_QNX)
+#ifdef ID_QNX_X86
+	#define VPCALL __msfastcall
+#elif defined(ID_QNX_ARM)
+	#define VPCALL
+#endif
+#endif
 
 class idVec2;
 class idVec3;

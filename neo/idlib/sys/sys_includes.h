@@ -41,6 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// prevent auto literal to string conversion
 
+#ifdef ID_WIN32
 #ifndef _D3SDK
 #ifndef GAME_DLL
 
@@ -70,6 +71,26 @@ If you have questions concerning this license or the applicable additional terms
 #include <malloc.h>							// no malloc.h on mac or unix
 #include <windows.h>						// for qgl.h
 #undef FindText								// fix namespace pollution
+#endif
+
+/*
+================================================================================================
+
+	QNX
+
+================================================================================================
+*/
+
+#ifdef ID_QNX
+
+#include <stddef.h>
+
+#include <semaphore.h>
+#include <pthread.h>
+
+#include <alloca.h>
+
+#endif
 
 /*
 ================================================================================================

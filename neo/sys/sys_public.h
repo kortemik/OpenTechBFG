@@ -531,7 +531,11 @@ void			Sys_ShowConsole( int visLevel, bool quitOnClose );
 
 // This really isn't the right place to have this, but since this is the 'top level' include
 // and has a function signature with 'FILE' in it, it kinda needs to be here =/
+#ifdef ID_WIN32
 typedef HANDLE idFileHandle;
+#elif defined(ID_QNX)
+typedef int idFileHandle;
+#endif
 
 
 ID_TIME_T		Sys_FileTimeStamp( idFileHandle fp );

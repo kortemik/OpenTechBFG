@@ -42,6 +42,8 @@ If you have questions concerning this license or the applicable additional terms
 #undef ID_PC_WIN
 #undef ID_PC_WIN64
 #undef ID_CONSOLE
+#undef ID_QNX
+#undef ID_CONSOLE_QNX
 #undef ID_WIN32
 #undef ID_LITTLE_ENDIAN
 
@@ -73,6 +75,11 @@ If you have questions concerning this license or the applicable additional terms
 	#define ID_PC
 	#define ID_PC_WIN
 	#define ID_WIN32
+	#define ID_LITTLE_ENDIAN
+#elif defined(__QNXNTO__)
+	#define ID_CONSOLE
+	#define ID_QNX
+	#define ID_CONSOLE_QNX
 	#define ID_LITTLE_ENDIAN
 #else
 #error Unknown Platform
@@ -121,6 +128,57 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef WIN32
 	#define WIN32
 #endif
+
+#endif
+
+/*
+================================================================================================
+
+	QNX Console (BlackBerry)
+
+================================================================================================
+*/
+
+#ifdef ID_QNX
+
+#ifdef __ARM__
+	#define CPUSTRING					"arm"
+	#define ID_QNX_ARM
+#else
+	#define CPUSTRING					"x86"
+	#define ID_QNX_X86
+#endif
+
+#define	BUILD_STRING					"qnx-" CPUSTRING
+#define BUILD_OS_ID						1
+
+#define ALIGN16( x )					x __attribute__((__aligned__(16)))
+//ALIGNTYPE16
+//ALIGNTYPE128
+#define FORMAT_PRINTF( x )
+
+#define PATHSEPERATOR_STR				"/"
+#define PATHSEPERATOR_CHAR				'/'
+#define NEWLINE							"\n"
+
+#define ID_INLINE						inline
+#define ID_FORCE_INLINE					__attribute__((always_inline))
+
+//Specifying extern causes compilation errors on templates
+#define ID_INLINE_EXTERN				inline
+#define ID_FORCE_INLINE_EXTERN			__attribute__((always_inline))
+
+#ifndef _alloca
+#define _alloca							alloca
+#endif
+
+//GCC warns us if the formats don't match the args anyway
+#define VERIFY_FORMAT_STRING
+
+// (From Windows) We need to inform the compiler that Error() and FatalError() will
+// never return, so any conditions that leeds to them being called are
+// guaranteed to be false in the following code
+#define NO_RETURN __attribute__((noreturn))
 
 #endif
 

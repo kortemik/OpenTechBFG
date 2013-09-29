@@ -38,6 +38,7 @@ If you have questions concerning this license or the applicable additional terms
 ================================================================================================
 */
 
+#ifdef ID_WIN32
 	typedef CRITICAL_SECTION		mutexHandle_t;
 	typedef HANDLE					signalHandle_t;
 	typedef LONG					interlockedInt_t;
@@ -47,6 +48,12 @@ If you have questions concerning this license or the applicable additional terms
 	// MemoryBarrier() inserts and CPU instruction that keeps the CPU from reordering reads and writes.
 	#pragma intrinsic(_ReadWriteBarrier)
 	#define SYS_MEMORYBARRIER		_ReadWriteBarrier(); MemoryBarrier()
+#elif defined(ID_QNX)
+	typedef pthread_mutex_t			mutexHandle_t;
+	typedef sem_t					signalHandle_t;
+	typedef int						interlockedInt_t;
+	#define SYS_MEMORYBARRIER		__cpu_membarrier(); //XXX Not sure if this is correct
+#endif
 
 
 
@@ -61,7 +68,7 @@ If you have questions concerning this license or the applicable additional terms
 ================================================================================================
 */
 
-
+#ifdef ID_WIN32
 	class idSysThreadLocalStorage {
 	public:
 		idSysThreadLocalStorage() { 
@@ -83,6 +90,29 @@ If you have questions concerning this license or the applicable additional terms
 		}	
 		DWORD	tlsIndex;
 	};
+#elif defined(ID_QNX)
+	class idSysThreadLocalStorage {
+	public:
+		idSysThreadLocalStorage() {
+			pthread_key_create( &tlsKey, NULL );
+		}
+		idSysThreadLocalStorage( const ptrdiff_t &val ) {
+			pthread_key_create( &tlsKey, NULL );
+			pthread_setspecific( tlsKey, (void*) val );
+		}
+		~idSysThreadLocalStorage() {
+			pthread_key_delete( tlsKey );
+		}
+		operator ptrdiff_t() {
+			return (ptrdiff_t)pthread_getspecific( tlsKey );
+		}
+		const ptrdiff_t & operator = ( const ptrdiff_t &val ) {
+			pthread_setspecific( tlsKey, (void*) val );
+			return val;
+		}	
+		pthread_key_t	tlsKey;
+	};
+#endif
 
 #define ID_TLS idSysThreadLocalStorage
 
@@ -96,6 +126,10 @@ If you have questions concerning this license or the applicable additional terms
 
 ================================================================================================
 */
+
+#ifndef uintptr_t
+#define uintptr_t unsigned int
+#endif
 
 enum core_t {
 	CORE_ANY = -1,

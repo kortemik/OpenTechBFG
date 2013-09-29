@@ -93,6 +93,13 @@ ID_FORCE_INLINE void FlushCacheLine( const void * ptr, int offset ) {
 */
 #else
 
+#ifndef UINT_PTR
+#if __SIZEOF_POINTER__ != __SIZEOF_INT__
+#error void* is not the same size as int
+#endif
+#define UINT_PTR unsigned int
+#endif
+
 #define CACHE_LINE_SIZE						128
 
 ID_INLINE void Prefetch( const void * ptr, int offset ) {}
@@ -155,6 +162,7 @@ ID_INLINE_EXTERN int CACHE_LINE_CLEAR_OVERFLOW_COUNT( int size ) {
 #define R_SHUFFLE_D( x, y, z, w )	(( (w) & 3 ) << 6 | ( (z) & 3 ) << 4 | ( (y) & 3 ) << 2 | ( (x) & 3 ))
 #endif
 
+#ifdef ID_WIN32
 // make the intrinsics "type unsafe"
 typedef union __declspec(intrin_type) _CRT_ALIGN(16) __m128c {
 				__m128c() {}
@@ -216,5 +224,8 @@ ID_FORCE_INLINE_EXTERN __m128 _mm_div16_ps( __m128 x, __m128 y ) {
 #define _mm_loadu_bounds_0( bounds )		_mm_perm_ps( _mm_loadh_pi( _mm_load_ss( & bounds[0].x ), (__m64 *) & bounds[0].y ), _MM_SHUFFLE( 1, 3, 2, 0 ) )
 // load idBounds::GetMaxs()
 #define _mm_loadu_bounds_1( bounds )		_mm_perm_ps( _mm_loadh_pi( _mm_load_ss( & bounds[1].x ), (__m64 *) & bounds[1].y ), _MM_SHUFFLE( 1, 3, 2, 0 ) )
+#endif
+
+//TODO: QNX
 
 #endif	// !__SYS_INTRIINSICS_H__

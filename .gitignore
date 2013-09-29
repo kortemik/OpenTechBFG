@@ -6,3 +6,4 @@ build
 *.opensdf
 *.sdf
 *.suo
+*.o

@@ -1,0 +1,357 @@
+/*
+===========================================================================
+
+Doom 3 BFG Edition GPL Source Code
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+
+Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Doom 3 BFG Edition Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Doom 3 BFG Edition Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the Doom 3 BFG Edition Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Doom 3 BFG Edition Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
+===========================================================================
+*/
+#include "../../precompiled.h"
+#include <pthread.h>
+#include <sched.h>
+#include <atomic.h>
+#include <semaphore.h>
+#include <time.h>
+#include <errno.h>
+
+// There is no "exchange" or "compare and exchange" functions on QNX for some reason, so we need to go low level
+#ifdef ID_QNX_ARM
+#include <arm/smpxchg.h>
+#elif defined(ID_QNX_X86)
+#include <x86/smpxchg.h>
+#endif
+
+/*
+================================================================================================
+================================================================================================
+*/
+
+/*
+========================
+Sys_SetCurrentThreadName
+========================
+*/
+void Sys_SetCurrentThreadName( const char * name ) {
+	pthread_setname_np( pthread_self(), name );
+}
+
+/*
+========================
+Sys_Createthread
+========================
+*/
+typedef void *(*pthread_function_t) (void *);
+// QNX has threading priorities between 0 and 255, with 1-63 being allowed for "unprivileged" threads.
+// By default, a thread inherits the priority of it's parent thread. For more explict control, we always set the priority.
+// Source: http://developer.blackberry.com/native/documentation/core/com.qnx.doc.neutrino.prog/topic/overview_priority_range.html
+#define QNX_THREAD_PRIORITY_OFFSET 12 // 62 / 5 = 12.4 ~ 12
+#define QNX_THREAD_PRIORITY(level) (QNX_THREAD_PRIORITY_OFFSET * (level) + 1)
+
+uintptr_t Sys_CreateThread( xthread_t function, void *parms, xthreadPriority priority, const char *name, core_t core, int stackSize, bool suspended ) {
+
+	pthread_attr_t attr;
+	pthread_attr_init( &attr );
+	pthread_attr_setstacksize( &attr, stackSize );
+	//XXX suspended
+	// Ignore core affinity. Let QNX handle it
+	//TODO: Move thread scheduling to thread creation: http://developer.blackberry.com/native/reference/core/com.qnx.doc.neutrino.lib_ref/topic/p/pthread_attr_setschedparam.html
+
+	pthread_t thread;
+	int ret = pthread_create(&thread, &attr, ( pthread_function_t )function, params);
+	pthread_attr_destroy( &attr );
+	if ( ret != EOK ) {
+		idLib::common->FatalError( "pthread_create error: %i", ret );
+		return (uintptr_t)0;
+	}
+	pthread_setname_np( &thread, name );
+	if ( priority == THREAD_HIGHEST ) {
+		pthread_setschedprio( thread, QNX_THREAD_PRIORITY(4) );
+	} else if ( priority == THREAD_ABOVE_NORMAL ) {
+		pthread_setschedprio( thread, QNX_THREAD_PRIORITY(3) );
+	} else if ( priority == THREAD_NORMAL ) {
+		pthread_setschedprio( thread, QNX_THREAD_PRIORITY(2) );
+	} else if ( priority == THREAD_BELOW_NORMAL ) {
+		pthread_setschedprio( thread, QNX_THREAD_PRIORITY(1) );
+	} else if ( priority == THREAD_LOWEST ) {
+		pthread_setschedprio( thread, QNX_THREAD_PRIORITY(0) );
+	}
+
+	return (uintptr_t)handle;
+}
+
+/*
+========================
+Sys_GetCurrentThreadID
+========================
+*/
+uintptr_t Sys_GetCurrentThreadID() {
+	return (uintptr_t)pthread_self();
+}
+
+/*
+========================
+Sys_WaitForThread
+========================
+*/
+void Sys_WaitForThread( uintptr_t threadHandle ) {
+	pthread_join( ( pthread_t )threadHandle, NULL );
+}
+
+/*
+========================
+Sys_DestroyThread
+========================
+*/
+void Sys_DestroyThread( uintptr_t threadHandle ) {
+	if ( threadHandle == 0 ) {
+		return;
+	}
+	pthread_cancel( ( pthread_t )threadHandle );
+	pthread_join( ( pthread_t )threadHandle, NULL );
+}
+
+/*
+========================
+Sys_Yield
+========================
+*/
+void Sys_Yield() {
+	sched_yield();
+}
+
+/*
+================================================================================================
+
+	Signal
+
+================================================================================================
+*/
+
+/*
+========================
+Sys_SignalCreate
+========================
+*/
+void Sys_SignalCreate( signalHandle_t & handle, bool manualReset ) {
+	// Don't have a way to do anything with manualReset
+	sem_init( &handle, 0, 0 );
+}
+
+/*
+========================
+Sys_SignalDestroy
+========================
+*/
+void Sys_SignalDestroy( signalHandle_t &handle ) {
+	sem_destroy( &handle );
+}
+
+/*
+========================
+Sys_SignalRaise
+========================
+*/
+void Sys_SignalRaise( signalHandle_t & handle ) {
+	sem_post( &handle );
+}
+
+/*
+========================
+Sys_SignalClear
+========================
+*/
+void Sys_SignalClear( signalHandle_t & handle ) {
+	// events are created as auto-reset so this should never be needed
+}
+
+/*
+========================
+Sys_SignalWait
+========================
+*/
+bool Sys_SignalWait( signalHandle_t & handle, int timeout ) {
+	struct timespec tm;
+	int result;
+	if ( timeout == idSysSignal::WAIT_INFINITE ) {
+		result = sem_wait( &handle );
+	} else if ( timeout == 0 ) {
+		result = sem_trywait( &handle );
+	} else {
+		// Get the time, add the timeout "offset", wait. If it works, then we're good. If it doesn't, then we get the error and assert will take care of te rest
+		clock_gettime( CLOCK_MONOTONIC, &tm );
+		nsec2timespec( &tm, timespec2nsec( &tm ) + ( timeout * 1000000 ) ); //Millisecond to nanosecond
+		result = sem_timedwait_monotonic( &handle, &tm );
+		if ( result != 0 ) {
+			result = errno;
+		}
+	}
+	assert( result == 0 || ( timeout != idSysSignal::WAIT_INFINITE && result == ETIMEDOUT ) );
+	return ( result == 0 );
+}
+
+/*
+================================================================================================
+
+	Mutex
+
+================================================================================================
+*/
+
+/*
+========================
+Sys_MutexCreate
+========================
+*/
+void Sys_MutexCreate( mutexHandle_t & handle ) {
+	pthread_mutexattr_t attr;
+	pthread_mutexattr_init( &attr );
+	pthread_mutexattr_setrecursive( &attr, PTHREAD_RECURSIVE_ENABLE );
+	pthread_mutex_init( &handle, attr );
+	pthread_mutexattr_destroy( &attr );
+}
+
+/*
+========================
+Sys_MutexDestroy
+========================
+*/
+void Sys_MutexDestroy( mutexHandle_t & handle ) {
+	pthread_mutex_destroy( &handle );
+}
+
+/*
+========================
+Sys_MutexLock
+========================
+*/
+bool Sys_MutexLock( mutexHandle_t & handle, bool blocking ) {
+	if ( pthread_mutex_trylock( &handle ) != EOK ) {
+		if ( !blocking ) {
+			return false;
+		}
+		pthread_mutex_lock( &handle );
+	}
+	return true;
+}
+
+/*
+========================
+Sys_MutexUnlock
+========================
+*/
+void Sys_MutexUnlock( mutexHandle_t & handle ) {
+	pthread_mutex_unlock( &handle );
+}
+
+/*
+================================================================================================
+
+	Interlocked Integer
+
+================================================================================================
+*/
+
+/*
+========================
+Sys_InterlockedIncrement
+========================
+*/
+interlockedInt_t Sys_InterlockedIncrement( interlockedInt_t & value ) {
+	return ( interlockedInt_t )(atomic_add_value( ( unsigned* )( &value ), 1 ) + 1);
+}
+
+/*
+========================
+Sys_InterlockedDecrement
+========================
+*/
+interlockedInt_t Sys_InterlockedDecrement( interlockedInt_t & value ) {
+	return ( interlockedInt_t )(atomic_sub_value( ( unsigned* )( &value ), 1 ) - 1);
+}
+
+/*
+========================
+Sys_InterlockedAdd
+========================
+*/
+interlockedInt_t Sys_InterlockedAdd( interlockedInt_t & value, interlockedInt_t i ) {
+	return ( interlockedInt_t )(atomic_add_value( ( unsigned* )( &value ), ( unsigned )i ) + i);
+}
+
+/*
+========================
+Sys_InterlockedSub
+========================
+*/
+interlockedInt_t Sys_InterlockedSub( interlockedInt_t & value, interlockedInt_t i ) {
+	return ( interlockedInt_t )(atomic_sub_value( ( unsigned* )( &value ), ( unsigned )i ) - i);
+}
+
+/*
+========================
+Sys_InterlockedExchange
+========================
+*/
+interlockedInt_t Sys_InterlockedExchange( interlockedInt_t & value, interlockedInt_t exchange ) {
+	return ( interlockedInt_t )_smp_xchg( ( unsigned* )( &value ), ( unsigned )exchange );
+}
+
+/*
+========================
+Sys_InterlockedCompareExchange
+========================
+*/
+interlockedInt_t Sys_InterlockedCompareExchange( interlockedInt_t & value, interlockedInt_t comparand, interlockedInt_t exchange ) {
+	return ( interlockedInt_t )_smp_cmpxchg( ( unsigned* )( &value ), ( unsigned )comparand, ( unsigned )exchange );
+}
+
+/*
+================================================================================================
+
+	Interlocked Pointer
+
+================================================================================================
+*/
+
+/*
+========================
+Sys_InterlockedExchangePointer
+========================
+*/
+void *Sys_InterlockedExchangePointer( void *& ptr, void * exchange ) {
+#if __SIZEOF_POINTER__ != __SIZEOF_INT__
+#error void* is not the same size as int. Exchange will fail
+#endif
+	return ( void* )_smp_xchg( ( unsigned* )( &ptr ), ( unsigned )exchange );
+}
+
+/*
+========================
+Sys_InterlockedCompareExchangePointer
+========================
+*/
+void * Sys_InterlockedCompareExchangePointer( void * & ptr, void * comparand, void * exchange ) {
+#if __SIZEOF_POINTER__ != __SIZEOF_INT__
+#error void* is not the same size as int. Compare-Exchange will fail
+#endif
+	return ( void* )_smp_cmpxchg( ( unsigned* )( &ptr ), ( unsigned )comparand, ( unsigned )exchange );
+}
