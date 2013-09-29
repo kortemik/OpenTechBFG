@@ -43,6 +43,8 @@ If you have questions concerning this license or the applicable additional terms
 #undef ID_PC_WIN64
 #undef ID_CONSOLE
 #undef ID_QNX
+#undef ID_QNX_ARM
+#undef ID_QNX_X86
 #undef ID_CONSOLE_QNX
 #undef ID_WIN32
 #undef ID_LITTLE_ENDIAN
@@ -81,6 +83,7 @@ If you have questions concerning this license or the applicable additional terms
 	#define ID_QNX
 	#define ID_CONSOLE_QNX
 	#define ID_LITTLE_ENDIAN
+	#define ID_OPENGL_ES
 #else
 #error Unknown Platform
 #endif
@@ -105,6 +108,8 @@ If you have questions concerning this license or the applicable additional terms
 #define ALIGN16( x )					__declspec(align(16)) x
 #define ALIGNTYPE16						__declspec(align(16))
 #define ALIGNTYPE128					__declspec(align(128))
+#define ALIGNTYPE16_POST
+#define ALIGNTYPE128_POST
 #define FORMAT_PRINTF( x )
 
 #define PATHSEPARATOR_STR				"\\"
@@ -153,8 +158,10 @@ If you have questions concerning this license or the applicable additional terms
 #define BUILD_OS_ID						1
 
 #define ALIGN16( x )					x __attribute__((__aligned__(16)))
-//ALIGNTYPE16
-//ALIGNTYPE128
+#define ALIGNTYPE16
+#define ALIGNTYPE128
+#define ALIGNTYPE16_POST				__attribute__((__aligned__(16)))
+#define ALIGNTYPE128_POST				__attribute__((__aligned__(128)))
 #define FORMAT_PRINTF( x )
 
 #define PATHSEPERATOR_STR				"/"

@@ -90,6 +90,19 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <alloca.h>
 
+//This does some setup for versions
+#include <bps/bps.h>
+#if BPS_VERSION >= 3001002 //Since we will get a compile error if we try to use bbndk.h before it was added
+#include <bbndk.h>
+#else
+#define BBNDK_VERSION_CURRENT_MAJOR 10
+#define BBNDK_VERSION_CURRENT_MINOR 0
+#define BBNDK_VERSION_CURRENT_PATCH 9 //First public version of BB10 was 10.0.9
+#define BBNDK_VERSION_ENCODE(major, minor, patch) (((major)*1000000)+((minor)*1000)+(patch))
+#define BBNDK_VERSION_CURRENT BBNDK_VERSION_ENCODE(BBNDK_VERSION_CURRENT_MAJOR,BBNDK_VERSION_CURRENT_MINOR,BBNDK_VERSION_CURRENT_PATCH)
+#define BBNDK_VERSION_AT_LEAST(major, minor, patch) (BBNDK_VERSION_CURRENT >= BBNDK_VERSION_ENCODE(major, minor, patch))
+#endif
+
 #endif
 
 /*

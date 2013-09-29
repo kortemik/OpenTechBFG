@@ -135,7 +135,7 @@ idSoftwareCache
 ================================================
 */
 template< typename _type_, int _entries_ = 8, int _associativity_ = 4, bool aligned = false >
-class ALIGNTYPE128 idSoftwareCache {
+class ALIGNTYPE128 idSoftwareCache ALIGNTYPE128_POST {
 public:
 	void Prefetch( const _type_ * obj ) {
 		::Prefetch( obj, 0 );
@@ -241,7 +241,7 @@ idODSStreamedOutputArray
 ================================================
 */
 template< typename _type_, int _bufferSize_ >
-class ALIGNTYPE16 idODSStreamedOutputArray {
+class ALIGNTYPE16 idODSStreamedOutputArray ALIGNTYPE16_POST {
 public:
 				idODSStreamedOutputArray( _type_ * array, int * numElements, int maxElements ) :
 						localNum( 0 ),
@@ -274,7 +274,7 @@ idODSStreamedArray
 ================================================
 */
 template< typename _type_, int _bufferSize_, streamBufferType_t _sbt_ = SBT_DOUBLE, int _roundUpToMultiple_ = 1 >
-class ALIGNTYPE16 idODSStreamedArray {
+class ALIGNTYPE16 idODSStreamedArray ALIGNTYPE16_POST {
 public:
 					idODSStreamedArray( const _type_ * array, const int numElements ) :
 							cachedArrayStart( 0 ),
@@ -381,7 +381,7 @@ An index with offsets and more complex logic is needed to support other sizes.
 ================================================
 */
 template< typename _elemType_, typename _indexType_, int _bufferSize_, streamBufferType_t _sbt_ = SBT_DOUBLE, int _roundUpToMultiple_ = 1 >
-class ALIGNTYPE16 idODSStreamedIndexedArray {
+class ALIGNTYPE16 idODSStreamedIndexedArray ALIGNTYPE16_POST {
 public:
 					idODSStreamedIndexedArray( const _elemType_ * array, const int numElements, const _indexType_ * index, const int numIndices ) :
 							cachedArrayStart( 0 ),

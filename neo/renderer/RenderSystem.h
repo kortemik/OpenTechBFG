@@ -77,7 +77,9 @@ enum stereoDepthType_t {
 enum graphicsVendor_t {
 	VENDOR_NVIDIA,
 	VENDOR_AMD,
-	VENDOR_INTEL
+	VENDOR_INTEL,
+	VENDOR_QC,
+	VENDOR_PVR
 };
 
 // Contains variables specific to the OpenGL configuration being run right now.
