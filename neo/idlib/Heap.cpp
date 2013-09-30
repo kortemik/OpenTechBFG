@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -47,7 +47,11 @@ void * Mem_Alloc16( const int size, const memTag_t tag ) {
 		return NULL;
 	}
 	const int paddedSize = ( size + 15 ) & ~15;
+#ifdef ID_WIN32
 	return _aligned_malloc( paddedSize, 16 );
+#else
+	return memalign( 16, paddedSize );
+#endif
 }
 
 /*
@@ -59,7 +63,11 @@ void Mem_Free16( void *ptr ) {
 	if ( ptr == NULL ) {
 		return;
 	}
+#ifdef ID_WIN32
 	_aligned_free( ptr );
+#else
+	free( ptr );
+#endif
 }
 
 /*

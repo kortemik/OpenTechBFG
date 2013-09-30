@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Simd_Generic.h"
 #include "Simd_SSE.h"
+#include "Simd_NEON.h"
 
 idSIMDProcessor	*	processor = NULL;			// pointer to SIMD processor
 idSIMDProcessor *	generic = NULL;				// pointer to generic SIMD implementation
@@ -66,11 +67,22 @@ void idSIMD::InitProcessor( const char *module, bool forceGeneric ) {
 	} else {
 
 		if ( processor == NULL ) {
+#ifdef ID_WIN32 //XXX Should support x86 BlackBerry
 			if ( ( cpuid & CPUID_MMX ) && ( cpuid & CPUID_SSE ) ) {
 				processor = new (TAG_MATH) idSIMD_SSE;
 			} else {
 				processor = generic;
 			}
+#elif defined(ID_QNX_ARM)
+			//XXX Should add support for VFP
+			if ( ( cpuid & CPUID_NEON ) ) {
+				processor = new (TAG_MATH) idSIMD_NEON;
+			} else {
+				processor = generic;
+			}
+#else
+			processor = generic;
+#endif
 			processor->cpuid = cpuid;
 		}
 
@@ -108,6 +120,7 @@ void idSIMD::Shutdown() {
 	SIMDProcessor = NULL;
 }
 
+#ifdef ID_WIN32 //XXX Should add support for x86 BlackBerry
 
 //===============================================================
 //
@@ -1270,3 +1283,5 @@ void idSIMD::Test_f( const idCmdArgs &args ) {
 
 	SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_NORMAL );
 }
+
+#endif

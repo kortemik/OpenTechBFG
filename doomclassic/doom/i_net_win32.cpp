@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -47,6 +47,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "i_net.h"
 
 #include "doomlib.h"
+
+#ifndef ID_WIN32
+#include <sys/socket.h>
+#endif
 
 void	NetSend (void);
 qboolean NetListen (void);
@@ -209,7 +213,7 @@ void I_InitNetwork (void)
 		{
 			::g->sendaddress[::g->doomcom.numnodes].sin_family = AF_INET;
 			::g->sendaddress[::g->doomcom.numnodes].sin_port = htons(DOOMPORT);
-			
+
 			// Pull out the port number.
 			const std::string ipAddressWithPort( ::g->myargv[i] );
 			const std::size_t colonPosition = ipAddressWithPort.find_last_of(':');
@@ -236,7 +240,7 @@ void I_InitNetwork (void)
 			::g->sendaddress[::g->doomcom.numnodes].sin_addr.s_addr = ipAddress;
 			::g->doomcom.numnodes++;
 		}
-		
+
 		::g->doomcom.id = DOOMCOM_ID;
 		::g->doomcom.numplayers = ::g->doomcom.numnodes;
 	}
@@ -245,7 +249,7 @@ void I_InitNetwork (void)
 		// Setup sockets
 		::g->insocket = UDPsocket ();
 		BindToLocalPort (::g->insocket,htons(DOOMPORT));
-		
+
 		// PS3 call to enable non-blocking mode
 		int nonblocking = 1; // Non-zero is nonblocking mode.
 		setsockopt( ::g->insocket, SOL_SOCKET, SO_NBIO, &nonblocking, sizeof(nonblocking));
@@ -259,7 +263,7 @@ void I_InitNetwork (void)
 
 // DHM - Nerve
 void I_ShutdownNetwork( void ) {
-	
+
 }
 
 void I_NetCmd (void)
@@ -273,6 +277,6 @@ void I_NetCmd (void)
 		netget ();
 	}
 	else
-		I_Error ("Bad net cmd: %i\n",::g->doomcom.command); 
+		I_Error ("Bad net cmd: %i\n",::g->doomcom.command);
 }
 

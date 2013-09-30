@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -104,7 +104,7 @@ struct idNullPtr {
 
 // C99 Standard
 #ifndef nullptr
-		#define nullptr	idNullPtr()		
+		#define nullptr	idNullPtr()
 #endif
 
 #ifndef BIT
@@ -142,7 +142,7 @@ ID_INLINE void WriteIndexPair( triIndex_t * dest, const triIndex_t a, const triI
 	*(unsigned *)dest = (unsigned)a | ( (unsigned)b<<16 );
 }
 
-#if defined(_DEBUG) || defined(_lint)
+#if defined(_DEBUG) || defined(_lint) || !defined(ID_WIN32)
 #define NODEFAULT	default: assert( 0 )
 #else
 #define NODEFAULT	default: __assume( 0 )

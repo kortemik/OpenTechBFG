@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -73,13 +73,13 @@ namespace DoomLib
 	static const char *  Doom_MapNames[] = {
 		"E1M1: Hangar", "E1M2: Nuclear Plant", "E1M3: Toxin Refinery", "E1M4: Command Control", "E1M5: Phobos Lab", "E1M6: Central Processing", "E1M7: Computer Station", "E1M8: Phobos Anomaly", "E1M9: Military Base",
 		"E2M1: Deimos Anomaly", "E2M2: Containment Area", "E2M3: Refinery", "E2M4: Deimos Lab", "E2M5: Command Center", "E2M6: Halls of the Damned", "E2M7: Spawning Vats", "E2M8: Tower of Babel",  "E2M9: Fortress of Mystery",
-		"E3M1: Hell Keep", "E3M2: Slough of Despair", "E3M3: Pandemonium", "E3M4: House of Pain", "E3M5: Unholy Cathedral", "E3M6: MT. Erebus", "E3M7: Gate to Limbo", "E3M8: DIS", "E3M9: Warrens", 
+		"E3M1: Hell Keep", "E3M2: Slough of Despair", "E3M3: Pandemonium", "E3M4: House of Pain", "E3M5: Unholy Cathedral", "E3M6: MT. Erebus", "E3M7: Gate to Limbo", "E3M8: DIS", "E3M9: Warrens",
 		"E4M1: Hell Beneath", "E4M2: Perfect Hatred", "E4M3: Sever The Wicked", "E4M4: Unruly Evil", "E4M5: They Will Repent", "E4M6: Against Thee Wickedly", "E4M7: And Hell Followed", "E4M8: Unto The Cruel", "E4M9: Fear"
 	};
 
 	static const char * Doom2_MapNames[] = {
-		"1: Entryway", "2: Underhalls", "3: The Gantlet", "4: The Focus", "5: The Waste Tunnels", "6: The Crusher", "7: Dead Simple", "8: Tricks and Traps", "9: The Pit", "10: Refueling Base", 
-		"11: Circle of Death", "12: The Factory", "13: Downtown", "14: The Inmost Dens", "15: Industrial Zone", "16: Suburbs", "17: Tenements", "18: The Courtyard", "19: The Citadel", "20: Gotcha!", 
+		"1: Entryway", "2: Underhalls", "3: The Gantlet", "4: The Focus", "5: The Waste Tunnels", "6: The Crusher", "7: Dead Simple", "8: Tricks and Traps", "9: The Pit", "10: Refueling Base",
+		"11: Circle of Death", "12: The Factory", "13: Downtown", "14: The Inmost Dens", "15: Industrial Zone", "16: Suburbs", "17: Tenements", "18: The Courtyard", "19: The Citadel", "20: Gotcha!",
 		"21: Nirvana", "22: The Catacombs", "23: Barrels O' Fun", "24: The Chasm", "25: Bloodfalls", "26: The Abandoned Mines", "27: Monster Condo", "28: The Spirit World", "29: The Living End",
 		"30: Icon of Sin", "31: IDKFA", "32: Keen"
 	};
@@ -91,13 +91,13 @@ namespace DoomLib
 	};
 
 	static const char * Plut_MapNames[] = {
-		"1: Congo", "2: Well of Souls", "3: Aztec", "4: Caged", "5: Ghost Town", "6: Baron's Lair", "7: Caughtyard", "8: Realm", "9: Abattoire", "10: Onslaught", "11: Hunted", "12: Speed", "13: The Crypt", "14: Genesis", 
+		"1: Congo", "2: Well of Souls", "3: Aztec", "4: Caged", "5: Ghost Town", "6: Baron's Lair", "7: Caughtyard", "8: Realm", "9: Abattoire", "10: Onslaught", "11: Hunted", "12: Speed", "13: The Crypt", "14: Genesis",
 		"15: The Twilight", "16: The Omen", "17: Compound", "18: Neurosphere", "19: NME", "20: The Death Domain", "21: Slayer", "22: Impossible Mission", "23: Tombstone", "24: The Final Frontier", "25: The Temple of Darkness",
 		"26: Bunker", "27: Anti-Christ", "28: The Sewers", "29: Odyssey of Noises", "30: The Gateway of Hell", "31: Cyberden", "32: Go 2 It"
 	};
 
 	static const char * Mast_MapNames[] = {
-		"1: Attack", "2: Canyon","3: The Catwalk", "4: The Combine", "5: The Fistula", "6: The Garrison", "7: Titan Manor", "8: Paradox", "9: Subspace", "10: Subterra", "11: Trapped On Titan", "12: Virgil's Lead", "13: Minos' Judgement", 
+		"1: Attack", "2: Canyon","3: The Catwalk", "4: The Combine", "5: The Fistula", "6: The Garrison", "7: Titan Manor", "8: Paradox", "9: Subspace", "10: Subterra", "11: Trapped On Titan", "12: Virgil's Lead", "13: Minos' Judgement",
 		"14: Bloodsea Keep", "15: Mephisto's Maosoleum", "16: Nessus", "17: Geryon", "18: Vesperas", "19: Black Tower", "20: The Express Elevator To Hell", "21: Bad Dream"
 	};
 
@@ -120,9 +120,9 @@ namespace DoomLib
 		return &App_Expansion_Data_Local[ DoomLib::expansionSelected ];
 	}
 
-	void				  SetCurrentExpansion( int expansion )  { 
-		expansionDirty = true; 
-		expansionSelected = expansion; 
+	void				  SetCurrentExpansion( int expansion )  {
+		expansionDirty = true;
+		expansionSelected = expansion;
 	}
 
 	void						SetIdealExpansion( int expansion ) {
@@ -155,6 +155,13 @@ namespace DoomLib
 
 	bool							skipToLoad = false;
 	char							loadGamePath[MAX_PATH];
+#ifdef MAX_PATH
+	char							loadGamePath[MAX_PATH];
+#elif defined(PATH_MAX)
+	char							loadGamePath[PATH_MAX];
+#else
+#error Unknown max path constant
+#endif
 
 	bool							skipToNew = false;
 	int								chosenSkill = 0;
@@ -185,7 +192,7 @@ namespace DoomLib
 	========================
 	*/
 	gameSKU_t GetGameSKU() {
-	
+
 		if ( common->GetCurrentGame() == DOOM_CLASSIC ) {
 			return GAME_SKU_DOOM1_BFG;
 		} else if ( common->GetCurrentGame() == DOOM2_CLASSIC ) {
@@ -252,7 +259,7 @@ void DoomLib::InitGlobals( void *ptr /* = NULL */ )
 	memset( globaldata[currentplayer], 0, sizeof(Globals) );
 	g = globaldata[currentplayer];
 	g->InitGlobals();
-	
+
 }
 
 void *DoomLib::GetGlobalData( int player ) {
@@ -263,7 +270,7 @@ void DoomLib::InitControlRemap() {
 
 	memset( classicRemap, K_NONE, sizeof( classicRemap ) );
 
-	classicRemap[K_JOY3] = KEY_TAB ; 
+	classicRemap[K_JOY3] = KEY_TAB ;
 	classicRemap[K_JOY4] = K_MINUS;
 	classicRemap[K_JOY2] = K_EQUALS;
 	classicRemap[K_JOY9] = K_ESCAPE ;
@@ -274,7 +281,7 @@ void DoomLib::InitControlRemap() {
 	classicRemap[K_JOY_STICK1_LEFT] = K_LEFTARROW ;
 	classicRemap[K_JOY_DPAD_LEFT] = K_LEFTARROW ;
 	classicRemap[K_JOY_STICK1_RIGHT] = K_RIGHTARROW ;
-	classicRemap[K_JOY_DPAD_RIGHT] = K_RIGHTARROW ;	
+	classicRemap[K_JOY_DPAD_RIGHT] = K_RIGHTARROW ;
 	classicRemap[K_JOY1] = K_ENTER;
 
 
@@ -301,7 +308,7 @@ void DoomLib::InitGame( int argc, char** argv )
 	::g->myargv = argv;
 
 	InitControlRemap();
-		
+
 
 
 	D_DoomMain();
@@ -356,7 +363,7 @@ void SetViewAngle( angle_t ang )
 	g->viewangle = ang;
 	::g->viewxoffset = (finesine[g->viewangle>>ANGLETOFINESHIFT]*::g->realoffset) >> 8;
 	::g->viewyoffset = (finecosine[g->viewangle>>ANGLETOFINESHIFT]*::g->realoffset) >> 8;
-	
+
 }
 
 
@@ -413,8 +420,8 @@ void DoomLib::SetPlayer( int id )
 		// Big Fucking hack.
 		if( globalNetworking && session->GetGameLobbyBase().GetMatchParms().matchFlags | MATCH_ONLINE ) {
 			currentplayer = 0;
-		} 
-		
+		}
+
 		g = globaldata[currentplayer];
 	}
 }
@@ -426,9 +433,9 @@ void DoomLib::SetNetworking( RecvFunc rf, SendFunc sf, SendRemoteFunc sendRemote
 	SendRemote = sendRemote;
 }
 
-int DoomLib::GetPlayer() 
-{ 
-	return currentplayer; 
+int DoomLib::GetPlayer()
+{
+	return currentplayer;
 }
 
 byte DoomLib::BuildSourceDest( int toNode ) {
@@ -460,7 +467,7 @@ int nodeMap[4][4] = {
 
 int DoomLib::RemoteNodeToPlayerIndex( int node ) {
 	//This needs to be called with the proper doom globals set so this calculation will work properly
-	
+
 	/*
 	int player = ::g->consoleplayer;
 	if (player == 2 && node == 2 ) {
@@ -544,7 +551,7 @@ void DoomLib::SendNetwork() {
 	if ( !globalNetworking ) {
 		return;
 	}
-	DoomLib::SendRemote();	
+	DoomLib::SendRemote();
 }
 
 void DoomLib::RunSound() {

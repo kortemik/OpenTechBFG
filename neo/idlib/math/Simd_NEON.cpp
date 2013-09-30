@@ -26,53 +26,28 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#ifndef DOOM_INTERFACE_H
-#define DOOM_INTERFACE_H
+#include "../precompiled.h"
+#include "Simd_Generic.h"
+#include "Simd_NEON.h"
 
-//#include "doomlib.h"
+#ifdef ID_QNX_ARM
 
-#include <vector>
-#include <string>
-#ifndef ID_WIN32
-// Networking headers probably shouldn't be here, but no other appropriate place seemed to exist
-#include <netinet/in.h>
+//===============================================================
+//                                                        M
+//  NEON implementation of idSIMDProcessor               MrE
+//                                                        E
+//===============================================================
+
+
+
+/*
+============
+idSIMD_NEON::GetName
+============
+*/
+const char * idSIMD_NEON::GetName() const {
+	return "NEON (Unimplemented)";
+}
+
 #endif
 
-class idUserCmdMgr;
-
-class DoomInterface
-{
-public:
-			DoomInterface();
-	virtual ~DoomInterface();
-
-	typedef int ( *NoParamCallback)();
-
-	void Startup( int players, bool multiplayer = false );
-	bool Frame( int time, idUserCmdMgr * userCmdMgr );
-	void Shutdown();
-	void QuitCurrentGame();
-	void EndDMGame();
-
-	// PS3
-	//void InitGraphics( int player = -1, int width = TEXTUREWIDTH, int height = TEXTUREHEIGHT, D3DCOLOR *pBuffer = NULL, D3DCOLOR *pBuffer2 = NULL );
-	void SetPostGlobalsCallback( NoParamCallback cb );
-#ifdef ID_ENABLE_DOOM_CLASSIC_NETWORKING
-	void SetNetworking( DoomLib::RecvFunc recv, DoomLib::SendFunc send, DoomLib::SendRemoteFunc sendRemote );
-#endif
-	int GetNumPlayers() const;
-
-	static int CurrentPlayer();
-
-	void	SetMultiplayerPlayers(int localPlayerIndex, int playerCount, int localPlayer, std::vector<std::string> playerAddresses );
-
-protected:
-	int					numplayers;
-
-	bool				bFinished[4];
-
-	int					lastTicRun;
-};
-
-
- #endif

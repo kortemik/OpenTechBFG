@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -215,7 +215,11 @@ int idSysThread::ThreadProc( idSysThread * thread ) {
 	} catch ( idException & ex ) {
 		idLib::Warning( "Fatal error in thread %s: %s", thread->GetName(), ex.GetError() );
 		// We don't handle threads terminating unexpectedly very well, so just terminate the whole process
+#ifdef ID_WIN32
 		_exit( 0 );
+#else
+		exit( 0 );
+#endif
 	}
 
 	thread->isRunning = false;

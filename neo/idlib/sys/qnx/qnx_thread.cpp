@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -38,6 +38,8 @@ If you have questions concerning this license or the applicable additional terms
 #include <arm/smpxchg.h>
 #elif defined(ID_QNX_X86)
 #include <x86/smpxchg.h>
+#else
+#error Not a supported QNX system
 #endif
 
 /*
@@ -59,7 +61,7 @@ void Sys_SetCurrentThreadName( const char * name ) {
 Sys_Createthread
 ========================
 */
-typedef void *(*pthread_function_t) (void *);
+typedef void *(*pthread_function_t)(void *);
 // QNX has threading priorities between 0 and 255, with 1-63 being allowed for "unprivileged" threads.
 // By default, a thread inherits the priority of it's parent thread. For more explict control, we always set the priority.
 // Source: http://developer.blackberry.com/native/documentation/core/com.qnx.doc.neutrino.prog/topic/overview_priority_range.html
@@ -76,13 +78,13 @@ uintptr_t Sys_CreateThread( xthread_t function, void *parms, xthreadPriority pri
 	//TODO: Move thread scheduling to thread creation: http://developer.blackberry.com/native/reference/core/com.qnx.doc.neutrino.lib_ref/topic/p/pthread_attr_setschedparam.html
 
 	pthread_t thread;
-	int ret = pthread_create(&thread, &attr, ( pthread_function_t )function, params);
+	int ret = pthread_create(&thread, &attr, ( pthread_function_t )function, parms);
 	pthread_attr_destroy( &attr );
 	if ( ret != EOK ) {
 		idLib::common->FatalError( "pthread_create error: %i", ret );
 		return (uintptr_t)0;
 	}
-	pthread_setname_np( &thread, name );
+	pthread_setname_np( thread, name );
 	if ( priority == THREAD_HIGHEST ) {
 		pthread_setschedprio( thread, QNX_THREAD_PRIORITY(4) );
 	} else if ( priority == THREAD_ABOVE_NORMAL ) {
@@ -95,7 +97,7 @@ uintptr_t Sys_CreateThread( xthread_t function, void *parms, xthreadPriority pri
 		pthread_setschedprio( thread, QNX_THREAD_PRIORITY(0) );
 	}
 
-	return (uintptr_t)handle;
+	return (uintptr_t)thread;
 }
 
 /*
@@ -225,7 +227,7 @@ void Sys_MutexCreate( mutexHandle_t & handle ) {
 	pthread_mutexattr_t attr;
 	pthread_mutexattr_init( &attr );
 	pthread_mutexattr_setrecursive( &attr, PTHREAD_RECURSIVE_ENABLE );
-	pthread_mutex_init( &handle, attr );
+	pthread_mutex_init( &handle, &attr );
 	pthread_mutexattr_destroy( &attr );
 }
 

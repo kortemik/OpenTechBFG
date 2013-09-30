@@ -252,9 +252,9 @@
 			<locationURI>PARENT-2-PROJECT_LOC/doomclassic/doom/i_sound.h</locationURI>
 		</link>
 		<link>
-			<name>src/i_sound_win32.cpp</name>
+			<name>src/i_sound_qnx.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/doomclassic/doom/i_sound_win32.cpp</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/doomclassic/doom/i_sound_qnx.cpp</locationURI>
 		</link>
 		<link>
 			<name>src/i_system.cpp</name>

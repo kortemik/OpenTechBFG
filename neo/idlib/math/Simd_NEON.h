@@ -26,53 +26,29 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#ifndef DOOM_INTERFACE_H
-#define DOOM_INTERFACE_H
+#ifndef __MATH_SIMD_NEON_H__
+#define __MATH_SIMD_NEON_H__
 
-//#include "doomlib.h"
+/*
+===============================================================================
 
-#include <vector>
-#include <string>
-#ifndef ID_WIN32
-// Networking headers probably shouldn't be here, but no other appropriate place seemed to exist
-#include <netinet/in.h>
-#endif
+	SSE implementation of idSIMDProcessor
 
-class idUserCmdMgr;
+===============================================================================
+*/
 
-class DoomInterface
-{
+class idSIMD_NEON : public idSIMD_Generic {
 public:
-			DoomInterface();
-	virtual ~DoomInterface();
+	virtual const char * VPCALL GetName() const;
 
-	typedef int ( *NoParamCallback)();
-
-	void Startup( int players, bool multiplayer = false );
-	bool Frame( int time, idUserCmdMgr * userCmdMgr );
-	void Shutdown();
-	void QuitCurrentGame();
-	void EndDMGame();
-
-	// PS3
-	//void InitGraphics( int player = -1, int width = TEXTUREWIDTH, int height = TEXTUREHEIGHT, D3DCOLOR *pBuffer = NULL, D3DCOLOR *pBuffer2 = NULL );
-	void SetPostGlobalsCallback( NoParamCallback cb );
-#ifdef ID_ENABLE_DOOM_CLASSIC_NETWORKING
-	void SetNetworking( DoomLib::RecvFunc recv, DoomLib::SendFunc send, DoomLib::SendRemoteFunc sendRemote );
-#endif
-	int GetNumPlayers() const;
-
-	static int CurrentPlayer();
-
-	void	SetMultiplayerPlayers(int localPlayerIndex, int playerCount, int localPlayer, std::vector<std::string> playerAddresses );
-
-protected:
-	int					numplayers;
-
-	bool				bFinished[4];
-
-	int					lastTicRun;
+	/* TODO
+	virtual void VPCALL BlendJoints( idJointQuat *joints, const idJointQuat *blendJoints, const float lerp, const int *index, const int numJoints );
+	virtual void VPCALL BlendJointsFast( idJointQuat *joints, const idJointQuat *blendJoints, const float lerp, const int *index, const int numJoints );
+	virtual void VPCALL ConvertJointQuatsToJointMats( idJointMat *jointMats, const idJointQuat *jointQuats, const int numJoints );
+	virtual void VPCALL ConvertJointMatsToJointQuats( idJointQuat *jointQuats, const idJointMat *jointMats, const int numJoints );
+	virtual void VPCALL TransformJoints( idJointMat *jointMats, const int *parents, const int firstJoint, const int lastJoint );
+	virtual void VPCALL UntransformJoints( idJointMat *jointMats, const int *parents, const int firstJoint, const int lastJoint );
+	*/
 };
 
-
- #endif
+#endif /* !__MATH_SIMD_NEON_H__ */
