@@ -361,10 +361,10 @@ static void R_CheckPortableExtensions() {
 		glConfig.vendor = VENDOR_NVIDIA;
 	} else if ( idStr::Icmpn( glConfig.renderer_string, "Intel", 5 ) == 0 ) {
 		glConfig.vendor = VENDOR_INTEL;
-	} else if ( idStr::Icmpn( glConfig.renderer_string, "Qualcomm", 8 ) == 0 ) { //XXX
+	} else if ( idStr::Icmpn( glConfig.renderer_string, "Qualcomm", 8 ) == 0 ) {
 		glConfig.vendor = VENDOR_QC;
-	} else if ( idStr::Icmpn( glConfig.renderer_string, "Imgtec", 6 ) == 0 ) { //XXX
-		glConfig.vendor = VENDOR_PVR;
+	} else if ( idStr::Icmpn( glConfig.renderer_string, "Imagination ", 12 ) == 0 ) { //XXX
+		glConfig.vendor = VENDOR_IMG;
 	}
 
 #ifndef GL_ES_VERSION_2_0

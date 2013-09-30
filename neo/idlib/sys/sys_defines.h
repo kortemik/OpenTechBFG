@@ -160,8 +160,8 @@ If you have questions concerning this license or the applicable additional terms
 #define ALIGN16( x )					x __attribute__((__aligned__(16)))
 #define ALIGNTYPE16
 #define ALIGNTYPE128
-#define ALIGNTYPE16_POST				__attribute__((__aligned__(16)))
-#define ALIGNTYPE128_POST				__attribute__((__aligned__(128)))
+#define ALIGNTYPE16_POST				//XXX __attribute__((__aligned__(16)))
+#define ALIGNTYPE128_POST				//XXX __attribute__((__aligned__(128)))
 #define FORMAT_PRINTF( x )
 
 #define PATHSEPERATOR_STR				"/"
