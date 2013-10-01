@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -85,6 +85,10 @@ ID_FORCE_INLINE void FlushCacheLine( const void * ptr, int offset ) {
 	_mm_clflush( bytePtr +  0 );
 	_mm_clflush( bytePtr + 64 );
 }
+
+//XXX #elif defined(ID_QNX_ARM_NEON_INTRIN)
+
+//TODO
 
 /*
 ================================================
@@ -226,6 +230,16 @@ ID_FORCE_INLINE_EXTERN __m128 _mm_div16_ps( __m128 x, __m128 y ) {
 #define _mm_loadu_bounds_1( bounds )		_mm_perm_ps( _mm_loadh_pi( _mm_load_ss( & bounds[1].x ), (__m64 *) & bounds[1].y ), _MM_SHUFFLE( 1, 3, 2, 0 ) )
 #endif
 
+/*
+================================================
+	QNX
+================================================
+*/
+
+#ifdef ID_QNX
+
 //TODO: QNX
+
+#endif
 
 #endif	// !__SYS_INTRIINSICS_H__

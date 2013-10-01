@@ -30,7 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "Simd_Generic.h"
 #include "Simd_NEON.h"
 
-#ifdef ID_QNX_ARM
+#ifdef ID_QNX_ARM_NEON_INTRIN
 
 //===============================================================
 //                                                        M
@@ -48,6 +48,8 @@ idSIMD_NEON::GetName
 const char * idSIMD_NEON::GetName() const {
 	return "NEON (Unimplemented)";
 }
+
+//TODO
 
 #endif
 

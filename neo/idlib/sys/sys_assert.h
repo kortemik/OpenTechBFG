@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -45,12 +45,13 @@ bool AssertFailed( const char *file, int line, const char *expression );
 //====================== assert in debug mode =======================
 #if defined( _DEBUG ) || defined( _lint )
 
-
+#ifdef ID_WIN32
 #undef assert
 
 // idassert is useful for cases where some external library (think MFC, etc.)
 // decides it's a good idea to redefine assert on us
 #define idassert( x )	(void)( ( !!( x ) ) || ( AssertFailed( __FILE__, __LINE__, #x ) ) )
+
 
 // We have the code analysis tools on the 360 compiler,
 // so let it know what our asserts are.
@@ -58,13 +59,16 @@ bool AssertFailed( const char *file, int line, const char *expression );
 #define assert( x )		__analysis_assume( x ) ; idassert( x )
 
 #define verify( x )		( ( x ) ? true : ( AssertFailed( __FILE__, __LINE__, #x ), false ) )
-
+#else
+#define idassert( x )	(void)( ( !!( x ) ) || ( assert( x ) ) )
+#define verify( x )		( ( x ) ? true : ( ( assert( x ) ), false ) )
+#endif
 
 #else // _DEBUG
 
 //====================== assert in release mode =======================
 
-#define idassert( x )	{ (( void )0); } 
+#define idassert( x )	{ (( void )0); }
 
 #undef assert
 

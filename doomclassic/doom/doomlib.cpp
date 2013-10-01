@@ -154,7 +154,6 @@ namespace DoomLib
 	bool							expansionDirty = true;
 
 	bool							skipToLoad = false;
-	char							loadGamePath[MAX_PATH];
 #ifdef MAX_PATH
 	char							loadGamePath[MAX_PATH];
 #elif defined(PATH_MAX)

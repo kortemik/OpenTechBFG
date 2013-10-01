@@ -39,6 +39,12 @@
 									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
 									<listOptionValue builtIn="false" value="__IDLIB__"/>
 									<listOptionValue builtIn="false" value="_USE_32BIT_TIME_T"/>
+									<listOptionValue builtIn="false" value="_DEBUG"/>
+									<listOptionValue builtIn="false" value="_INLINEDEBUG"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.873337990" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList"/>
+								<option id="com.qnx.qcc.option.compiler.qccoptions.1490938776" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-mfpu=neon"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.7198444" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -100,11 +106,14 @@
 									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
 									<listOptionValue builtIn="false" value="__IDLIB__"/>
 									<listOptionValue builtIn="false" value="_USE_32BIT_TIME_T"/>
+									<listOptionValue builtIn="false" value="NDEBUG"/>
 								</option>
 								<option id="com.qnx.qcc.option.compiler.pie.890952520" name="Position Independent Executable (-fPIE)" superClass="com.qnx.qcc.option.compiler.pie" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.309351010" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-frecord-gcc-switches"/>
+									<listOptionValue builtIn="false" value="-mfpu=neon"/>
 								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.1644774784" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList"/>
 								<inputType id="com.qnx.qcc.inputType.compiler.357395126" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.1949191104" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
@@ -166,6 +175,12 @@
 									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
 									<listOptionValue builtIn="false" value="__IDLIB__"/>
 									<listOptionValue builtIn="false" value="_USE_32BIT_TIME_T"/>
+									<listOptionValue builtIn="false" value="_DEBUG"/>
+									<listOptionValue builtIn="false" value="_INLINEDEBUG"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.1140395024" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList"/>
+								<option id="com.qnx.qcc.option.compiler.qccoptions.1976137877" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-mfpu=neon"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.182484104" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -230,6 +245,12 @@
 									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
 									<listOptionValue builtIn="false" value="__IDLIB__"/>
 									<listOptionValue builtIn="false" value="_USE_32BIT_TIME_T"/>
+									<listOptionValue builtIn="false" value="_DEBUG"/>
+									<listOptionValue builtIn="false" value="_INLINEDEBUG"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.1240332865" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList"/>
+								<option id="com.qnx.qcc.option.compiler.qccoptions.1224410427" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-mfpu=neon"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.2137885092" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -292,7 +313,10 @@
 									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
 									<listOptionValue builtIn="false" value="__IDLIB__"/>
 									<listOptionValue builtIn="false" value="_USE_32BIT_TIME_T"/>
+									<listOptionValue builtIn="false" value="_DEBUG"/>
+									<listOptionValue builtIn="false" value="_INLINEDEBUG"/>
 								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.27184091" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList"/>
 								<inputType id="com.qnx.qcc.inputType.compiler.1652807160" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.2105295219" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
@@ -354,7 +378,10 @@
 									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
 									<listOptionValue builtIn="false" value="__IDLIB__"/>
 									<listOptionValue builtIn="false" value="_USE_32BIT_TIME_T"/>
+									<listOptionValue builtIn="false" value="_DEBUG"/>
+									<listOptionValue builtIn="false" value="_INLINEDEBUG"/>
 								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.1636896177" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList"/>
 								<inputType id="com.qnx.qcc.inputType.compiler.901619135" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.1454457646" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
@@ -417,7 +444,10 @@
 									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
 									<listOptionValue builtIn="false" value="__IDLIB__"/>
 									<listOptionValue builtIn="false" value="_USE_32BIT_TIME_T"/>
+									<listOptionValue builtIn="false" value="_DEBUG"/>
+									<listOptionValue builtIn="false" value="_INLINEDEBUG"/>
 								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.1519344823" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList"/>
 								<inputType id="com.qnx.qcc.inputType.compiler.1639567956" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.1041634587" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
@@ -474,4 +504,5 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+	<storageModule moduleId="refreshScope"/>
 </cproject>
