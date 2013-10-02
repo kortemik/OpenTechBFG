@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -59,6 +59,35 @@ struct format_t {
 	unsigned short bitsPerSample;
 };
 
+#ifndef WIN32
+
+//Placeholders for non-Win32 functions
+
+int fopen_s( FILE** result, const char* path, const char* mode ) {
+	if( result ) {
+		*result = fopen( path, mode );
+		if( *result ) {
+			return 0;
+		}
+	}
+	return 1;
+}
+
+int strcpy_s( char* dst, size_t dstSize, const char* src ) {
+	if( ( strlen(src) + 1 ) > dstSize ) {
+		return 1;
+	}
+	strcpy( dst, src );
+	return 0;
+}
+
+template<class T>
+int strcpy_s( T dst, const char* src ) {
+	return strcpy_s( ( char* )dst, sizeof( dst ), src );
+}
+
+#endif
+
 #define SwapBytes( x, y ) { unsigned char t = (x); (x) = (y); (y) = t; }
 
 template<class type> static void Swap( type &c ) {
@@ -93,7 +122,7 @@ int WAVE_ReadHeader( FILE * f ) {
 	Swap( header.id );
 	Swap( header.format );
 
-	if ( header.id != 'RIFF' || header.format != 'WAVE' || header.size < 4 ) {
+	if ( header.id != 'RIFF' || header.format != 'WAVE' || header.size < 4 ) { //XXX How would this work on GCC?
 		return 0;
 	}
 
@@ -230,7 +259,7 @@ bool Process( FILE * in, FILE * out ) {
 		max[i] = -1.0f;
 		min[i] = 1.0f;
 	}
-	
+
 	if ( format.bitsPerSample == 16 ) {
 		short * sdata = (short *)inputData;
 		if ( format.numChannels == 1 ) {

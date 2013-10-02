@@ -1,9 +1,12 @@
 # Folders
 build
+.settings
 
 # File types
 *.user
 *.opensdf
 *.sdf
 *.suo
+*.ipch
 *.o
+*.a
