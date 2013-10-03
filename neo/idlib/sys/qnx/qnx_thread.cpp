@@ -34,13 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <errno.h>
 
 // There is no "exchange" or "compare and exchange" functions on QNX for some reason, so we need to go low level
-#ifdef ID_QNX_ARM
-#include <arm/smpxchg.h>
-#elif defined(ID_QNX_X86)
-#include <x86/smpxchg.h>
-#else
-#error Not a supported QNX system
-#endif
+#include _NTO_CPU_HDR_(smpxchg.h)
 
 /*
 ================================================================================================
@@ -61,12 +55,17 @@ void Sys_SetCurrentThreadName( const char * name ) {
 Sys_Createthread
 ========================
 */
+/* 80 % duty cycle of 8 secs on 2 secs off */
+struct timespec thread_init_budget = { 2, 0 };
+struct timespec thread_repl_period = { 10, 0 };
+
+//Whenever the thread blocks or reaches it's execution limit, it has to be "replenished".
+//If this happens too much, the scheduling algorithm becomes a burden. So there is a upper-limit to the
+//number of replenishments that will happen before the thread is set as a lower priority.
+//The value 15 is arbitrary as there is no real upper or lower limit and it's unknown how often a thread might block.
+#define QNX_THREAD_MAX_REPL 15
+
 typedef void *(*pthread_function_t)(void *);
-// QNX has threading priorities between 0 and 255, with 1-63 being allowed for "unprivileged" threads.
-// By default, a thread inherits the priority of it's parent thread. For more explict control, we always set the priority.
-// Source: http://developer.blackberry.com/native/documentation/core/com.qnx.doc.neutrino.prog/topic/overview_priority_range.html
-#define QNX_THREAD_PRIORITY_OFFSET 12 // 62 / 5 = 12.4 ~ 12
-#define QNX_THREAD_PRIORITY(level) (QNX_THREAD_PRIORITY_OFFSET * (level) + 1)
 
 uintptr_t Sys_CreateThread( xthread_t function, void *parms, xthreadPriority priority, const char *name, core_t core, int stackSize, bool suspended ) {
 
@@ -75,8 +74,47 @@ uintptr_t Sys_CreateThread( xthread_t function, void *parms, xthreadPriority pri
 	pthread_attr_setstacksize( &attr, stackSize );
 	//XXX suspended
 	// Ignore core affinity. Let QNX handle it
-	//TODO: Move thread scheduling to thread creation: http://developer.blackberry.com/native/reference/core/com.qnx.doc.neutrino.lib_ref/topic/p/pthread_attr_setschedparam.html
 
+	//Setup thread scheduling (based off http://developer.blackberry.com/native/reference/core/com.qnx.doc.neutrino.lib_ref/topic/s/sched_param.html)
+	struct sched_param params;
+	pthread_attr_setinheritsched( &attr, PTHREAD_EXPLICIT_SCHED );
+	pthread_attr_setschedpolicy( &attr, SCHED_SPORADIC );
+
+	int minPriority = sched_get_priority_min( SCHED_SPORADIC );
+	int maxPriority = sched_get_priority_max( SCHED_SPORADIC );
+	int priorityOffset = ( maxPriority - minPriority ) / 4;
+
+#define QNX_THREAD_PRIORITY(level) ( ( priorityOffset * (level) ) + minPriority + 1 )
+
+	// sched_priority must be between minPriority and maxPriority and higher then sched_ss_low_priority.
+	// So QNX_THREAD_PRIORITY is 1 higher then minPriority, while sched_ss_low_priority will be minPriority.
+	// For high priority threads, the sched_ss_low_priority will be higher then minPriority to a degree.
+	params.sched_ss_low_priority = minPriority;
+	if ( priority == THREAD_HIGHEST ) {
+		params.sched_priority = QNX_THREAD_PRIORITY( 4 );
+		params.sched_ss_low_priority = QNX_THREAD_PRIORITY( 2 );
+	} else if ( priority == THREAD_ABOVE_NORMAL ) {
+		params.sched_priority = QNX_THREAD_PRIORITY( 3 );
+		params.sched_ss_low_priority = QNX_THREAD_PRIORITY( 1 );
+	} else if ( priority == THREAD_NORMAL ) {
+		params.sched_priority = QNX_THREAD_PRIORITY( 2 );
+		params.sched_ss_low_priority = QNX_THREAD_PRIORITY( 0 );
+	} else if ( priority == THREAD_BELOW_NORMAL ) {
+		params.sched_priority = QNX_THREAD_PRIORITY( 1 );
+	} else if ( priority == THREAD_LOWEST ) {
+		params.sched_priority = QNX_THREAD_PRIORITY( 0 );
+	}
+	if ( params.sched_priority > maxPriority ) {
+		params.sched_priority = minPriority;
+	}
+
+	params.sched_ss_max_repl = QNX_THREAD_MAX_REPL;
+	memcpy( &params.sched_ss_init_budget, &thread_init_budget, sizeof( thread_init_budget ) );
+	memcpy( &params.sched_ss_repl_period, &thread_repl_period, sizeof( thread_repl_period ) );
+
+	pthread_attr_setschedparam( &attr, &params );
+
+	//Create thread and set name
 	pthread_t thread;
 	int ret = pthread_create(&thread, &attr, ( pthread_function_t )function, parms);
 	pthread_attr_destroy( &attr );
@@ -85,17 +123,6 @@ uintptr_t Sys_CreateThread( xthread_t function, void *parms, xthreadPriority pri
 		return (uintptr_t)0;
 	}
 	pthread_setname_np( thread, name );
-	if ( priority == THREAD_HIGHEST ) {
-		pthread_setschedprio( thread, QNX_THREAD_PRIORITY(4) );
-	} else if ( priority == THREAD_ABOVE_NORMAL ) {
-		pthread_setschedprio( thread, QNX_THREAD_PRIORITY(3) );
-	} else if ( priority == THREAD_NORMAL ) {
-		pthread_setschedprio( thread, QNX_THREAD_PRIORITY(2) );
-	} else if ( priority == THREAD_BELOW_NORMAL ) {
-		pthread_setschedprio( thread, QNX_THREAD_PRIORITY(1) );
-	} else if ( priority == THREAD_LOWEST ) {
-		pthread_setschedprio( thread, QNX_THREAD_PRIORITY(0) );
-	}
 
 	return (uintptr_t)thread;
 }

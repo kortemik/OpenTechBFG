@@ -57,7 +57,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sound/snd_local.h"
 
-#include <AL/al.h>
 #include <pthread.h>
 
 #define	MIDI_CHANNELS		2
