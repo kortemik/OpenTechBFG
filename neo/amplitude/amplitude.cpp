@@ -122,7 +122,7 @@ int WAVE_ReadHeader( FILE * f ) {
 	Swap( header.id );
 	Swap( header.format );
 
-	if ( header.id != 'RIFF' || header.format != 'WAVE' || header.size < 4 ) { //XXX How would this work on GCC?
+	if ( header.id != 'RIFF' || header.format != 'WAVE' || header.size < 4 ) {
 		return 0;
 	}
 

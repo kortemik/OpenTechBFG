@@ -62,17 +62,17 @@ If you have questions concerning this license or the applicable additional terms
 #define	MIDI_CHANNELS		2
 #if 1
 #define MIDI_RATE			22050
-//#define MIDI_SAMPLETYPE		SND_PCM_SFMT_U8
+#define MIDI_SAMPLETYPE		AL_FORMAT_STEREO8
 #define MIDI_FORMAT			AUDIO_U8
 #define MIDI_FORMAT_BYTES	1
 #else
 #define MIDI_RATE			48000
-//#define MIDI_SAMPLETYPE		SND_PCM_SFMT_S16_BE
-#define MIDI_FORMAT			AUDIO_S16MSB
+#define MIDI_SAMPLETYPE		AL_FORMAT_STEREO16
+#define MIDI_FORMAT			AUDIO_S16LSB
 #define MIDI_FORMAT_BYTES	2
 #endif
 
-IXAudio2SourceVoice*	pMusicSourceVoice; //XXX
+ALuint					musicSource;
 MidiSong*				doomMusic;
 byte*					musicBuffer;
 int						totalBufferSize;
@@ -83,11 +83,7 @@ bool		musicReady;
 
 
 typedef struct tagActiveSound_t {
-	//XXX
-	IXAudio2SourceVoice*     m_pSourceVoice;         // Source voice
-	X3DAUDIO_DSP_SETTINGS   m_DSPSettings;
-	X3DAUDIO_EMITTER        m_Emitter;
-	X3DAUDIO_CONE           m_Cone;
+	ALuint	m_Source;	// Source
 	int id;
 	int valid;
 	int start;
@@ -125,21 +121,13 @@ activeSound_t	activeSounds[NUM_SOUNDBUFFERS] = {0};
 int				S_initialized = 0;
 bool			Music_initialized = false;
 
-// XAUDIO
-float			g_EmitterAzimuths [] = { 0.f };
-static int		numOutputChannels = 0;
 static bool		soundHardwareInitialized = false;
 
-//XXX
-X3DAUDIO_HANDLE					X3DAudioInstance;
+#define HARDWARE_FREQUENCY (MIDI_RATE > 11025 ? MIDI_RATE : 11025)
+ALCcontext*		AudioInstance;
+bool			AudioInstanceOwnsDevice;
 
-X3DAUDIO_LISTENER				doom_Listener;
-
-//float							localSoundVolumeEntries[] = { 0.f, 0.f, 0.9f, 0.5f, 0.f, 0.f };
-float							localSoundVolumeEntries[] = { 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f };
-
-
-void							I_InitSoundChannel( int channel, int numOutputChannels_ );
+void			I_InitSoundChannel( int channel, int numOutputChannels_ );
 
 /*
 ======================
@@ -239,6 +227,41 @@ int I_GetSfxLumpNum(sfxinfo_t* sfx)
 
 /*
 ======================
+I_FlushALQueue
+======================
+*/
+void I_FlushALQueue(ALuint source)
+{
+	ALint processed;
+	ALsizei total;
+	ALuint* buffers;
+
+	//Get total buffers
+	alGetSourceiv( source, AL_BUFFERS_QUEUED, ( ALint* )&total );
+	alGetSourceiv( source, AL_BUFFERS_PROCESSED, &processed );
+	total += processed;
+
+	if( total > 0 )
+	{
+		//Allocate buffer storage
+		buffers = ( ALuint* )malloc( total * sizeof( ALuint ) );
+		if( buffers == NULL )
+		{
+			//Just don't try
+			return;
+		}
+
+		//Get buffers
+		alSourceUnqueueBuffers( source, total, buffers );
+
+		//Free buffers and cleanup
+		alDeleteBuffers( total, buffers );
+		free( ( void* )buffers );
+	}
+}
+
+/*
+======================
 I_StartSound2
 ======================
 */
@@ -257,9 +280,9 @@ int I_StartSound2 ( int id, int player, mobj_t *origin, mobj_t *listener_origin,
 		return id;
 	}
 
-	//XXX
 	int i;
-	XAUDIO2_VOICE_STATE state;
+	ALint processed;
+	ALuint buffer;
 	activeSound_t* sound = 0;
 	int oldest = 0, oldestnum = -1;
 
@@ -289,8 +312,8 @@ int I_StartSound2 ( int id, int player, mobj_t *origin, mobj_t *listener_origin,
 			oldest = sound->start;
 		}
 
-		sound->m_pSourceVoice->GetState( &state );
-		if ( state.BuffersQueued == 0 ) {
+		alGetSourceiv( sound->m_Source, AL_BUFFERS_PROCESSED, &processed );
+		if ( processed > 0 ) {
 			break;
 		}
 	}
@@ -302,59 +325,56 @@ int I_StartSound2 ( int id, int player, mobj_t *origin, mobj_t *listener_origin,
 		sound = &activeSounds[i];
 	}
 
-	// stop the sound with a FlushPackets
-	sound->m_pSourceVoice->Stop();
-	sound->m_pSourceVoice->FlushSourceBuffers();
+	// stop the sound
+	alSourceStop( sound->m_Source );
 
-	// Set up packet
-	XAUDIO2_BUFFER Packet = { 0 };
-	Packet.Flags = XAUDIO2_END_OF_STREAM;
-	Packet.AudioBytes = lengths[id];
-	Packet.pAudioData = (BYTE*)S_sfx[id].data;
-	Packet.PlayBegin = 0;
-	Packet.PlayLength = 0;
-	Packet.LoopBegin = XAUDIO2_NO_LOOP_REGION;
-	Packet.LoopLength = 0;
-	Packet.LoopCount = 0;
-	Packet.pContext = NULL;
+	// get a buffer for use later
+	alGetSourceiv( sound->m_Source, AL_BUFFERS_PROCESSED, &processed );
+	if( processed > 0 )
+	{
+		alSourceUnqueueBuffers( sound->m_Source, 1, &buffer );
+	}
+	else
+	{
+		// Create the buffer
+		alGenBuffers( 1, &buffer );
+	}
 
+	// flush the buffers
+	I_FlushALQueue( sound->m_Source );
+
+	// Set up buffer
+	alBufferData( buffer, MIDI_SAMPLETYPE, S_sfx[id].data, lengths[id], MIDI_RATE );
 
 	// Set voice volumes
-	sound->m_pSourceVoice->SetVolume( x_SoundVolume );
+	alSourcef( sound->m_Source, AL_GAIN, x_SoundVolume );
 
 	// Set voice pitch
-	sound->m_pSourceVoice->SetFrequencyRatio( 1 + ((float)pitch-128.f)/95.f );
+	alSourcef( sound->m_Source, AL_PITCH, 1 + ((float)pitch-128.f)/95.f );
 
 	// Set initial spatialization
 	if ( origin && origin != listener_origin ) {
 		// Update Emitter Position
-		sound->m_Emitter.Position.x = (float)(origin->x >> FRACBITS);
-		sound->m_Emitter.Position.y = 0.f;
-		sound->m_Emitter.Position.z = (float)(origin->y >> FRACBITS);
-
-		// Calculate 3D positioned speaker volumes
-		DWORD dwCalculateFlags = X3DAUDIO_CALCULATE_MATRIX;
-		X3DAudioCalculate( X3DAudioInstance, &doom_Listener, &sound->m_Emitter, dwCalculateFlags, &sound->m_DSPSettings );
-
-		// Pan the voice according to X3DAudio calculation
-		sound->m_pSourceVoice->SetOutputMatrix( NULL, 1, numOutputChannels, sound->m_DSPSettings.pMatrixCoefficients );
+		alSource3f( sound->m_Source, AL_POSITION, (float)(origin->x >> FRACBITS), 0.f, (float)(origin->y >> FRACBITS) );
 
 		sound->localSound = false;
 	} else {
 		// Local(or Global) sound, fixed speaker volumes
-		sound->m_pSourceVoice->SetOutputMatrix( NULL, 1, numOutputChannels, localSoundVolumeEntries );
+		alSource3f( sound->m_Source, AL_POSITION, 0.f, 0.f, 0.f );
 
 		sound->localSound = true;
 	}
+	alSourcei( sound->m_Source, AL_SOURCE_RELATIVE, sound->localSound ? AL_TRUE : AL_FALSE );
 
-	// Submit packet
-	HRESULT hr;
-	if( FAILED( hr = sound->m_pSourceVoice->SubmitSourceBuffer( &Packet ) ) ) {
+	// Submit buffer
+	alSourceQueueBuffers( sound->m_Source, 1, &buffer );
+	if( alGetError() != AL_NO_ERROR ) {
 		int fail = 1;
 	}
 
 	// Play the source voice
-	if( FAILED( hr = sound->m_pSourceVoice->Start( 0 ) ) ) {
+	alSourcePlay( sound->m_Source );
+	if( alGetError() != AL_NO_ERROR ) {
 		int fail = 1;
 	}
 
@@ -438,8 +458,8 @@ void I_StopSound (int handle, int player)
 		return;
 
 	// stop the sound
-	if ( sound->m_pSourceVoice != NULL ) {
-		sound->m_pSourceVoice->Stop( 0 );
+	if ( sound->m_Source != 0 ) {
+		alSourceStop( sound->m_Source );
 	}
 
 	sound->valid = 0;
@@ -456,9 +476,8 @@ int I_SoundIsPlaying(int handle) {
 		return 0;
 	}
 
-	//XXX
 	int i;
-	XAUDIO2_VOICE_STATE	state;
+	ALint queued;
 	activeSound_t* sound;
 
 	for (i = 0; i < NUM_SOUNDBUFFERS; ++i)
@@ -467,8 +486,8 @@ int I_SoundIsPlaying(int handle) {
 		if (!sound->valid || sound->id != handle)
 			continue;
 
-		sound->m_pSourceVoice->GetState( &state );
-		if ( state.BuffersQueued > 0 ) {
+		alGetSourceiv( sound->m_Source, AL_BUFFERS_QUEUED, &queued );
+		if ( queued == 0 ) {
 			return 1;
 		}
 	}
@@ -488,10 +507,12 @@ void I_UpdateSound( void ) {
 		return;
 	}
 
-	//XXX
 	int i;
-	XAUDIO2_VOICE_STATE	state;
+	ALint queued;
 	activeSound_t* sound;
+	ALfloat orient[6];
+
+	alcMakeContextCurrent( AudioInstance );
 
 	for ( i=0; i < NUM_SOUNDBUFFERS; i++ ) {
 		sound = &activeSounds[i];
@@ -500,9 +521,9 @@ void I_UpdateSound( void ) {
 			continue;
 		}
 
-		sound->m_pSourceVoice->GetState( &state );
+		alGetSourceiv( sound->m_Source, AL_BUFFERS_QUEUED, &queued );
 
-		if ( state.BuffersQueued > 0 ) {
+		if ( queued > 0 ) {
 			mobj_t *playerObj = ::g->players[ sound->player ].mo;
 
 			// Update Listener Orientation and Position
@@ -514,25 +535,21 @@ void I_UpdateSound( void ) {
 			fx = finecosine[pAngle];
 			fz = finesine[pAngle];
 
-			doom_Listener.OrientFront.x = (float)(fx) / 65535.f;
-			doom_Listener.OrientFront.y = 0.f;
-			doom_Listener.OrientFront.z = (float)(fz) / 65535.f;
+			//Front orientation
+			orient[0] = (float)(fx) / 65535.f;
+			orient[1] =  0.f;
+			orient[2] = (float)(fz) / 65535.f;
 
-			doom_Listener.Position.x = (float)(playerObj->x >> FRACBITS);
-			doom_Listener.Position.y = 0.f;
-			doom_Listener.Position.z = (float)(playerObj->y >> FRACBITS);
+			//Up orientation
+			orient[3] = 0.f;
+			orient[4] = 1.f;
+			orient[5] = 0.f;
+			alListenerfv( AL_ORIENTATION, orient );
+
+			alListener3f( AL_POSITION, (float)(playerObj->x >> FRACBITS), 0.f, (float)(playerObj->y >> FRACBITS) );
 
 			// Update Emitter Position
-			sound->m_Emitter.Position.x = (float)(sound->originator->x >> FRACBITS);
-			sound->m_Emitter.Position.y = 0.f;
-			sound->m_Emitter.Position.z = (float)(sound->originator->y >> FRACBITS);
-
-			// Calculate 3D positioned speaker volumes
-			DWORD dwCalculateFlags = X3DAUDIO_CALCULATE_MATRIX;
-			X3DAudioCalculate( X3DAudioInstance, &doom_Listener, &sound->m_Emitter, dwCalculateFlags, &sound->m_DSPSettings );
-
-			// Pan the voice according to X3DAudio calculation
-			sound->m_pSourceVoice->SetOutputMatrix( NULL, 1, numOutputChannels, sound->m_DSPSettings.pMatrixCoefficients );
+			alSource3f( sound->m_Source, AL_POSITION, (float)(sound->originator->x >> FRACBITS), 0.f, (float)(sound->originator->y >> FRACBITS) );
 		}
 	}
 }
@@ -565,8 +582,8 @@ void I_ShutdownSound(void) {
 
 			I_StopSound( sound->id, 0 );
 
-			if ( sound->m_pSourceVoice ) {
-				sound->m_pSourceVoice->FlushSourceBuffers();
+			if ( sound->m_Source != 0 ) {
+				I_FlushALQueue( sound->m_Source );
 			}
 		}
 
@@ -593,15 +610,32 @@ Called from the tech4x initialization code. Sets up Doom classic's
 sound channels.
 ======================
 */
-void I_InitSoundHardware( int numOutputChannels_, int channelMask ) {
-	::numOutputChannels = numOutputChannels_;
+void I_InitSoundHardware( int numOutputChannels, int _unused ) {
 
-	//XXX
-	// Initialize the X3DAudio
-	//  Speaker geometry configuration on the final mix, specifies assignment of channels
-	//  to speaker positions, defined as per WAVEFORMATEXTENSIBLE.dwChannelMask
+	ALCint atts[] = {
+		ALC_FREQUENCY, HARDWARE_FREQUENCY,
+		0
+	};
+
+	// Initialize OpenAL
+	//  Speaker setup is not handled manually, so we don't do anything with it.
 	//  SpeedOfSound - not used by doomclassic
-	X3DAudioInitialize( channelMask, 340.29f, X3DAudioInstance );
+	ALCcontext* currentContext = alcGetCurrentContext();
+	ALCdevice* device;
+	if( currentContext != NULL )
+	{
+		device = alcGetContextsDevice( currentContext );
+		AudioInstanceOwnsDevice = false;
+	}
+	else
+	{
+		// Should not get here
+		device = alcOpenDevice( NULL );
+		AudioInstanceOwnsDevice = true;
+	}
+	AudioInstance = alcCreateContext( device, atts );
+	alcMakeContextCurrent( AudioInstance );
+	alSpeedOfSound(340.29f);
 
 	for ( int i = 0; i < NUM_SOUNDBUFFERS; ++i ) {
 		// Initialize source voices
@@ -634,17 +668,22 @@ void I_ShutdownSoundHardware() {
 			continue;
 		}
 
-		if ( sound->m_pSourceVoice ) {
-			sound->m_pSourceVoice->Stop();
-			sound->m_pSourceVoice->FlushSourceBuffers();
-			sound->m_pSourceVoice->DestroyVoice();
-			sound->m_pSourceVoice = NULL;
+		if ( sound->m_Source != 0 ) {
+			alSourceStop( sound->m_Source );
+			I_FlushALQueue( sound->m_Source );
+			alDeleteSources( 1, &sound->m_Source );
+			sound->m_Source = 0;
 		}
+	}
 
-		if ( sound->m_DSPSettings.pMatrixCoefficients ) {
-			delete [] sound->m_DSPSettings.pMatrixCoefficients;
-			sound->m_DSPSettings.pMatrixCoefficients = NULL;
-		}
+	alcMakeContextCurrent( NULL );
+	ALCdevice* device = alcGetContextsDevice( AudioInstance );
+	alcDestroyContext( AudioInstance );
+	AudioInstance = NULL;
+	if( AudioInstanceOwnsDevice )
+	{
+		alcCloseDevice( device );
+		device = NULL;
 	}
 }
 
@@ -656,59 +695,22 @@ I_InitSoundChannel
 void I_InitSoundChannel( int channel, int numOutputChannels_ ) {
 	activeSound_t	*soundchannel = &activeSounds[ channel ];
 
-	//XXX
-	X3DAUDIO_VECTOR ZeroVector = { 0.0f, 0.0f, 0.0f };
+	// Create Source
+	alGenSources( 1, &soundchannel->m_Source );
 
-	// Set up emitter parameters
-	soundchannel->m_Emitter.OrientFront.x         = 0.0f;
-	soundchannel->m_Emitter.OrientFront.y         = 0.0f;
-	soundchannel->m_Emitter.OrientFront.z         = 1.0f;
-	soundchannel->m_Emitter.OrientTop.x           = 0.0f;
-	soundchannel->m_Emitter.OrientTop.y           = 1.0f;
-	soundchannel->m_Emitter.OrientTop.z           = 0.0f;
-	soundchannel->m_Emitter.Position              = ZeroVector;
-	soundchannel->m_Emitter.Velocity              = ZeroVector;
-	soundchannel->m_Emitter.pCone                 = &(soundchannel->m_Cone);
-	soundchannel->m_Emitter.pCone->InnerAngle     = 0.0f; // Setting the inner cone angles to X3DAUDIO_2PI and
+	// Setup source parameters
+	alSource3f( soundchannel->m_Source, AL_DIRECTION, 0.f, 0.f, 1.f ); //XXX Values are from orientation:front vector, is this the correct setup?
+	alSource3f( soundchannel->m_Source, AL_POSITION, 0.f, 0.f, 0.f );
+	alSource3f( soundchannel->m_Source, AL_VELOCITY, 0.f, 0.f, 0.f );
+
+	alSourcei( soundchannel->m_Source, AL_CONE_INNER_ANGLE, 0 ); // Setting the inner cone angles to X3DAUDIO_2PI and
 	// outer cone other than 0 causes
 	// the emitter to act like a point emitter using the
-	// INNER cone settings only.
-	soundchannel->m_Emitter.pCone->OuterAngle     = 0.0f; // Setting the outer cone angles to zero causes
+	// INNER cone settings only. //XXX Does this apply to OpenAL?
+	alSourcei( soundchannel->m_Source, AL_CONE_OUTER_ANGLE, 0 ); // Setting the outer cone angles to zero causes
 	// the emitter to act like a point emitter using the
-	// OUTER cone settings only.
-	soundchannel->m_Emitter.pCone->InnerVolume    = 0.0f;
-	soundchannel->m_Emitter.pCone->OuterVolume    = 1.0f;
-	soundchannel->m_Emitter.pCone->InnerLPF       = 0.0f;
-	soundchannel->m_Emitter.pCone->OuterLPF       = 1.0f;
-	soundchannel->m_Emitter.pCone->InnerReverb    = 0.0f;
-	soundchannel->m_Emitter.pCone->OuterReverb    = 1.0f;
-
-	soundchannel->m_Emitter.ChannelCount          = 1;
-	soundchannel->m_Emitter.ChannelRadius         = 0.0f;
-	soundchannel->m_Emitter.pVolumeCurve          = NULL;
-	soundchannel->m_Emitter.pLFECurve             = NULL;
-	soundchannel->m_Emitter.pLPFDirectCurve       = NULL;
-	soundchannel->m_Emitter.pLPFReverbCurve       = NULL;
-	soundchannel->m_Emitter.pReverbCurve          = NULL;
-	soundchannel->m_Emitter.CurveDistanceScaler   = 1200.0f;
-	soundchannel->m_Emitter.DopplerScaler         = 1.0f;
-	soundchannel->m_Emitter.pChannelAzimuths      = g_EmitterAzimuths;
-
-	soundchannel->m_DSPSettings.SrcChannelCount     = 1;
-	soundchannel->m_DSPSettings.DstChannelCount     = numOutputChannels_;
-	soundchannel->m_DSPSettings.pMatrixCoefficients = new FLOAT[ numOutputChannels_ ];
-
-	// Create Source voice
-	WAVEFORMATEX voiceFormat = {0};
-	voiceFormat.wFormatTag = WAVE_FORMAT_PCM;
-	voiceFormat.nChannels = 1;
-    voiceFormat.nSamplesPerSec = 11025;
-    voiceFormat.nAvgBytesPerSec = 11025;
-    voiceFormat.nBlockAlign = 1;
-    voiceFormat.wBitsPerSample = 8;
-    voiceFormat.cbSize = 0;
-
-	soundSystemLocal.hardware.GetIXAudio2()->CreateSourceVoice( &soundchannel->m_pSourceVoice, (WAVEFORMATEX *)&voiceFormat );
+	// OUTER cone settings only. //XXX Does this apply to OpenAL?
+	alSourcei( soundchannel->m_Source, AL_CONE_OUTER_GAIN, 1 );
 }
 
 /*
@@ -721,18 +723,16 @@ void I_InitSound() {
 	if (S_initialized == 0) {
 		int i;
 
-		//XXX
-		X3DAUDIO_VECTOR ZeroVector = { 0.0f, 0.0f, 0.0f };
+		ALfloat orient[6];
+		memset( orient, 0, sizeof( orient ) );
+		orient[2] = 1.f; //Forward Z
+		orient[4] = 1.f; //Up Y
 
-		// Set up listener parameters
-		doom_Listener.OrientFront.x        = 0.0f;
-		doom_Listener.OrientFront.y        = 0.0f;
-		doom_Listener.OrientFront.z        = 1.0f;
-		doom_Listener.OrientTop.x          = 0.0f;
-		doom_Listener.OrientTop.y          = 1.0f;
-		doom_Listener.OrientTop.z          = 0.0f;
-		doom_Listener.Position             = ZeroVector;
-		doom_Listener.Velocity             = ZeroVector;
+		alcMakeContextCurrent( AudioInstance );
+
+		alListenerfv( AL_ORIENTATION, orient );
+		alListener3f( AL_POSITION, 0.f, 0.f, 0.f );
+		alListener3f( AL_VELOCITY, 0.f, 0.f, 0.f );
 
 		for (i=1 ; i<NUMSFX ; i++)
 		{
@@ -801,24 +801,14 @@ void I_InitMusic(void)
 		// Initialize Timidity
 		Timidity_Init( MIDI_RATE, MIDI_FORMAT, MIDI_CHANNELS, MIDI_RATE, "classicmusic/gravis.cfg" );
 
-		hMusicThread = NULL;
+		hMusicThread = ( pthread_t )NULL;
 		musicBuffer = NULL;
 		totalBufferSize = 0;
 		waitingForMusic = false;
 		musicReady = false;
 
-		//XXX
-		// Create Source voice
-		WAVEFORMATEX voiceFormat = {0};
-		voiceFormat.wFormatTag = WAVE_FORMAT_PCM;
-		voiceFormat.nChannels = 2;
-		voiceFormat.nSamplesPerSec = MIDI_RATE;
-		voiceFormat.nAvgBytesPerSec = MIDI_RATE * MIDI_FORMAT_BYTES * 2;
-		voiceFormat.nBlockAlign = MIDI_FORMAT_BYTES * 2;
-		voiceFormat.wBitsPerSample = MIDI_FORMAT_BYTES * 8;
-		voiceFormat.cbSize = 0;
-
-		soundSystemLocal.hardware.GetIXAudio2()->CreateSourceVoice( &pMusicSourceVoice, (WAVEFORMATEX *)&voiceFormat, XAUDIO2_VOICE_MUSIC );
+		// Create Source
+		alGenSources( 1, &musicSource );
 
 		Music_initialized = true;
 	}
@@ -834,11 +824,11 @@ void I_ShutdownMusic(void)
 	I_StopSong( 0 );
 
 	if ( Music_initialized ) {
-		if ( pMusicSourceVoice ) {
-			pMusicSourceVoice->Stop();
-			pMusicSourceVoice->FlushSourceBuffers();
-			pMusicSourceVoice->DestroyVoice();
-			pMusicSourceVoice = NULL;
+		if ( musicSource != 0 ) {
+			alSourceStop( musicSource );
+			I_FlushALQueue( musicSource );
+			alDeleteSources( 1, &musicSource );
+			musicSource = 0;
 		}
 
 		if ( hMusicThread ) {
@@ -859,8 +849,8 @@ void I_ShutdownMusic(void)
 		Timidity_Shutdown();
 	}
 
-	pMusicSourceVoice = NULL;
-	hMusicThread = NULL;
+	musicSource = 0;
+	hMusicThread = ( pthread_t )NULL;
 	musicBuffer = NULL;
 
 	totalBufferSize = 0;
@@ -882,7 +872,7 @@ namespace {
 I_LoadSong
 ======================
 */
-DWORD WINAPI I_LoadSong( LPVOID songname ) {
+unsigned int WINAPI I_LoadSong( void* songname ) {
 	idStr lumpName = "d_";
 	lumpName += static_cast< const char * >( songname );
 
@@ -914,7 +904,7 @@ DWORD WINAPI I_LoadSong( LPVOID songname ) {
 
 	musicReady = true;
 
-	return ERROR_SUCCESS;
+	return EOK;
 }
 
 /*
@@ -928,24 +918,23 @@ void I_PlaySong( const char *songname, int looping)
 		return;
 	}
 
-	if ( pMusicSourceVoice != NULL ) {
-		// Stop the voice and flush packets before freeing the musicBuffer
-		pMusicSourceVoice->Stop();
-		pMusicSourceVoice->FlushSourceBuffers();
+	if ( musicSource != 0 ) {
+		// Stop the source and flush packets before freeing the musicBuffer
+		alSourceStop( musicSource );
+		I_FlushALQueue( musicSource );
 	}
 
-	//XXX
 	// Make sure voice is stopped before we free the buffer
 	bool isStopped = false;
 	int d = 0;
 	while ( !isStopped ) {
-		XAUDIO2_VOICE_STATE test;
+		ALint queued = 0;
 
-		if ( pMusicSourceVoice != NULL ) {
-			pMusicSourceVoice->GetState( &test );
+		if ( musicSource != 0 ) {
+			alGetSourceiv( musicSource, AL_BUFFERS_QUEUED, &queued );
 		}
 
-		if ( test.pCurrentBufferContext == NULL && test.BuffersQueued == 0 ) {
+		if ( queued == 0 ) {
 			isStopped = true;
 		}
 		//I_Printf( "waiting to stop (%d)\n", d++ );
@@ -958,7 +947,7 @@ void I_PlaySong( const char *songname, int looping)
 	}
 
 	musicReady = false;
-	I_LoadSong( (LPVOID)songname );
+	I_LoadSong( (void*)songname );
 	waitingForMusic = true;
 
 	if ( DoomLib::GetPlayer() >= 0 ) {
@@ -976,32 +965,30 @@ void I_UpdateMusic( void ) {
 		return;
 	}
 
-	//XXX
 	if ( waitingForMusic ) {
 
-		if ( musicReady && pMusicSourceVoice != NULL ) {
+		if ( musicReady && musicSource != 0 ) {
 
 			if ( musicBuffer ) {
-				// Set up packet
-				XAUDIO2_BUFFER Packet = { 0 };
-				Packet.Flags = XAUDIO2_END_OF_STREAM;
-				Packet.AudioBytes = totalBufferSize;
-				Packet.pAudioData = (BYTE*)musicBuffer;
-				Packet.PlayBegin = 0;
-				Packet.PlayLength = 0;
-				Packet.LoopBegin = 0;
-				Packet.LoopLength = 0;
-				Packet.LoopCount = ::g->mus_looping ? XAUDIO2_LOOP_INFINITE : 0;
-				Packet.pContext = NULL;
+				alcMakeContextCurrent( AudioInstance );
 
-				// Submit packet
-				HRESULT hr;
-				if( FAILED( hr = pMusicSourceVoice->SubmitSourceBuffer( &Packet ) ) ) {
+				// Set source
+				alSourcei( musicSource, AL_LOOPING, AL_TRUE );
+
+				// Set up buffer
+				ALuint buffer;
+				alGenBuffers( 1, &buffer );
+				alBufferData( buffer, MIDI_SAMPLETYPE, musicBuffer, totalBufferSize, MIDI_RATE );
+
+				// Submit buffer
+				alSourcei( musicSource, AL_BUFFER, buffer );
+				if( alGetError() != AL_NO_ERROR ) {
 					int fail = 1;
 				}
 
 				// Play the source voice
-				if( FAILED( hr = pMusicSourceVoice->Start( 0 ) ) ) {
+				alSourcePlay( musicSource );
+				if( alGetError() != AL_NO_ERROR ) {
 					int fail = 1;
 				}
 			}
@@ -1010,9 +997,9 @@ void I_UpdateMusic( void ) {
 		}
 	}
 
-	if ( pMusicSourceVoice != NULL ) {
+	if ( musicSource != 0 ) {
 		// Set the volume
-		pMusicSourceVoice->SetVolume( x_MusicVolume * GLOBAL_VOLUME_MULTIPLIER );
+		alSourcef( musicSource, AL_GAIN, x_MusicVolume * GLOBAL_VOLUME_MULTIPLIER );
 	}
 }
 
@@ -1027,9 +1014,9 @@ void I_PauseSong (int handle)
 		return;
 	}
 
-	if ( pMusicSourceVoice != NULL ) {
+	if ( musicSource != 0 ) {
 		// Stop the music source voice
-		pMusicSourceVoice->Stop( 0 );
+		alSourceStop( musicSource );
 	}
 }
 
@@ -1045,8 +1032,8 @@ void I_ResumeSong (int handle)
 	}
 
 	// Stop the music source voice
-	if ( pMusicSourceVoice != NULL ) {
-		pMusicSourceVoice->Start( 0 );
+	if ( musicSource != 0 ) {
+		alSourcePlay( musicSource );
 	}
 }
 
@@ -1062,8 +1049,8 @@ void I_StopSong(int handle)
 	}
 
 	// Stop the music source voice
-	if ( pMusicSourceVoice != NULL ) {
-		pMusicSourceVoice->Stop( 0 );
+	if ( musicSource != 0 ) {
+		alSourceStop( musicSource );
 	}
 }
 

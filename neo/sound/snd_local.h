@@ -94,6 +94,9 @@ typedef enum {
 #include "XAudio2/XA2_SoundHardware.h"
 #elif defined(ID_QNX)
 #include <AL/al.h>
+#include <AL/alc.h>
+#include <AL/alext.h>
+
 //TODO
 #endif
 
