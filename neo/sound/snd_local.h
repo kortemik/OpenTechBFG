@@ -97,7 +97,9 @@ typedef enum {
 #include <AL/alc.h>
 #include <AL/alext.h>
 
-//TODO
+#include "OpenAL/OAL_SoundSample.h"
+#include "OpenAL/OAL_SoundVoice.h"
+#include "OpenAL/OAL_SoundHardware.h"
 #endif
 
 
@@ -444,8 +446,8 @@ public:
 			sample( NULL ),
 			bufferNumber( 0 )
 		{ }
-		idSoundVoice_XAudio2 *	voice;
-		idSoundSample_XAudio2 * sample;
+		idSoundVoice *	voice;
+		idSoundSample * sample;
 		int bufferNumber;
 	};
 
