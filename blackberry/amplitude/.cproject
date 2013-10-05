@@ -35,7 +35,7 @@
 								<option id="com.qnx.qcc.option.compiler.qccoptions.1686818138" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-Wno-multichar"/>
 								</option>
-								<option id="com.qnx.qcc.option.compiler.ccoptions.667442252" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList"/>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.667442252" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions"/>
 								<inputType id="com.qnx.qcc.inputType.compiler.91388757" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.2003724137" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">

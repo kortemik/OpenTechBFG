@@ -446,8 +446,8 @@ public:
 			sample( NULL ),
 			bufferNumber( 0 )
 		{ }
-		idSoundVoice *	voice;
-		idSoundSample * sample;
+		idSoundVoice_Buffer *	voice;
+		idSoundSample_Buffer * sample;
 		int bufferNumber;
 	};
 

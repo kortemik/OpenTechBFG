@@ -37,6 +37,8 @@ typedef int qboolean;
 
 typedef float FLOAT;
 
+#ifndef ID_WIN32
+
 #ifndef BOOL
 typedef int BOOL;
 #endif
@@ -64,6 +66,8 @@ typedef int boolean;
 #else
 #error Unknown min int
 #endif
+#endif
+
 #endif
 
 #endif

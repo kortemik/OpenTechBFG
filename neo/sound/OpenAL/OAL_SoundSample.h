@@ -113,6 +113,7 @@ protected:
 
 	idList<byte, TAG_AMPLITUDE> amplitude;
 };
+typedef idSoundSample_OpenAL idSoundSample_Buffer;
 
 /*
 ================================================

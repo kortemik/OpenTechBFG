@@ -102,6 +102,7 @@ private:
 	bool					hasVUMeter;
 	bool					paused;
 };
+typedef idSoundVoice_XAudio2 idSoundVoice_Buffer;
 
 /*
 ================================================

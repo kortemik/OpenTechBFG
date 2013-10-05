@@ -102,6 +102,7 @@ private:
 	bool					hasVUMeter;
 	bool					paused;
 };
+typedef idSoundVoice_OpenAL idSoundVoice_Buffer;
 
 /*
 ================================================
