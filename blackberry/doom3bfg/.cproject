@@ -24,6 +24,14 @@
 								<option id="com.qnx.qcc.option.compiler.optlevel.606249619" name="Optimization Level" superClass="com.qnx.qcc.option.compiler.optlevel" value="com.qnx.qcc.option.compiler.optlevel.0" valueType="enumerated"/>
 								<option id="com.qnx.qcc.option.compile.debug.1102520540" name="Debug (-g)" superClass="com.qnx.qcc.option.compile.debug" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.includePath.1270487287" name="Include Directories (-I)" superClass="com.qnx.qcc.option.compiler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/usr/include/freetype2"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/usr/include"/>
 								</option>
@@ -37,18 +45,42 @@
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.696761276" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
 								<option id="com.qnx.qcc.option.assembler.debug.1946642777" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.assembler.includePath.504940173" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
+								</option>
 								<inputType id="com.qnx.qcc.inputType.assembler.903401021" superClass="com.qnx.qcc.inputType.assembler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.linker.391464981" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
 								<option id="com.qnx.qcc.option.linker.debug.585936448" name="Debug (-g)" superClass="com.qnx.qcc.option.linker.debug" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.linker.langcpp.242769566" name="C++ (-lang-c++)" superClass="com.qnx.qcc.option.linker.langcpp" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.linker.libraryPaths.1885530281" name="Library Paths (-L)" superClass="com.qnx.qcc.option.linker.libraryPaths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/Device-Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/Device-Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/Device-Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/Device-Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/lib"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/usr/lib"/>
 								</option>
 								<option id="com.qnx.qcc.option.linker.security.1779919819" name="Enhanced Security (-Wl,-z,relro -Wl,-z,now)" superClass="com.qnx.qcc.option.linker.security" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.linker.ldoptions.596695797" name="Linker Options (-Wl,)" superClass="com.qnx.qcc.option.linker.ldoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="--stack,16777216"/>
+								</option>
+								<option id="com.qnx.qcc.option.linker.libraries.1230343137" name="Libraries (-l)" superClass="com.qnx.qcc.option.linker.libraries" valueType="libs">
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.257941073" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -63,7 +95,48 @@
 					</sourceEntries>
 				</configuration>
 			</storageModule>
-			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="doomclassic;com.qnx.qcc.configuration.staticLib.debug.283553325" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic/Device-Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic"/>
+						<entry flags="" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="game-d3xp;com.qnx.qcc.configuration.staticLib.debug.1258582821" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Device-Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
+						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="idlib;com.qnx.qcc.configuration.staticLib.debug.395557705" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib/Device-Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib"/>
+						<entry flags="" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="timidity;com.qnx.qcc.configuration.staticLib.debug.1215202710" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity/Device-Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity"/>
+						<entry flags="" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+			</storageModule>
 		</cconfiguration>
 		<cconfiguration id="com.qnx.qcc.configuration.exe.release.1657557283">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.exe.release.1657557283" moduleId="org.eclipse.cdt.core.settings" name="Device-Release">
@@ -85,6 +158,14 @@
 							<tool id="com.qnx.qcc.tool.compiler.1727028790" name="QCC Compiler" superClass="com.qnx.qcc.tool.compiler">
 								<option id="com.qnx.qcc.option.compiler.optlevel.1606441570" name="Optimization Level" superClass="com.qnx.qcc.option.compiler.optlevel" value="com.qnx.qcc.option.compiler.optlevel.2" valueType="enumerated"/>
 								<option id="com.qnx.qcc.option.compiler.includePath.1533247163" name="Include Directories (-I)" superClass="com.qnx.qcc.option.compiler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/usr/include/freetype2"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/usr/include"/>
 								</option>
@@ -102,11 +183,29 @@
 								<inputType id="com.qnx.qcc.inputType.compiler.516975726" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.1112417811" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
+								<option id="com.qnx.qcc.option.assembler.includePath.148947521" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
+								</option>
 								<inputType id="com.qnx.qcc.inputType.assembler.2067695334" superClass="com.qnx.qcc.inputType.assembler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.linker.1033414609" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
 								<option id="com.qnx.qcc.option.linker.langcpp.1630013961" name="C++ (-lang-c++)" superClass="com.qnx.qcc.option.linker.langcpp" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.linker.libraryPaths.1542980794" name="Library Paths (-L)" superClass="com.qnx.qcc.option.linker.libraryPaths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/Device-Release}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/Device-Release}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/Device-Release}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/Device-Release}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/lib"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/usr/lib"/>
 								</option>
@@ -114,6 +213,12 @@
 								<option id="com.qnx.qcc.option.linker.security.792560998" name="Enhanced Security (-Wl,-z,relro -Wl,-z,now)" superClass="com.qnx.qcc.option.linker.security" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.linker.ldoptions.859079374" name="Linker Options (-Wl,)" superClass="com.qnx.qcc.option.linker.ldoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="--stack,16777216"/>
+								</option>
+								<option id="com.qnx.qcc.option.linker.libraries.548011228" superClass="com.qnx.qcc.option.linker.libraries" valueType="libs">
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.823928155" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -128,7 +233,48 @@
 					</sourceEntries>
 				</configuration>
 			</storageModule>
-			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="doomclassic;com.qnx.qcc.configuration.staticLib.release.927465572" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic/Device-Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic"/>
+						<entry flags="" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="game-d3xp;com.qnx.qcc.configuration.staticLib.release.1393510121" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Device-Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
+						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="idlib;com.qnx.qcc.configuration.staticLib.release.2047967738" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib/Device-Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib"/>
+						<entry flags="" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="timidity;com.qnx.qcc.configuration.staticLib.release.2121734296" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity/Device-Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity"/>
+						<entry flags="" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+			</storageModule>
 		</cconfiguration>
 		<cconfiguration id="com.qnx.qcc.configuration.exe.profile.664212159">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.exe.profile.664212159" moduleId="org.eclipse.cdt.core.settings" name="Device-Profile">
@@ -152,6 +298,14 @@
 								<option id="com.qnx.qcc.option.compile.debug.1831455380" name="Debug (-g)" superClass="com.qnx.qcc.option.compile.debug" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.profile2.229573887" name="Build for Profiling (Function Instrumentation) (-finstrument-functions)" superClass="com.qnx.qcc.option.compiler.profile2" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.includePath.220027778" name="Include Directories (-I)" superClass="com.qnx.qcc.option.compiler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/usr/include/freetype2"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/usr/include"/>
 								</option>
@@ -166,6 +320,16 @@
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.1689250883" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
 								<option id="com.qnx.qcc.option.assembler.debug.1370087959" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.assembler.includePath.377916409" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
+								</option>
 								<inputType id="com.qnx.qcc.inputType.assembler.1060837818" superClass="com.qnx.qcc.inputType.assembler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.linker.1996229796" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
@@ -173,12 +337,26 @@
 								<option id="com.qnx.qcc.option.linker.profile2.1389239698" name="Build for Profiling (Function Instrumentation) (-lprofiling)" superClass="com.qnx.qcc.option.linker.profile2" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.linker.langcpp.1940244957" name="C++ (-lang-c++)" superClass="com.qnx.qcc.option.linker.langcpp" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.linker.libraryPaths.1607862106" name="Library Paths (-L)" superClass="com.qnx.qcc.option.linker.libraryPaths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/Device-Profile}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/Device-Profile}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/Device-Profile}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/Device-Profile}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/lib"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/usr/lib"/>
 								</option>
 								<option id="com.qnx.qcc.option.linker.security.1382606218" name="Enhanced Security (-Wl,-z,relro -Wl,-z,now)" superClass="com.qnx.qcc.option.linker.security" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.linker.ldoptions.2122240504" name="Linker Options (-Wl,)" superClass="com.qnx.qcc.option.linker.ldoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="--stack,16777216"/>
+								</option>
+								<option id="com.qnx.qcc.option.linker.libraries.2107871156" name="Libraries (-l)" superClass="com.qnx.qcc.option.linker.libraries" valueType="libs">
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.414524484" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -193,7 +371,48 @@
 					</sourceEntries>
 				</configuration>
 			</storageModule>
-			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="doomclassic;com.qnx.qcc.configuration.staticLib.profile.476158712" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic/Device-Profile"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic"/>
+						<entry flags="" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="game-d3xp;com.qnx.qcc.configuration.staticLib.profile.924383944" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Device-Profile"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
+						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="idlib;com.qnx.qcc.configuration.staticLib.profile.1416154789" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib/Device-Profile"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib"/>
+						<entry flags="" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="timidity;com.qnx.qcc.configuration.staticLib.profile.1210230862" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity/Device-Profile"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity"/>
+						<entry flags="" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+			</storageModule>
 		</cconfiguration>
 		<cconfiguration id="com.qnx.qcc.configuration.exe.profile.coverage.448140697">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.exe.profile.coverage.448140697" moduleId="org.eclipse.cdt.core.settings" name="Device-Coverage">
@@ -217,6 +436,14 @@
 								<option id="com.qnx.qcc.option.compile.debug.339539" name="Debug (-g)" superClass="com.qnx.qcc.option.compile.debug" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.coverage.1611303637" name="Build for Code Coverage (-Wc,-ftest-coverage -Wc,-fprofile-arcs)" superClass="com.qnx.qcc.option.compiler.coverage" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.includePath.492600768" name="Include Directories (-I)" superClass="com.qnx.qcc.option.compiler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/usr/include/freetype2"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/usr/include"/>
 								</option>
@@ -230,6 +457,16 @@
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.1194282320" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
 								<option id="com.qnx.qcc.option.assembler.debug.1550474903" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.assembler.includePath.969645387" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
+								</option>
 								<inputType id="com.qnx.qcc.inputType.assembler.1360064080" superClass="com.qnx.qcc.inputType.assembler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.linker.700771273" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
@@ -237,12 +474,26 @@
 								<option id="com.qnx.qcc.option.linker.coverage.2066665320" name="Build for Code Coverage (-ftest-coverage -fprofile-arcs)" superClass="com.qnx.qcc.option.linker.coverage" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.linker.langcpp.88047750" name="C++ (-lang-c++)" superClass="com.qnx.qcc.option.linker.langcpp" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.linker.libraryPaths.322878269" name="Library Paths (-L)" superClass="com.qnx.qcc.option.linker.libraryPaths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/Device-Coverage}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/Device-Coverage}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/Device-Coverage}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/Device-Coverage}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/lib"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/usr/lib"/>
 								</option>
 								<option id="com.qnx.qcc.option.linker.security.1035173997" name="Enhanced Security (-Wl,-z,relro -Wl,-z,now)" superClass="com.qnx.qcc.option.linker.security" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.linker.ldoptions.641269758" name="Linker Options (-Wl,)" superClass="com.qnx.qcc.option.linker.ldoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="--stack,16777216"/>
+								</option>
+								<option id="com.qnx.qcc.option.linker.libraries.2100139382" name="Libraries (-l)" superClass="com.qnx.qcc.option.linker.libraries" valueType="libs">
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.1311123190" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -257,7 +508,48 @@
 					</sourceEntries>
 				</configuration>
 			</storageModule>
-			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="doomclassic;com.qnx.qcc.configuration.staticLib.coverage.1130697829" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic/Device-Coverage"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic"/>
+						<entry flags="" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="game-d3xp;com.qnx.qcc.configuration.staticLib.coverage.2093501117" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Device-Coverage"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
+						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="idlib;com.qnx.qcc.configuration.staticLib.coverage.1816727467" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib/Device-Coverage"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib"/>
+						<entry flags="" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="timidity;com.qnx.qcc.configuration.staticLib.coverage.1909168692" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity/Device-Coverage"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity"/>
+						<entry flags="" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+			</storageModule>
 		</cconfiguration>
 		<cconfiguration id="com.qnx.qcc.configuration.exe.debug.673103559">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.exe.debug.673103559" moduleId="org.eclipse.cdt.core.settings" name="Simulator-Debug">
@@ -279,6 +571,14 @@
 								<option id="com.qnx.qcc.option.compiler.optlevel.1070044946" name="Optimization Level" superClass="com.qnx.qcc.option.compiler.optlevel" value="com.qnx.qcc.option.compiler.optlevel.0" valueType="enumerated"/>
 								<option id="com.qnx.qcc.option.compile.debug.351554660" name="Debug (-g)" superClass="com.qnx.qcc.option.compile.debug" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.includePath.486791889" name="Include Directories (-I)" superClass="com.qnx.qcc.option.compiler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/usr/include/freetype2"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/usr/include"/>
 								</option>
@@ -292,18 +592,42 @@
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.783135853" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
 								<option id="com.qnx.qcc.option.assembler.debug.1619722682" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.assembler.includePath.2081188042" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
+								</option>
 								<inputType id="com.qnx.qcc.inputType.assembler.628108239" superClass="com.qnx.qcc.inputType.assembler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.linker.1178831846" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
 								<option id="com.qnx.qcc.option.linker.debug.987668894" name="Debug (-g)" superClass="com.qnx.qcc.option.linker.debug" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.linker.langcpp.894103991" name="C++ (-lang-c++)" superClass="com.qnx.qcc.option.linker.langcpp" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.linker.libraryPaths.949195855" name="Library Paths (-L)" superClass="com.qnx.qcc.option.linker.libraryPaths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/Simulator-Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/Simulator-Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/Simulator-Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/Simulator-Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/lib"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/usr/lib"/>
 								</option>
 								<option id="com.qnx.qcc.option.linker.security.2145279959" name="Enhanced Security (-Wl,-z,relro -Wl,-z,now)" superClass="com.qnx.qcc.option.linker.security" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.linker.ldoptions.832432827" name="Linker Options (-Wl,)" superClass="com.qnx.qcc.option.linker.ldoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="--stack,16777216"/>
+								</option>
+								<option id="com.qnx.qcc.option.linker.libraries.651594070" superClass="com.qnx.qcc.option.linker.libraries" valueType="libs">
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.2061379145" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -318,7 +642,48 @@
 					</sourceEntries>
 				</configuration>
 			</storageModule>
-			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="doomclassic;com.qnx.qcc.configuration.staticLib.debug.1460553566" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic/Simulator-Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic"/>
+						<entry flags="" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="game-d3xp;com.qnx.qcc.configuration.staticLib.debug.2036808040" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Simulator-Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
+						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="idlib;com.qnx.qcc.configuration.staticLib.debug.1977680765" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib/Simulator-Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib"/>
+						<entry flags="" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="timidity;com.qnx.qcc.configuration.staticLib.debug.1566896151" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity/Simulator-Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity"/>
+						<entry flags="" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+			</storageModule>
 		</cconfiguration>
 		<cconfiguration id="com.qnx.qcc.configuration.exe.profile.2074727550">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.exe.profile.2074727550" moduleId="org.eclipse.cdt.core.settings" name="Simulator-Profile">
@@ -341,6 +706,14 @@
 								<option id="com.qnx.qcc.option.compile.debug.1652790950" name="Debug (-g)" superClass="com.qnx.qcc.option.compile.debug" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.profile2.507611281" name="Build for Profiling (Function Instrumentation) (-finstrument-functions)" superClass="com.qnx.qcc.option.compiler.profile2" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.includePath.1594914080" name="Include Directories (-I)" superClass="com.qnx.qcc.option.compiler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/usr/include/freetype2"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/usr/include"/>
 								</option>
@@ -355,6 +728,16 @@
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.1962855" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
 								<option id="com.qnx.qcc.option.assembler.debug.1672073563" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.assembler.includePath.362674240" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
+								</option>
 								<inputType id="com.qnx.qcc.inputType.assembler.1422787161" superClass="com.qnx.qcc.inputType.assembler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.linker.1178351199" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
@@ -362,12 +745,26 @@
 								<option id="com.qnx.qcc.option.linker.profile2.116778519" name="Build for Profiling (Function Instrumentation) (-lprofiling)" superClass="com.qnx.qcc.option.linker.profile2" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.linker.langcpp.770069943" name="C++ (-lang-c++)" superClass="com.qnx.qcc.option.linker.langcpp" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.linker.libraryPaths.2109003705" name="Library Paths (-L)" superClass="com.qnx.qcc.option.linker.libraryPaths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/Simulator-Profile}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/Simulator-Profile}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/Simulator-Profile}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/Simulator-Profile}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/lib"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/usr/lib"/>
 								</option>
 								<option id="com.qnx.qcc.option.linker.security.655703256" name="Enhanced Security (-Wl,-z,relro -Wl,-z,now)" superClass="com.qnx.qcc.option.linker.security" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.linker.ldoptions.518768556" name="Linker Options (-Wl,)" superClass="com.qnx.qcc.option.linker.ldoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="--stack,16777216"/>
+								</option>
+								<option id="com.qnx.qcc.option.linker.libraries.1138562894" name="Libraries (-l)" superClass="com.qnx.qcc.option.linker.libraries" valueType="libs">
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.324631596" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -382,7 +779,48 @@
 					</sourceEntries>
 				</configuration>
 			</storageModule>
-			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="doomclassic;com.qnx.qcc.configuration.staticLib.profile.524194208" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic/Simulator-Profile"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic"/>
+						<entry flags="" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="game-d3xp;com.qnx.qcc.configuration.staticLib.profile.834045505" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Simulator-Profile"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
+						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="idlib;com.qnx.qcc.configuration.staticLib.profile.1835418854" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib/Simulator-Profile"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib"/>
+						<entry flags="" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="timidity;com.qnx.qcc.configuration.staticLib.profile.285955322" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity/Simulator-Profile"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity"/>
+						<entry flags="" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+			</storageModule>
 		</cconfiguration>
 		<cconfiguration id="com.qnx.qcc.configuration.exe.profile.coverage.1197712012">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.exe.profile.coverage.1197712012" moduleId="org.eclipse.cdt.core.settings" name="Simulator-Coverage">
@@ -405,6 +843,14 @@
 								<option id="com.qnx.qcc.option.compile.debug.1393940936" name="Debug (-g)" superClass="com.qnx.qcc.option.compile.debug" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.coverage.2108872759" name="Build for Code Coverage (-Wc,-ftest-coverage -Wc,-fprofile-arcs)" superClass="com.qnx.qcc.option.compiler.coverage" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.includePath.785738238" name="Include Directories (-I)" superClass="com.qnx.qcc.option.compiler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/usr/include/freetype2"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/usr/include"/>
 								</option>
@@ -418,6 +864,16 @@
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.833733744" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
 								<option id="com.qnx.qcc.option.assembler.debug.573032209" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.assembler.includePath.1076924770" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
+								</option>
 								<inputType id="com.qnx.qcc.inputType.assembler.1653337371" superClass="com.qnx.qcc.inputType.assembler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.linker.1530890953" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
@@ -425,12 +881,26 @@
 								<option id="com.qnx.qcc.option.linker.coverage.463393583" name="Build for Code Coverage (-ftest-coverage -fprofile-arcs)" superClass="com.qnx.qcc.option.linker.coverage" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.linker.langcpp.2017473875" name="C++ (-lang-c++)" superClass="com.qnx.qcc.option.linker.langcpp" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.linker.libraryPaths.271823635" name="Library Paths (-L)" superClass="com.qnx.qcc.option.linker.libraryPaths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/Simulator-Coverage}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/Simulator-Coverage}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/Simulator-Coverage}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/Simulator-Coverage}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/lib"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/usr/lib"/>
 								</option>
 								<option id="com.qnx.qcc.option.linker.security.512451649" name="Enhanced Security (-Wl,-z,relro -Wl,-z,now)" superClass="com.qnx.qcc.option.linker.security" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.linker.ldoptions.738229542" name="Linker Options (-Wl,)" superClass="com.qnx.qcc.option.linker.ldoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="--stack,16777216"/>
+								</option>
+								<option id="com.qnx.qcc.option.linker.libraries.318323226" superClass="com.qnx.qcc.option.linker.libraries" valueType="libs">
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.809873610" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -445,7 +915,48 @@
 					</sourceEntries>
 				</configuration>
 			</storageModule>
-			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="doomclassic;com.qnx.qcc.configuration.staticLib.coverage.1610282172" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic/Simulator-Coverage"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic"/>
+						<entry flags="" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="game-d3xp;com.qnx.qcc.configuration.staticLib.coverage.935600147" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Simulator-Coverage"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
+						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="idlib;com.qnx.qcc.configuration.staticLib.coverage.1195038568" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib/Simulator-Coverage"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib"/>
+						<entry flags="" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="timidity;com.qnx.qcc.configuration.staticLib.coverage.344881044" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity/Simulator-Coverage"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity"/>
+						<entry flags="" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+			</storageModule>
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -476,4 +987,5 @@
 		</scannerConfigBuildInfo>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope"/>
 </cproject>

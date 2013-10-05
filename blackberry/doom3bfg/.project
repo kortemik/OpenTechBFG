@@ -3,6 +3,10 @@
 	<name>doom3bfg</name>
 	<comment></comment>
 	<projects>
+		<project>doomclassic</project>
+		<project>game-d3xp</project>
+		<project>idlib</project>
+		<project>timidity</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
