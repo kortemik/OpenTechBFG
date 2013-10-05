@@ -24,14 +24,6 @@
 								<option id="com.qnx.qcc.option.compiler.optlevel.606249619" name="Optimization Level" superClass="com.qnx.qcc.option.compiler.optlevel" value="com.qnx.qcc.option.compiler.optlevel.0" valueType="enumerated"/>
 								<option id="com.qnx.qcc.option.compile.debug.1102520540" name="Debug (-g)" superClass="com.qnx.qcc.option.compile.debug" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.includePath.1270487287" name="Include Directories (-I)" superClass="com.qnx.qcc.option.compiler.includePath" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/usr/include/freetype2"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/usr/include"/>
 								</option>
@@ -45,16 +37,7 @@
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.696761276" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
 								<option id="com.qnx.qcc.option.assembler.debug.1946642777" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
-								<option id="com.qnx.qcc.option.assembler.includePath.504940173" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
-								</option>
+								<option id="com.qnx.qcc.option.assembler.includePath.504940173" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath"/>
 								<inputType id="com.qnx.qcc.inputType.assembler.903401021" superClass="com.qnx.qcc.inputType.assembler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.linker.391464981" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
@@ -91,7 +74,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+						<entry excluding="framework/precompiled.cpp|renderer/jobs/dynamicshadowvolume/DynamicShadowVolume.cpp|renderer/jobs/prelightshadowvolume/PreLightShadowVolume.cpp|renderer/jobs/staticshadowvolume/StaticShadowVolume.cpp|renderer/jobs/ShadowShared.cpp" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -158,14 +141,6 @@
 							<tool id="com.qnx.qcc.tool.compiler.1727028790" name="QCC Compiler" superClass="com.qnx.qcc.tool.compiler">
 								<option id="com.qnx.qcc.option.compiler.optlevel.1606441570" name="Optimization Level" superClass="com.qnx.qcc.option.compiler.optlevel" value="com.qnx.qcc.option.compiler.optlevel.2" valueType="enumerated"/>
 								<option id="com.qnx.qcc.option.compiler.includePath.1533247163" name="Include Directories (-I)" superClass="com.qnx.qcc.option.compiler.includePath" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/usr/include/freetype2"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/usr/include"/>
 								</option>
@@ -183,16 +158,7 @@
 								<inputType id="com.qnx.qcc.inputType.compiler.516975726" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.1112417811" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
-								<option id="com.qnx.qcc.option.assembler.includePath.148947521" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
-								</option>
+								<option id="com.qnx.qcc.option.assembler.includePath.148947521" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath"/>
 								<inputType id="com.qnx.qcc.inputType.assembler.2067695334" superClass="com.qnx.qcc.inputType.assembler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.linker.1033414609" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
@@ -214,7 +180,7 @@
 								<option id="com.qnx.qcc.option.linker.ldoptions.859079374" name="Linker Options (-Wl,)" superClass="com.qnx.qcc.option.linker.ldoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="--stack,16777216"/>
 								</option>
-								<option id="com.qnx.qcc.option.linker.libraries.548011228" superClass="com.qnx.qcc.option.linker.libraries" valueType="libs">
+								<option id="com.qnx.qcc.option.linker.libraries.548011228" name="Libraries (-l)" superClass="com.qnx.qcc.option.linker.libraries" valueType="libs">
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
@@ -298,14 +264,6 @@
 								<option id="com.qnx.qcc.option.compile.debug.1831455380" name="Debug (-g)" superClass="com.qnx.qcc.option.compile.debug" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.profile2.229573887" name="Build for Profiling (Function Instrumentation) (-finstrument-functions)" superClass="com.qnx.qcc.option.compiler.profile2" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.includePath.220027778" name="Include Directories (-I)" superClass="com.qnx.qcc.option.compiler.includePath" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/usr/include/freetype2"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/usr/include"/>
 								</option>
@@ -320,16 +278,7 @@
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.1689250883" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
 								<option id="com.qnx.qcc.option.assembler.debug.1370087959" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
-								<option id="com.qnx.qcc.option.assembler.includePath.377916409" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
-								</option>
+								<option id="com.qnx.qcc.option.assembler.includePath.377916409" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath"/>
 								<inputType id="com.qnx.qcc.inputType.assembler.1060837818" superClass="com.qnx.qcc.inputType.assembler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.linker.1996229796" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
@@ -436,14 +385,6 @@
 								<option id="com.qnx.qcc.option.compile.debug.339539" name="Debug (-g)" superClass="com.qnx.qcc.option.compile.debug" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.coverage.1611303637" name="Build for Code Coverage (-Wc,-ftest-coverage -Wc,-fprofile-arcs)" superClass="com.qnx.qcc.option.compiler.coverage" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.includePath.492600768" name="Include Directories (-I)" superClass="com.qnx.qcc.option.compiler.includePath" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/usr/include/freetype2"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/usr/include"/>
 								</option>
@@ -457,16 +398,7 @@
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.1194282320" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
 								<option id="com.qnx.qcc.option.assembler.debug.1550474903" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
-								<option id="com.qnx.qcc.option.assembler.includePath.969645387" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
-								</option>
+								<option id="com.qnx.qcc.option.assembler.includePath.969645387" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath"/>
 								<inputType id="com.qnx.qcc.inputType.assembler.1360064080" superClass="com.qnx.qcc.inputType.assembler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.linker.700771273" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
@@ -571,14 +503,6 @@
 								<option id="com.qnx.qcc.option.compiler.optlevel.1070044946" name="Optimization Level" superClass="com.qnx.qcc.option.compiler.optlevel" value="com.qnx.qcc.option.compiler.optlevel.0" valueType="enumerated"/>
 								<option id="com.qnx.qcc.option.compile.debug.351554660" name="Debug (-g)" superClass="com.qnx.qcc.option.compile.debug" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.includePath.486791889" name="Include Directories (-I)" superClass="com.qnx.qcc.option.compiler.includePath" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/usr/include/freetype2"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/usr/include"/>
 								</option>
@@ -592,16 +516,7 @@
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.783135853" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
 								<option id="com.qnx.qcc.option.assembler.debug.1619722682" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
-								<option id="com.qnx.qcc.option.assembler.includePath.2081188042" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
-								</option>
+								<option id="com.qnx.qcc.option.assembler.includePath.2081188042" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath"/>
 								<inputType id="com.qnx.qcc.inputType.assembler.628108239" superClass="com.qnx.qcc.inputType.assembler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.linker.1178831846" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
@@ -623,7 +538,7 @@
 								<option id="com.qnx.qcc.option.linker.ldoptions.832432827" name="Linker Options (-Wl,)" superClass="com.qnx.qcc.option.linker.ldoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="--stack,16777216"/>
 								</option>
-								<option id="com.qnx.qcc.option.linker.libraries.651594070" superClass="com.qnx.qcc.option.linker.libraries" valueType="libs">
+								<option id="com.qnx.qcc.option.linker.libraries.651594070" name="Libraries (-l)" superClass="com.qnx.qcc.option.linker.libraries" valueType="libs">
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
@@ -706,14 +621,6 @@
 								<option id="com.qnx.qcc.option.compile.debug.1652790950" name="Debug (-g)" superClass="com.qnx.qcc.option.compile.debug" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.profile2.507611281" name="Build for Profiling (Function Instrumentation) (-finstrument-functions)" superClass="com.qnx.qcc.option.compiler.profile2" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.includePath.1594914080" name="Include Directories (-I)" superClass="com.qnx.qcc.option.compiler.includePath" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/usr/include/freetype2"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/usr/include"/>
 								</option>
@@ -728,16 +635,7 @@
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.1962855" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
 								<option id="com.qnx.qcc.option.assembler.debug.1672073563" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
-								<option id="com.qnx.qcc.option.assembler.includePath.362674240" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
-								</option>
+								<option id="com.qnx.qcc.option.assembler.includePath.362674240" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath"/>
 								<inputType id="com.qnx.qcc.inputType.assembler.1422787161" superClass="com.qnx.qcc.inputType.assembler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.linker.1178351199" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
@@ -843,14 +741,6 @@
 								<option id="com.qnx.qcc.option.compile.debug.1393940936" name="Debug (-g)" superClass="com.qnx.qcc.option.compile.debug" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.coverage.2108872759" name="Build for Code Coverage (-Wc,-ftest-coverage -Wc,-fprofile-arcs)" superClass="com.qnx.qcc.option.compiler.coverage" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.includePath.785738238" name="Include Directories (-I)" superClass="com.qnx.qcc.option.compiler.includePath" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/usr/include/freetype2"/>
 									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/usr/include"/>
 								</option>
@@ -864,16 +754,7 @@
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.833733744" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
 								<option id="com.qnx.qcc.option.assembler.debug.573032209" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
-								<option id="com.qnx.qcc.option.assembler.includePath.1076924770" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/timidity}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/idlib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/game-d3xp}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic/public}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/doomclassic}&quot;"/>
-								</option>
+								<option id="com.qnx.qcc.option.assembler.includePath.1076924770" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath"/>
 								<inputType id="com.qnx.qcc.inputType.assembler.1653337371" superClass="com.qnx.qcc.inputType.assembler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.linker.1530890953" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
@@ -896,7 +777,7 @@
 								<option id="com.qnx.qcc.option.linker.ldoptions.738229542" name="Linker Options (-Wl,)" superClass="com.qnx.qcc.option.linker.ldoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="--stack,16777216"/>
 								</option>
-								<option id="com.qnx.qcc.option.linker.libraries.318323226" superClass="com.qnx.qcc.option.linker.libraries" valueType="libs">
+								<option id="com.qnx.qcc.option.linker.libraries.318323226" name="Libraries (-l)" superClass="com.qnx.qcc.option.linker.libraries" valueType="libs">
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
