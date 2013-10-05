@@ -1,0 +1,872 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?>
+
+<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="com.qnx.qcc.configuration.staticLib.debug.1258582821">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.staticLib.debug.1258582821" moduleId="org.eclipse.cdt.core.settings" name="Device-Debug">
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Device-Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
+						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<extensions>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" description="" id="com.qnx.qcc.configuration.staticLib.debug.1258582821" name="Device-Debug" parent="com.qnx.qcc.configuration.staticLib.debug">
+					<folderInfo id="com.qnx.qcc.configuration.staticLib.debug.1258582821." name="/" resourcePath="">
+						<toolChain id="com.qnx.qcc.toolChain.staticLib.debug.299862657" name="QNX QCC" superClass="com.qnx.qcc.toolChain">
+							<option id="com.qnx.qcc.option.cpu.1387263786" name="Target CPU:" superClass="com.qnx.qcc.option.cpu" value="com.qnx.qcc.option.gen.cpu.armle-v7" valueType="enumerated"/>
+							<targetPlatform archList="all" binaryParser="com.qnx.tools.ide.qde.core.QDEBynaryParser" id="com.qnx.qcc.targetPlatform.2003480233" osList="all" superClass="com.qnx.qcc.targetPlatform"/>
+							<builder buildPath="${workspace_loc:/game-d3xp}/Device-Debug" id="com.qnx.nto.1906393387" keepEnvironmentInBuildfile="false" name="CDT Internal Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="com.qnx.nto"/>
+							<tool id="com.qnx.qcc.tool.compiler.129860098" name="QCC Compiler" superClass="com.qnx.qcc.tool.compiler">
+								<option id="com.qnx.qcc.option.compiler.optlevel.87494896" name="Optimization Level" superClass="com.qnx.qcc.option.compiler.optlevel" value="com.qnx.qcc.option.compiler.optlevel.0" valueType="enumerated"/>
+								<option id="com.qnx.qcc.option.compile.debug.2066613522" name="Debug (-g)" superClass="com.qnx.qcc.option.compile.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.compiler.includePath.2039738476" name="Include Directories (-I)" superClass="com.qnx.qcc.option.compiler.includePath"/>
+								<option id="com.qnx.qcc.option.compiler.security.1166443773" name="Enhanced Security (-fstack-protector-strong)" superClass="com.qnx.qcc.option.compiler.security" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.compiler.defines.42177985" name="Defines (-D)" superClass="com.qnx.qcc.option.compiler.defines" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
+									<listOptionValue builtIn="false" value="__DOOM__"/>
+									<listOptionValue builtIn="false" value="_D3XP"/>
+									<listOptionValue builtIn="false" value="CTF"/>
+									<listOptionValue builtIn="false" value="_DEBUG"/>
+								</option>
+								<inputType id="com.qnx.qcc.inputType.compiler.132165498" superClass="com.qnx.qcc.inputType.compiler"/>
+							</tool>
+							<tool id="com.qnx.qcc.tool.assembler.2106347317" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
+								<option id="com.qnx.qcc.option.assembler.debug.1575205507" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.assembler.includePath.100437091" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${QNX_TARGET}/usr/include/freetype2&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QNX_TARGET}/../target-override/usr/include&quot;"/>
+								</option>
+								<option id="com.qnx.qcc.option.assembler.defines.1623434669" name="Defines (-D)" superClass="com.qnx.qcc.option.assembler.defines" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
+								</option>
+								<inputType id="com.qnx.qcc.inputType.assembler.790863626" superClass="com.qnx.qcc.inputType.assembler"/>
+							</tool>
+							<tool id="com.qnx.qcc.tool.linker.1815344780" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
+								<option id="com.qnx.qcc.option.linker.debug.1171688052" name="Debug (-g)" superClass="com.qnx.qcc.option.linker.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.linker.langcpp.2051697656" name="C++ (-lang-c++)" superClass="com.qnx.qcc.option.linker.langcpp" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.linker.libraryPaths.544090093" name="Library Paths (-L)" superClass="com.qnx.qcc.option.linker.libraryPaths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/lib"/>
+									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/usr/lib"/>
+								</option>
+								<option id="com.qnx.qcc.option.linker.security.687112475" name="Enhanced Security (-Wl,-z,relro -Wl,-z,now)" superClass="com.qnx.qcc.option.linker.security" value="true" valueType="boolean"/>
+							</tool>
+							<tool id="com.qnx.qcc.tool.archiver.1173053207" name="QCC Archiver" superClass="com.qnx.qcc.tool.archiver"/>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+					</sourceEntries>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="com.qnx.qcc.configuration.staticLib.release.1393510121">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.staticLib.release.1393510121" moduleId="org.eclipse.cdt.core.settings" name="Device-Release">
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Device-Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
+						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<extensions>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" description="" id="com.qnx.qcc.configuration.staticLib.release.1393510121" name="Device-Release" parent="com.qnx.qcc.configuration.staticLib.release">
+					<folderInfo id="com.qnx.qcc.configuration.staticLib.release.1393510121." name="/" resourcePath="">
+						<toolChain id="com.qnx.qcc.toolChain.staticLib.release.1103655093" name="QNX QCC" superClass="com.qnx.qcc.toolChain">
+							<option id="com.qnx.qcc.option.cpu.716103288" name="Target CPU:" superClass="com.qnx.qcc.option.cpu" value="com.qnx.qcc.option.gen.cpu.armle-v7" valueType="enumerated"/>
+							<targetPlatform archList="all" binaryParser="com.qnx.tools.ide.qde.core.QDEBynaryParser" id="com.qnx.qcc.targetPlatform.452951027" osList="all" superClass="com.qnx.qcc.targetPlatform"/>
+							<builder buildPath="${workspace_loc:/game-d3xp}/Device-Release" id="com.qnx.nto.1558072563" keepEnvironmentInBuildfile="false" name="CDT Internal Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="com.qnx.nto"/>
+							<tool id="com.qnx.qcc.tool.compiler.851654842" name="QCC Compiler" superClass="com.qnx.qcc.tool.compiler">
+								<option id="com.qnx.qcc.option.compiler.optlevel.1759466653" name="Optimization Level" superClass="com.qnx.qcc.option.compiler.optlevel" value="com.qnx.qcc.option.compiler.optlevel.2" valueType="enumerated"/>
+								<option id="com.qnx.qcc.option.compiler.includePath.718138933" name="Include Directories (-I)" superClass="com.qnx.qcc.option.compiler.includePath"/>
+								<option id="com.qnx.qcc.option.compiler.security.1076154336" name="Enhanced Security (-fstack-protector-strong)" superClass="com.qnx.qcc.option.compiler.security" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.compiler.defines.1736455373" name="Defines (-D)" superClass="com.qnx.qcc.option.compiler.defines" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__DBL_MIN__=double(2.2250738585072014e-308L)"/>
+									<listOptionValue builtIn="false" value="__DBL_DENORM_MIN__=double(4.9406564584124654e-324L)"/>
+									<listOptionValue builtIn="false" value="__DBL_MAX__=double(1.7976931348623157e+308L)"/>
+									<listOptionValue builtIn="false" value="__GXX_WEAK__=1"/>
+									<listOptionValue builtIn="false" value="__GNUG__=4"/>
+									<listOptionValue builtIn="false" value="__cplusplus=1"/>
+									<listOptionValue builtIn="false" value="__EXCEPTIONS=1"/>
+									<listOptionValue builtIn="false" value="__DEPRECATED=1"/>
+									<listOptionValue builtIn="false" value="__DBL_EPSILON__=double(2.2204460492503131e-16L)"/>
+									<listOptionValue builtIn="false" value="__GXX_RTTI=1"/>
+									<listOptionValue builtIn="false" value="__WCHAR_UNSIGNED__=1"/>
+									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
+									<listOptionValue builtIn="false" value="__DOOM__"/>
+									<listOptionValue builtIn="false" value="_D3XP"/>
+									<listOptionValue builtIn="false" value="CTF"/>
+									<listOptionValue builtIn="false" value="NDEBUG"/>
+									<listOptionValue builtIn="false" value="ID_RETAIL"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.pie.796994145" name="Position Independent Executable (-fPIE)" superClass="com.qnx.qcc.option.compiler.pie" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.compiler.qccoptions.568461763" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-frecord-gcc-switches"/>
+								</option>
+								<inputType id="com.qnx.qcc.inputType.compiler.1846122860" superClass="com.qnx.qcc.inputType.compiler"/>
+							</tool>
+							<tool id="com.qnx.qcc.tool.assembler.1198744354" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
+								<option id="com.qnx.qcc.option.assembler.includePath.1630316511" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${QNX_TARGET}/usr/include/freetype2&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QNX_TARGET}/../target-override/usr/include&quot;"/>
+								</option>
+								<option id="com.qnx.qcc.option.assembler.defines.282445900" name="Defines (-D)" superClass="com.qnx.qcc.option.assembler.defines" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
+									<listOptionValue builtIn="false" value="__DBL_MIN__=double(2.2250738585072014e-308L)"/>
+									<listOptionValue builtIn="false" value="__DBL_DENORM_MIN__=double(4.9406564584124654e-324L)"/>
+									<listOptionValue builtIn="false" value="__DBL_MAX__=double(1.7976931348623157e+308L)"/>
+									<listOptionValue builtIn="false" value="__GXX_WEAK__=1"/>
+									<listOptionValue builtIn="false" value="__GNUG__=4"/>
+									<listOptionValue builtIn="false" value="__cplusplus=1"/>
+									<listOptionValue builtIn="false" value="__EXCEPTIONS=1"/>
+									<listOptionValue builtIn="false" value="__DEPRECATED=1"/>
+									<listOptionValue builtIn="false" value="__DBL_EPSILON__=double(2.2204460492503131e-16L)"/>
+									<listOptionValue builtIn="false" value="__GXX_RTTI=1"/>
+									<listOptionValue builtIn="false" value="__WCHAR_UNSIGNED__=1"/>
+								</option>
+								<inputType id="com.qnx.qcc.inputType.assembler.466297050" superClass="com.qnx.qcc.inputType.assembler"/>
+							</tool>
+							<tool id="com.qnx.qcc.tool.linker.1703394505" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
+								<option id="com.qnx.qcc.option.linker.langcpp.531011970" name="C++ (-lang-c++)" superClass="com.qnx.qcc.option.linker.langcpp" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.linker.libraryPaths.858275489" name="Library Paths (-L)" superClass="com.qnx.qcc.option.linker.libraryPaths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/lib"/>
+									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/usr/lib"/>
+								</option>
+								<option id="com.qnx.qcc.option.linker.security.1427191703" name="Enhanced Security (-Wl,-z,relro -Wl,-z,now)" superClass="com.qnx.qcc.option.linker.security" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.linker.pie.1570199903" name="Position Independent Executable (-pie)" superClass="com.qnx.qcc.option.linker.pie" value="true" valueType="boolean"/>
+							</tool>
+							<tool id="com.qnx.qcc.tool.archiver.684839062" name="QCC Archiver" superClass="com.qnx.qcc.tool.archiver"/>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+					</sourceEntries>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="com.qnx.qcc.configuration.staticLib.profile.924383944">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.staticLib.profile.924383944" moduleId="org.eclipse.cdt.core.settings" name="Device-Profile">
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Device-Profile"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
+						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<extensions>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildType=com.qnx.buildType.profile,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" description="Build for Profiling" id="com.qnx.qcc.configuration.staticLib.profile.924383944" name="Device-Profile" parent="com.qnx.qcc.configuration.staticLib.profile">
+					<folderInfo id="com.qnx.qcc.configuration.staticLib.profile.924383944." name="/" resourcePath="">
+						<toolChain id="com.qnx.qcc.toolChain.staticLib.profile.54867828" name="QNX QCC" superClass="com.qnx.qcc.toolChain">
+							<option id="com.qnx.qcc.option.cpu.1418818922" name="Target CPU:" superClass="com.qnx.qcc.option.cpu" value="com.qnx.qcc.option.gen.cpu.armle-v7" valueType="enumerated"/>
+							<targetPlatform archList="all" binaryParser="com.qnx.tools.ide.qde.core.QDEBynaryParser" id="com.qnx.qcc.targetPlatform.1278275465" osList="all" superClass="com.qnx.qcc.targetPlatform"/>
+							<builder buildPath="${workspace_loc:/game-d3xp}/Device-Profile" id="com.qnx.nto.1327553969" keepEnvironmentInBuildfile="false" name="CDT Internal Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="com.qnx.nto"/>
+							<tool id="com.qnx.qcc.tool.compiler.920984011" name="QCC Compiler" superClass="com.qnx.qcc.tool.compiler">
+								<option id="com.qnx.qcc.option.compiler.optlevel.1498176581" name="Optimization Level" superClass="com.qnx.qcc.option.compiler.optlevel" value="com.qnx.qcc.option.compiler.optlevel.0" valueType="enumerated"/>
+								<option id="com.qnx.qcc.option.compile.debug.1162693199" name="Debug (-g)" superClass="com.qnx.qcc.option.compile.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.compiler.profile2.449983707" name="Build for Profiling (Function Instrumentation) (-finstrument-functions)" superClass="com.qnx.qcc.option.compiler.profile2" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.compiler.includePath.1004151477" name="Include Directories (-I)" superClass="com.qnx.qcc.option.compiler.includePath"/>
+								<option id="com.qnx.qcc.option.compiler.security.1844813315" name="Enhanced Security (-fstack-protector-strong)" superClass="com.qnx.qcc.option.compiler.security" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.compiler.defines.707990529" name="Defines (-D)" superClass="com.qnx.qcc.option.compiler.defines" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__DBL_MIN__=double(2.2250738585072014e-308L)"/>
+									<listOptionValue builtIn="false" value="__DBL_DENORM_MIN__=double(4.9406564584124654e-324L)"/>
+									<listOptionValue builtIn="false" value="__DBL_MAX__=double(1.7976931348623157e+308L)"/>
+									<listOptionValue builtIn="false" value="__GXX_WEAK__=1"/>
+									<listOptionValue builtIn="false" value="__GNUG__=4"/>
+									<listOptionValue builtIn="false" value="__cplusplus=1"/>
+									<listOptionValue builtIn="false" value="__EXCEPTIONS=1"/>
+									<listOptionValue builtIn="false" value="__DEPRECATED=1"/>
+									<listOptionValue builtIn="false" value="__DBL_EPSILON__=double(2.2204460492503131e-16L)"/>
+									<listOptionValue builtIn="false" value="__GXX_RTTI=1"/>
+									<listOptionValue builtIn="false" value="__WCHAR_UNSIGNED__=1"/>
+									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
+									<listOptionValue builtIn="false" value="__DOOM__"/>
+									<listOptionValue builtIn="false" value="_D3XP"/>
+									<listOptionValue builtIn="false" value="CTF"/>
+									<listOptionValue builtIn="false" value="_DEBUG"/>
+									<listOptionValue builtIn="false" value="_INLINEDEBUG"/>
+								</option>
+								<inputType id="com.qnx.qcc.inputType.compiler.1624445506" superClass="com.qnx.qcc.inputType.compiler"/>
+							</tool>
+							<tool id="com.qnx.qcc.tool.assembler.1507724437" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
+								<option id="com.qnx.qcc.option.assembler.debug.75012313" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.assembler.includePath.16140522" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${QNX_TARGET}/usr/include/freetype2&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QNX_TARGET}/../target-override/usr/include&quot;"/>
+								</option>
+								<option id="com.qnx.qcc.option.assembler.defines.861494380" name="Defines (-D)" superClass="com.qnx.qcc.option.assembler.defines" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
+									<listOptionValue builtIn="false" value="__DBL_MIN__=double(2.2250738585072014e-308L)"/>
+									<listOptionValue builtIn="false" value="__DBL_DENORM_MIN__=double(4.9406564584124654e-324L)"/>
+									<listOptionValue builtIn="false" value="__DBL_MAX__=double(1.7976931348623157e+308L)"/>
+									<listOptionValue builtIn="false" value="__GXX_WEAK__=1"/>
+									<listOptionValue builtIn="false" value="__GNUG__=4"/>
+									<listOptionValue builtIn="false" value="__cplusplus=1"/>
+									<listOptionValue builtIn="false" value="__EXCEPTIONS=1"/>
+									<listOptionValue builtIn="false" value="__DEPRECATED=1"/>
+									<listOptionValue builtIn="false" value="__DBL_EPSILON__=double(2.2204460492503131e-16L)"/>
+									<listOptionValue builtIn="false" value="__GXX_RTTI=1"/>
+									<listOptionValue builtIn="false" value="__WCHAR_UNSIGNED__=1"/>
+								</option>
+								<inputType id="com.qnx.qcc.inputType.assembler.1295762872" superClass="com.qnx.qcc.inputType.assembler"/>
+							</tool>
+							<tool id="com.qnx.qcc.tool.linker.996702387" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
+								<option id="com.qnx.qcc.option.linker.debug.980276424" name="Debug (-g)" superClass="com.qnx.qcc.option.linker.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.linker.profile2.1510031762" name="Build for Profiling (Function Instrumentation) (-lprofiling)" superClass="com.qnx.qcc.option.linker.profile2" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.linker.langcpp.1145104058" name="C++ (-lang-c++)" superClass="com.qnx.qcc.option.linker.langcpp" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.linker.libraryPaths.292415758" name="Library Paths (-L)" superClass="com.qnx.qcc.option.linker.libraryPaths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/lib"/>
+									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/usr/lib"/>
+								</option>
+								<option id="com.qnx.qcc.option.linker.security.754630705" name="Enhanced Security (-Wl,-z,relro -Wl,-z,now)" superClass="com.qnx.qcc.option.linker.security" value="true" valueType="boolean"/>
+							</tool>
+							<tool id="com.qnx.qcc.tool.archiver.2104742128" name="QCC Archiver" superClass="com.qnx.qcc.tool.archiver"/>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+					</sourceEntries>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="com.qnx.qcc.configuration.staticLib.coverage.2093501117">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.staticLib.coverage.2093501117" moduleId="org.eclipse.cdt.core.settings" name="Device-Coverage">
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Device-Coverage"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
+						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<extensions>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildType=com.qnx.buildType.coverage,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" description="Build with Code Coverage" id="com.qnx.qcc.configuration.staticLib.coverage.2093501117" name="Device-Coverage" parent="com.qnx.qcc.configuration.staticLib.coverage">
+					<folderInfo id="com.qnx.qcc.configuration.staticLib.coverage.2093501117." name="/" resourcePath="">
+						<toolChain id="com.qnx.qcc.toolChain.staticLib.coverage.1592370144" name="QNX QCC" superClass="com.qnx.qcc.toolChain">
+							<option id="com.qnx.qcc.option.cpu.783461771" name="Target CPU:" superClass="com.qnx.qcc.option.cpu" value="com.qnx.qcc.option.gen.cpu.armle-v7" valueType="enumerated"/>
+							<targetPlatform archList="all" binaryParser="com.qnx.tools.ide.qde.core.QDEBynaryParser" id="com.qnx.qcc.targetPlatform.1890159909" osList="all" superClass="com.qnx.qcc.targetPlatform"/>
+							<builder buildPath="${workspace_loc:/game-d3xp}/Device-Coverage" id="com.qnx.nto.1298432690" keepEnvironmentInBuildfile="false" name="CDT Internal Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="com.qnx.nto"/>
+							<tool id="com.qnx.qcc.tool.compiler.1771620316" name="QCC Compiler" superClass="com.qnx.qcc.tool.compiler">
+								<option id="com.qnx.qcc.option.compiler.optlevel.1965234084" name="Optimization Level" superClass="com.qnx.qcc.option.compiler.optlevel" value="com.qnx.qcc.option.compiler.optlevel.0" valueType="enumerated"/>
+								<option id="com.qnx.qcc.option.compile.debug.1289389039" name="Debug (-g)" superClass="com.qnx.qcc.option.compile.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.compiler.coverage.658545298" name="Build for Code Coverage (-Wc,-ftest-coverage -Wc,-fprofile-arcs)" superClass="com.qnx.qcc.option.compiler.coverage" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.compiler.includePath.2093858403" name="Include Directories (-I)" superClass="com.qnx.qcc.option.compiler.includePath"/>
+								<option id="com.qnx.qcc.option.compiler.security.299701133" name="Enhanced Security (-fstack-protector-strong)" superClass="com.qnx.qcc.option.compiler.security" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.compiler.defines.441966020" name="Defines (-D)" superClass="com.qnx.qcc.option.compiler.defines" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__DBL_MIN__=double(2.2250738585072014e-308L)"/>
+									<listOptionValue builtIn="false" value="__DBL_DENORM_MIN__=double(4.9406564584124654e-324L)"/>
+									<listOptionValue builtIn="false" value="__DBL_MAX__=double(1.7976931348623157e+308L)"/>
+									<listOptionValue builtIn="false" value="__GXX_WEAK__=1"/>
+									<listOptionValue builtIn="false" value="__GNUG__=4"/>
+									<listOptionValue builtIn="false" value="__cplusplus=1"/>
+									<listOptionValue builtIn="false" value="__EXCEPTIONS=1"/>
+									<listOptionValue builtIn="false" value="__DEPRECATED=1"/>
+									<listOptionValue builtIn="false" value="__DBL_EPSILON__=double(2.2204460492503131e-16L)"/>
+									<listOptionValue builtIn="false" value="__GXX_RTTI=1"/>
+									<listOptionValue builtIn="false" value="__WCHAR_UNSIGNED__=1"/>
+									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
+									<listOptionValue builtIn="false" value="__DOOM__"/>
+									<listOptionValue builtIn="false" value="_D3XP"/>
+									<listOptionValue builtIn="false" value="CTF"/>
+									<listOptionValue builtIn="false" value="_DEBUG"/>
+								</option>
+								<inputType id="com.qnx.qcc.inputType.compiler.1905752695" superClass="com.qnx.qcc.inputType.compiler"/>
+							</tool>
+							<tool id="com.qnx.qcc.tool.assembler.1966434198" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
+								<option id="com.qnx.qcc.option.assembler.debug.1339302167" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.assembler.includePath.2075279780" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${QNX_TARGET}/usr/include/freetype2&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QNX_TARGET}/../target-override/usr/include&quot;"/>
+								</option>
+								<option id="com.qnx.qcc.option.assembler.defines.1339470222" name="Defines (-D)" superClass="com.qnx.qcc.option.assembler.defines" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
+									<listOptionValue builtIn="false" value="__DBL_MIN__=double(2.2250738585072014e-308L)"/>
+									<listOptionValue builtIn="false" value="__DBL_DENORM_MIN__=double(4.9406564584124654e-324L)"/>
+									<listOptionValue builtIn="false" value="__DBL_MAX__=double(1.7976931348623157e+308L)"/>
+									<listOptionValue builtIn="false" value="__GXX_WEAK__=1"/>
+									<listOptionValue builtIn="false" value="__GNUG__=4"/>
+									<listOptionValue builtIn="false" value="__cplusplus=1"/>
+									<listOptionValue builtIn="false" value="__EXCEPTIONS=1"/>
+									<listOptionValue builtIn="false" value="__DEPRECATED=1"/>
+									<listOptionValue builtIn="false" value="__DBL_EPSILON__=double(2.2204460492503131e-16L)"/>
+									<listOptionValue builtIn="false" value="__GXX_RTTI=1"/>
+									<listOptionValue builtIn="false" value="__WCHAR_UNSIGNED__=1"/>
+								</option>
+								<inputType id="com.qnx.qcc.inputType.assembler.1536624508" superClass="com.qnx.qcc.inputType.assembler"/>
+							</tool>
+							<tool id="com.qnx.qcc.tool.linker.1761925515" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
+								<option id="com.qnx.qcc.option.linker.debug.1142705245" name="Debug (-g)" superClass="com.qnx.qcc.option.linker.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.linker.coverage.1851180632" name="Build for Code Coverage (-ftest-coverage -fprofile-arcs)" superClass="com.qnx.qcc.option.linker.coverage" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.linker.langcpp.1807209353" name="C++ (-lang-c++)" superClass="com.qnx.qcc.option.linker.langcpp" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.linker.libraryPaths.1237402382" name="Library Paths (-L)" superClass="com.qnx.qcc.option.linker.libraryPaths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/lib"/>
+									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/usr/lib"/>
+								</option>
+								<option id="com.qnx.qcc.option.linker.security.297578866" name="Enhanced Security (-Wl,-z,relro -Wl,-z,now)" superClass="com.qnx.qcc.option.linker.security" value="true" valueType="boolean"/>
+							</tool>
+							<tool id="com.qnx.qcc.tool.archiver.212520687" name="QCC Archiver" superClass="com.qnx.qcc.tool.archiver"/>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+					</sourceEntries>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="com.qnx.qcc.configuration.staticLib.debug.2036808040">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.staticLib.debug.2036808040" moduleId="org.eclipse.cdt.core.settings" name="Simulator-Debug">
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Simulator-Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
+						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<extensions>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" description="" id="com.qnx.qcc.configuration.staticLib.debug.2036808040" name="Simulator-Debug" parent="com.qnx.qcc.configuration.staticLib.debug">
+					<folderInfo id="com.qnx.qcc.configuration.staticLib.debug.2036808040." name="/" resourcePath="">
+						<toolChain id="com.qnx.qcc.toolChain.staticLib.debug.1887185922" name="QNX QCC" superClass="com.qnx.qcc.toolChain">
+							<targetPlatform archList="all" binaryParser="com.qnx.tools.ide.qde.core.QDEBynaryParser" id="com.qnx.qcc.targetPlatform.574290023" osList="all" superClass="com.qnx.qcc.targetPlatform"/>
+							<builder buildPath="${workspace_loc:/game-d3xp}/Simulator-Debug" id="com.qnx.nto.1524177156" keepEnvironmentInBuildfile="false" name="CDT Internal Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="com.qnx.nto"/>
+							<tool id="com.qnx.qcc.tool.compiler.581281105" name="QCC Compiler" superClass="com.qnx.qcc.tool.compiler">
+								<option id="com.qnx.qcc.option.compiler.optlevel.306499448" name="Optimization Level" superClass="com.qnx.qcc.option.compiler.optlevel" value="com.qnx.qcc.option.compiler.optlevel.0" valueType="enumerated"/>
+								<option id="com.qnx.qcc.option.compile.debug.657211759" name="Debug (-g)" superClass="com.qnx.qcc.option.compile.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.compiler.includePath.1638736888" name="Include Directories (-I)" superClass="com.qnx.qcc.option.compiler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="C:/bbndk-10.2/host_10_1_0_238/win32/x86/usr/lib/gcc/arm-unknown-nto-qnx8.0.0eabi/4.6.3/include"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.security.88709238" name="Enhanced Security (-fstack-protector-strong)" superClass="com.qnx.qcc.option.compiler.security" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.compiler.defines.1263932522" name="Defines (-D)" superClass="com.qnx.qcc.option.compiler.defines" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__THUMB_INTERWORK__=1"/>
+									<listOptionValue builtIn="false" value="__FLT_EPSILON__=1.1920928955078125e-7F"/>
+									<listOptionValue builtIn="false" value="__DBL_MIN__=double(2.2250738585072014e-308L)"/>
+									<listOptionValue builtIn="false" value="__DBL_DENORM_MIN__=double(4.9406564584124654e-324L)"/>
+									<listOptionValue builtIn="false" value="__GXX_TYPEINFO_EQUALITY_INLINE=0"/>
+									<listOptionValue builtIn="false" value="__LDBL_MANT_DIG__=53"/>
+									<listOptionValue builtIn="false" value="__LDBL_DIG__=15"/>
+									<listOptionValue builtIn="false" value="__LDBL_DENORM_MIN__=4.9406564584124654e-324L"/>
+									<listOptionValue builtIn="false" value="__APCS_32__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN_10_EXP__=(-307)"/>
+									<listOptionValue builtIn="false" value="__ARM_EABI__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX_EXP__=1024"/>
+									<listOptionValue builtIn="false" value="__ARM_ARCH_7A__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN_EXP__=(-1021)"/>
+									<listOptionValue builtIn="false" value="__arm__=1"/>
+									<listOptionValue builtIn="false" value="__DBL_MAX__=double(1.7976931348623157e+308L)"/>
+									<listOptionValue builtIn="false" value="__GXX_WEAK__=1"/>
+									<listOptionValue builtIn="false" value="__GNUG__=4"/>
+									<listOptionValue builtIn="false" value="__cplusplus=1"/>
+									<listOptionValue builtIn="false" value="__FLT_EVAL_METHOD__=0"/>
+									<listOptionValue builtIn="false" value="__ARMEL__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_EPSILON__=2.2204460492503131e-16L"/>
+									<listOptionValue builtIn="false" value="__VFP_FP__=1"/>
+									<listOptionValue builtIn="false" value="__FLT_DENORM_MIN__=1.4012984643248171e-45F"/>
+									<listOptionValue builtIn="false" value="__ARM_FEATURE_DSP=1"/>
+									<listOptionValue builtIn="false" value="__thumb__=1"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4=1"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_1=1"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_LONG_DOUBLE__=8"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_2=1"/>
+									<listOptionValue builtIn="false" value="__EXCEPTIONS=1"/>
+									<listOptionValue builtIn="false" value="__DEPRECATED=1"/>
+									<listOptionValue builtIn="false" value="__FLT_MIN__=1.1754943508222875e-38F"/>
+									<listOptionValue builtIn="false" value="__DBL_EPSILON__=double(2.2204460492503131e-16L)"/>
+									<listOptionValue builtIn="false" value="__GXX_RTTI=1"/>
+									<listOptionValue builtIn="false" value="__THUMBEL__=1"/>
+									<listOptionValue builtIn="false" value="__BIGGEST_ALIGNMENT__=8"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN__=2.2250738585072014e-308L"/>
+									<listOptionValue builtIn="false" value="__ARM_PCS=1"/>
+									<listOptionValue builtIn="false" value="__FLT_MAX__=3.4028234663852886e+38F"/>
+									<listOptionValue builtIn="false" value="__thumb2__=1"/>
+									<listOptionValue builtIn="false" value="__ARM__=1"/>
+									<listOptionValue builtIn="false" value="__DECIMAL_DIG__=17"/>
+									<listOptionValue builtIn="false" value="__WCHAR_UNSIGNED__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX_10_EXP__=308"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX__=1.7976931348623157e+308L"/>
+									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
+									<listOptionValue builtIn="false" value="__DOOM__"/>
+									<listOptionValue builtIn="false" value="_D3XP"/>
+									<listOptionValue builtIn="false" value="CTF"/>
+									<listOptionValue builtIn="false" value="_DEBUG"/>
+								</option>
+								<inputType id="com.qnx.qcc.inputType.compiler.433288646" superClass="com.qnx.qcc.inputType.compiler"/>
+							</tool>
+							<tool id="com.qnx.qcc.tool.assembler.1425148529" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
+								<option id="com.qnx.qcc.option.assembler.debug.1887214622" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.assembler.includePath.107970412" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${QNX_TARGET}/usr/include/freetype2&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QNX_TARGET}/../target-override/usr/include&quot;"/>
+									<listOptionValue builtIn="false" value="C:/bbndk-10.2/host_10_1_0_238/win32/x86/usr/lib/gcc/arm-unknown-nto-qnx8.0.0eabi/4.6.3/include"/>
+								</option>
+								<option id="com.qnx.qcc.option.assembler.defines.1930709384" name="Defines (-D)" superClass="com.qnx.qcc.option.assembler.defines" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
+									<listOptionValue builtIn="false" value="__THUMB_INTERWORK__=1"/>
+									<listOptionValue builtIn="false" value="__FLT_EPSILON__=1.1920928955078125e-7F"/>
+									<listOptionValue builtIn="false" value="__DBL_MIN__=double(2.2250738585072014e-308L)"/>
+									<listOptionValue builtIn="false" value="__DBL_DENORM_MIN__=double(4.9406564584124654e-324L)"/>
+									<listOptionValue builtIn="false" value="__GXX_TYPEINFO_EQUALITY_INLINE=0"/>
+									<listOptionValue builtIn="false" value="__LDBL_MANT_DIG__=53"/>
+									<listOptionValue builtIn="false" value="__LDBL_DIG__=15"/>
+									<listOptionValue builtIn="false" value="__LDBL_DENORM_MIN__=4.9406564584124654e-324L"/>
+									<listOptionValue builtIn="false" value="__APCS_32__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN_10_EXP__=(-307)"/>
+									<listOptionValue builtIn="false" value="__ARM_EABI__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX_EXP__=1024"/>
+									<listOptionValue builtIn="false" value="__ARM_ARCH_7A__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN_EXP__=(-1021)"/>
+									<listOptionValue builtIn="false" value="__arm__=1"/>
+									<listOptionValue builtIn="false" value="__DBL_MAX__=double(1.7976931348623157e+308L)"/>
+									<listOptionValue builtIn="false" value="__GXX_WEAK__=1"/>
+									<listOptionValue builtIn="false" value="__GNUG__=4"/>
+									<listOptionValue builtIn="false" value="__cplusplus=1"/>
+									<listOptionValue builtIn="false" value="__FLT_EVAL_METHOD__=0"/>
+									<listOptionValue builtIn="false" value="__ARMEL__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_EPSILON__=2.2204460492503131e-16L"/>
+									<listOptionValue builtIn="false" value="__VFP_FP__=1"/>
+									<listOptionValue builtIn="false" value="__FLT_DENORM_MIN__=1.4012984643248171e-45F"/>
+									<listOptionValue builtIn="false" value="__ARM_FEATURE_DSP=1"/>
+									<listOptionValue builtIn="false" value="__thumb__=1"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4=1"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_1=1"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_LONG_DOUBLE__=8"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_2=1"/>
+									<listOptionValue builtIn="false" value="__EXCEPTIONS=1"/>
+									<listOptionValue builtIn="false" value="__DEPRECATED=1"/>
+									<listOptionValue builtIn="false" value="__FLT_MIN__=1.1754943508222875e-38F"/>
+									<listOptionValue builtIn="false" value="__DBL_EPSILON__=double(2.2204460492503131e-16L)"/>
+									<listOptionValue builtIn="false" value="__GXX_RTTI=1"/>
+									<listOptionValue builtIn="false" value="__THUMBEL__=1"/>
+									<listOptionValue builtIn="false" value="__BIGGEST_ALIGNMENT__=8"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN__=2.2250738585072014e-308L"/>
+									<listOptionValue builtIn="false" value="__ARM_PCS=1"/>
+									<listOptionValue builtIn="false" value="__FLT_MAX__=3.4028234663852886e+38F"/>
+									<listOptionValue builtIn="false" value="__thumb2__=1"/>
+									<listOptionValue builtIn="false" value="__ARM__=1"/>
+									<listOptionValue builtIn="false" value="__DECIMAL_DIG__=17"/>
+									<listOptionValue builtIn="false" value="__WCHAR_UNSIGNED__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX_10_EXP__=308"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX__=1.7976931348623157e+308L"/>
+								</option>
+								<inputType id="com.qnx.qcc.inputType.assembler.1081139136" superClass="com.qnx.qcc.inputType.assembler"/>
+							</tool>
+							<tool id="com.qnx.qcc.tool.linker.1085316831" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
+								<option id="com.qnx.qcc.option.linker.debug.618902703" name="Debug (-g)" superClass="com.qnx.qcc.option.linker.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.linker.langcpp.52985043" name="C++ (-lang-c++)" superClass="com.qnx.qcc.option.linker.langcpp" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.linker.libraryPaths.2038850254" name="Library Paths (-L)" superClass="com.qnx.qcc.option.linker.libraryPaths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/lib"/>
+									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/usr/lib"/>
+								</option>
+								<option id="com.qnx.qcc.option.linker.security.1345648501" name="Enhanced Security (-Wl,-z,relro -Wl,-z,now)" superClass="com.qnx.qcc.option.linker.security" value="true" valueType="boolean"/>
+							</tool>
+							<tool id="com.qnx.qcc.tool.archiver.1150130116" name="QCC Archiver" superClass="com.qnx.qcc.tool.archiver"/>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+					</sourceEntries>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="com.qnx.qcc.configuration.staticLib.profile.834045505">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.staticLib.profile.834045505" moduleId="org.eclipse.cdt.core.settings" name="Simulator-Profile">
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Simulator-Profile"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
+						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<extensions>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildType=com.qnx.buildType.profile,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" description="Build for Profiling" id="com.qnx.qcc.configuration.staticLib.profile.834045505" name="Simulator-Profile" parent="com.qnx.qcc.configuration.staticLib.profile">
+					<folderInfo id="com.qnx.qcc.configuration.staticLib.profile.834045505." name="/" resourcePath="">
+						<toolChain id="com.qnx.qcc.toolChain.staticLib.profile.1863114901" name="QNX QCC" superClass="com.qnx.qcc.toolChain">
+							<targetPlatform archList="all" binaryParser="com.qnx.tools.ide.qde.core.QDEBynaryParser" id="com.qnx.qcc.targetPlatform.1756027097" osList="all" superClass="com.qnx.qcc.targetPlatform"/>
+							<builder buildPath="${workspace_loc:/game-d3xp}/Simulator-Profile" id="com.qnx.nto.1287523434" keepEnvironmentInBuildfile="false" name="CDT Internal Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="com.qnx.nto"/>
+							<tool id="com.qnx.qcc.tool.compiler.1877072037" name="QCC Compiler" superClass="com.qnx.qcc.tool.compiler">
+								<option id="com.qnx.qcc.option.compiler.optlevel.580829835" name="Optimization Level" superClass="com.qnx.qcc.option.compiler.optlevel" value="com.qnx.qcc.option.compiler.optlevel.0" valueType="enumerated"/>
+								<option id="com.qnx.qcc.option.compile.debug.960406512" name="Debug (-g)" superClass="com.qnx.qcc.option.compile.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.compiler.profile2.890947459" name="Build for Profiling (Function Instrumentation) (-finstrument-functions)" superClass="com.qnx.qcc.option.compiler.profile2" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.compiler.includePath.1981542404" name="Include Directories (-I)" superClass="com.qnx.qcc.option.compiler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="C:/bbndk-10.2/host_10_1_0_238/win32/x86/usr/lib/gcc/arm-unknown-nto-qnx8.0.0eabi/4.6.3/include"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.security.1374065316" name="Enhanced Security (-fstack-protector-strong)" superClass="com.qnx.qcc.option.compiler.security" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.compiler.defines.664565620" name="Defines (-D)" superClass="com.qnx.qcc.option.compiler.defines" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__THUMB_INTERWORK__=1"/>
+									<listOptionValue builtIn="false" value="__FLT_EPSILON__=1.1920928955078125e-7F"/>
+									<listOptionValue builtIn="false" value="__DBL_MIN__=double(2.2250738585072014e-308L)"/>
+									<listOptionValue builtIn="false" value="__DBL_DENORM_MIN__=double(4.9406564584124654e-324L)"/>
+									<listOptionValue builtIn="false" value="__GXX_TYPEINFO_EQUALITY_INLINE=0"/>
+									<listOptionValue builtIn="false" value="__LDBL_MANT_DIG__=53"/>
+									<listOptionValue builtIn="false" value="__LDBL_DIG__=15"/>
+									<listOptionValue builtIn="false" value="__LDBL_DENORM_MIN__=4.9406564584124654e-324L"/>
+									<listOptionValue builtIn="false" value="__APCS_32__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN_10_EXP__=(-307)"/>
+									<listOptionValue builtIn="false" value="__ARM_EABI__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX_EXP__=1024"/>
+									<listOptionValue builtIn="false" value="__ARM_ARCH_7A__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN_EXP__=(-1021)"/>
+									<listOptionValue builtIn="false" value="__arm__=1"/>
+									<listOptionValue builtIn="false" value="__DBL_MAX__=double(1.7976931348623157e+308L)"/>
+									<listOptionValue builtIn="false" value="__GXX_WEAK__=1"/>
+									<listOptionValue builtIn="false" value="__GNUG__=4"/>
+									<listOptionValue builtIn="false" value="__cplusplus=1"/>
+									<listOptionValue builtIn="false" value="__FLT_EVAL_METHOD__=0"/>
+									<listOptionValue builtIn="false" value="__ARMEL__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_EPSILON__=2.2204460492503131e-16L"/>
+									<listOptionValue builtIn="false" value="__VFP_FP__=1"/>
+									<listOptionValue builtIn="false" value="__FLT_DENORM_MIN__=1.4012984643248171e-45F"/>
+									<listOptionValue builtIn="false" value="__ARM_FEATURE_DSP=1"/>
+									<listOptionValue builtIn="false" value="__thumb__=1"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4=1"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_1=1"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_LONG_DOUBLE__=8"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_2=1"/>
+									<listOptionValue builtIn="false" value="__EXCEPTIONS=1"/>
+									<listOptionValue builtIn="false" value="__DEPRECATED=1"/>
+									<listOptionValue builtIn="false" value="__FLT_MIN__=1.1754943508222875e-38F"/>
+									<listOptionValue builtIn="false" value="__DBL_EPSILON__=double(2.2204460492503131e-16L)"/>
+									<listOptionValue builtIn="false" value="__GXX_RTTI=1"/>
+									<listOptionValue builtIn="false" value="__THUMBEL__=1"/>
+									<listOptionValue builtIn="false" value="__BIGGEST_ALIGNMENT__=8"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN__=2.2250738585072014e-308L"/>
+									<listOptionValue builtIn="false" value="__ARM_PCS=1"/>
+									<listOptionValue builtIn="false" value="__FLT_MAX__=3.4028234663852886e+38F"/>
+									<listOptionValue builtIn="false" value="__thumb2__=1"/>
+									<listOptionValue builtIn="false" value="__ARM__=1"/>
+									<listOptionValue builtIn="false" value="__DECIMAL_DIG__=17"/>
+									<listOptionValue builtIn="false" value="__WCHAR_UNSIGNED__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX_10_EXP__=308"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX__=1.7976931348623157e+308L"/>
+									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
+									<listOptionValue builtIn="false" value="__DOOM__"/>
+									<listOptionValue builtIn="false" value="_D3XP"/>
+									<listOptionValue builtIn="false" value="CTF"/>
+									<listOptionValue builtIn="false" value="_DEBUG"/>
+									<listOptionValue builtIn="false" value="_INLINEDEBUG"/>
+								</option>
+								<inputType id="com.qnx.qcc.inputType.compiler.1739592871" superClass="com.qnx.qcc.inputType.compiler"/>
+							</tool>
+							<tool id="com.qnx.qcc.tool.assembler.1381405717" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
+								<option id="com.qnx.qcc.option.assembler.debug.1324396307" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.assembler.includePath.1212322881" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${QNX_TARGET}/usr/include/freetype2&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QNX_TARGET}/../target-override/usr/include&quot;"/>
+									<listOptionValue builtIn="false" value="C:/bbndk-10.2/host_10_1_0_238/win32/x86/usr/lib/gcc/arm-unknown-nto-qnx8.0.0eabi/4.6.3/include"/>
+								</option>
+								<option id="com.qnx.qcc.option.assembler.defines.91798068" name="Defines (-D)" superClass="com.qnx.qcc.option.assembler.defines" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
+									<listOptionValue builtIn="false" value="__THUMB_INTERWORK__=1"/>
+									<listOptionValue builtIn="false" value="__FLT_EPSILON__=1.1920928955078125e-7F"/>
+									<listOptionValue builtIn="false" value="__DBL_MIN__=double(2.2250738585072014e-308L)"/>
+									<listOptionValue builtIn="false" value="__DBL_DENORM_MIN__=double(4.9406564584124654e-324L)"/>
+									<listOptionValue builtIn="false" value="__GXX_TYPEINFO_EQUALITY_INLINE=0"/>
+									<listOptionValue builtIn="false" value="__LDBL_MANT_DIG__=53"/>
+									<listOptionValue builtIn="false" value="__LDBL_DIG__=15"/>
+									<listOptionValue builtIn="false" value="__LDBL_DENORM_MIN__=4.9406564584124654e-324L"/>
+									<listOptionValue builtIn="false" value="__APCS_32__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN_10_EXP__=(-307)"/>
+									<listOptionValue builtIn="false" value="__ARM_EABI__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX_EXP__=1024"/>
+									<listOptionValue builtIn="false" value="__ARM_ARCH_7A__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN_EXP__=(-1021)"/>
+									<listOptionValue builtIn="false" value="__arm__=1"/>
+									<listOptionValue builtIn="false" value="__DBL_MAX__=double(1.7976931348623157e+308L)"/>
+									<listOptionValue builtIn="false" value="__GXX_WEAK__=1"/>
+									<listOptionValue builtIn="false" value="__GNUG__=4"/>
+									<listOptionValue builtIn="false" value="__cplusplus=1"/>
+									<listOptionValue builtIn="false" value="__FLT_EVAL_METHOD__=0"/>
+									<listOptionValue builtIn="false" value="__ARMEL__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_EPSILON__=2.2204460492503131e-16L"/>
+									<listOptionValue builtIn="false" value="__VFP_FP__=1"/>
+									<listOptionValue builtIn="false" value="__FLT_DENORM_MIN__=1.4012984643248171e-45F"/>
+									<listOptionValue builtIn="false" value="__ARM_FEATURE_DSP=1"/>
+									<listOptionValue builtIn="false" value="__thumb__=1"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4=1"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_1=1"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_LONG_DOUBLE__=8"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_2=1"/>
+									<listOptionValue builtIn="false" value="__EXCEPTIONS=1"/>
+									<listOptionValue builtIn="false" value="__DEPRECATED=1"/>
+									<listOptionValue builtIn="false" value="__FLT_MIN__=1.1754943508222875e-38F"/>
+									<listOptionValue builtIn="false" value="__DBL_EPSILON__=double(2.2204460492503131e-16L)"/>
+									<listOptionValue builtIn="false" value="__GXX_RTTI=1"/>
+									<listOptionValue builtIn="false" value="__THUMBEL__=1"/>
+									<listOptionValue builtIn="false" value="__BIGGEST_ALIGNMENT__=8"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN__=2.2250738585072014e-308L"/>
+									<listOptionValue builtIn="false" value="__ARM_PCS=1"/>
+									<listOptionValue builtIn="false" value="__FLT_MAX__=3.4028234663852886e+38F"/>
+									<listOptionValue builtIn="false" value="__thumb2__=1"/>
+									<listOptionValue builtIn="false" value="__ARM__=1"/>
+									<listOptionValue builtIn="false" value="__DECIMAL_DIG__=17"/>
+									<listOptionValue builtIn="false" value="__WCHAR_UNSIGNED__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX_10_EXP__=308"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX__=1.7976931348623157e+308L"/>
+								</option>
+								<inputType id="com.qnx.qcc.inputType.assembler.976641140" superClass="com.qnx.qcc.inputType.assembler"/>
+							</tool>
+							<tool id="com.qnx.qcc.tool.linker.1105159125" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
+								<option id="com.qnx.qcc.option.linker.debug.613087381" name="Debug (-g)" superClass="com.qnx.qcc.option.linker.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.linker.profile2.1443094568" name="Build for Profiling (Function Instrumentation) (-lprofiling)" superClass="com.qnx.qcc.option.linker.profile2" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.linker.langcpp.1388425552" name="C++ (-lang-c++)" superClass="com.qnx.qcc.option.linker.langcpp" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.linker.libraryPaths.1766246168" name="Library Paths (-L)" superClass="com.qnx.qcc.option.linker.libraryPaths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/lib"/>
+									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/usr/lib"/>
+								</option>
+								<option id="com.qnx.qcc.option.linker.security.2122967040" name="Enhanced Security (-Wl,-z,relro -Wl,-z,now)" superClass="com.qnx.qcc.option.linker.security" value="true" valueType="boolean"/>
+							</tool>
+							<tool id="com.qnx.qcc.tool.archiver.1983191260" name="QCC Archiver" superClass="com.qnx.qcc.tool.archiver"/>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+					</sourceEntries>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="com.qnx.qcc.configuration.staticLib.coverage.935600147">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.staticLib.coverage.935600147" moduleId="org.eclipse.cdt.core.settings" name="Simulator-Coverage">
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Simulator-Coverage"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
+						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<extensions>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildType=com.qnx.buildType.coverage,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" description="Build with Code Coverage" id="com.qnx.qcc.configuration.staticLib.coverage.935600147" name="Simulator-Coverage" parent="com.qnx.qcc.configuration.staticLib.coverage">
+					<folderInfo id="com.qnx.qcc.configuration.staticLib.coverage.935600147." name="/" resourcePath="">
+						<toolChain id="com.qnx.qcc.toolChain.staticLib.coverage.236895866" name="QNX QCC" superClass="com.qnx.qcc.toolChain">
+							<targetPlatform archList="all" binaryParser="com.qnx.tools.ide.qde.core.QDEBynaryParser" id="com.qnx.qcc.targetPlatform.2095640115" osList="all" superClass="com.qnx.qcc.targetPlatform"/>
+							<builder buildPath="${workspace_loc:/game-d3xp}/Simulator-Coverage" id="com.qnx.nto.1945951768" keepEnvironmentInBuildfile="false" name="CDT Internal Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="com.qnx.nto"/>
+							<tool id="com.qnx.qcc.tool.compiler.1659294916" name="QCC Compiler" superClass="com.qnx.qcc.tool.compiler">
+								<option id="com.qnx.qcc.option.compiler.optlevel.2127384841" name="Optimization Level" superClass="com.qnx.qcc.option.compiler.optlevel" value="com.qnx.qcc.option.compiler.optlevel.0" valueType="enumerated"/>
+								<option id="com.qnx.qcc.option.compile.debug.1342951724" name="Debug (-g)" superClass="com.qnx.qcc.option.compile.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.compiler.coverage.708744738" name="Build for Code Coverage (-Wc,-ftest-coverage -Wc,-fprofile-arcs)" superClass="com.qnx.qcc.option.compiler.coverage" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.compiler.includePath.339190684" name="Include Directories (-I)" superClass="com.qnx.qcc.option.compiler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="C:/bbndk-10.2/host_10_1_0_238/win32/x86/usr/lib/gcc/arm-unknown-nto-qnx8.0.0eabi/4.6.3/include"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.security.554988483" name="Enhanced Security (-fstack-protector-strong)" superClass="com.qnx.qcc.option.compiler.security" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.compiler.defines.1849065696" name="Defines (-D)" superClass="com.qnx.qcc.option.compiler.defines" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__THUMB_INTERWORK__=1"/>
+									<listOptionValue builtIn="false" value="__FLT_EPSILON__=1.1920928955078125e-7F"/>
+									<listOptionValue builtIn="false" value="__DBL_MIN__=double(2.2250738585072014e-308L)"/>
+									<listOptionValue builtIn="false" value="__DBL_DENORM_MIN__=double(4.9406564584124654e-324L)"/>
+									<listOptionValue builtIn="false" value="__GXX_TYPEINFO_EQUALITY_INLINE=0"/>
+									<listOptionValue builtIn="false" value="__LDBL_MANT_DIG__=53"/>
+									<listOptionValue builtIn="false" value="__LDBL_DIG__=15"/>
+									<listOptionValue builtIn="false" value="__LDBL_DENORM_MIN__=4.9406564584124654e-324L"/>
+									<listOptionValue builtIn="false" value="__APCS_32__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN_10_EXP__=(-307)"/>
+									<listOptionValue builtIn="false" value="__ARM_EABI__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX_EXP__=1024"/>
+									<listOptionValue builtIn="false" value="__ARM_ARCH_7A__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN_EXP__=(-1021)"/>
+									<listOptionValue builtIn="false" value="__arm__=1"/>
+									<listOptionValue builtIn="false" value="__DBL_MAX__=double(1.7976931348623157e+308L)"/>
+									<listOptionValue builtIn="false" value="__GXX_WEAK__=1"/>
+									<listOptionValue builtIn="false" value="__GNUG__=4"/>
+									<listOptionValue builtIn="false" value="__cplusplus=1"/>
+									<listOptionValue builtIn="false" value="__FLT_EVAL_METHOD__=0"/>
+									<listOptionValue builtIn="false" value="__ARMEL__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_EPSILON__=2.2204460492503131e-16L"/>
+									<listOptionValue builtIn="false" value="__VFP_FP__=1"/>
+									<listOptionValue builtIn="false" value="__FLT_DENORM_MIN__=1.4012984643248171e-45F"/>
+									<listOptionValue builtIn="false" value="__ARM_FEATURE_DSP=1"/>
+									<listOptionValue builtIn="false" value="__thumb__=1"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4=1"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_1=1"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_LONG_DOUBLE__=8"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_2=1"/>
+									<listOptionValue builtIn="false" value="__EXCEPTIONS=1"/>
+									<listOptionValue builtIn="false" value="__DEPRECATED=1"/>
+									<listOptionValue builtIn="false" value="__FLT_MIN__=1.1754943508222875e-38F"/>
+									<listOptionValue builtIn="false" value="__DBL_EPSILON__=double(2.2204460492503131e-16L)"/>
+									<listOptionValue builtIn="false" value="__GXX_RTTI=1"/>
+									<listOptionValue builtIn="false" value="__THUMBEL__=1"/>
+									<listOptionValue builtIn="false" value="__BIGGEST_ALIGNMENT__=8"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN__=2.2250738585072014e-308L"/>
+									<listOptionValue builtIn="false" value="__ARM_PCS=1"/>
+									<listOptionValue builtIn="false" value="__FLT_MAX__=3.4028234663852886e+38F"/>
+									<listOptionValue builtIn="false" value="__thumb2__=1"/>
+									<listOptionValue builtIn="false" value="__ARM__=1"/>
+									<listOptionValue builtIn="false" value="__DECIMAL_DIG__=17"/>
+									<listOptionValue builtIn="false" value="__WCHAR_UNSIGNED__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX_10_EXP__=308"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX__=1.7976931348623157e+308L"/>
+									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
+									<listOptionValue builtIn="false" value="__DOOM__"/>
+									<listOptionValue builtIn="false" value="_D3XP"/>
+									<listOptionValue builtIn="false" value="CTF"/>
+									<listOptionValue builtIn="false" value="_DEBUG"/>
+								</option>
+								<inputType id="com.qnx.qcc.inputType.compiler.987042865" superClass="com.qnx.qcc.inputType.compiler"/>
+							</tool>
+							<tool id="com.qnx.qcc.tool.assembler.1738236161" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
+								<option id="com.qnx.qcc.option.assembler.debug.2608418" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.assembler.includePath.532078901" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${QNX_TARGET}/usr/include/freetype2&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QNX_TARGET}/../target-override/usr/include&quot;"/>
+									<listOptionValue builtIn="false" value="C:/bbndk-10.2/host_10_1_0_238/win32/x86/usr/lib/gcc/arm-unknown-nto-qnx8.0.0eabi/4.6.3/include"/>
+								</option>
+								<option id="com.qnx.qcc.option.assembler.defines.1690395124" name="Defines (-D)" superClass="com.qnx.qcc.option.assembler.defines" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
+									<listOptionValue builtIn="false" value="__THUMB_INTERWORK__=1"/>
+									<listOptionValue builtIn="false" value="__FLT_EPSILON__=1.1920928955078125e-7F"/>
+									<listOptionValue builtIn="false" value="__DBL_MIN__=double(2.2250738585072014e-308L)"/>
+									<listOptionValue builtIn="false" value="__DBL_DENORM_MIN__=double(4.9406564584124654e-324L)"/>
+									<listOptionValue builtIn="false" value="__GXX_TYPEINFO_EQUALITY_INLINE=0"/>
+									<listOptionValue builtIn="false" value="__LDBL_MANT_DIG__=53"/>
+									<listOptionValue builtIn="false" value="__LDBL_DIG__=15"/>
+									<listOptionValue builtIn="false" value="__LDBL_DENORM_MIN__=4.9406564584124654e-324L"/>
+									<listOptionValue builtIn="false" value="__APCS_32__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN_10_EXP__=(-307)"/>
+									<listOptionValue builtIn="false" value="__ARM_EABI__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX_EXP__=1024"/>
+									<listOptionValue builtIn="false" value="__ARM_ARCH_7A__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN_EXP__=(-1021)"/>
+									<listOptionValue builtIn="false" value="__arm__=1"/>
+									<listOptionValue builtIn="false" value="__DBL_MAX__=double(1.7976931348623157e+308L)"/>
+									<listOptionValue builtIn="false" value="__GXX_WEAK__=1"/>
+									<listOptionValue builtIn="false" value="__GNUG__=4"/>
+									<listOptionValue builtIn="false" value="__cplusplus=1"/>
+									<listOptionValue builtIn="false" value="__FLT_EVAL_METHOD__=0"/>
+									<listOptionValue builtIn="false" value="__ARMEL__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_EPSILON__=2.2204460492503131e-16L"/>
+									<listOptionValue builtIn="false" value="__VFP_FP__=1"/>
+									<listOptionValue builtIn="false" value="__FLT_DENORM_MIN__=1.4012984643248171e-45F"/>
+									<listOptionValue builtIn="false" value="__ARM_FEATURE_DSP=1"/>
+									<listOptionValue builtIn="false" value="__thumb__=1"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4=1"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_1=1"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_LONG_DOUBLE__=8"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_2=1"/>
+									<listOptionValue builtIn="false" value="__EXCEPTIONS=1"/>
+									<listOptionValue builtIn="false" value="__DEPRECATED=1"/>
+									<listOptionValue builtIn="false" value="__FLT_MIN__=1.1754943508222875e-38F"/>
+									<listOptionValue builtIn="false" value="__DBL_EPSILON__=double(2.2204460492503131e-16L)"/>
+									<listOptionValue builtIn="false" value="__GXX_RTTI=1"/>
+									<listOptionValue builtIn="false" value="__THUMBEL__=1"/>
+									<listOptionValue builtIn="false" value="__BIGGEST_ALIGNMENT__=8"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN__=2.2250738585072014e-308L"/>
+									<listOptionValue builtIn="false" value="__ARM_PCS=1"/>
+									<listOptionValue builtIn="false" value="__FLT_MAX__=3.4028234663852886e+38F"/>
+									<listOptionValue builtIn="false" value="__thumb2__=1"/>
+									<listOptionValue builtIn="false" value="__ARM__=1"/>
+									<listOptionValue builtIn="false" value="__DECIMAL_DIG__=17"/>
+									<listOptionValue builtIn="false" value="__WCHAR_UNSIGNED__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX_10_EXP__=308"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX__=1.7976931348623157e+308L"/>
+								</option>
+								<inputType id="com.qnx.qcc.inputType.assembler.358673209" superClass="com.qnx.qcc.inputType.assembler"/>
+							</tool>
+							<tool id="com.qnx.qcc.tool.linker.1001305330" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
+								<option id="com.qnx.qcc.option.linker.debug.1658721941" name="Debug (-g)" superClass="com.qnx.qcc.option.linker.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.linker.coverage.2071113241" name="Build for Code Coverage (-ftest-coverage -fprofile-arcs)" superClass="com.qnx.qcc.option.linker.coverage" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.linker.langcpp.1584693767" name="C++ (-lang-c++)" superClass="com.qnx.qcc.option.linker.langcpp" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.linker.libraryPaths.535364934" name="Library Paths (-L)" superClass="com.qnx.qcc.option.linker.libraryPaths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/lib"/>
+									<listOptionValue builtIn="false" value="${QNX_TARGET}/../target-override/${CPUVARDIR}/usr/lib"/>
+								</option>
+								<option id="com.qnx.qcc.option.linker.security.1300940148" name="Enhanced Security (-Wl,-z,relro -Wl,-z,now)" superClass="com.qnx.qcc.option.linker.security" value="true" valueType="boolean"/>
+							</tool>
+							<tool id="com.qnx.qcc.tool.archiver.649584804" name="QCC Archiver" superClass="com.qnx.qcc.tool.archiver"/>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+					</sourceEntries>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<project id="game-d3xp.null.1413085465" name="game-d3xp"/>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.qnx.tools.ide.qde.managedbuilder.core.qccScannerInfo"/>
+		<scannerConfigBuildInfo instanceId="com.qnx.qcc.configuration.staticLib.profile.924383944">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.qnx.tools.ide.qde.managedbuilder.core.qccScannerInfo"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.qnx.qcc.configuration.staticLib.coverage.935600147">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.qnx.tools.ide.qde.managedbuilder.core.qccScannerInfo"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.qnx.qcc.configuration.staticLib.debug.1258582821">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.qnx.tools.ide.qde.managedbuilder.core.qccScannerInfo"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.qnx.qcc.configuration.staticLib.coverage.2093501117">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.qnx.tools.ide.qde.managedbuilder.core.qccScannerInfo"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.qnx.qcc.configuration.staticLib.profile.834045505">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.qnx.tools.ide.qde.managedbuilder.core.qccScannerInfo"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.qnx.qcc.configuration.staticLib.debug.2036808040">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.qnx.tools.ide.qde.managedbuilder.core.qccScannerInfo"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.qnx.qcc.configuration.staticLib.release.1393510121">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.qnx.tools.ide.qde.managedbuilder.core.qccScannerInfo"/>
+		</scannerConfigBuildInfo>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+</cproject>

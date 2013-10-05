@@ -2138,7 +2138,7 @@ int idParser::Directive_eval() {
 	token.whiteSpaceEnd_p = NULL;
 	token.linesCrossed = 0;
 	token.flags = 0;
-#if ID_WIN32
+#ifdef ID_WIN32
 	sprintf(buf, "%d", abs(value));
 #else
 	sprintf(buf, "%d", labs(value));
