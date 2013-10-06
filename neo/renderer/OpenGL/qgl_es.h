@@ -89,6 +89,12 @@ extern "C" {
 	typedef void (GL_APIENTRYP PFNGLGETCOMPRESSEDTEXIMAGEARBPROC) (GLenum target, GLint level, GLvoid *img);
 #endif
 
+#ifndef GL_ELEMENT_ARRAY_BUFFER_ARB
+	#define GL_ELEMENT_ARRAY_BUFFER_ARB GL_ELEMENT_ARRAY_BUFFER
+#endif
+#ifndef GL_ARRAY_BUFFER_ARB
+	#define GL_ARRAY_BUFFER_ARB GL_ARRAY_BUFFER
+#endif
 #ifndef PFNGLBINDBUFFERARBPROC
 	typedef void (GL_APIENTRYP PFNGLBINDBUFFERARBPROC) (GLenum target, GLuint buffer);
 #endif

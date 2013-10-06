@@ -1736,6 +1736,11 @@
 			<locationURI>PARENT-2-PROJECT_LOC/neo/sound/OpenAL/OAL_SoundVoice.h</locationURI>
 		</link>
 		<link>
+			<name>src/sys/qnx/qnx_cpu.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_cpu.cpp</locationURI>
+		</link>
+		<link>
 			<name>src/sys/qnx/qnx_local.h</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_local.h</locationURI>

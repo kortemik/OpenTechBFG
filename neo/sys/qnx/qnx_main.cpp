@@ -36,6 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <dlfcn.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <slog2.h>
 
 #include "../sys_local.h"
 #include "qnx_local.h"
@@ -201,6 +202,7 @@ Sys_Printf
 ==============
 */
 #define MAXPRINTMSG 4096
+#define SLOG_CODE 2004
 void Sys_Printf( const char *fmt, ... ) {
 	char		msg[MAXPRINTMSG];
 
@@ -210,8 +212,9 @@ void Sys_Printf( const char *fmt, ... ) {
 	va_end(argptr);
 	msg[sizeof(msg)-1] = '\0';
 
-	/* XXX OutputDebugString( msg );
+	slog2fa( NULL, SLOG_CODE, SLOG2_INFO, "%s", SLOG2_FA_STRING( msg ), SLOG2_FA_END );
 
+	/* XXX
 	if ( win32.win_outputEditString.GetBool() && idLib::IsMainThread() ) {
 		Conbuf_AppendText( msg );
 	}*/
@@ -232,7 +235,7 @@ void Sys_DebugPrintf( const char *fmt, ... ) {
 	msg[ sizeof(msg)-1 ] = '\0';
 	va_end( argptr );
 
-	//XXX OutputDebugString( msg );
+	slog2fa( NULL, SLOG_CODE, SLOG2_DEBUG1, "%s", SLOG2_FA_STRING( msg ), SLOG2_FA_END );
 }
 
 /*
@@ -246,7 +249,7 @@ void Sys_DebugVPrintf( const char *fmt, va_list arg ) {
 	idStr::vsnPrintf( msg, MAXPRINTMSG-1, fmt, arg );
 	msg[ sizeof(msg)-1 ] = '\0';
 
-	//XXX OutputDebugString( msg );
+	slog2fa( NULL, SLOG_CODE, SLOG2_DEBUG1, "%s", SLOG2_FA_STRING( msg ), SLOG2_FA_END );
 }
 
 /*
@@ -914,7 +917,7 @@ The cvar system must already be setup
 */
 void Sys_Init() {
 
-	/* TODO
+	/* TODO: Need to setup slog2 as well
 	CoInitialize( NULL );
 
 	// get WM_TIMER messages pumped every millisecond

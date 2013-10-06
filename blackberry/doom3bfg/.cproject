@@ -33,6 +33,9 @@
 									<listOptionValue builtIn="false" value="__DOOM__"/>
 									<listOptionValue builtIn="false" value="_DEBUG"/>
 								</option>
+								<option id="com.qnx.qcc.option.compiler.qccoptions.168100639" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-mfpu=neon"/>
+								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.1422041738" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.696761276" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
@@ -64,6 +67,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="slog2"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.257941073" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -153,12 +157,12 @@
 								</option>
 								<option id="com.qnx.qcc.option.compiler.pie.1869691664" name="Position Independent Executable (-fPIE)" superClass="com.qnx.qcc.option.compiler.pie" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.1523945363" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
-									<listOptionValue builtIn="false" value="-frecord-gcc-switches"/>
+									<listOptionValue builtIn="false" value="-mfpu=neon"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.516975726" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.1112417811" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
-								<option id="com.qnx.qcc.option.assembler.includePath.148947521" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath"/>
+								<option id="com.qnx.qcc.option.assembler.includePath.148947521" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath"/>
 								<inputType id="com.qnx.qcc.inputType.assembler.2067695334" superClass="com.qnx.qcc.inputType.assembler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.linker.1033414609" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
@@ -185,6 +189,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="slog2"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.823928155" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -274,11 +279,14 @@
 									<listOptionValue builtIn="false" value="_DEBUG"/>
 									<listOptionValue builtIn="false" value="_INLINEDEBUG"/>
 								</option>
+								<option id="com.qnx.qcc.option.compiler.qccoptions.1174713231" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-mfpu=neon"/>
+								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.452095292" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.1689250883" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
 								<option id="com.qnx.qcc.option.assembler.debug.1370087959" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
-								<option id="com.qnx.qcc.option.assembler.includePath.377916409" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath"/>
+								<option id="com.qnx.qcc.option.assembler.includePath.377916409" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath"/>
 								<inputType id="com.qnx.qcc.inputType.assembler.1060837818" superClass="com.qnx.qcc.inputType.assembler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.linker.1996229796" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
@@ -306,6 +314,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="slog2"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.414524484" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -394,11 +403,14 @@
 									<listOptionValue builtIn="false" value="__DOOM__"/>
 									<listOptionValue builtIn="false" value="_DEBUG"/>
 								</option>
+								<option id="com.qnx.qcc.option.compiler.qccoptions.212591966" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-mfpu=neon"/>
+								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.1564631756" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.1194282320" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
 								<option id="com.qnx.qcc.option.assembler.debug.1550474903" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
-								<option id="com.qnx.qcc.option.assembler.includePath.969645387" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath"/>
+								<option id="com.qnx.qcc.option.assembler.includePath.969645387" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath"/>
 								<inputType id="com.qnx.qcc.inputType.assembler.1360064080" superClass="com.qnx.qcc.inputType.assembler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.linker.700771273" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
@@ -426,6 +438,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="slog2"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.1311123190" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -512,11 +525,12 @@
 									<listOptionValue builtIn="false" value="__DOOM__"/>
 									<listOptionValue builtIn="false" value="_DEBUG"/>
 								</option>
+								<option id="com.qnx.qcc.option.compiler.qccoptions.247017931" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList"/>
 								<inputType id="com.qnx.qcc.inputType.compiler.1137492076" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.783135853" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
 								<option id="com.qnx.qcc.option.assembler.debug.1619722682" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
-								<option id="com.qnx.qcc.option.assembler.includePath.2081188042" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath"/>
+								<option id="com.qnx.qcc.option.assembler.includePath.2081188042" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath"/>
 								<inputType id="com.qnx.qcc.inputType.assembler.628108239" superClass="com.qnx.qcc.inputType.assembler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.linker.1178831846" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
@@ -543,6 +557,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="slog2"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.2061379145" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -631,11 +646,12 @@
 									<listOptionValue builtIn="false" value="_DEBUG"/>
 									<listOptionValue builtIn="false" value="_INLINEDEBUG"/>
 								</option>
+								<option id="com.qnx.qcc.option.compiler.qccoptions.1447811706" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList"/>
 								<inputType id="com.qnx.qcc.inputType.compiler.1282601949" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.1962855" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
 								<option id="com.qnx.qcc.option.assembler.debug.1672073563" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
-								<option id="com.qnx.qcc.option.assembler.includePath.362674240" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath"/>
+								<option id="com.qnx.qcc.option.assembler.includePath.362674240" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath"/>
 								<inputType id="com.qnx.qcc.inputType.assembler.1422787161" superClass="com.qnx.qcc.inputType.assembler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.linker.1178351199" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
@@ -663,6 +679,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="slog2"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.324631596" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -750,11 +767,12 @@
 									<listOptionValue builtIn="false" value="__DOOM__"/>
 									<listOptionValue builtIn="false" value="_DEBUG"/>
 								</option>
+								<option id="com.qnx.qcc.option.compiler.qccoptions.929329724" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList"/>
 								<inputType id="com.qnx.qcc.inputType.compiler.796137051" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.833733744" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
 								<option id="com.qnx.qcc.option.assembler.debug.573032209" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
-								<option id="com.qnx.qcc.option.assembler.includePath.1076924770" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath"/>
+								<option id="com.qnx.qcc.option.assembler.includePath.1076924770" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath"/>
 								<inputType id="com.qnx.qcc.inputType.assembler.1653337371" superClass="com.qnx.qcc.inputType.assembler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.linker.1530890953" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
@@ -782,6 +800,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="slog2"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.809873610" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -868,5 +887,28 @@
 		</scannerConfigBuildInfo>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Simulator-Profile">
+			<resource resourceType="PROJECT" workspacePath="/doom3bfg"/>
+		</configuration>
+		<configuration configurationName="Simulator-Coverage">
+			<resource resourceType="PROJECT" workspacePath="/doom3bfg"/>
+		</configuration>
+		<configuration configurationName="Device-Profile">
+			<resource resourceType="PROJECT" workspacePath="/doom3bfg"/>
+		</configuration>
+		<configuration configurationName="Device-Debug">
+			<resource resourceType="PROJECT" workspacePath="/doom3bfg"/>
+		</configuration>
+		<configuration configurationName="Simulator-Debug">
+			<resource resourceType="PROJECT" workspacePath="/doom3bfg"/>
+		</configuration>
+		<configuration configurationName="Device-Release">
+			<resource resourceType="PROJECT" workspacePath="/doom3bfg"/>
+		</configuration>
+		<configuration configurationName="Device-Coverage">
+			<resource resourceType="PROJECT" workspacePath="/doom3bfg"/>
+		</configuration>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>
