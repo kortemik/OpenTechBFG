@@ -165,19 +165,19 @@ If you have questions concerning this license or the applicable additional terms
 #define ALIGN16( x )					x __attribute__((__aligned__(16)))
 #define ALIGNTYPE16
 #define ALIGNTYPE128
-#define ALIGNTYPE16_POST				//XXX __attribute__((__aligned__(16)))
-#define ALIGNTYPE128_POST				//XXX __attribute__((__aligned__(128)))
+#define ALIGNTYPE16_POST				__attribute__((__aligned__(16)))
+#define ALIGNTYPE128_POST				__attribute__((__aligned__(128)))
 #define FORMAT_PRINTF( x )
 
 #define PATHSEPARATOR_STR				"/"
 #define PATHSEPARATOR_CHAR				'/'
 #define NEWLINE							"\n"
 
-#define ID_INLINE						inline
+#define ID_INLINE						__inline__
 #define ID_FORCE_INLINE					__attribute__((always_inline))
 
 //Specifying extern causes compilation errors on templates
-#define ID_INLINE_EXTERN				inline
+#define ID_INLINE_EXTERN				__inline__
 #define ID_FORCE_INLINE_EXTERN			__attribute__((always_inline))
 
 #ifndef _alloca

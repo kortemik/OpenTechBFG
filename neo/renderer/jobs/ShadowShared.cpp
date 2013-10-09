@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -269,7 +269,7 @@ static float R_SegmentToSegmentDistanceSquare( const idVec3 & start1, const idVe
 	const idVec3 dir0 = start1 - start2;
 	const idVec3 dir1 = end1 - start1;
 	const idVec3 dir2 = end2 - start2;
-	
+
 	const float dotDir1Dir1 = dir1 * dir1;
 	const float dotDir2Dir2 = dir2 * dir2;
 	const float dotDir1Dir2 = dir1 * dir2;
@@ -292,7 +292,7 @@ static float R_SegmentToSegmentDistanceSquare( const idVec3 & start1, const idVe
 		// The parallel case is not relevent here though.
 		return ( start2 - start1 ).LengthSqr();
 	}
-	
+
 	const float n = dotDir0Dir2 * dotDir1Dir2 - dotDir0Dir1 * dotDir2Dir2;
 
 	const float t1 = n / d;
@@ -378,7 +378,7 @@ Rendering with Z-fail can be significantly slower even on today's hardware.
 bool R_ViewInsideShadowVolume( byte * cullBits, const idShadowVert * verts, int numVerts, const triIndex_t * indexes, int numIndexes,
 								const idVec3 & localLightOrigin, const idVec3 & localViewOrigin, const float zNear ) {
 
-	ALIGNTYPE16 idPlane planes[4];
+	ALIGNTYPE16 idPlane planes[4] ALIGNTYPE16_POST;
 	// create two planes orthogonal to each other that intersect along the trace
 	idVec3 startDir = localLightOrigin - localViewOrigin;
 	startDir.Normalize();

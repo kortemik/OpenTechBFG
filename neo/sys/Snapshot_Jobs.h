@@ -59,7 +59,7 @@ struct ALIGNTYPE16 objHeader_t {
 #ifdef SNAPSHOT_CHECKSUMS
 	uint32	checksum;				// Checksum before compression, used for sanity checking
 #endif
-};
+} ALIGNTYPE16_POST;
 
 struct objJobState_t {
 	uint8				valid;
@@ -80,7 +80,7 @@ struct ALIGNTYPE16 objParms_t {
 	// Output
 	objHeader_t	*		destHeader;
 	uint8 *				dest;
-};
+} ALIGNTYPE16_POST;
 	
 // Output from the job that takes the results of the delta'd zrle obj's.
 // This struct contains the start of where the final delta packet data is within lzwMem
@@ -88,7 +88,7 @@ struct ALIGNTYPE16 lzwDelta_t {
 	int					offset;						// Offset into lzwMem
 	int					size;
 	int					snapSequence;
-};
+} ALIGNTYPE16_POST;
 		
 // Struct used to maintain state that needs to persist across lzw jobs
 struct ALIGNTYPE16 lzwInOutData_t {
@@ -104,7 +104,7 @@ struct ALIGNTYPE16 lzwInOutData_t {
 	int						snapSequence;
 	uint16					lastObjId;				// Last obj id written out
 	lzwCompressionData_t *	lzwData;
-};
+} ALIGNTYPE16_POST;
 
 // Input to the job that takes the results of the delta'd zrle obj's, and turns them into lzw delta packets
 struct ALIGNTYPE16 lzwParm_t {
@@ -119,7 +119,7 @@ struct ALIGNTYPE16 lzwParm_t {
 
 	// In/Out	
 	lzwInOutData_t *		ioData;					// In/Out
-};
+} ALIGNTYPE16_POST;
 
 extern void SnapshotObjectJob( objParms_t * parms );
 extern void LZWJob( lzwParm_t * parm );

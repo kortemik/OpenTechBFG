@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -28,7 +28,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __SOFTWARECACHE_H__
 #define __SOFTWARECACHE_H__
 
+#ifdef ID_WIN32
 #pragma warning( disable : 4324 )	// structure was padded due to __declspec(align())
+#endif
 
 /*
 ================================================================================================
@@ -135,12 +137,12 @@ idSoftwareCache
 ================================================
 */
 template< typename _type_, int _entries_ = 8, int _associativity_ = 4, bool aligned = false >
-class ALIGNTYPE128 idSoftwareCache ALIGNTYPE128_POST {
+class ALIGNTYPE128 idSoftwareCache {
 public:
 	void Prefetch( const _type_ * obj ) {
 		::Prefetch( obj, 0 );
 	}
-};
+} ALIGNTYPE128_POST;
 
 /*
 ================================================
@@ -241,7 +243,7 @@ idODSStreamedOutputArray
 ================================================
 */
 template< typename _type_, int _bufferSize_ >
-class ALIGNTYPE16 idODSStreamedOutputArray ALIGNTYPE16_POST {
+class ALIGNTYPE16 idODSStreamedOutputArray {
 public:
 				idODSStreamedOutputArray( _type_ * array, int * numElements, int maxElements ) :
 						localNum( 0 ),
@@ -266,7 +268,7 @@ private:
 	_type_ *	outArray;
 	int *		outNum;
 	int			outMax;
-};
+} ALIGNTYPE16_POST;
 
 /*
 ================================================
@@ -274,7 +276,7 @@ idODSStreamedArray
 ================================================
 */
 template< typename _type_, int _bufferSize_, streamBufferType_t _sbt_ = SBT_DOUBLE, int _roundUpToMultiple_ = 1 >
-class ALIGNTYPE16 idODSStreamedArray ALIGNTYPE16_POST {
+class ALIGNTYPE16 idODSStreamedArray {
 public:
 					idODSStreamedArray( const _type_ * array, const int numElements ) :
 							cachedArrayStart( 0 ),
@@ -290,7 +292,7 @@ public:
 						assert_16_byte_aligned( array );
 						assert( (uintptr_t)array > _bufferSize_ * sizeof( _type_ ) );
 						// Fetch the first batch of elements.
-						FetchNextBatch();	
+						FetchNextBatch();
 						// Calculate the rounded up size here making the mod effectively for free because we have to wait
 						// for memory access anyway while the above FetchNextBatch() does not need the rounded up size yet.
 						inArrayNumRoundedUp += _roundUpToMultiple_ - 1;
@@ -365,7 +367,7 @@ private:
 		}
 #endif
 	}
-};
+} ALIGNTYPE16_POST;
 
 /*
 ================================================
@@ -381,7 +383,7 @@ An index with offsets and more complex logic is needed to support other sizes.
 ================================================
 */
 template< typename _elemType_, typename _indexType_, int _bufferSize_, streamBufferType_t _sbt_ = SBT_DOUBLE, int _roundUpToMultiple_ = 1 >
-class ALIGNTYPE16 idODSStreamedIndexedArray ALIGNTYPE16_POST {
+class ALIGNTYPE16 idODSStreamedIndexedArray {
 public:
 					idODSStreamedIndexedArray( const _elemType_ * array, const int numElements, const _indexType_ * index, const int numIndices ) :
 							cachedArrayStart( 0 ),
@@ -507,7 +509,7 @@ private:
 		}
 #endif
 	}
-};
+} ALIGNTYPE16_POST;
 
 
 #endif // !__SOFTWARECACHE_H__

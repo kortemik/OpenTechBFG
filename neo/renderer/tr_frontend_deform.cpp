@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -120,7 +120,7 @@ static drawSurf_t * R_AutospriteDeform( drawSurf_t *surf ) {
 		newVerts[i+0].xyz = mid + left + up;
 		newVerts[i+0].SetTexCoord( 0, 0 );
 		newVerts[i+1].xyz = mid - left + up;
-		newVerts[i+1].SetTexCoord( 1, 0 ); 
+		newVerts[i+1].SetTexCoord( 1, 0 );
 		newVerts[i+2].xyz = mid - left - up;
 		newVerts[i+2].SetTexCoord( 1, 1 );
 		newVerts[i+3].xyz = mid + left - up;
@@ -233,7 +233,7 @@ static drawSurf_t * R_TubeDeform( drawSurf_t * surf ) {
 			newVerts[i2] = idDrawVert::GetSkinnedDrawVert( srcTri->verts[i2], joints );
 
 			const float l = 0.5f * lengths[j];
-			
+
 			// cross this with the view direction to get minor axis
 			idVec3 dir = mid[j] - localView;
 			idVec3 minor;
@@ -415,13 +415,13 @@ static drawSurf_t * R_FlareDeform( drawSurf_t * surf ) {
 		idVec3 toEye = srcTri->verts[ indexes[i] ].xyz - localViewer;
 		toEye.Normalize();
 
-		idVec3 d1 = srcTri->verts[ indexes[(i+1)%4] ].xyz - localViewer; 
+		idVec3 d1 = srcTri->verts[ indexes[(i+1)%4] ].xyz - localViewer;
 		d1.Normalize();
 		edgeDir[i][2].Cross( toEye, d1 );
 		edgeDir[i][2].Normalize();
 		edgeDir[i][2] = vec3_origin - edgeDir[i][2];
 
-		idVec3 d2 = srcTri->verts[ indexes[(i+3)%4] ].xyz - localViewer; 
+		idVec3 d2 = srcTri->verts[ indexes[(i+3)%4] ].xyz - localViewer;
 		d2.Normalize();
 		edgeDir[i][0].Cross( toEye, d2 );
 		edgeDir[i][0].Normalize();
@@ -453,7 +453,7 @@ static drawSurf_t * R_FlareDeform( drawSurf_t * surf ) {
 		newVerts[i].color[3] = 255;
 	}
 
-	ALIGNTYPE16 static triIndex_t triIndexes[18*3 + 10] = {
+	ALIGNTYPE16 static triIndex_t triIndexes[18*3 + 10] ALIGNTYPE16_POST = {
 		 0, 4,5,  0,5, 6,  0,6,7,  0,7, 1,  1,7, 8,  1,8, 9,
 		15, 4,0, 15,0, 3,  3,0,1,  3,1, 2,  2,1, 9,  2,9,10,
 		14,15,3, 14,3,13, 13,3,2, 13,2,12, 12,2,11, 11,2,10,
@@ -607,14 +607,14 @@ static void AddTriangleToIsland_r( const srfTriangles_t *tri, int triangleNum, b
 		if ( usedList[i] ) {
 			continue;
 		}
-		if ( tri->indexes[i*3+0] == a 
-			|| tri->indexes[i*3+1] == a 
-			|| tri->indexes[i*3+2] == a 
-			|| tri->indexes[i*3+0] == b 
-			|| tri->indexes[i*3+1] == b 
-			|| tri->indexes[i*3+2] == b 
-			|| tri->indexes[i*3+0] == c 
-			|| tri->indexes[i*3+1] == c 
+		if ( tri->indexes[i*3+0] == a
+			|| tri->indexes[i*3+1] == a
+			|| tri->indexes[i*3+2] == a
+			|| tri->indexes[i*3+0] == b
+			|| tri->indexes[i*3+1] == b
+			|| tri->indexes[i*3+2] == b
+			|| tri->indexes[i*3+0] == c
+			|| tri->indexes[i*3+1] == c
 			|| tri->indexes[i*3+2] == c ) {
 			AddTriangleToIsland_r( tri, i, usedList, island );
 		}
@@ -874,7 +874,7 @@ static drawSurf_t * R_ParticleDeform( drawSurf_t *surf, bool useArea ) {
 				steppingRandom.RandomInt();
 				steppingRandom2.RandomInt();
 
-				// calculate local age for this index 
+				// calculate local age for this index
 				int bunchOffset = idMath::Ftoi( stage->particleLife * 1000 * stage->spawnBunching * index / maxStageParticles[stageNum] );
 
 				int particleAge = stageAge - bunchOffset;
@@ -890,7 +890,7 @@ static drawSurf_t * R_ParticleDeform( drawSurf_t *surf, bool useArea ) {
 
 				int inCycleTime = particleAge - particleCycle * stage->cycleMsec;
 
-				if ( renderEntity->shaderParms[SHADERPARM_PARTICLE_STOPTIME] != 0.0f && 
+				if ( renderEntity->shaderParms[SHADERPARM_PARTICLE_STOPTIME] != 0.0f &&
 					g.renderView->time[renderEntity->timeGroup] - inCycleTime >= renderEntity->shaderParms[SHADERPARM_PARTICLE_STOPTIME] * 1000.0f ) {
 					// don't fire any more particles
 					continue;
@@ -954,7 +954,7 @@ static drawSurf_t * R_ParticleDeform( drawSurf_t *surf, bool useArea ) {
 				numVerts += stage->CreateParticle( &g, newVerts + numVerts );
 			}
 		}
-	
+
 		if ( numVerts == 0 ) {
 			continue;
 		}

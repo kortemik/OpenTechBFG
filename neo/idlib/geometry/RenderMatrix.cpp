@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ ALIGNTYPE16 const idRenderMatrix renderMatrix_identity(
 	0.0f, 1.0f, 0.0f, 0.0f,
 	0.0f, 0.0f, 1.0f, 0.0f,
 	0.0f, 0.0f, 0.0f, 1.0f
-);
+) ALIGNTYPE16_POST;
 
 // convert from our coordinate system (looking down X) to OpenGL's coordinate system (looking down -Z)
 ALIGNTYPE16 const idRenderMatrix renderMatrix_flipToOpenGL(
@@ -74,7 +74,7 @@ ALIGNTYPE16 const idRenderMatrix renderMatrix_flipToOpenGL(
 	 0.0f,  0.0f, 1.0f, 0.0f,
 	-1.0f,  0.0f, 0.0f, 0.0f,
 	 0.0f,  0.0f, 0.0f, 1.0f
-);
+) ALIGNTYPE16_POST;
 
 // OpenGL -1 to 1.
 ALIGNTYPE16 const idRenderMatrix renderMatrix_windowSpaceToClipSpace(
@@ -82,7 +82,7 @@ ALIGNTYPE16 const idRenderMatrix renderMatrix_windowSpaceToClipSpace(
 	0.0f, 2.0f, 0.0f, -1.0f,
 	0.0f, 0.0f, 2.0f, -1.0f,
 	0.0f, 0.0f, 0.0f,  1.0f
-);
+) ALIGNTYPE16_POST;
 
 /*
 ================================================================================================
@@ -193,7 +193,7 @@ public:
 			}
 			char buffer[1024];
 			sprintf( buffer, "{ { %d, %d, %d, %d, %d, %d, %d }, %d }, // %s = %d%s\n",
-								frontPolygons[0], frontPolygons[1], frontPolygons[2], frontPolygons[3], 
+								frontPolygons[0], frontPolygons[1], frontPolygons[2], frontPolygons[3],
 								frontPolygons[4], frontPolygons[5], frontPolygons[6],
 								numFrontPolygons, bits, i, comment );
 			OutputDebugString( buffer );
@@ -441,7 +441,7 @@ public:
 			}
 			char buffer[1024];
 			sprintf( buffer, "{ { %d, %d, %d, %d, %d, %d, %d }, %d }, // %s = %d%s\n",
-								silhouetteVertices[0], silhouetteVertices[1], silhouetteVertices[2], silhouetteVertices[3], 
+								silhouetteVertices[0], silhouetteVertices[1], silhouetteVertices[2], silhouetteVertices[3],
 								silhouetteVertices[4], silhouetteVertices[5], silhouetteVertices[6], numSilhouetteVertices, bits, i, comment );
 			OutputDebugString( buffer );
 		}
@@ -666,12 +666,12 @@ void idRenderMatrix::CreateProjectionMatrix( float xMin, float xMax, float yMin,
 
 	out[0][0] = 2.0f * zNear / width;
 	out[0][1] = 0.0f;
-	out[0][2] = ( xMax + xMin ) / width;	// normally 0	
+	out[0][2] = ( xMax + xMin ) / width;	// normally 0
 	out[0][3] = 0.0f;
 
 	out[1][0] = 0.0f;
 	out[1][1] = 2.0f * zNear / height;
-	out[1][2] = ( yMax + yMin ) / height;	// normally 0	
+	out[1][2] = ( yMax + yMin ) / height;	// normally 0
 	out[1][3] = 0.0f;
 
 	if ( zFar <= zNear ) {
@@ -866,12 +866,12 @@ void idRenderMatrix::InverseOffsetScaleForBounds( const idRenderMatrix & src, co
 	out[0][1] = scale[0] * src[0][1];
 	out[0][2] = scale[0] * src[0][2];
 	out[0][3] = scale[0] * ( src[0][3] + offset[0] );
-						
+
 	out[1][0] = scale[1] * src[1][0];
 	out[1][1] = scale[1] * src[1][1];
 	out[1][2] = scale[1] * src[1][2];
 	out[1][3] = scale[1] * ( src[1][3] + offset[1] );
-						
+
 	out[2][0] = scale[2] * src[2][0];
 	out[2][1] = scale[2] * src[2][1];
 	out[2][2] = scale[2] * src[2][2];
@@ -3025,8 +3025,8 @@ static void ClipHomogeneousPolygonToSide_SSE2( idVec4 * __restrict newPoints, id
 	__m128i mask = _mm_sub_epi32( vector_int_0123, _mm_shuffle_epi32( _mm_cvtsi32_si128( numPoints ), 0 ) );
 	__m128i index = _mm_setzero_si128();
 
-	ALIGNTYPE16 unsigned short indices[16 * 2];
-	ALIGNTYPE16 float clipFractions[16];
+	ALIGNTYPE16 unsigned short indices[16 * 2] ALIGNTYPE16_POST;
+	ALIGNTYPE16 float clipFractions[16] ALIGNTYPE16_POST;
 
 	int localNumPoint = numPoints;
 
@@ -3144,7 +3144,7 @@ Clips a polygon with homogeneous coordinates to all six axis aligned unit cube p
 */
 static int ClipHomogeneousPolygonToUnitCube_SSE2( idVec4 * points, int numPoints ) {
 	assert( numPoints < 16 - 6 );
-	ALIGNTYPE16 idVec4 newPoints[16 * 2];
+	ALIGNTYPE16 idVec4 newPoints[16 * 2] ALIGNTYPE16_POST;
 
 #if defined( CLIP_SPACE_D3D )	// the D3D near plane is at Z=0 instead of Z=-1
 	ClipHomogeneousPolygonToSide_SSE2( newPoints, points, numPoints, 2, vector_float_neg_one, vector_float_zero );	// near
@@ -3227,7 +3227,7 @@ Clips a polygon with homogeneous coordinates to all six axis aligned unit cube p
 */
 static int ClipHomogeneousPolygonToUnitCube_Generic( idVec4 * points, int numPoints ) {
 	assert( numPoints < 16 - 6 );
-	ALIGNTYPE16 idVec4 newPoints[2 * 16];	// the C clip code temporarily doubles the points
+	ALIGNTYPE16 idVec4 newPoints[2 * 16] ALIGNTYPE16_POST;	// the C clip code temporarily doubles the points
 
 #if defined( CLIP_SPACE_D3D )	// the D3D near plane is at Z=0 instead of Z=-1
 	numPoints = ClipHomogeneousPolygonToSide_Generic( newPoints, points, numPoints, 2, -1.0f, 0.0f );	// near
@@ -3298,7 +3298,7 @@ void idRenderMatrix::ProjectedFullyClippedBounds( idBounds & projected, const id
 	const __m128 p6 = _mm_madd_ps( b1X, mvpX, _mm_madd_ps( b1Y, mvpY, _mm_madd_ps( b1Z, mvpZ, mvpW ) ) );
 	const __m128 p7 = _mm_madd_ps( b0X, mvpX, _mm_madd_ps( b1Y, mvpY, _mm_madd_ps( b1Z, mvpZ, mvpW ) ) );
 
-	ALIGNTYPE16 idVec4 projectedPoints[8];
+	ALIGNTYPE16 idVec4 projectedPoints[8] ALIGNTYPE16_POST;
 	_mm_store_ps( projectedPoints[0].ToFloatPtr(), p0 );
 	_mm_store_ps( projectedPoints[1].ToFloatPtr(), p1 );
 	_mm_store_ps( projectedPoints[2].ToFloatPtr(), p2 );
@@ -3308,7 +3308,7 @@ void idRenderMatrix::ProjectedFullyClippedBounds( idBounds & projected, const id
 	_mm_store_ps( projectedPoints[6].ToFloatPtr(), p6 );
 	_mm_store_ps( projectedPoints[7].ToFloatPtr(), p7 );
 
-	ALIGNTYPE16 idVec4 clippedPoints[6 * 16];
+	ALIGNTYPE16 idVec4 clippedPoints[6 * 16] ALIGNTYPE16_POST;
 	int numClippedPoints = 0;
 	for ( int i = 0; i < 6; i++ ) {
 		_mm_store_ps( clippedPoints[numClippedPoints + 0].ToFloatPtr(), _mm_load_ps( projectedPoints[boxPolygonVertices[i][0]].ToFloatPtr() ) );
@@ -3947,7 +3947,7 @@ void idRenderMatrix::DepthBoundsForShadowBounds( float & min, float & max, const
 	const __m128 np6 = _mm_madd_ps( b1X, mvpX, _mm_madd_ps( b1Y, mvpY, _mm_madd_ps( b1Z, mvpZ, mvpW ) ) );
 	const __m128 np7 = _mm_madd_ps( b0X, mvpX, _mm_madd_ps( b1Y, mvpY, _mm_madd_ps( b1Z, mvpZ, mvpW ) ) );
 
-	ALIGNTYPE16 idVec4 projectedNearPoints[8];
+	ALIGNTYPE16 idVec4 projectedNearPoints[8] ALIGNTYPE16_POST;
 	_mm_store_ps( projectedNearPoints[0].ToFloatPtr(), np0 );
 	_mm_store_ps( projectedNearPoints[1].ToFloatPtr(), np1 );
 	_mm_store_ps( projectedNearPoints[2].ToFloatPtr(), np2 );
@@ -3980,7 +3980,7 @@ void idRenderMatrix::DepthBoundsForShadowBounds( float & min, float & max, const
 	const __m128 fp6 = _mm_madd_ps( d1X, mvpX, _mm_madd_ps( d1Y, mvpY, _mm_mul_ps( d1Z, mvpZ ) ) );
 	const __m128 fp7 = _mm_madd_ps( d0X, mvpX, _mm_madd_ps( d1Y, mvpY, _mm_mul_ps( d1Z, mvpZ ) ) );
 
-	ALIGNTYPE16 idVec4 projectedFarPoints[8];
+	ALIGNTYPE16 idVec4 projectedFarPoints[8] ALIGNTYPE16_POST;
 	_mm_store_ps( projectedFarPoints[0].ToFloatPtr(), fp0 );
 	_mm_store_ps( projectedFarPoints[1].ToFloatPtr(), fp1 );
 	_mm_store_ps( projectedFarPoints[2].ToFloatPtr(), fp2 );
@@ -3990,7 +3990,7 @@ void idRenderMatrix::DepthBoundsForShadowBounds( float & min, float & max, const
 	_mm_store_ps( projectedFarPoints[6].ToFloatPtr(), fp6 );
 	_mm_store_ps( projectedFarPoints[7].ToFloatPtr(), fp7 );
 
-	ALIGNTYPE16 idVec4 clippedPoints[( 6 + 12 ) * 16];
+	ALIGNTYPE16 idVec4 clippedPoints[( 6 + 12 ) * 16] ALIGNTYPE16_POST;
 	int numClippedPoints = 0;
 
 	// clip the front facing bounding box polygons at the near cap
@@ -4093,7 +4093,7 @@ void idRenderMatrix::DepthBoundsForShadowBounds( float & min, float & max, const
 	int frontBits = GetBoxFrontBits_Generic( bounds, localLightOrigin );
 
 	// bounding box corners
-	ALIGNTYPE16 idVec4 projectedNearPoints[8];
+	ALIGNTYPE16 idVec4 projectedNearPoints[8] ALIGNTYPE16_POST;
 	for ( int i = 0; i < 8; i++ ) {
 		const idVec3 & v = points[i];
 		projectedNearPoints[i].x = v[0] * mvp[0][0] + v[1] * mvp[0][1] + v[2] * mvp[0][2] + mvp[0][3];
@@ -4103,7 +4103,7 @@ void idRenderMatrix::DepthBoundsForShadowBounds( float & min, float & max, const
 	}
 
 	// bounding box corners projected to infinity from the light position
-	ALIGNTYPE16 idVec4 projectedFarPoints[8];
+	ALIGNTYPE16 idVec4 projectedFarPoints[8] ALIGNTYPE16_POST;
 	for ( int i = 0; i < 8; i++ ) {
 		const idVec3 v = points[i] - localLightOrigin;
 		projectedFarPoints[i].x = v[0] * mvp[0][0] + v[1] * mvp[0][1] + v[2] * mvp[0][2];
@@ -4112,7 +4112,7 @@ void idRenderMatrix::DepthBoundsForShadowBounds( float & min, float & max, const
 		projectedFarPoints[i].w = v[0] * mvp[3][0] + v[1] * mvp[3][1] + v[2] * mvp[3][2];
 	}
 
-	ALIGNTYPE16 idVec4 clippedPoints[( 6 + 12 ) * 16];
+	ALIGNTYPE16 idVec4 clippedPoints[( 6 + 12 ) * 16] ALIGNTYPE16_POST;
 	int numClippedPoints = 0;
 
 	// clip the front facing bounding box polygons at the near cap
@@ -4201,7 +4201,7 @@ void idRenderMatrix::GetFrustumPlanes( idPlane planes[6], const idRenderMatrix &
 		planes[0][1] = frustum[0][1];
 		planes[0][2] = frustum[0][2];
 		planes[0][3] = frustum[0][3];
- 
+
 		// bottom: inside(p) = p * frustum[1] > 0
 		planes[2][0] = frustum[1][0];
 		planes[2][1] = frustum[1][1];
@@ -4219,7 +4219,7 @@ void idRenderMatrix::GetFrustumPlanes( idPlane planes[6], const idRenderMatrix &
 		planes[0][1] = frustum[3][1] + frustum[0][1];
 		planes[0][2] = frustum[3][2] + frustum[0][2];
 		planes[0][3] = frustum[3][3] + frustum[0][3];
- 
+
 		// bottom: inside(p) = p * frustum[1] > -( p * frustum[3] )
 		planes[2][0] = frustum[3][0] + frustum[1][0];
 		planes[2][1] = frustum[3][1] + frustum[1][1];
@@ -4244,7 +4244,7 @@ void idRenderMatrix::GetFrustumPlanes( idPlane planes[6], const idRenderMatrix &
 	planes[3][1] = frustum[3][1] - frustum[1][1];
 	planes[3][2] = frustum[3][2] - frustum[1][2];
 	planes[3][3] = frustum[3][3] - frustum[1][3];
- 
+
 	// far: inside(p) = p * frustum[2] < p * frustum[3]
 	planes[5][0] = frustum[3][0] - frustum[2][0];
 	planes[5][1] = frustum[3][1] - frustum[2][1];

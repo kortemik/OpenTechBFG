@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -126,7 +126,7 @@ idCVar r_subviewOnly( "r_subviewOnly", "0", CVAR_RENDERER | CVAR_BOOL, "1 = don'
 idCVar r_testGamma( "r_testGamma", "0", CVAR_RENDERER | CVAR_FLOAT, "if > 0 draw a grid pattern to test gamma levels", 0, 195 );
 idCVar r_testGammaBias( "r_testGammaBias", "0", CVAR_RENDERER | CVAR_FLOAT, "if > 0 draw a grid pattern to test gamma levels" );
 idCVar r_lightScale( "r_lightScale", "3", CVAR_ARCHIVE | CVAR_RENDERER | CVAR_FLOAT, "all light intensities are multiplied by this" );
-idCVar r_flareSize( "r_flareSize", "1", CVAR_RENDERER | CVAR_FLOAT, "scale the flare deforms from the material def" ); 
+idCVar r_flareSize( "r_flareSize", "1", CVAR_RENDERER | CVAR_FLOAT, "scale the flare deforms from the material def" );
 
 idCVar r_skipPrelightShadows( "r_skipPrelightShadows", "0", CVAR_RENDERER | CVAR_BOOL, "skip the dmap generated static shadow volumes" );
 idCVar r_useScissor( "r_useScissor", "1", CVAR_RENDERER | CVAR_BOOL, "scissor clip as portals and lights are processed" );
@@ -929,7 +929,7 @@ void R_InitOpenGL() {
 	idLib::Printf( "OpenGL Version: %3.1f\n", glVersion );
 	idLib::Printf( "OpenGL Vendor : %s\n", glConfig.vendor_string );
 	idLib::Printf( "OpenGL GLSL   : %3.1f\n", glslVersion );
-	
+
 	// OpenGL driver constants
 	GLint temp;
 	qglGetIntegerv( GL_MAX_TEXTURE_SIZE, &temp );
@@ -1035,7 +1035,7 @@ Reload the material displayed by r_showSurfaceInfo
 static void R_ReloadSurface_f( const idCmdArgs &args ) {
 	modelTrace_t mt;
 	idVec3 start, end;
-	
+
 	// start far enough away that we don't hit the player model
 	start = tr.primaryView->renderView.vieworg + tr.primaryView->renderView.viewaxis[0] * 16;
 	end = start + tr.primaryView->renderView.viewaxis[0] * 1000.0f;
@@ -1215,13 +1215,13 @@ void R_ReportSurfaceAreas_f( const idCmdArgs &args ) {
 #pragma warning( default: 6385 )
 
 
-/* 
-============================================================================== 
- 
-						SCREEN SHOTS 
- 
-============================================================================== 
-*/ 
+/*
+==============================================================================
+
+						SCREEN SHOTS
+
+==============================================================================
+*/
 
 /*
 ====================
@@ -1273,7 +1273,7 @@ void R_ReadTiledPixels( int width, int height, byte *buffer, renderView_t *ref =
 			}
 
 			qglReadBuffer( GL_FRONT );
-			qglReadPixels( 0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, temp ); 
+			qglReadPixels( 0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, temp );
 
 			int	row = ( w * 3 + 3 ) & ~3;		// OpenGL pads to dword boundaries
 
@@ -1291,15 +1291,15 @@ void R_ReadTiledPixels( int width, int height, byte *buffer, renderView_t *ref =
 
 
 /*
-================== 
+==================
 TakeScreenshot
 
 Move to tr_imagefiles.c...
 
 Downsample is the number of steps to mipmap the image before saving it
 If ref == NULL, common->UpdateScreen will be used
-================== 
-*/  
+==================
+*/
 void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fileName, int blends, renderView_t *ref ) {
 	byte		*buffer;
 	int			i, j, c, temp;
@@ -1361,16 +1361,16 @@ void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fil
 	takingScreenshot = false;
 }
 
-/* 
-================== 
+/*
+==================
 R_ScreenshotFilename
 
 Returns a filename with digits appended
 if we have saved a previous screenshot, don't scan
 from the beginning, because recording demo avis can involve
 thousands of shots
-================== 
-*/  
+==================
+*/
 void R_ScreenshotFilename( int &lastNumber, const char *base, idStr &fileName ) {
 	int	a,b,c,d, e;
 
@@ -1408,15 +1408,15 @@ void R_ScreenshotFilename( int &lastNumber, const char *base, idStr &fileName ) 
 }
 
 /*
-================== 
+==================
 R_BlendedScreenShot
 
 screenshot
 screenshot [filename]
 screenshot [width] [height]
 screenshot [width] [height] [samples]
-================== 
-*/ 
+==================
+*/
 #define	MAX_BLENDS	256	// to keep the accumulation in shorts
 void R_ScreenShot_f( const idCmdArgs &args ) {
 	static int lastNumber = 0;
@@ -1490,7 +1490,7 @@ void R_StencilShot() {
 
 	idTempArray< byte > byteBuffer( pix );
 
-	qglReadPixels( 0, 0, width, height, GL_STENCIL_INDEX , GL_UNSIGNED_BYTE, byteBuffer.Ptr() ); 
+	qglReadPixels( 0, 0, width, height, GL_STENCIL_INDEX , GL_UNSIGNED_BYTE, byteBuffer.Ptr() );
 
 	for ( i = 0 ; i < pix ; i++ ) {
 		buffer[18+i*3] =
@@ -1567,15 +1567,15 @@ void R_SampleCubeMap( const idVec3 &dir, int size, byte *buffers[6], byte result
 	result[3] = buffers[axis][(y*size+x)*4+3];
 }
 
-/* 
-================== 
+/*
+==================
 R_MakeAmbientMap_f
 
 R_MakeAmbientMap_f <basename> [size]
 
 Saves out env/<basename>_amb_ft.tga, etc
-================== 
-*/  
+==================
+*/
 void R_MakeAmbientMap_f( const idCmdArgs &args ) {
 	idStr fullname;
 	const char	*baseName;
@@ -1583,7 +1583,7 @@ void R_MakeAmbientMap_f( const idCmdArgs &args ) {
 	renderView_t	ref;
 	viewDef_t	primary;
 	int			downSample;
-	char	*extensions[6] =  { "_px.tga", "_nx.tga", "_py.tga", "_ny.tga", 
+	char	*extensions[6] =  { "_px.tga", "_nx.tga", "_py.tga", "_ny.tga",
 		"_pz.tga", "_nz.tga" };
 	int			outSize;
 	byte		*buffers[6];
@@ -1708,7 +1708,7 @@ void R_MakeAmbientMap_f( const idCmdArgs &args ) {
 			Mem_Free( buffers[i] );
 		}
 	}
-} 
+}
 
 //============================================================================
 
@@ -2080,7 +2080,7 @@ static srfTriangles_t * R_MakeFullScreenTris() {
 
 	triIndex_t tempIndexes[6] = { 3, 0, 2, 2, 0, 1 };
 	memcpy( tri->indexes, tempIndexes, indexSize );
-	
+
 	verts[0].xyz[0] = -1.0f;
 	verts[0].xyz[1] = 1.0f;
 	verts[0].SetTexCoord( 0.0f, 1.0f );
@@ -2217,7 +2217,7 @@ srfTriangles_t* R_MakeTestImageTriangles() {
 	int allocatedVertexBytes =  ALIGN( vertexSize, 16 );
 	tri->verts = (idDrawVert *)Mem_ClearedAlloc( allocatedVertexBytes, TAG_RENDER_TOOLS );
 
-	ALIGNTYPE16 triIndex_t tempIndexes[6] = { 3, 0, 2, 2, 0, 1 };
+	ALIGNTYPE16 triIndex_t tempIndexes[6] ALIGNTYPE16_POST = { 3, 0, 2, 2, 0, 1 };
 	memcpy( tri->indexes, tempIndexes, indexSize );
 
 	idDrawVert* tempVerts = tri->verts;
@@ -2252,7 +2252,7 @@ srfTriangles_t* R_MakeTestImageTriangles() {
 idRenderSystemLocal::Init
 ===============
 */
-void idRenderSystemLocal::Init() {	
+void idRenderSystemLocal::Init() {
 
 	common->Printf( "------- Initializing renderSystem --------\n" );
 
@@ -2319,7 +2319,7 @@ void idRenderSystemLocal::Init() {
 idRenderSystemLocal::Shutdown
 ===============
 */
-void idRenderSystemLocal::Shutdown() {	
+void idRenderSystemLocal::Shutdown() {
 	common->Printf( "idRenderSystem::Shutdown()\n" );
 
 	fonts.DeleteContents();
@@ -2375,7 +2375,7 @@ void idRenderSystemLocal::BeginLevelLoad() {
 	globalImages->BeginLevelLoad();
 	renderModelManager->BeginLevelLoad();
 
-	// Re-Initialize the Default Materials if needed. 
+	// Re-Initialize the Default Materials if needed.
 	R_InitMaterials();
 }
 
@@ -2474,7 +2474,7 @@ void idRenderSystemLocal::InitOpenGL() {
 
 		// Reloading images here causes the rendertargets to get deleted. Figure out how to handle this properly on 360
 		globalImages->ReloadImages( true );
-		
+
 		int err = qglGetError();
 		if ( err != GL_NO_ERROR ) {
 			common->Printf( "glGetError() = 0x%x\n", err );

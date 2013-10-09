@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -756,7 +756,7 @@ drawSurf_t * idRenderModelDecal::CreateDecalDrawSurf( const viewEntity_t *space,
 
 		const float f = ( deltaTime > decalInfo.stayTime ) ? ( (float) fadeTime / decalInfo.fadeTime ) : 0.0f;
 
-		ALIGNTYPE16 float fadeColor[4];
+		ALIGNTYPE16 float fadeColor[4] ALIGNTYPE16_POST;
 		for ( int j = 0; j < 4; j++ ) {
 			fadeColor[j] = 255.0f * ( decalInfo.start[j] + ( decalInfo.end[j] - decalInfo.start[j] ) * f );
 		}

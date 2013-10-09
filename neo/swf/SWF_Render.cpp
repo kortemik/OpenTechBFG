@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -226,7 +226,7 @@ void idSWF::RenderSprite( idRenderSystem * gui, idSWFSpriteInstance * spriteInst
 		swfRenderState_t renderState2;
 
 		if ( spriteInstance->stereoDepth != STEREO_DEPTH_TYPE_NONE ) {
-			renderState2.stereoDepth = ( stereoDepthType_t )spriteInstance->stereoDepth; 
+			renderState2.stereoDepth = ( stereoDepthType_t )spriteInstance->stereoDepth;
 		} else if ( renderState.stereoDepth != STEREO_DEPTH_TYPE_NONE ) {
 			renderState2.stereoDepth = renderState.stereoDepth;
 		}
@@ -265,7 +265,7 @@ void idSWF::RenderSprite( idRenderSystem * gui, idSWFSpriteInstance * spriteInst
 				//if ( display.spriteInstance->name.Icmp( "_rightAlign" ) == 0 ) {
 				//	renderState2.matrix.tx = ( (float)renderSystem->GetWidth() - ( ( (float)frameWidth - display.matrix.tx - adj ) * renderState.matrix.xx ) );
 				//}
-		
+
 				float widthAdj = swf_titleSafe.GetFloat() * frameWidth;
 				float heightAdj = swf_titleSafe.GetFloat() * frameHeight;
 
@@ -308,12 +308,12 @@ void idSWF::RenderSprite( idRenderSystem * gui, idSWFSpriteInstance * spriteInst
 					float prevX = renderState2.matrix.tx;
 					renderState2.matrix.tx = ( display.matrix.tx + widthAdj ) * renderState.matrix.xx;
 					xOffset = (( renderState2.matrix.tx - prevX ) / renderState.matrix.xx );
-					
+
 
 					float prevY = renderState2.matrix.ty;
 					renderState2.matrix.ty = ( (float)sysHeight - ( ( (float)frameHeight - display.matrix.ty + heightAdj ) * renderState.matrix.yy ) );
 					yOffset = (( renderState2.matrix.ty - prevY ) / renderState.matrix.yy );
-					
+
 					display.spriteInstance->SetAlignment( spriteInstance->xOffset + xOffset, spriteInstance->yOffset + yOffset );
 				} else if ( display.spriteInstance->name.Icmp( "_absBottom" ) == 0 ) {
 					renderState2.matrix.ty = ( (float)sysHeight - ( ( (float)frameHeight - display.matrix.ty ) * renderState.matrix.yy ) );
@@ -334,7 +334,7 @@ void idSWF::RenderSprite( idRenderSystem * gui, idSWFSpriteInstance * spriteInst
 					float prevX = renderState2.matrix.tx;
 					renderState2.matrix.tx = ( (float)sysWidth - ( ( (float)frameWidth - display.matrix.tx ) * renderState.matrix.xx ) );
 					xOffset = (( renderState2.matrix.tx - prevX ) / renderState.matrix.xx );
-					display.spriteInstance->SetAlignment( spriteInstance->xOffset + xOffset, spriteInstance->yOffset + yOffset );					
+					display.spriteInstance->SetAlignment( spriteInstance->xOffset + xOffset, spriteInstance->yOffset + yOffset );
 				} else if ( display.spriteInstance->name.Icmp( "_bottomRight" ) == 0 ) {
 					renderState2.matrix.tx = ( (float)sysWidth - ( ( (float)frameWidth - display.matrix.tx + widthAdj ) * renderState.matrix.xx ) );
 					renderState2.matrix.ty = ( (float)sysHeight - ( ( (float)frameHeight - display.matrix.ty + heightAdj ) * renderState.matrix.yy ) );
@@ -357,7 +357,7 @@ void idSWF::RenderSprite( idRenderSystem * gui, idSWFSpriteInstance * spriteInst
 					display.spriteInstance->SetAlignment( spriteInstance->xOffset + xOffset, spriteInstance->yOffset + yOffset );
 				}
 			}
-			
+
 			RenderSprite( gui, display.spriteInstance, renderState2, time, isSplitscreen );
 		} else if ( entry->type == SWF_DICT_SHAPE ) {
 			RenderShape( gui, entry->shape, renderState2 );
@@ -481,7 +481,7 @@ void idSWF::RenderMorphShape( idRenderSystem * gui, const idSWFShape * shape, co
 
 		gui->SetGLState( GLStateForRenderState( renderState ) );
 
-		idDrawVert * verts = gui->AllocTris( fill.startVerts.Num(), fill.indices.Ptr(), fill.indices.Num(), material, renderState.stereoDepth );	
+		idDrawVert * verts = gui->AllocTris( fill.startVerts.Num(), fill.indices.Ptr(), fill.indices.Num(), material, renderState.stereoDepth );
 		if ( verts == NULL ) {
 			continue;
 		}
@@ -494,7 +494,7 @@ void idSWF::RenderMorphShape( idRenderSystem * gui, const idSWFShape * shape, co
 			st.y = ( ( xy.y - bounds.tl.y ) * oneOverSize.y ) * 20.0f;
 			idVec2 adjust( 0.5f * oneOverSize.x, 0.5f * oneOverSize.y );
 
-			ALIGNTYPE16 idDrawVert tempVert;
+			ALIGNTYPE16 idDrawVert tempVert ALIGNTYPE16_POST;
 
 			tempVert.Clear();
 			tempVert.xyz.ToVec2() = renderState.matrix.Transform( xy ).Scale( scaleToVirtual );
@@ -579,12 +579,12 @@ void idSWF::RenderShape( idRenderSystem * gui, const idSWFShape * shape, const s
 
 		gui->SetGLState( GLStateForRenderState( renderState ) );
 
-		idDrawVert * verts = gui->AllocTris( fill.startVerts.Num(), fill.indices.Ptr(), fill.indices.Num(), material, renderState.stereoDepth );	
+		idDrawVert * verts = gui->AllocTris( fill.startVerts.Num(), fill.indices.Ptr(), fill.indices.Num(), material, renderState.stereoDepth );
 		if ( verts == NULL ) {
 			continue;
 		}
 
-		ALIGNTYPE16 idDrawVert tempVerts[4];
+		ALIGNTYPE16 idDrawVert tempVerts[4] ALIGNTYPE16_POST;
 		for ( int j = 0; j < fill.startVerts.Num(); j++ ) {
 			const idVec2 & xy = fill.startVerts[j];
 
@@ -643,7 +643,7 @@ void idSWF::RenderShape( idRenderSystem * gui, const idSWFShape * shape, const s
 
 		gui->SetGLState( GLStateForRenderState( renderState ) | GLS_POLYMODE_LINE );
 
-		idDrawVert * verts = gui->AllocTris( line.startVerts.Num(), line.indices.Ptr(), line.indices.Num(), white, renderState.stereoDepth );	
+		idDrawVert * verts = gui->AllocTris( line.startVerts.Num(), line.indices.Ptr(), line.indices.Num(), white, renderState.stereoDepth );
 		if ( verts == NULL ) {
 			continue;
 		}
@@ -651,7 +651,7 @@ void idSWF::RenderShape( idRenderSystem * gui, const idSWFShape * shape, const s
 		for ( int j = 0; j < line.startVerts.Num(); j++ ) {
 			const idVec2 & xy = line.startVerts[j];
 
-			ALIGNTYPE16 idDrawVert tempVert;
+			ALIGNTYPE16 idDrawVert tempVert ALIGNTYPE16_POST;
 
 			tempVert.Clear();
 			tempVert.xyz.ToVec2() = renderState.matrix.Transform( xy ).Scale( scaleToVirtual );
@@ -728,7 +728,7 @@ void idSWF::RenderEditText( idRenderSystem * gui, idSWFTextInstance * textInstan
 	if ( textInstance->NeedsSoundPlayed() ) {
 		PlaySound( textInstance->GetSoundClip() );
 		textInstance->ClearPlaySound();
-	}	
+	}
 
 	if ( textInstance->tooltip ) {
 		FindTooltipIcons( &text );
@@ -821,12 +821,12 @@ void idSWF::RenderEditText( idRenderSystem * gui, idSWFTextInstance * textInstan
 
 	textInstance->linespacing = linespacing;
 	textInstance->bounds = bounds;
-	
+
 	if ( shape->flags & SWF_ET_AUTOSIZE ) {
 		bounds.br.x = frameWidth;
 		bounds.br.y = frameHeight;
 	}
-	
+
 	if ( drawCursor && cursorPos <= 0 ) {
 		float yPos = 0.0f;
 		scaledGlyphInfo_t glyph;
@@ -875,7 +875,7 @@ void idSWF::RenderEditText( idRenderSystem * gui, idSWFTextInstance * textInstan
 				currentLine->Append( '\n' );
 				x = bounds.tl.x;
 				y += linespacing;
-				currentLine = &textLines.Alloc();			
+				currentLine = &textLines.Alloc();
 				lastbreak = 0;
 				charIndex++;
 				continue;
@@ -893,7 +893,7 @@ void idSWF::RenderEditText( idRenderSystem * gui, idSWFTextInstance * textInstan
 		}
 
 		tooltipIcon_t iconCheck;
-		
+
 		if ( iconIndex < tooltipIconList.Num() ) {
 			iconCheck = tooltipIconList[iconIndex];
 		}
@@ -954,7 +954,7 @@ void idSWF::RenderEditText( idRenderSystem * gui, idSWFTextInstance * textInstan
 	if ( textInstance->IsSubtitle() && textInstance->IsUpdatingSubtitle() ) {
 		if ( textLines.Num() > 0 && textInstance->SubNeedsSwitch() ) {
 
-			int lastWordIndex = textInstance->GetApporoximateSubtitleBreak( time );	
+			int lastWordIndex = textInstance->GetApporoximateSubtitleBreak( time );
 			int newEndChar = textInstance->GetSubStartIndex() + textLines[0].Length();
 
 			int wordCount = 0;
@@ -986,13 +986,13 @@ void idSWF::RenderEditText( idRenderSystem * gui, idSWFTextInstance * textInstan
 			if ( wordCount <= 0 && textLines[0].Length() > 0 ) {
 				wordCount = 1;
 			}
-			
+
 			if ( !earlyOut ) {
 				textInstance->LastWordChanged( wordCount, time );
 			}
 
 			textInstance->SetSubEndIndex( newEndChar, time );
-				
+
 			idStr subText = textLines[0].Left( newEndChar - textInstance->GetSubStartIndex() );
 			idSWFParmList parms;
 			parms.Append( subText );
@@ -1005,7 +1005,7 @@ void idSWF::RenderEditText( idRenderSystem * gui, idSWFTextInstance * textInstan
 			textInstance->SwitchSubtitleText( time );
 		}
 
-		if ( !textInstance->UpdateSubtitle( time ) ) {			
+		if ( !textInstance->UpdateSubtitle( time ) ) {
 			textInstance->SubtitleComplete();
 			idSWFParmList parms;
 			parms.Append( textInstance->GetSubAlignment() );
@@ -1022,7 +1022,7 @@ void idSWF::RenderEditText( idRenderSystem * gui, idSWFTextInstance * textInstan
 	textInstance->CalcMaxScroll( textLines.Num() - maxLines );
 
 	int c = 1;
-	int textLine = textInstance->scroll;	
+	int textLine = textInstance->scroll;
 
 	if ( textLine + maxLines > textLines.Num() && maxLines < textLines.Num() ) {
 		textLine = textLines.Num() - maxLines;
@@ -1099,7 +1099,7 @@ void idSWF::RenderEditText( idRenderSystem * gui, idSWFTextInstance * textInstan
 						endFound = true;
 						break;
 					}
-				} 
+				}
 				inputText.AppendUTF8Char( tc );
 				left += glyphSkip;
 			}
@@ -1113,13 +1113,13 @@ void idSWF::RenderEditText( idRenderSystem * gui, idSWFTextInstance * textInstan
 			endCharacter = startCheckIndex;
 		}
 	}
-	
+
 	for ( int t = 0; t < textLines.Num(); t++ ) {
 
 		if ( textInstance->IsSubtitle() && t > 0 ) {
 			break;
 		}
-		
+
 		if ( t < textLine ) {
 			idStr & text = textLines[t];
 			c += text.Length();
@@ -1197,7 +1197,7 @@ void idSWF::RenderEditText( idRenderSystem * gui, idSWFTextInstance * textInstan
 
 		y = bounds.tl.y + ( index * linespacing );
 
-		float biggestGlyphHeight = 0.0f;		
+		float biggestGlyphHeight = 0.0f;
 		/*for ( int image = 0; image < tooltipIconList.Num(); ++image ) {
 			if ( tooltipIconList[image].startIndex >= startCharacter && tooltipIconList[image].endIndex < endCharacter ) {
 				biggestGlyphHeight = tooltipIconList[image].imageHeight > biggestGlyphHeight ? tooltipIconList[image].imageHeight : biggestGlyphHeight;
@@ -1208,7 +1208,7 @@ void idSWF::RenderEditText( idRenderSystem * gui, idSWFTextInstance * textInstan
 		float yTopOffset = 0.0f;
 
 		if ( biggestGlyphHeight > 0.0f ) {
-		
+
 			float topSpace = 0.0f;
 			float bottomSpace = 0.0f;
 
@@ -1237,8 +1237,8 @@ void idSWF::RenderEditText( idRenderSystem * gui, idSWFTextInstance * textInstan
 			}
 		}
 
-		y += yOffset;		
-		yPrevBottomOffset = yBottomOffset;		
+		y += yOffset;
+		yPrevBottomOffset = yBottomOffset;
 
 		float extraSpace = 0.0f;
 		switch ( shape->align ) {
@@ -1276,7 +1276,7 @@ void idSWF::RenderEditText( idRenderSystem * gui, idSWFTextInstance * textInstan
 		i = 0;
 		int overallLineIndex = 0;
 		idVec4 textColor = defaultColor;
-		while ( i < lastChar ) {		
+		while ( i < lastChar ) {
 
 			if ( i >= text.Length() ) {
 				break;
@@ -1318,7 +1318,7 @@ void idSWF::RenderEditText( idRenderSystem * gui, idSWFTextInstance * textInstan
 			if ( iconIndex <  tooltipIconList.Num() ) {
 				icon = tooltipIconList[iconIndex];
 			}
-			
+
 			if ( overallIndex == icon.startIndex ) {
 				insertingImage = true;
 
@@ -1334,9 +1334,9 @@ void idSWF::RenderEditText( idRenderSystem * gui, idSWFTextInstance * textInstan
 					imageY += ( glyphHeight - imageHeight ) * 0.5f;
 					imageY += 2.0f;
 				} else {
-					imageY = ( y + glyphHeight ) - ( ( icon.imageHeight * imageScale ) - ( glyphHeight ) );	
-				} 
-				
+					imageY = ( y + glyphHeight ) - ( ( icon.imageHeight * imageScale ) - ( glyphHeight ) );
+				}
+
 				float imageX = x + glyph.left;
 				float imageW = icon.imageWidth * imageScale;
 				float imageH = icon.imageHeight * imageScale;
@@ -1363,7 +1363,7 @@ void idSWF::RenderEditText( idRenderSystem * gui, idSWFTextInstance * textInstan
 
 			} else if ( overallIndex == icon.endIndex ) {
 				insertingImage = false;
-				iconIndex++;	
+				iconIndex++;
 			}
 
 			if ( insertingImage ) {
@@ -1408,7 +1408,7 @@ void idSWF::RenderEditText( idRenderSystem * gui, idSWFTextInstance * textInstan
 			}
 
 			if ( textInstance->GetHasDropShadow() ) {
-			
+
 				float dsY = glyphY + glyphScale * 2.0f;
 				float dsX = glyphX + glyphScale * 2.0f;
 
@@ -1423,7 +1423,7 @@ void idSWF::RenderEditText( idRenderSystem * gui, idSWFTextInstance * textInstan
 				DrawStretchPic( idVec4( dstopl.x, dstopl.y, s1, t1 ), idVec4( dstopr.x, dstopr.y, s2, t1 ), idVec4( dsbr.x, dsbr.y, s2, t2 ), idVec4( dsbl.x, dsbl.y, s1, t2 ), glyph.material );
 				gui->SetColor( textColor );
 			} else if ( textInstance->HasStroke() ) {
-				
+
 				idVec4 strokeColor = colorBlack;
 				strokeColor.w = textInstance->GetStrokeStrength() * defaultColor.w;
 				gui->SetColor( strokeColor );
@@ -1433,8 +1433,8 @@ void idSWF::RenderEditText( idRenderSystem * gui, idSWFTextInstance * textInstan
 					idVec2 topLeft = matrix.Transform( idVec2( xPos, yPos ) );
 					idVec2 topRight = matrix.Transform( idVec2( xPos + glyphW, yPos ) );
 					idVec2 botRight = matrix.Transform( idVec2( xPos + glyphW, yPos + glyphH ) );
-					idVec2 botLeft = matrix.Transform( idVec2( xPos, yPos + glyphH ) );					
-					DrawStretchPic( idVec4( topLeft.x, topLeft.y, s1, t1 ), idVec4( topRight.x, topRight.y, s2, t1 ), idVec4( botRight.x, botRight.y, s2, t2 ), idVec4( botLeft.x, botLeft.y, s1, t2 ), glyph.material );					
+					idVec2 botLeft = matrix.Transform( idVec2( xPos, yPos + glyphH ) );
+					DrawStretchPic( idVec4( topLeft.x, topLeft.y, s1, t1 ), idVec4( topRight.x, topRight.y, s2, t1 ), idVec4( botRight.x, botRight.y, s2, t2 ), idVec4( botLeft.x, botLeft.y, s1, t2 ), glyph.material );
 				}
 				gui->SetColor( textColor );
 			}
@@ -1477,7 +1477,7 @@ void idSWF::FindTooltipIcons( idStr * text ) {
 			gamepad.Append( ">" );
 
 			if ( !in_useJoystick.GetBool() ) {
-				
+
 				if ( !bind.mouse.IsEmpty() ) {
 					replacement.Format( "<%s>", bind.mouse.c_str() );
 				} else if ( !bind.keyboard.IsEmpty() ) {
@@ -1523,12 +1523,12 @@ void idSWF::FindTooltipIcons( idStr * text ) {
 						inserted = true;
 						break;
 					}
-				}				
-			} 
-	
+				}
+			}
+
 			if ( !inserted ) {
 				tooltipIconList.Append( icon );
-			}			
+			}
 		}
 	}
 }
