@@ -68,6 +68,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="slog2"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="bps"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.257941073" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -190,6 +191,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="slog2"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="bps"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.823928155" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -315,6 +317,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="slog2"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="bps"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.414524484" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -439,6 +442,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="slog2"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="bps"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.1311123190" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -525,7 +529,7 @@
 									<listOptionValue builtIn="false" value="__DOOM__"/>
 									<listOptionValue builtIn="false" value="_DEBUG"/>
 								</option>
-								<option id="com.qnx.qcc.option.compiler.qccoptions.247017931" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList"/>
+								<option id="com.qnx.qcc.option.compiler.qccoptions.247017931" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions"/>
 								<inputType id="com.qnx.qcc.inputType.compiler.1137492076" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.783135853" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
@@ -558,6 +562,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="slog2"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="bps"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.2061379145" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -646,7 +651,7 @@
 									<listOptionValue builtIn="false" value="_DEBUG"/>
 									<listOptionValue builtIn="false" value="_INLINEDEBUG"/>
 								</option>
-								<option id="com.qnx.qcc.option.compiler.qccoptions.1447811706" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList"/>
+								<option id="com.qnx.qcc.option.compiler.qccoptions.1447811706" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions"/>
 								<inputType id="com.qnx.qcc.inputType.compiler.1282601949" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.1962855" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
@@ -680,6 +685,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="slog2"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="bps"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.324631596" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -767,7 +773,7 @@
 									<listOptionValue builtIn="false" value="__DOOM__"/>
 									<listOptionValue builtIn="false" value="_DEBUG"/>
 								</option>
-								<option id="com.qnx.qcc.option.compiler.qccoptions.929329724" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList"/>
+								<option id="com.qnx.qcc.option.compiler.qccoptions.929329724" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions"/>
 								<inputType id="com.qnx.qcc.inputType.compiler.796137051" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.833733744" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
@@ -801,6 +807,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="slog2"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="bps"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.809873610" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>

@@ -33,6 +33,12 @@ cpuid_t	Sys_GetCPUId();
 
 uint64 Sys_Microseconds();
 
+typedef struct {
+	//TODO
+} QNXVars_t;
+
+extern QNXVars_t	qnx;
+
 //TODO
 /*
 #include <windows.h>

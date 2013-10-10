@@ -89,6 +89,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <pthread.h>
 
 #include <alloca.h>
+#include <assert.h>
 
 //This does some setup for versions
 #include <bps/bps.h>

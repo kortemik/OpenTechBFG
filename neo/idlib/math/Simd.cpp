@@ -67,7 +67,7 @@ void idSIMD::InitProcessor( const char *module, bool forceGeneric ) {
 	} else {
 
 		if ( processor == NULL ) {
-#ifdef ID_WIN32 //XXX Should support x86 BlackBerry
+#if defined(ID_WIN32)//XXX || defined(ID_QNX_X86)
 			if ( ( cpuid & CPUID_MMX ) && ( cpuid & CPUID_SSE ) ) {
 				processor = new (TAG_MATH) idSIMD_SSE;
 			} else {

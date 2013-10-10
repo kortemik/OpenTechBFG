@@ -504,11 +504,7 @@ static void R_CheckPortableExtensions() {
 #ifndef GL_ES_VERSION_3_0
 		if ( qglGenVertexArrays == NULL ) {
 			qglGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)GLimp_ExtensionPointer( "glGenVertexArraysOES" );
-		}
-		if ( qglBindVertexArray == NULL ) {
 			qglBindVertexArray = (PFNGLBINDVERTEXARRAYPROC)GLimp_ExtensionPointer( "glBindVertexArrayOES" );
-		}
-		if ( qglDeleteVertexArrays == NULL ) {
 			qglDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC)GLimp_ExtensionPointer( "glDeleteVertexArraysOES" );
 		}
 #endif
@@ -616,17 +612,28 @@ static void R_CheckPortableExtensions() {
 
 	// GL_ARB_occlusion_query
 #ifndef GL_ES_VERSION_3_0
-	glConfig.occlusionQueryAvailable = R_CheckExtension( "GL_ARB_occlusion_query" );
+	glConfig.occlusionQueryAvailable = R_CheckExtension( "GL_ARB_occlusion_query" ) || R_CheckExtension( "GL_EXT_occlusion_query_boolean" );
 	if ( glConfig.occlusionQueryAvailable ) {
 		// defined in GL_ARB_occlusion_query, which is required for GL_EXT_timer_query
 		qglGenQueriesARB = (PFNGLGENQUERIESARBPROC)GLimp_ExtensionPointer( "glGenQueriesARB" );
-		qglDeleteQueriesARB = (PFNGLDELETEQUERIESARBPROC)GLimp_ExtensionPointer( "glDeleteQueriesARB" );
-		qglIsQueryARB = (PFNGLISQUERYARBPROC)GLimp_ExtensionPointer( "glIsQueryARB" );
-		qglBeginQueryARB = (PFNGLBEGINQUERYARBPROC)GLimp_ExtensionPointer( "glBeginQueryARB" );
-		qglEndQueryARB = (PFNGLENDQUERYARBPROC)GLimp_ExtensionPointer( "glEndQueryARB" );
-		qglGetQueryivARB = (PFNGLGETQUERYIVARBPROC)GLimp_ExtensionPointer( "glGetQueryivARB" );
-		qglGetQueryObjectivARB = (PFNGLGETQUERYOBJECTIVARBPROC)GLimp_ExtensionPointer( "glGetQueryObjectivARB" );
-		qglGetQueryObjectuivARB = (PFNGLGETQUERYOBJECTUIVARBPROC)GLimp_ExtensionPointer( "glGetQueryObjectuivARB" );
+		if ( qglGenQueriesARB == NULL ) {
+			qglGenQueriesARB = (PFNGLGENQUERIESARBPROC)GLimp_ExtensionPointer( "glGenQueriesEXT" );
+			qglDeleteQueriesARB = (PFNGLDELETEQUERIESARBPROC)GLimp_ExtensionPointer( "glDeleteQueriesEXT" );
+			qglIsQueryARB = (PFNGLISQUERYARBPROC)GLimp_ExtensionPointer( "glIsQueryEXT" );
+			qglBeginQueryARB = (PFNGLBEGINQUERYARBPROC)GLimp_ExtensionPointer( "glBeginQueryEXT" );
+			qglEndQueryARB = (PFNGLENDQUERYARBPROC)GLimp_ExtensionPointer( "glEndQueryEXT" );
+			qglGetQueryivARB = (PFNGLGETQUERYIVARBPROC)GLimp_ExtensionPointer( "glGetQueryivEXT" );
+			qglGetQueryObjectivARB = NULL; //Not used
+			qglGetQueryObjectuivARB = (PFNGLGETQUERYOBJECTUIVARBPROC)GLimp_ExtensionPointer( "glGetQueryObjectuivEXT" );
+		} else {
+			qglDeleteQueriesARB = (PFNGLDELETEQUERIESARBPROC)GLimp_ExtensionPointer( "glDeleteQueriesARB" );
+			qglIsQueryARB = (PFNGLISQUERYARBPROC)GLimp_ExtensionPointer( "glIsQueryARB" );
+			qglBeginQueryARB = (PFNGLBEGINQUERYARBPROC)GLimp_ExtensionPointer( "glBeginQueryARB" );
+			qglEndQueryARB = (PFNGLENDQUERYARBPROC)GLimp_ExtensionPointer( "glEndQueryARB" );
+			qglGetQueryivARB = (PFNGLGETQUERYIVARBPROC)GLimp_ExtensionPointer( "glGetQueryivARB" );
+			qglGetQueryObjectivARB = (PFNGLGETQUERYOBJECTIVARBPROC)GLimp_ExtensionPointer( "glGetQueryObjectivARB" );
+			qglGetQueryObjectuivARB = (PFNGLGETQUERYOBJECTUIVARBPROC)GLimp_ExtensionPointer( "glGetQueryObjectuivARB" );
+		}
 	}
 #else
 	glConfig.occlusionQueryAvailable = true;
@@ -653,20 +660,15 @@ static void R_CheckPortableExtensions() {
 	glConfig.debugOutputAvailable = R_CheckExtension( "GL_ARB_debug_output" ) || R_CheckExtension( "GL_KHR_debug" );
 	if ( glConfig.debugOutputAvailable ) {
 		qglDebugMessageControlARB   = (PFNGLDEBUGMESSAGECONTROLARBPROC)GLimp_ExtensionPointer( "glDebugMessageControlARB" );
-		qglDebugMessageInsertARB    = (PFNGLDEBUGMESSAGEINSERTARBPROC)GLimp_ExtensionPointer( "glDebugMessageInsertARB" );
-		qglDebugMessageCallbackARB  = (PFNGLDEBUGMESSAGECALLBACKARBPROC)GLimp_ExtensionPointer( "glDebugMessageCallbackARB" );
-		qglGetDebugMessageLogARB    = (PFNGLGETDEBUGMESSAGELOGARBPROC)GLimp_ExtensionPointer( "glGetDebugMessageLogARB" );
 		if ( qglDebugMessageControlARB == NULL ) {
 			qglDebugMessageControlARB   = (PFNGLDEBUGMESSAGECONTROLARBPROC)GLimp_ExtensionPointer( "glDebugMessageControl" );
-		}
-		if ( qglDebugMessageInsertARB == NULL ) {
 			qglDebugMessageInsertARB    = (PFNGLDEBUGMESSAGEINSERTARBPROC)GLimp_ExtensionPointer( "glDebugMessageInsert" );
-		}
-		if ( qglDebugMessageCallbackARB == NULL ) {
 			qglDebugMessageCallbackARB  = (PFNGLDEBUGMESSAGECALLBACKARBPROC)GLimp_ExtensionPointer( "glDebugMessageCallback" );
-		}
-		if ( qglGetDebugMessageLogARB == NULL ) {
 			qglGetDebugMessageLogARB    = (PFNGLGETDEBUGMESSAGELOGARBPROC)GLimp_ExtensionPointer( "glGetDebugMessageLog" );
+		} else {
+			qglDebugMessageInsertARB    = (PFNGLDEBUGMESSAGEINSERTARBPROC)GLimp_ExtensionPointer( "glDebugMessageInsertARB" );
+			qglDebugMessageCallbackARB  = (PFNGLDEBUGMESSAGECALLBACKARBPROC)GLimp_ExtensionPointer( "glDebugMessageCallbackARB" );
+			qglGetDebugMessageLogARB    = (PFNGLGETDEBUGMESSAGELOGARBPROC)GLimp_ExtensionPointer( "glGetDebugMessageLogARB" );
 		}
 
 		if ( r_debugContext.GetInteger() >= 1 ) {

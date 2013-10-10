@@ -1,6 +1,9 @@
 # Folders
 build
 .settings
+Device-Debug
+Debug
+Release
 
 # File types
 *.user

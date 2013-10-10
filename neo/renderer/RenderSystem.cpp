@@ -258,6 +258,7 @@ static void R_CheckCvars() {
 	}
 
 
+	//XXX Need to change for GLES
 	if ( r_multiSamples.IsModified() ) {
 		if ( r_multiSamples.GetInteger() > 0 ) {
 			qglEnable( GL_MULTISAMPLE_ARB );

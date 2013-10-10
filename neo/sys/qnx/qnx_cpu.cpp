@@ -45,7 +45,7 @@ If you have questions concerning this license or the applicable additional terms
 Sys_GetClockTicks
 ================
 */
-double Sys_GetClockTicks() {
+double Sys_GetClockTicks() { //XXX Required
 #if 0
 
 	LARGE_INTEGER li;
@@ -76,7 +76,7 @@ double Sys_GetClockTicks() {
 Sys_ClockTicksPerSecond
 ================
 */
-double Sys_ClockTicksPerSecond() {
+double Sys_ClockTicksPerSecond() { //XXX Required
 	static double ticks = 0;
 #if 0
 
@@ -690,7 +690,7 @@ numPhysicalCPUCores	- the total number of cores per package
 numCPUPackages		- the total number of packages (physical processors)
 ========================
 */
-void Sys_CPUCount( int & numLogicalCPUCores, int & numPhysicalCPUCores, int & numCPUPackages ) {
+void Sys_CPUCount( int & numLogicalCPUCores, int & numPhysicalCPUCores, int & numCPUPackages ) { //XXX Required
 	cpuInfo_t cpuInfo;
 	GetCPUInfo( cpuInfo );
 
@@ -704,7 +704,7 @@ void Sys_CPUCount( int & numLogicalCPUCores, int & numPhysicalCPUCores, int & nu
 Sys_GetCPUId
 ================
 */
-cpuid_t Sys_GetCPUId() {
+cpuid_t Sys_GetCPUId() { //XXX Required
 	int flags;
 
 #ifdef ID_QNX_ARM
@@ -858,7 +858,7 @@ int Sys_FPU_PrintStateFlags( char *ptr, int ctrl, int stat, int tags, int inof, 
 Sys_FPU_StackIsEmpty
 ===============
 */
-bool Sys_FPU_StackIsEmpty() {
+bool Sys_FPU_StackIsEmpty() { //XXX Required
 	__asm {
 		mov			eax, statePtr
 		fnstenv		[eax]
@@ -877,7 +877,7 @@ empty:
 Sys_FPU_ClearStack
 ===============
 */
-void Sys_FPU_ClearStack() {
+void Sys_FPU_ClearStack() { //XXX Required
 	__asm {
 		mov			eax, statePtr
 		fnstenv		[eax]
@@ -902,7 +902,7 @@ Sys_FPU_GetState
   gets the FPU state without changing the state
 ===============
 */
-const char *Sys_FPU_GetState() {
+const char *Sys_FPU_GetState() { //XXX Required
 	double fpuStack[8] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 	double *fpuStackPtr = fpuStack;
 	int i, numValues;
@@ -1006,7 +1006,7 @@ const char *Sys_FPU_GetState() {
 Sys_FPU_EnableExceptions
 ===============
 */
-void Sys_FPU_EnableExceptions( int exceptions ) {
+void Sys_FPU_EnableExceptions( int exceptions ) { //XXX Required
 	__asm {
 		mov			eax, statePtr
 		mov			ecx, exceptions
@@ -1026,7 +1026,7 @@ void Sys_FPU_EnableExceptions( int exceptions ) {
 Sys_FPU_SetPrecision
 ===============
 */
-void Sys_FPU_SetPrecision( int precision ) {
+void Sys_FPU_SetPrecision( int precision ) { //XXX Required (though NEON only supports floats, so this may actually not be needed)
 	short precisionBitTable[4] = { 0, 1, 3, 0 };
 	short precisionBits = precisionBitTable[precision & 3] << 8;
 	short precisionMask = ~( ( 1 << 9 ) | ( 1 << 8 ) );
@@ -1048,7 +1048,7 @@ void Sys_FPU_SetPrecision( int precision ) {
 Sys_FPU_SetRounding
 ================
 */
-void Sys_FPU_SetRounding( int rounding ) {
+void Sys_FPU_SetRounding( int rounding ) { //XXX Required
 	short roundingBitTable[4] = { 0, 1, 2, 3 };
 	short roundingBits = roundingBitTable[rounding & 3] << 10;
 	short roundingMask = ~( ( 1 << 11 ) | ( 1 << 10 ) );
@@ -1070,7 +1070,7 @@ void Sys_FPU_SetRounding( int rounding ) {
 Sys_FPU_SetDAZ
 ================
 */
-void Sys_FPU_SetDAZ( bool enable ) {
+void Sys_FPU_SetDAZ( bool enable ) { //XXX Required
 	DWORD dwData;
 
 	_asm {
@@ -1091,7 +1091,7 @@ void Sys_FPU_SetDAZ( bool enable ) {
 Sys_FPU_SetFTZ
 ================
 */
-void Sys_FPU_SetFTZ( bool enable ) {
+void Sys_FPU_SetFTZ( bool enable ) { //XXX Required
 	DWORD dwData;
 
 	_asm {

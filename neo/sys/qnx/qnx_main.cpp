@@ -36,17 +36,20 @@ If you have questions concerning this license or the applicable additional terms
 #include <dlfcn.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#include <bps/bps.h>
+#include <bps/navigator_invoke.h>
 #include <slog2.h>
 
 #include "../sys_local.h"
 #include "qnx_local.h"
 #include "../../renderer/tr_local.h"
 
-idCVar Win32Vars_t::sys_arch( "sys_arch", "", CVAR_SYSTEM | CVAR_INIT, "" );
-idCVar Win32Vars_t::sys_cpustring( "sys_cpustring", "detect", CVAR_SYSTEM | CVAR_INIT, "" );
+idCVar QNXVars_t::sys_arch( "sys_arch", "", CVAR_SYSTEM | CVAR_INIT, "" );
+idCVar QNXVars_t::sys_cpustring( "sys_cpustring", "detect", CVAR_SYSTEM | CVAR_INIT, "" );
 //XXX
 
-//XXX Win32Vars_t	win32;
+QNXVars_t	qnx;
 
 static char		sys_cmdline[MAX_STRING_CHARS];
 
@@ -111,7 +114,8 @@ void Sys_Error( const char *error, ... ) {
 	extern idCVar com_productionMode;
 	if ( com_productionMode.GetInteger() == 0 ) {
 		// wait for the user to quit
-		/* TODO: while ( 1 ) {
+		/* TODO: Need to continue to handle messages, but don't do anything specific until they quit
+		while ( 1 ) {
 			if ( !GetMessage( &msg, NULL, 0, 0 ) ) {
 				common->Quit();
 			}
@@ -297,40 +301,9 @@ Sys_FileTimeStamp
 =================
 */
 ID_TIME_T Sys_FileTimeStamp( idFileHandle fp ) {
-	/* TODO
-	FILETIME writeTime;
-	GetFileTime( fp, NULL, NULL, &writeTime );
-
-	/*
-		FILETIME = number of 100-nanosecond ticks since midnight
-		1 Jan 1601 UTC. time_t = number of 1-second ticks since
-		midnight 1 Jan 1970 UTC. To translate, we subtract a
-		FILETIME representation of midnight, 1 Jan 1970 from the
-		time in question and divide by the number of 100-ns ticks
-		in one second.
-	* /
-
-	SYSTEMTIME base_st = {
-		1970,   // wYear
-		1,      // wMonth
-		0,      // wDayOfWeek
-		1,      // wDay
-		0,      // wHour
-		0,      // wMinute
-		0,      // wSecond
-		0       // wMilliseconds
-	};
-
-	FILETIME base_ft;
-	SystemTimeToFileTime( &base_st, &base_ft );
-
-	LARGE_INTEGER itime;
-	itime.QuadPart = reinterpret_cast<LARGE_INTEGER&>( writeTime ).QuadPart;
-	itime.QuadPart -= reinterpret_cast<LARGE_INTEGER&>( base_ft ).QuadPart;
-	itime.QuadPart /= 10000000LL;
-	return itime.QuadPart;
-	*/
-	return 0;
+	struct stat st;
+	fstat( fp, &st );
+	return st.st_mtime;
 }
 
 /*
@@ -744,148 +717,6 @@ void Sys_DLL_Unload( int dllHandle ) {
 }
 
 /*
-========================================================================
-
-EVENT LOOP
-
-========================================================================
-*/
-
-#define	MAX_QUED_EVENTS		256
-#define	MASK_QUED_EVENTS	( MAX_QUED_EVENTS - 1 )
-
-sysEvent_t	eventQue[MAX_QUED_EVENTS];
-int			eventHead = 0;
-int			eventTail = 0;
-
-/*
-================
-Sys_QueEvent
-
-Ptr should either be null, or point to a block of data that can
-be freed by the game later.
-================
-*/
-void Sys_QueEvent( sysEventType_t type, int value, int value2, int ptrLength, void *ptr, int inputDeviceNum ) {
-	sysEvent_t * ev = &eventQue[ eventHead & MASK_QUED_EVENTS ];
-
-	if ( eventHead - eventTail >= MAX_QUED_EVENTS ) {
-		common->Printf("Sys_QueEvent: overflow\n");
-		// we are discarding an event, but don't leak memory
-		if ( ev->evPtr ) {
-			Mem_Free( ev->evPtr );
-		}
-		eventTail++;
-	}
-
-	eventHead++;
-
-	ev->evType = type;
-	ev->evValue = value;
-	ev->evValue2 = value2;
-	ev->evPtrLength = ptrLength;
-	ev->evPtr = ptr;
-	ev->inputDevice = inputDeviceNum;
-}
-
-/*
-=============
-Sys_PumpEvents
-
-This allows windows to be moved during renderbump
-=============
-*/
-void Sys_PumpEvents() {
-	/* TODO
-    MSG msg;
-
-	// pump the message loop
-	while( PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) ) {
-		if ( !GetMessage( &msg, NULL, 0, 0 ) ) {
-			common->Quit();
-		}
-
-		// save the msg time, because wndprocs don't have access to the timestamp
-		if ( win32.sysMsgTime && win32.sysMsgTime > (int)msg.time ) {
-			// don't ever let the event times run backwards
-//			common->Printf( "Sys_PumpEvents: win32.sysMsgTime (%i) > msg.time (%i)\n", win32.sysMsgTime, msg.time );
-		} else {
-			win32.sysMsgTime = msg.time;
-		}
-
-		TranslateMessage (&msg);
-      	DispatchMessage (&msg);
-	}
-	*/
-}
-
-/*
-================
-Sys_GenerateEvents
-================
-*/
-void Sys_GenerateEvents() {
-	static int entered = false;
-	char *s;
-
-	if ( entered ) {
-		return;
-	}
-	entered = true;
-
-	// pump the message loop
-	Sys_PumpEvents();
-
-	// grab or release the mouse cursor if necessary
-	IN_Frame();
-
-	// check for console commands
-	s = Sys_ConsoleInput();
-	if ( s ) {
-		char	*b;
-		int		len;
-
-		len = strlen( s ) + 1;
-		b = (char *)Mem_Alloc( len, TAG_EVENTS );
-		strcpy( b, s );
-		Sys_QueEvent( SE_CONSOLE, 0, 0, len, b, 0 );
-	}
-
-	entered = false;
-}
-
-/*
-================
-Sys_ClearEvents
-================
-*/
-void Sys_ClearEvents() {
-	eventHead = eventTail = 0;
-}
-
-/*
-================
-Sys_GetEvent
-================
-*/
-sysEvent_t Sys_GetEvent() {
-	sysEvent_t	ev;
-
-	// return if we have data
-	if ( eventHead > eventTail ) {
-		eventTail++;
-		return eventQue[ ( eventTail - 1 ) & MASK_QUED_EVENTS ];
-	}
-
-	// return the empty event
-	memset( &ev, 0, sizeof( ev ) );
-
-	return ev;
-}
-
-//================================================================
-
-/*
 =================
 Sys_In_Restart_f
 
@@ -916,6 +747,8 @@ The cvar system must already be setup
 ================
 */
 void Sys_Init() {
+
+	bps_initialize();
 
 	/* TODO: Need to setup slog2 as well
 	CoInitialize( NULL );
@@ -1077,7 +910,7 @@ Sys_Shutdown
 ================
 */
 void Sys_Shutdown() {
-	//XXX CoUninitialize();
+	bps_shutdown();
 }
 
 /*
@@ -1109,8 +942,7 @@ EmailCrashReport
   emailer originally from Raven/Quake 4
 ====================
 */
-void EmailCrashReport( LPSTR messageText ) {
-	/* TODO
+void EmailCrashReport( const char* messageText ) {
 	static int lastEmailTime = 0;
 
 	if ( Sys_Milliseconds() < lastEmailTime + 10000 ) {
@@ -1119,36 +951,33 @@ void EmailCrashReport( LPSTR messageText ) {
 
 	lastEmailTime = Sys_Milliseconds();
 
-	HINSTANCE mapi = LoadLibrary( "MAPI32.DLL" );
-	if( mapi ) {
-		LPMAPISENDMAIL	MAPISendMail = ( LPMAPISENDMAIL )GetProcAddress( mapi, "MAPISendMail" );
-		if( MAPISendMail ) {
-			MapiRecipDesc toProgrammers =
-			{
-				0,										// ulReserved
-					MAPI_TO,							// ulRecipClass
-					"DOOM 3 Crash",						// lpszName
-					"SMTP:programmers@idsoftware.com",	// lpszAddress
-					0,									// ulEIDSize
-					0									// lpEntry
-			};
+	/* XXX Works, but requires app to stay running
+	navigator_invoke_invocation_t *invoke = NULL;
 
-			MapiMessage		message = {};
-			message.lpszSubject = "DOOM 3 Fatal Error";
-			message.lpszNoteText = messageText;
-			message.nRecipCount = 1;
-			message.lpRecips = &toProgrammers;
+	navigator_invoke_invocation_create( &invoke );
+	navigator_invoke_invocation_set_action( invoke, "bb.action.OPEN" );
+	navigator_invoke_invocation_set_target( invoke, "sys.pim.uib.email.hybridcomposer" );
+	//XXX Message and "to" needs to be set and escaped (messageText)
+	navigator_invoke_invocation_set_uri( invoke, "mailto:account@domain.com?subject=DOOM%203%20Fatal%20Error&body=Stuff%20For%20You!" );
 
-			MAPISendMail(
-				0,									// LHANDLE lhSession
-				0,									// ULONG ulUIParam
-				&message,							// lpMapiMessage lpMessage
-				MAPI_DIALOG,						// FLAGS flFlags
-				0									// ULONG ulReserved
-				);
-		}
-		FreeLibrary( mapi );
-	}
+	navigator_invoke_invocation_send( invoke );
+
+	navigator_invoke_invocation_destroy( invoke );
+	*/
+
+	/* XXX Not working, but doesn't require escaping text
+	navigator_invoke_invocation_t *invoke = NULL;
+
+	navigator_invoke_invocation_create( &invoke );
+	navigator_invoke_invocation_set_action( invoke, "bb.action.COMPOSE" );
+	navigator_invoke_invocation_set_target( invoke, "sys.pim.uib.email.hybridcomposer" );
+	navigator_invoke_invocation_set_type( invoke, "message/rfc822" );
+	const char* data = "{\"to\":[\"account@domain.com\"],\"subject\":\"DOOM 3 Fatal Error\",\"body\":\"%s\"}"; //XXX Message needs to be set (messageText)
+	navigator_invoke_invocation_set_data( invoke, data, strlen(data) + 1 );
+
+	navigator_invoke_invocation_send( invoke );
+
+	navigator_invoke_invocation_destroy( invoke );
 	*/
 }
 
@@ -1258,7 +1087,7 @@ idSysLocal::OpenURL
 */
 void idSysLocal::OpenURL( const char *url, bool doexit ) {
 	static bool doexit_spamguard = false;
-	HWND wnd;
+	navigator_invoke_invocation_t* invoke = NULL;
 
 	if (doexit_spamguard) {
 		common->DPrintf( "OpenURL: already in an exit sequence, ignoring %s\n", url );
@@ -1267,22 +1096,24 @@ void idSysLocal::OpenURL( const char *url, bool doexit ) {
 
 	common->Printf("Open URL: %s\n", url);
 
-	/* TODO
-	if ( !ShellExecute( NULL, "open", url, NULL, NULL, SW_RESTORE ) ) {
+	navigator_invoke_invocation_create( &invoke );
+	navigator_invoke_invocation_set_action( invoke, "bb.action.OPEN" );
+	navigator_invoke_invocation_set_uri( invoke, url );
+
+	//This will open a card if it's not a browser URL. The card will be closed when the app exits
+	int ret = navigator_invoke_invocation_send( invoke );
+
+	navigator_invoke_invocation_destroy( invoke );
+
+	if ( ret != BPS_SUCCESS ) {
 		common->Error( "Could not open url: '%s' ", url );
 		return;
-	}
-
-	wnd = GetForegroundWindow();
-	if ( wnd ) {
-		ShowWindow( wnd, SW_MAXIMIZE );
 	}
 
 	if ( doexit ) {
 		doexit_spamguard = true;
 		cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "quit\n" );
 	}
-	*/
 }
 
 /*

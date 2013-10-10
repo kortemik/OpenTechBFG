@@ -345,7 +345,8 @@ void idRenderLog::OpenBlock( const char *label ) {
 	PC_BeginNamedEvent( label );
 
 	if ( logFile != NULL ) {
-		LogOpenBlock( RENDER_LOG_INDENT_MAIN_BLOCK, label, (va_list)NULL );
+		va_list list = NULL;
+		LogOpenBlock( RENDER_LOG_INDENT_MAIN_BLOCK, label, list );
 	}
 }
 

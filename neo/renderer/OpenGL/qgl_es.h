@@ -316,6 +316,13 @@ extern "C" {
 	typedef void (GL_APIENTRYP PFNGLGETQUERYOBJECTUIVARBPROC) (GLuint id, GLenum pname, GLuint *params);
 #endif
 
+#ifndef GL_TIME_ELAPSED_EXT
+	#ifdef GL_TIME_ELAPSED
+		#define GL_TIME_ELAPSED_EXT GL_TIME_ELAPSED
+	#else
+		#define GL_TIME_ELAPSED_EXT 0x88BF
+	#endif
+#endif
 #ifndef PFNGLGETQUERYOBJECTUI64VEXTPROC
 	typedef void (GL_APIENTRYP PFNGLGETQUERYOBJECTUI64VEXTPROC) (GLuint id, GLenum pname, GLuint64 *params);
 #endif
@@ -350,6 +357,18 @@ extern "C" {
 	#else
 		typedef GLuint (GL_APIENTRYP PFNGLGETDEBUGMESSAGELOGARBPROC) (GLuint count, GLsizei bufsize, GLenum *sources, GLenum *types, GLuint *ids, GLenum *severities, GLsizei *lengths, GLchar *messageLog);
 	#endif
+#endif
+
+#ifndef GL_TEXTURE_CUBE_MAP_SEAMLESS
+	#define GL_TEXTURE_CUBE_MAP_SEAMLESS 0x884F
+#endif
+
+#ifndef GL_FRAMEBUFFER_SRGB
+	#define GL_FRAMEBUFFER_SRGB 0x8DB9
+#endif
+
+#ifndef GL_MULTISAMPLE_ARB
+	#define GL_MULTISAMPLE_ARB 0x809D
 #endif
 
 #ifdef __cplusplus
