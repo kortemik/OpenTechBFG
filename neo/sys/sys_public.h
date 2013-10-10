@@ -57,9 +57,10 @@ enum cpuid_t {
 	CPUID_DAZ							= 0x008000,	// Denormals-Are-Zero mode (denormal source operands are set to zero)
 	CPUID_XENON							= 0x010000,	// Xbox 360
 	CPUID_CELL							= 0x020000,	// PS3
-	CPUID_ARM							= 0x040000,	// ARM
-	CPUID_VFP							= 0x080000,	// Vector Floating Point
-	CPUID_NEON							= 0x100000  // ARM Advanced SIMD
+	CPUID_TI							= 0x040000,	// Texas Instruments
+	CPUID_QC							= 0x080000,	// Qualcomm
+	CPUID_VFP							= 0x100000,	// Vector Floating Point
+	CPUID_NEON							= 0x200000  // ARM Advanced SIMD
 };
 
 enum fpuExceptions_t {

@@ -134,7 +134,6 @@ void Sys_GenerateEvents() {
 	// pump the message loop
 	Sys_PumpEvents();
 
-	/* XXX: Should console be included? Probably not
 	// check for console commands
 	s = Sys_ConsoleInput();
 	if ( s ) {
@@ -146,7 +145,6 @@ void Sys_GenerateEvents() {
 		strcpy( b, s );
 		Sys_QueEvent( SE_CONSOLE, 0, 0, len, b, 0 );
 	}
-	*/
 
 	entered = false;
 }

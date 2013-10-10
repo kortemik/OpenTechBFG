@@ -35,6 +35,8 @@ uint64 Sys_Microseconds();
 
 typedef struct {
 	//TODO
+	static idCVar	sys_arch;
+	static idCVar	sys_cpustring;
 } QNXVars_t;
 
 extern QNXVars_t	qnx;

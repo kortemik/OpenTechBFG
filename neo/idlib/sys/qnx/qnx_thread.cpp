@@ -73,7 +73,7 @@ uintptr_t Sys_CreateThread( xthread_t function, void *parms, xthreadPriority pri
 	pthread_attr_init( &attr );
 	pthread_attr_setstacksize( &attr, stackSize );
 	//XXX suspended
-	// Ignore core affinity. Let QNX handle it
+	// Ignore core affinity. Let QNX handle it. Though if we did want to handle it, we would use ThreadCtl(_NTO_TCTL_RUNMASK, ...) within it
 
 	//Setup thread scheduling (based off http://developer.blackberry.com/native/reference/core/com.qnx.doc.neutrino.lib_ref/topic/s/sched_param.html)
 	struct sched_param params;
