@@ -446,7 +446,7 @@ idFileHandle idFileSystemLocal::OpenOSFile( const char *fileName, fsMode_t mode 
 	}
 #else
 	int access = 0;
-	mode_t mode = 0;
+	std::mode_t mode = 0;
 
 	if ( mode == FS_WRITE ) {
 		access = O_RDWR | O_CREAT | O_TRUNC;
@@ -1806,7 +1806,9 @@ bool idFileSystemLocal::RenameFile( const char * relativePath, const char * newN
 		idLib::Warning( "RenameFile( %s, %s ) error %i", newOSPath.c_str(), oldOSPath.c_str(), err );
 	}
 #else
-	if ( rename( oldOSPath.c_str(), newOSPath.c_str() ) != 0 ) {
+	const bool success = rename( oldOSPath.c_str(), newOSPath.c_str() ) == 0;
+
+	if ( !success ) {
 		const int err = errno;
 		idLib::Warning( "RenameFile( %s, %s ) error %i", newOSPath.c_str(), oldOSPath.c_str(), err );
 	}

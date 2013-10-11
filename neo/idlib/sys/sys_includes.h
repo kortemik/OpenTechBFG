@@ -90,8 +90,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <alloca.h>
 #include <assert.h>
+#include <wctype.h>
 
-//This does some setup for versions
+//This does some setup for versions (shouldn't really be here, but we don't want to include files anywhere else)
 #include <bps/bps.h>
 #if BPS_VERSION >= 3001002 //Since we will get a compile error if we try to use bbndk.h before it was added
 #include <bbndk.h>

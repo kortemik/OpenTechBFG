@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -247,11 +247,15 @@ void GL_SetDefaultState() {
 	qglDepthFunc( GL_LESS );
 	qglDisable( GL_STENCIL_TEST );
 	qglDisable( GL_POLYGON_OFFSET_FILL );
+#ifndef GL_ES_VERSION_2_0
 	qglDisable( GL_POLYGON_OFFSET_LINE );
+#endif
 	qglPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
 	// These should never be changed
+#ifndef GL_ES_VERSION_2_0
 	qglShadeModel( GL_SMOOTH );
+#endif
 	qglEnable( GL_DEPTH_TEST );
 	qglEnable( GL_BLEND );
 	qglEnable( GL_SCISSOR_TEST );
@@ -272,7 +276,7 @@ This routine is responsible for setting the most commonly changed state
 */
 void GL_State( uint64 stateBits, bool forceGlState ) {
 	uint64 diff = stateBits ^ backEnd.glState.glStateBits;
-	
+
 	if ( !r_useStateCaching.GetBool() || forceGlState ) {
 		// make sure everything is set all the time, so we
 		// can see if our delta checking is screwing up
@@ -359,6 +363,8 @@ void GL_State( uint64 stateBits, bool forceGlState ) {
 		qglColorMask( r, g, b, a );
 	}
 
+#ifndef GL_ES_VERSION_2_0
+	//XXX Any polygon being drawn needs to be adjusted. If GL_LINE is used, then use GL_LINE_LOOP primitives. If GL_FILL is used, then just use normal GL_TRIANGLES
 	//
 	// fill/line mode
 	//
@@ -369,6 +375,7 @@ void GL_State( uint64 stateBits, bool forceGlState ) {
 			qglPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 		}
 	}
+#endif
 
 	//
 	// polygon offset
@@ -377,10 +384,14 @@ void GL_State( uint64 stateBits, bool forceGlState ) {
 		if ( stateBits & GLS_POLYGON_OFFSET ) {
 			qglPolygonOffset( backEnd.glState.polyOfsScale, backEnd.glState.polyOfsBias );
 			qglEnable( GL_POLYGON_OFFSET_FILL );
+#ifndef GL_ES_VERSION_2_0
 			qglEnable( GL_POLYGON_OFFSET_LINE );
+#endif
 		} else {
 			qglDisable( GL_POLYGON_OFFSET_FILL );
+#ifndef GL_ES_VERSION_2_0
 			qglDisable( GL_POLYGON_OFFSET_LINE );
+#endif
 		}
 	}
 

@@ -75,6 +75,9 @@ extern "C" {
 //=============
 //Defines for functions that are defined but may not actually exist
 //=============
+#ifndef GL_TEXTURE0_ARB
+	#define GL_TEXTURE0_ARB GL_TEXTURE0
+#endif
 #ifndef PFNGLBINDMULTITEXTUREEXTPROC
 	typedef void (GL_APIENTRYP PFNGLBINDMULTITEXTUREEXTPROC) (GLenum texunit, GLenum target, GLuint texture);
 #endif
@@ -274,6 +277,9 @@ extern "C" {
 	typedef void (GL_APIENTRYP PFNGLSTENCILFUNCSEPARATEATIPROC) (GLenum frontfunc, GLenum backfunc, GLint ref, GLuint mask);
 #endif
 
+#ifndef GL_DEPTH_BOUNDS_TEST_EXT
+	#define GL_DEPTH_BOUNDS_TEST_EXT 0x8890
+#endif
 #ifndef PFNGLDEPTHBOUNDSEXTPROC
 	typedef void (GL_APIENTRYP PFNGLDEPTHBOUNDSEXTPROC) (GLclampd zmin, GLclampd zmax);
 #endif
@@ -363,12 +369,28 @@ extern "C" {
 	#define GL_TEXTURE_CUBE_MAP_SEAMLESS 0x884F
 #endif
 
+#ifndef GL_TEXTURE_CUBE_MAP_EXT
+	#define GL_TEXTURE_CUBE_MAP_EXT GL_TEXTURE_CUBE_MAP
+#endif
+
 #ifndef GL_FRAMEBUFFER_SRGB
 	#define GL_FRAMEBUFFER_SRGB 0x8DB9
 #endif
 
 #ifndef GL_MULTISAMPLE_ARB
 	#define GL_MULTISAMPLE_ARB 0x809D
+#endif
+
+#ifndef GL_RGBA8
+	#ifdef GL_RGBA8_OES
+		#define GL_RGBA8 GL_RGBA8_OES
+	#else
+		#define GL_RGBA8 GL_RGBA
+	#endif
+#endif
+
+#ifndef GL_STENCIL_INDEX
+	#define GL_STENCIL_INDEX GL_STENCIL_INDEX8
 #endif
 
 #ifdef __cplusplus
