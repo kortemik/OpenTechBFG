@@ -60,7 +60,8 @@ enum cpuid_t {
 	CPUID_TI							= 0x040000,	// Texas Instruments
 	CPUID_QC							= 0x080000,	// Qualcomm
 	CPUID_VFP							= 0x100000,	// Vector Floating Point
-	CPUID_NEON							= 0x200000  // ARM Advanced SIMD
+	CPUID_NEON							= 0x200000,	// ARM Advanced SIMD
+	CPUID_WMMX2							= 0x400000	// iWMMX2 support
 };
 
 enum fpuExceptions_t {

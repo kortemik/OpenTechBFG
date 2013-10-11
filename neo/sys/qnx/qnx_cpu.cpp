@@ -72,43 +72,6 @@ double Sys_ClockTicksPerSecond() {
 #ifdef ID_QNX_X86
 //TODO: switch to using QNX functions
 
-/*
-================
-HasCPUID
-================
-*/
-static bool HasCPUID() {
-	__asm
-	{
-		pushfd						// save eflags
-		pop		eax
-		test	eax, 0x00200000		// check ID bit
-		jz		set21				// bit 21 is not set, so jump to set_21
-		and		eax, 0xffdfffff		// clear bit 21
-		push	eax					// save new value in register
-		popfd						// store new value in flags
-		pushfd
-		pop		eax
-		test	eax, 0x00200000		// check ID bit
-		jz		good
-		jmp		err					// cpuid not supported
-set21:
-		or		eax, 0x00200000		// set ID bit
-		push	eax					// store new value
-		popfd						// store new value in EFLAGS
-		pushfd
-		pop		eax
-		test	eax, 0x00200000		// if bit 21 is on
-		jnz		good
-		jmp		err
-	}
-
-err:
-	return false;
-good:
-	return true;
-}
-
 #define _REG_EAX		0
 #define _REG_EBX		1
 #define _REG_ECX		2
@@ -172,24 +135,6 @@ static bool IsAMD() {
 
 /*
 ================
-HasCMOV
-================
-*/
-static bool HasCMOV() {
-	unsigned regs[4];
-
-	// get CPU feature bits
-	CPUID( 1, regs );
-
-	// bit 15 of EDX denotes CMOV existence
-	if ( regs[_REG_EDX] & ( 1 << 15 ) ) {
-		return true;
-	}
-	return false;
-}
-
-/*
-================
 Has3DNow
 ================
 */
@@ -208,60 +153,6 @@ static bool Has3DNow() {
 		return true;
 	}
 
-	return false;
-}
-
-/*
-================
-HasMMX
-================
-*/
-static bool HasMMX() {
-	unsigned regs[4];
-
-	// get CPU feature bits
-	CPUID( 1, regs );
-
-	// bit 23 of EDX denotes MMX existence
-	if ( regs[_REG_EDX] & ( 1 << 23 ) ) {
-		return true;
-	}
-	return false;
-}
-
-/*
-================
-HasSSE
-================
-*/
-static bool HasSSE() {
-	unsigned regs[4];
-
-	// get CPU feature bits
-	CPUID( 1, regs );
-
-	// bit 25 of EDX denotes SSE existence
-	if ( regs[_REG_EDX] & ( 1 << 25 ) ) {
-		return true;
-	}
-	return false;
-}
-
-/*
-================
-HasSSE2
-================
-*/
-static bool HasSSE2() {
-	unsigned regs[4];
-
-	// get CPU feature bits
-	CPUID( 1, regs );
-
-	// bit 26 of EDX denotes SSE2 existence
-	if ( regs[_REG_EDX] & ( 1 << 26 ) ) {
-		return true;
-	}
 	return false;
 }
 
@@ -435,11 +326,45 @@ Sys_GetCPUId
 cpuid_t Sys_GetCPUId() { //XXX Required
 	int flags;
 
+	unsigned int cpuFlags = SYSPAGE_ENTRY(cpuinfo)->flags;
+
 #ifdef ID_QNX_ARM
-	//TODO
+	unsigned int cpuType = SYSPAGE_ENTRY(cpuinfo)->cpu;
+
+	// check CPU manufacturer
+	switch( ( cpuType & 0xFF000000 ) >> 24 ) {
+		case 'A':	//ARM
+		case 'D':	//Digital Equipment Corporation
+		case 'M':	//Motorola/Freescale
+		case 'V':	//Marvell
+		case 'i':	//Intel
+			flags = CPUID_GENERIC; //Nothing is really unsupported...
+			break;
+		case 'Q':	//Qualcomm
+			flags = CPUID_QC;
+			break;
+		case 'T':	//Texas Instruments
+			flags = CPUID_TI;
+			break;
+		}
+
+	// check for VFP support
+	if ( ( cpuFlags & CPU_FLAG_FPU ) != 0 ) {
+		flags |= CPUID_VFP;
+	}
+
+	// check for NEON
+	if ( ( cpuFlags & ARM_CPU_FLAG_NEON ) != 0 ) {
+		flags |= CPUID_NEON;
+	}
+
+	// check for iWMMX2
+	if ( ( cpuFlags & ARM_CPU_FLAG_WMMX2 ) != 0 ) {
+		flags |= CPUID_WMMX2;
+	}
 #else
 	// verify we're at least a Pentium or 486 with CPUID support
-	if ( !HasCPUID() ) {
+	if ( ( cpuFlags & X86_CPU_CPUID ) == 0 ) {
 		return CPUID_UNSUPPORTED;
 	}
 
@@ -451,7 +376,7 @@ cpuid_t Sys_GetCPUId() { //XXX Required
 	}
 
 	// check for Multi Media Extensions
-	if ( HasMMX() ) {
+	if ( ( cpuFlags & X86_CPU_MMX ) != 0 ) {
 		flags |= CPUID_MMX;
 	}
 
@@ -461,12 +386,12 @@ cpuid_t Sys_GetCPUId() { //XXX Required
 	}
 
 	// check for Streaming SIMD Extensions
-	if ( HasSSE() ) {
+	if ( ( cpuFlags & X86_CPU_SIMD ) != 0 ) {
 		flags |= CPUID_SSE | CPUID_FTZ;
 	}
 
 	// check for Streaming SIMD Extensions 2
-	if ( HasSSE2() ) {
+	if ( ( cpuFlags & X86_CPU_SSE2 ) != 0 ) {
 		flags |= CPUID_SSE2;
 	}
 
@@ -481,7 +406,7 @@ cpuid_t Sys_GetCPUId() { //XXX Required
 	}
 
 	// check for Conditional Move (CMOV) and fast floating point comparison (FCOMI) instructions
-	if ( HasCMOV() ) {
+	if ( ( cpuFlags & X86_CPU_CMOV ) != 0 ) {
 		flags |= CPUID_CMOV;
 	}
 
