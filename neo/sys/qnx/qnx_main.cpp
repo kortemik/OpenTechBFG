@@ -920,7 +920,7 @@ Sys_GetProcessorId
 */
 cpuid_t Sys_GetProcessorId() {
     //XXX return win32.cpuid;
-	return 0;
+	return (cpuid_t)0;
 }
 
 /*

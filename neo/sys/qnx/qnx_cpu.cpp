@@ -33,6 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <sys/neutrino.h>
 #include <sys/syspage.h>
 #include <inttypes.h>
+#include <fpstatus.h>
 
 /*
 ==============================================================
@@ -658,19 +659,32 @@ const char *Sys_FPU_GetState() { //XXX Required
 Sys_FPU_EnableExceptions
 ===============
 */
-void Sys_FPU_EnableExceptions( int exceptions ) { //XXX Required
-	__asm {
-		mov			eax, statePtr
-		mov			ecx, exceptions
-		and			cx, 63
-		not			cx
-		fnstcw		word ptr [eax]
-		mov			bx, word ptr [eax]
-		or			bx, 63
-		and			bx, cx
-		mov			word ptr [eax], bx
-		fldcw		word ptr [eax]
+void Sys_FPU_EnableExceptions( int exceptions ) {
+	//Could also be done with fesetexceptflag
+	int flags = 0;
+
+	if ( exceptions & FPU_EXCEPTION_INVALID_OPERATION ) {
+		flags |= _FP_EXC_INVALID;
 	}
+	if ( exceptions & FPU_EXCEPTION_DENORMALIZED_OPERAND ) {
+		flags |= _FP_EXC_DENORMAL;
+	}
+	if ( exceptions & FPU_EXCEPTION_DIVIDE_BY_ZERO ) {
+		flags |= _FP_EXC_DIVZERO;
+	}
+	if ( exceptions & FPU_EXCEPTION_NUMERIC_OVERFLOW ) {
+		flags |= _FP_EXC_OVERFLOW;
+	}
+	if ( exceptions & FPU_EXCEPTION_NUMERIC_UNDERFLOW ) {
+		flags |= _FP_EXC_UNDERFLOW;
+	}
+	if ( exceptions & FPU_EXCEPTION_INEXACT_RESULT ) {
+		flags |= _FP_EXC_INEXACT;
+	}
+
+	//No way to simply set, we have to toggle flags on and off
+	fp_exception_mask( _FP_EXC_ALL, 0 ); //Disable all exception mask flags
+	fp_exception_mask( flags, 1 ); //Set exception flags
 }
 
 /*
@@ -678,21 +692,21 @@ void Sys_FPU_EnableExceptions( int exceptions ) { //XXX Required
 Sys_FPU_SetPrecision
 ===============
 */
-void Sys_FPU_SetPrecision( int precision ) { //XXX Required (though NEON only supports floats, so this may actually not be needed)
-	short precisionBitTable[4] = { 0, 1, 3, 0 };
-	short precisionBits = precisionBitTable[precision & 3] << 8;
-	short precisionMask = ~( ( 1 << 9 ) | ( 1 << 8 ) );
+void Sys_FPU_SetPrecision( int precision ) {
+	int val = -1;
 
-	__asm {
-		mov			eax, statePtr
-		mov			cx, precisionBits
-		fnstcw		word ptr [eax]
-		mov			bx, word ptr [eax]
-		and			bx, precisionMask
-		or			bx, cx
-		mov			word ptr [eax], bx
-		fldcw		word ptr [eax]
+	switch( rounding ) {
+	case FPU_PRECISION_SINGLE:
+		val = _FP_PREC_FLOAT;
+		break;
+	case FPU_PRECISION_DOUBLE:
+		val = _FP_PREC_DOUBLE;
+		break;
+	case FPU_PRECISION_DOUBLE_EXTENDED:
+		val = _FP_PREC_DOUBLE_EXTENDED;
+		break;
 	}
+	fp_precision( val );
 }
 
 /*
@@ -700,21 +714,25 @@ void Sys_FPU_SetPrecision( int precision ) { //XXX Required (though NEON only su
 Sys_FPU_SetRounding
 ================
 */
-void Sys_FPU_SetRounding( int rounding ) { //XXX Required
-	short roundingBitTable[4] = { 0, 1, 2, 3 };
-	short roundingBits = roundingBitTable[rounding & 3] << 10;
-	short roundingMask = ~( ( 1 << 11 ) | ( 1 << 10 ) );
+void Sys_FPU_SetRounding( int rounding ) {
+	//Could also be done with fesetround
+	int val = -1;
 
-	__asm {
-		mov			eax, statePtr
-		mov			cx, roundingBits
-		fnstcw		word ptr [eax]
-		mov			bx, word ptr [eax]
-		and			bx, roundingMask
-		or			bx, cx
-		mov			word ptr [eax], bx
-		fldcw		word ptr [eax]
+	switch( rounding ) {
+	case FPU_ROUNDING_TO_NEAREST:
+		val = _FP_ROUND_NEAREST;
+		break;
+	case FPU_ROUNDING_DOWN:
+		val = _FP_ROUND_NEGATIVE;
+		break;
+	case FPU_ROUNDING_UP:
+		val = _FP_ROUND_POSITIVE;
+		break;
+	case FPU_ROUNDING_TO_ZERO:
+		val = _FP_ROUND_ZERO;
+		break;
 	}
+	fp_rounding( val );
 }
 
 /*

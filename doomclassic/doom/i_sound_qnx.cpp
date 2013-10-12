@@ -125,7 +125,6 @@ static bool		soundHardwareInitialized = false;
 
 #define HARDWARE_FREQUENCY (MIDI_RATE > 11025 ? MIDI_RATE : 11025)
 ALCcontext*		AudioInstance;
-bool			AudioInstanceOwnsDevice;
 
 void			I_InitSoundChannel( int channel, int numOutputChannels_ );
 
@@ -620,19 +619,7 @@ void I_InitSoundHardware( int numOutputChannels, int _unused ) {
 	// Initialize OpenAL
 	//  Speaker setup is not handled manually, so we don't do anything with it.
 	//  SpeedOfSound - not used by doomclassic
-	ALCcontext* currentContext = alcGetCurrentContext();
-	ALCdevice* device;
-	if( currentContext != NULL )
-	{
-		device = alcGetContextsDevice( currentContext );
-		AudioInstanceOwnsDevice = false;
-	}
-	else
-	{
-		// Should not get here
-		device = alcOpenDevice( NULL );
-		AudioInstanceOwnsDevice = true;
-	}
+	ALCdevice* device = alcGetContextsDevice( soundSystemLocal.hardware.GetContext() );
 	AudioInstance = alcCreateContext( device, atts );
 	alcMakeContextCurrent( AudioInstance );
 	alSpeedOfSound(340.29f);
@@ -677,14 +664,8 @@ void I_ShutdownSoundHardware() {
 	}
 
 	alcMakeContextCurrent( NULL );
-	ALCdevice* device = alcGetContextsDevice( AudioInstance );
 	alcDestroyContext( AudioInstance );
 	AudioInstance = NULL;
-	if( AudioInstanceOwnsDevice )
-	{
-		alcCloseDevice( device );
-		device = NULL;
-	}
 }
 
 /*

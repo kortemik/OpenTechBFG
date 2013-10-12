@@ -1721,6 +1721,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>src/sound/OpenAL/OAL_SoundHardware.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/sound/OpenAL/OAL_SoundHardware.cpp</locationURI>
+		</link>
+		<link>
 			<name>src/sound/OpenAL/OAL_SoundHardware.h</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/neo/sound/OpenAL/OAL_SoundHardware.h</locationURI>

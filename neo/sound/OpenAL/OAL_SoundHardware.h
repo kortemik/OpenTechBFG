@@ -50,7 +50,7 @@ public:
 	void			FreeVoice( idSoundVoice * voice );
 
 	// video playback needs this
-	void *		GetIXAudio2() const { return NULL; }; //XXX
+	ALCcontext *	GetContext() const { return context; };
 
 	int				GetNumZombieVoices() const { return zombieVoices.Num(); }
 	int				GetNumFreeVoices() const { return freeVoices.Num(); }
@@ -60,14 +60,10 @@ protected:
 	friend class idSoundVoice_OpenAL;
 
 private:
+	ALCcontext *		context;
+	ALCdevice *			device;
+
 	int					lastResetTime;
-
-	int					outputChannels;
-	int					channelMask;
-
-	idDebugGraph *		vuMeterRMS;
-	idDebugGraph *		vuMeterPeak;
-	int					vuMeterPeakTimes[ 8 ];
 
 	// Can't stop and start a voice on the same frame, so we have to double this to handle the worst case scenario of stopping all voices and starting a full new set
 	idStaticList<idSoundVoice_OpenAL, MAX_HARDWARE_VOICES * 2 > voices;
