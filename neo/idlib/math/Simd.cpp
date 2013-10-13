@@ -75,8 +75,10 @@ void idSIMD::InitProcessor( const char *module, bool forceGeneric ) {
 			}
 #elif defined(ID_QNX_ARM)
 			//XXX Should add support for VFP
-			if ( ( cpuid & CPUID_NEON ) ) {
+			if ( ( cpuid & CPUID_NEON ) ) { // Want NEON over VFP, if it's available
 				processor = new (TAG_MATH) idSIMD_NEON;
+			/*} else if ( ( cpuid & CPUID_VFP ) ) {
+				processor = new (TAG_MATH) idSIMD_NEON;*/
 			} else {
 				processor = generic;
 			}

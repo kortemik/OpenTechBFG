@@ -193,9 +193,16 @@ void idSoundHardware_OpenAL::Init() {
 
 	alListenerf( AL_GAIN, DBtoLinear( s_volume_dB.GetFloat() ) );
 
-	// Get the number of channels the device supports
+	// ---------------------
+	// Try to get information about the sound device
+	// ---------------------
 	snd_pcm_t * handle;
+	snd_mixer_t * mixHandle;
+	snd_pcm_info_t pcmInfo;
 	snd_pcm_channel_info_t channelInfo;
+	snd_mixer_info_t mixInfo;
+	snd_mixer_groups_t mixGroups;
+	snd_mixer_group_t mixGroup;
 	ALCint mono, stereo, sourcesMax = -1;
 	int outputChannels = 0;
 	int channelMask = 0;
@@ -205,10 +212,26 @@ void idSoundHardware_OpenAL::Init() {
 	if ( snd_pcm_open_name( &handle, deviceName, SND_PCM_OPEN_PLAYBACK ) >= 0 ) {
 
 		channelInfo.channel = SND_PCM_CHANNEL_PLAYBACK;
-		if ( snd_pcm_channel_info( handle, &channelInfo ) >= 0 ) {
+		if ( snd_pcm_info( handle, &pcmInfo ) >= 0 && snd_pcm_channel_info( handle, &channelInfo ) >= 0 ) {
 
 			//sourcesMax = channelInfo.max_voices; //Tests have shown this to be quite low, which isn't good for a game like Doom 3. Also, OpenAL takes care of this for us
-			//TODO: try to get the mixer group, from which we can get channels (and possibly channel mask)
+
+			if ( snd_mixer_open( &mixHandle, pcmInfo.card, channelInfo.mixer_device ) >= 0 ) {
+
+				if ( snd_mixer_info( mixHandle, &mixInfo ) >= 0 ) {
+
+					mixGroups.groups_size = mixInfo.groups;
+					mixGroups.pgroups = new (TAG_AUDIO) snd_mixer_gid_t[ mixInfo.groups ];
+
+					if ( snd_mixer_groups( mixHandle, &mixGroups ) >= 0 && ( mixGroup.caps & SND_MIXER_GRPCAP_PLAY_GRP ) != 0 ) {
+						//TODO: try to get the mixer group, from which we can get channels (and possibly channel mask)
+					}
+
+					delete [] mixGroups.pgroups;
+				}
+
+				snd_mixer_close( mixHandle );
+			}
 		}
 
 		snd_pcm_close( handle );
@@ -216,7 +239,7 @@ void idSoundHardware_OpenAL::Init() {
 	if ( outputChannels == 0 ) {
 		// Couldn't get audio info, use "defaults"
 		outputChannels = 2;
-		channelMask = idWaveFile::CHANNEL_MASK_SIDE_LEFT | idWaveFile::CHANNEL_MASK_SIDE_RIGHT; // Think: headphones
+		channelMask = idWaveFile::CHANNEL_MASK_FRONT_LEFT | idWaveFile::CHANNEL_MASK_FRONT_RIGHT; // Think: headphones
 	}
 
 	idSoundVoice::InitSurround( outputChannels, channelMask );

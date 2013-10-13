@@ -622,6 +622,7 @@ void I_InitSoundHardware( int numOutputChannels, int _unused ) {
 	ALCdevice* device = alcGetContextsDevice( soundSystemLocal.hardware.GetContext() );
 	AudioInstance = alcCreateContext( device, atts );
 	alcMakeContextCurrent( AudioInstance );
+	alGetError(); //Clear error
 	alSpeedOfSound(340.29f);
 
 	for ( int i = 0; i < NUM_SOUNDBUFFERS; ++i ) {

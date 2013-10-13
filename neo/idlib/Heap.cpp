@@ -50,7 +50,11 @@ void * Mem_Alloc16( const int size, const memTag_t tag ) {
 #ifdef ID_WIN32
 	return _aligned_malloc( paddedSize, 16 );
 #else
-	return memalign( 16, paddedSize );
+	void * mem;
+	if ( posix_memalign( &mem, 16, paddedSize ) == 0 ) {
+		return mem;
+	}
+	return NULL;
 #endif
 }
 
