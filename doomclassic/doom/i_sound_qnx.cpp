@@ -619,7 +619,7 @@ void I_InitSoundHardware( int numOutputChannels, int _unused ) {
 	// Initialize OpenAL
 	//  Speaker setup is not handled manually, so we don't do anything with it.
 	//  SpeedOfSound - not used by doomclassic
-	ALCdevice* device = alcGetContextsDevice( soundSystemLocal.hardware.GetContext() );
+	ALCdevice* device = soundSystemLocal.hardware.GetOpenALDevice();
 	AudioInstance = alcCreateContext( device, atts );
 	alcMakeContextCurrent( AudioInstance );
 	alGetError(); //Clear error

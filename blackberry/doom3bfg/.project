@@ -1721,24 +1721,24 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>src/sound/OpenAL/OAL_SoundHardware.cpp</name>
+			<name>src/sound/OpenAL/AL_SoundHardware.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/neo/sound/OpenAL/OAL_SoundHardware.cpp</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/sound/OpenAL/AL_SoundHardware.cpp</locationURI>
 		</link>
 		<link>
-			<name>src/sound/OpenAL/OAL_SoundHardware.h</name>
+			<name>src/sound/OpenAL/AL_SoundHardware.h</name>
 			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/neo/sound/OpenAL/OAL_SoundHardware.h</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/sound/OpenAL/AL_SoundHardware.h</locationURI>
 		</link>
 		<link>
-			<name>src/sound/OpenAL/OAL_SoundSample.h</name>
+			<name>src/sound/OpenAL/AL_SoundSample.h</name>
 			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/neo/sound/OpenAL/OAL_SoundSample.h</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/sound/OpenAL/AL_SoundSample.h</locationURI>
 		</link>
 		<link>
-			<name>src/sound/OpenAL/OAL_SoundVoice.h</name>
+			<name>src/sound/OpenAL/AL_SoundVoice.h</name>
 			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/neo/sound/OpenAL/OAL_SoundVoice.h</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/sound/OpenAL/AL_SoundVoice.h</locationURI>
 		</link>
 		<link>
 			<name>src/sys/qnx/qnx_cpu.cpp</name>

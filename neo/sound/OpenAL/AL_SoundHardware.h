@@ -25,8 +25,8 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#ifndef __OAL_SOUNDHARDWARE_H__
-#define __OAL_SOUNDHARDWARE_H__
+#ifndef __AL_SOUNDHARDWARE_H__
+#define __AL_SOUNDHARDWARE_H__
 
 class idSoundSample_OpenAL;
 class idSoundVoice_OpenAL;
@@ -49,8 +49,7 @@ public:
 	idSoundVoice *	AllocateVoice( const idSoundSample * leadinSample, const idSoundSample * loopingSample );
 	void			FreeVoice( idSoundVoice * voice );
 
-	// video playback needs this
-	ALCcontext *	GetContext() const { return context; };
+	ALCdevice *		GetOpenALDevice() const { return openalDevice; };
 
 	int				GetNumZombieVoices() const { return zombieVoices.Num(); }
 	int				GetNumFreeVoices() const { return freeVoices.Num(); }
@@ -60,8 +59,8 @@ protected:
 	friend class idSoundVoice_OpenAL;
 
 private:
-	ALCcontext *		context;
-	ALCdevice *			device;
+	ALCdevice *			openalDevice;
+	ALCcontext *		openalContext;
 
 	int					lastResetTime;
 

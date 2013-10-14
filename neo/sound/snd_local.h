@@ -97,9 +97,9 @@ typedef enum {
 #include <AL/alc.h>
 #include <AL/alext.h>
 
-#include "OpenAL/OAL_SoundSample.h"
-#include "OpenAL/OAL_SoundVoice.h"
-#include "OpenAL/OAL_SoundHardware.h"
+#include "OpenAL/AL_SoundSample.h"
+#include "OpenAL/AL_SoundVoice.h"
+#include "OpenAL/AL_SoundHardware.h"
 #endif
 
 

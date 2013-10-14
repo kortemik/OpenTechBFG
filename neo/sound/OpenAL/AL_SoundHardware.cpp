@@ -40,8 +40,8 @@ idSoundHardware_OpenAL::idSoundHardware_OpenAL
 ========================
 */
 idSoundHardware_OpenAL::idSoundHardware_OpenAL() {
-	context = NULL;
-	device = NULL;
+	openalContext = NULL;
+	openalDevice = NULL;
 
 	voices.SetNum( 0 );
 	zombieVoices.SetNum( 0 );
@@ -162,8 +162,8 @@ void idSoundHardware_OpenAL::Init() {
 	//XXX cmdSystem->AddCommand( "listDevices", listDevices_f, 0, "Lists the connected sound devices", NULL );
 
 	// Get device
-	device = alcOpenDevice( NULL );
-	if ( device == NULL ) {
+	openalDevice = alcOpenDevice( NULL );
+	if ( openalDevice == NULL ) {
 		idLib::FatalError( "Failed to open default OpenAL device." );
 		return;
 	}
@@ -173,20 +173,20 @@ void idSoundHardware_OpenAL::Init() {
 		ALC_FREQUENCY, 44100, //Taken from XA2_SoundHardware::Init()'s outputSampleRate field
 		0
 	};
-	context = alcCreateContext( device, atts );
-	ALCenum err = alcGetError( device );
-	if ( !context || err != ALC_NO_ERROR ) {
-		alcCloseDevice( device );
+	openalContext = alcCreateContext( openalDevice, atts );
+	ALCenum err = alcGetError( openalDevice );
+	if ( !openalContext || err != ALC_NO_ERROR ) {
+		alcCloseDevice( openalDevice );
 		idLib::FatalError( "Failed to create OpenAL context. Error: %d.", err );
 		return;
 	}
 
 	// Set current context
-	alcMakeContextCurrent( context );
-	err = alcGetError( device );
+	alcMakeContextCurrent( openalContext );
+	err = alcGetError( openalDevice );
 	if ( err != ALC_NO_ERROR ) {
-		alcDestroyContext( context );
-		alcCloseDevice( device );
+		alcDestroyContext( openalContext );
+		alcCloseDevice( openalDevice );
 		idLib::FatalError( "Failed to set current OpenAL context. Error: %d.", err );
 		return;
 	}
@@ -207,7 +207,7 @@ void idSoundHardware_OpenAL::Init() {
 	int outputChannels = 0;
 	int channelMask = 0;
 
-	const ALCchar* deviceName = alcGetString( device, ALC_DEVICE_SPECIFIER );
+	const ALCchar* deviceName = alcGetString( openalDevice, ALC_DEVICE_SPECIFIER );
 
 	if ( snd_pcm_open_name( &handle, deviceName, SND_PCM_OPEN_PLAYBACK ) >= 0 ) {
 
@@ -251,8 +251,8 @@ void idSoundHardware_OpenAL::Init() {
 
 	// Set the maximum number of "voices", AKA sources in OpenAL terms. Maximum number of sources is mono sources + stereo sources
 	if ( sourcesMax < 1 ) {
-		alcGetIntegerv( device, ALC_MONO_SOURCES, 1, &mono );
-		alcGetIntegerv( device, ALC_STEREO_SOURCES, 1, &stereo );
+		alcGetIntegerv( openalDevice, ALC_MONO_SOURCES, 1, &mono );
+		alcGetIntegerv( openalDevice, ALC_STEREO_SOURCES, 1, &stereo );
 		sourcesMax = mono + stereo;
 	}
 
@@ -283,13 +283,13 @@ void idSoundHardware_OpenAL::Shutdown() {
 	I_ShutdownSoundHardware();
 
 	alcMakeContextCurrent( NULL );
-	if ( context != NULL ) {
-		alcDestroyContext( context );
-		context = NULL;
+	if ( openalContext != NULL ) {
+		alcDestroyContext( openalContext );
+		openalContext = NULL;
 	}
-	if ( device != NULL ) {
-		alcCloseDevice( device );
-		device = NULL;
+	if ( openalDevice != NULL ) {
+		alcCloseDevice( openalDevice );
+		openalDevice = NULL;
 	}
 }
 
@@ -349,7 +349,7 @@ idSoundHardware_OpenAL::Update
 ========================
 */
 void idSoundHardware_OpenAL::Update() {
-	if ( context == NULL ) {
+	if ( openalContext == NULL ) {
 		int nowTime = Sys_Milliseconds();
 		if ( lastResetTime + 1000 < nowTime ) {
 			lastResetTime = nowTime;

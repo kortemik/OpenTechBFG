@@ -25,8 +25,8 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#ifndef __OAL_SOUNDVOICE_H__
-#define __OAL_SOUNDVOICE_H__
+#ifndef __AL_SOUNDVOICE_H__
+#define __AL_SOUNDVOICE_H__
 
 static const int MAX_QUEUED_BUFFERS = 3;
 
