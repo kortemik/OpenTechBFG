@@ -55,6 +55,10 @@ public:
 	int				GetNumFreeVoices() const { return freeVoices.Num(); }
 
 protected:
+	// OpenAL info
+	static void		PrintDeviceList( const char* list );
+	static void		PrintALCInfo( ALCdevice* device );
+
 	friend class idSoundSample_OpenAL;
 	friend class idSoundVoice_OpenAL;
 

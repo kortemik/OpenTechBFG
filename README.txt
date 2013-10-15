@@ -4,6 +4,7 @@ Doom 3 BFG Edition GPL Source Code
 This file contains the following sections:
 
 GENERAL NOTES
+THANKS
 LICENSE
 
 GENERAL NOTES
@@ -31,6 +32,20 @@ You will need the Microsoft DirectX SDK installed as well.
 If it does not reside in "C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)"
 you will need to update the project files accordingly.
 
+Compiling on BlackBerry 10:
+---------------------------
+
+Make sure that Momentics 10.2 or higher is installed. Only works on the BlackBerry Z30
+right now since it has OpenGL ES 3.0 support.
+
+A set of projects are located within the blackberry folder. Import these projects and
+compile doom3bfg.
+
+Notes:
+- Amplitude is not needed for compilation.
+- X86 is currently not supported, so only on device compiles will work
+
+TODO: write instructions for game data
 
 Steam:
 ------
@@ -60,6 +75,11 @@ it is likely that you can find modified and improved versions of the engine in
 various open source projects across the internet.
 
 Depending what is your interest with the source code, those may be a better starting point.
+
+
+THANKS
+======
+- Robert Beckebans (RobertBeckebans) for RBDOOM-3-BFG, which had an already implemented version of OpenAL audio
 
 
 LICENSE

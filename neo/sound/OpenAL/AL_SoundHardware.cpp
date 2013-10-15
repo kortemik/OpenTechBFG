@@ -32,6 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <sys/asoundlib.h>
 
 idCVar s_device( "s_device", "-1", CVAR_INTEGER|CVAR_ARCHIVE, "Which audio device to use (listDevices to list, -1 for default)" );
+idCVar s_supportedMixers( "s_supportedMixers", "BT A2DP Out;HDMI Out;Headphone;Master;", CVAR_SOUND|CVAR_INIT, "Which audio mixers are supported for channel counting. Mixers must be separated by ';' without gaps between items, including the last element." );
 extern idCVar s_volume_dB;
 
 /*
@@ -50,106 +51,96 @@ idSoundHardware_OpenAL::idSoundHardware_OpenAL() {
 	lastResetTime = 0;
 }
 
-void listDevices_f( const idCmdArgs & args ) {
+/*
+========================
+idSoundHardware_OpenAL::PrintDeviceList
 
-	ALCcontext * context = soundSystemLocal.hardware.GetContext();
+Taken from RBDOOM-3-BFG
+========================
+*/
+void idSoundHardware_OpenAL::PrintDeviceList( const char* list )
+{
+	if( !list || *list == '\0' ) {
+		idLib::Printf( "    !!! none !!!\n" );
+	} else {
+		do {
+			idLib::Printf( "    %s\n", list );
+			list += strlen( list ) + 1;
+		}
+		while( *list != '\0' );
+	}
+}
 
-	if ( context == NULL ) {
-		idLib::Warning( "No OpenAL context object" );
-		return;
+/*
+========================
+idSoundHardware_OpenAL::PrintALCInfo
+
+Taken from RBDOOM-3-BFG
+========================
+*/
+void idSoundHardware_OpenAL::PrintALCInfo( ALCdevice* device )
+{
+	ALCint major, minor;
+
+	if( device ) {
+		const ALCchar* devname = NULL;
+		idLib::Printf( "\n" );
+		if( alcIsExtensionPresent( device, "ALC_ENUMERATE_ALL_EXT" ) != AL_FALSE ) {
+			devname = alcGetString( device, ALC_ALL_DEVICES_SPECIFIER );
+		}
+
+		if( alcGetError( device ) != ALC_NO_ERROR || !devname ) {
+			devname = alcGetString( device, ALC_DEVICE_SPECIFIER );
+		}
+
+		idLib::Printf( "** Info for device \"%s\" **\n", devname );
+	}
+	alcGetIntegerv( device, ALC_MAJOR_VERSION, 1, &major );
+	alcGetIntegerv( device, ALC_MINOR_VERSION, 1, &minor );
+
+	if( alcGetError( device ) == ALC_NO_ERROR ) {
+		idLib::Printf( "ALC version: %d.%d\n", major, minor );
 	}
 
-	//TODO
-	/*
-	UINT32 deviceCount = 0;
-	if ( pXAudio2->GetDeviceCount( &deviceCount ) != S_OK || deviceCount == 0 ) {
-		idLib::Warning( "No audio devices found" );
-		return;
+	if( device ) {
+		idLib::Printf( "OpenAL extensions: %s", alGetString( AL_EXTENSIONS ) );
+
+		//idLib::Printf("ALC extensions:");
+		//printList(alcGetString(device, ALC_EXTENSIONS), ' ');
+		alcGetError( device );
+	}
+}
+
+/*
+========================
+listDevices_f
+
+Taken from RBDOOM-3-BFG
+========================
+*/
+void listDevices_f( const idCmdArgs& args ) {
+
+	idLib::Printf( "Available playback devices:\n" );
+	if( alcIsExtensionPresent( NULL, "ALC_ENUMERATE_ALL_EXT" ) != AL_FALSE ) {
+		idSoundHardware_OpenAL::PrintDeviceList( alcGetString( NULL, ALC_ALL_DEVICES_SPECIFIER ) );
+	} else {
+		idSoundHardware_OpenAL::PrintDeviceList( alcGetString( NULL, ALC_DEVICE_SPECIFIER ) );
 	}
 
-	for ( unsigned int i = 0; i < deviceCount; i++ ) {
-		XAUDIO2_DEVICE_DETAILS deviceDetails;
-		if ( pXAudio2->GetDeviceDetails( i, &deviceDetails ) != S_OK ) {
-			continue;
-		}
-		idStaticList< const char *, 5 > roles;
-		if ( deviceDetails.Role & DefaultConsoleDevice ) {
-			roles.Append( "Console Device" );
-		}
-		if ( deviceDetails.Role & DefaultMultimediaDevice ) {
-			roles.Append( "Multimedia Device" );
-		}
-		if ( deviceDetails.Role & DefaultCommunicationsDevice ) {
-			roles.Append( "Communications Device" );
-		}
-		if ( deviceDetails.Role & DefaultGameDevice ) {
-			roles.Append( "Game Device" );
-		}
-		idStaticList< const char *, 11 > channelNames;
-		if ( deviceDetails.OutputFormat.dwChannelMask & SPEAKER_FRONT_LEFT ) {
-			channelNames.Append( "Front Left" );
-		}
-		if ( deviceDetails.OutputFormat.dwChannelMask & SPEAKER_FRONT_RIGHT ) {
-			channelNames.Append( "Front Right" );
-		}
-		if ( deviceDetails.OutputFormat.dwChannelMask & SPEAKER_FRONT_CENTER ) {
-			channelNames.Append( "Front Center" );
-		}
-		if ( deviceDetails.OutputFormat.dwChannelMask & SPEAKER_LOW_FREQUENCY ) {
-			channelNames.Append( "Low Frequency" );
-		}
-		if ( deviceDetails.OutputFormat.dwChannelMask & SPEAKER_BACK_LEFT ) {
-			channelNames.Append( "Back Left" );
-		}
-		if ( deviceDetails.OutputFormat.dwChannelMask & SPEAKER_BACK_RIGHT ) {
-			channelNames.Append( "Back Right" );
-		}
-		if ( deviceDetails.OutputFormat.dwChannelMask & SPEAKER_FRONT_LEFT_OF_CENTER ) {
-			channelNames.Append( "Front Left of Center" );
-		}
-		if ( deviceDetails.OutputFormat.dwChannelMask & SPEAKER_FRONT_RIGHT_OF_CENTER ) {
-			channelNames.Append( "Front Right of Center" );
-		}
-		if ( deviceDetails.OutputFormat.dwChannelMask & SPEAKER_BACK_CENTER ) {
-			channelNames.Append( "Back Center" );
-		}
-		if ( deviceDetails.OutputFormat.dwChannelMask & SPEAKER_SIDE_LEFT ) {
-			channelNames.Append( "Side Left" );
-		}
-		if ( deviceDetails.OutputFormat.dwChannelMask & SPEAKER_SIDE_RIGHT ) {
-			channelNames.Append( "Side Right" );
-		}
-		char mbcsDisplayName[ 256 ];
-		wcstombs( mbcsDisplayName, deviceDetails.DisplayName, sizeof( mbcsDisplayName ) );
-		idLib::Printf( "%3d: %s\n", i, mbcsDisplayName );
-		idLib::Printf( "     %d channels, %d Hz\n", deviceDetails.OutputFormat.Format.nChannels, deviceDetails.OutputFormat.Format.nSamplesPerSec );
-		if ( channelNames.Num() != deviceDetails.OutputFormat.Format.nChannels ) {
-			idLib::Printf( S_COLOR_YELLOW "WARNING: " S_COLOR_RED "Mismatch between # of channels and channel mask\n" );
-		}
-		if ( channelNames.Num() == 1 ) {
-			idLib::Printf( "     %s\n", channelNames[0] );
-		} else if ( channelNames.Num() == 2 ) {
-			idLib::Printf( "     %s and %s\n", channelNames[0], channelNames[1] );
-		} else if ( channelNames.Num() > 2 ) {
-			idLib::Printf( "     %s", channelNames[0] );
-			for ( int i = 1; i < channelNames.Num() - 1; i++ ) {
-				idLib::Printf( ", %s", channelNames[i] );
-			}
-			idLib::Printf( ", and %s\n", channelNames[channelNames.Num() - 1] );
-		}
-		if ( roles.Num() == 1 ) {
-			idLib::Printf( "     Default %s\n", roles[0] );
-		} else if ( roles.Num() == 2 ) {
-			idLib::Printf( "     Default %s and %s\n", roles[0], roles[1] );
-		} else if ( roles.Num() > 2 ) {
-			idLib::Printf( "     Default %s", roles[0] );
-			for ( int i = 1; i < roles.Num() - 1; i++ ) {
-				idLib::Printf( ", %s", roles[i] );
-			}
-			idLib::Printf( ", and %s\n", roles[roles.Num() - 1] );
-		}
+	//idLib::Printf("Available capture devices:\n");
+	//printDeviceList(alcGetString(NULL, ALC_CAPTURE_DEVICE_SPECIFIER));
+
+	if( alcIsExtensionPresent( NULL, "ALC_ENUMERATE_ALL_EXT" ) != AL_FALSE ) {
+		idLib::Printf( "Default playback device: %s\n", alcGetString( NULL, ALC_DEFAULT_ALL_DEVICES_SPECIFIER ) );
+	} else {
+		idLib::Printf( "Default playback device: %s\n",  alcGetString( NULL, ALC_DEFAULT_DEVICE_SPECIFIER ) );
 	}
-	*/
+
+	//idLib::Printf("Default capture device: %s\n", alcGetString(NULL, ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER));
+
+	idSoundHardware_OpenAL::PrintALCInfo( NULL );
+
+	idSoundHardware_OpenAL::PrintALCInfo( ( ALCdevice* )soundSystemLocal.hardware.GetOpenALDevice() );
 }
 
 /*
@@ -159,7 +150,9 @@ idSoundHardware_OpenAL::Init
 */
 void idSoundHardware_OpenAL::Init() {
 
-	//XXX cmdSystem->AddCommand( "listDevices", listDevices_f, 0, "Lists the connected sound devices", NULL );
+	cmdSystem->AddCommand( "listDevices", listDevices_f, 0, "Lists the connected sound devices", NULL );
+
+	common->Printf( "Setup OpenAL device and context... " );
 
 	// Get device
 	openalDevice = alcOpenDevice( NULL );
@@ -170,7 +163,7 @@ void idSoundHardware_OpenAL::Init() {
 
 	// Create context
 	ALCint atts[] = {
-		ALC_FREQUENCY, 44100, //Taken from XA2_SoundHardware::Init()'s outputSampleRate field
+		ALC_FREQUENCY, 44100, //Taken from XA2_SoundHardware::Init()'s outputSampleRate field. Also specified in XA2_SoundSource.cpp with SYSTEM_SAMPLE_RATE.
 		0
 	};
 	openalContext = alcCreateContext( openalDevice, atts );
@@ -193,8 +186,17 @@ void idSoundHardware_OpenAL::Init() {
 
 	alListenerf( AL_GAIN, DBtoLinear( s_volume_dB.GetFloat() ) );
 
+	common->Printf( "Done setting up OpenAL.\n" );
+
+	common->Printf( "OpenAL vendor: %s\n", alGetString( AL_VENDOR ) );
+	common->Printf( "OpenAL renderer: %s\n", alGetString( AL_RENDERER ) );
+	common->Printf( "OpenAL version: %s\n", alGetString( AL_VERSION ) );
+	common->Printf( "OpenAL extensions: %s\n", alGetString( AL_EXTENSIONS ) );
+
 	// ---------------------
 	// Try to get information about the sound device
+	//
+	// Not really the prettiest, but it's the safest... makes a nice curve /s
 	// ---------------------
 	snd_pcm_t * handle;
 	snd_mixer_t * mixHandle;
@@ -223,8 +225,73 @@ void idSoundHardware_OpenAL::Init() {
 					mixGroups.groups_size = mixInfo.groups;
 					mixGroups.pgroups = new (TAG_AUDIO) snd_mixer_gid_t[ mixInfo.groups ];
 
-					if ( snd_mixer_groups( mixHandle, &mixGroups ) >= 0 && ( mixGroup.caps & SND_MIXER_GRPCAP_PLAY_GRP ) != 0 ) {
-						//TODO: try to get the mixer group, from which we can get channels (and possibly channel mask)
+					if ( snd_mixer_groups( mixHandle, &mixGroups ) >= 0 ) {
+
+						unsigned int lcdChannelCount = 0xFFFFFFFF;
+						unsigned int lcdChannelMask = 0;
+						idStr groupName;
+
+						for ( int m = 0; m < mixGroups.groups; m++) {
+
+							//Create the name of the group to search for, then check if it exists
+							groupName = mixGroups.pgroups[m].name;
+							groupName.Append( ';' );
+
+							if ( idStr::FindText( s_supportedMixers.GetString(), groupName, false ) ) {
+
+								memcpy( &mixGroup.gid, &mixGroups.pgroups[m], sizeof( snd_mixer_gid_t ) );
+
+								if ( snd_mixer_group_read( mixHandle, &mixGroup ) >= 0 && ( mixGroup.caps & SND_MIXER_GRPCAP_PLAY_GRP ) != 0 ) {
+
+									unsigned int tChannelCount = 0;
+									unsigned int tChannelMask = 0;
+
+									//Max of 8 channels (7.1)
+									for ( int channels = 0; channels < 8; channels++ ) {
+										if ( ( mixGroup.channels & (1 << channels ) ) != 0 ) {
+											tChannelCount++;
+											tChannelMask |= (1 << channels ); //SND_MIXER_CHN_MASK_*
+										}
+									}
+
+									if ( tChannelCount < lcdChannelCount ) {
+										lcdChannelCount = tChannelCount;
+										lcdChannelMask = tChannelMask;
+									}
+								}
+								break;
+							}
+						}
+
+						if ( lcdChannelMask != 0 ) {
+							outputChannels = lcdChannelCount;
+
+							//Do manually because bits between idWaveFile and SND_MIXER_CHN_MASK_* don't match
+							if ( ( lcdChannelMask & SND_MIXER_CHN_MASK_FRONT_LEFT ) != 0) {
+								channelMask |= idWaveFile::CHANNEL_MASK_FRONT_LEFT;
+							}
+							if ( ( lcdChannelMask & SND_MIXER_CHN_MASK_FRONT_RIGHT ) != 0) {
+								channelMask |= idWaveFile::CHANNEL_MASK_FRONT_RIGHT;
+							}
+							if ( ( lcdChannelMask & SND_MIXER_CHN_MASK_FRONT_CENTER ) != 0) {
+								channelMask |= idWaveFile::CHANNEL_MASK_FRONT_CENTER;
+							}
+							if ( ( lcdChannelMask & SND_MIXER_CHN_MASK_REAR_LEFT ) != 0) {
+								channelMask |= idWaveFile::CHANNEL_MASK_BACK_LEFT;
+							}
+							if ( ( lcdChannelMask & SND_MIXER_CHN_MASK_REAR_RIGHT ) != 0) {
+								channelMask |= idWaveFile::CHANNEL_MASK_BACK_RIGHT;
+							}
+							if ( ( lcdChannelMask & SND_MIXER_CHN_MASK_WOOFER ) != 0) {
+								channelMask |= idWaveFile::CHANNEL_MASK_LOW_FREQUENCY;
+							}
+							if ( ( lcdChannelMask & SND_MIXER_CHN_MASK_SURR_LEFT ) != 0) {
+								channelMask |= idWaveFile::CHANNEL_MASK_SIDE_LEFT;
+							}
+							if ( ( lcdChannelMask & SND_MIXER_CHN_MASK_SURR_RIGHT ) != 0) {
+								channelMask |= idWaveFile::CHANNEL_MASK_SIDE_RIGHT;
+							}
+						}
 					}
 
 					delete [] mixGroups.pgroups;
@@ -249,7 +316,8 @@ void idSoundHardware_OpenAL::Init() {
 	// ---------------------
 	I_InitSoundHardware( outputChannels, channelMask );
 
-	// Set the maximum number of "voices", AKA sources in OpenAL terms. Maximum number of sources is mono sources + stereo sources
+	// Set the maximum number of "voices", AKA sources in OpenAL terms. Maximum number of sources is mono sources + stereo sources.
+	// Technically doesn't matter, but there is "hearsay" limit of 256 (look at the original Doom 3 source with it's OpenAL implementation)
 	if ( sourcesMax < 1 ) {
 		alcGetIntegerv( openalDevice, ALC_MONO_SOURCES, 1, &mono );
 		alcGetIntegerv( openalDevice, ALC_STEREO_SOURCES, 1, &stereo );
