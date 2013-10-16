@@ -351,12 +351,13 @@ cpuid_t Sys_GetCPUId() { //XXX Required
 
 	// check for VFP support
 	if ( ( cpuFlags & CPU_FLAG_FPU ) != 0 ) {
-		flags |= CPUID_VFP;
+		flags |= CPUID_VFP | CPUID_FTZ;
 	}
 
 	// check for NEON
 	if ( ( cpuFlags & ARM_CPU_FLAG_NEON ) != 0 ) {
 		flags |= CPUID_NEON;
+		flags &= ~CPUID_FTZ; //NEON always does FTZ if NEON is used. If NEON is supported, we will use that anyway.
 	}
 
 	// check for iWMMX2
@@ -740,7 +741,12 @@ void Sys_FPU_SetRounding( int rounding ) {
 Sys_FPU_SetDAZ
 ================
 */
-void Sys_FPU_SetDAZ( bool enable ) { //XXX Required
+void Sys_FPU_SetDAZ( bool enable ) {
+#ifdef ID_QNX_ARM
+	//ARM does not have something equivalent to x86's DAZ, though supposedly FTZ handles both input (x86's DAZ) and output (x86's FTZ)
+#elif defined(ID_QNX_X86)
+	//XXX Required
+
 	DWORD dwData;
 
 	_asm {
@@ -754,6 +760,9 @@ void Sys_FPU_SetDAZ( bool enable ) { //XXX Required
 		mov		dwData, eax
 		LDMXCSR	dword ptr dwData
 	}
+#else
+#error Unknown CPU architecture
+#endif
 }
 
 /*
@@ -761,7 +770,19 @@ void Sys_FPU_SetDAZ( bool enable ) { //XXX Required
 Sys_FPU_SetFTZ
 ================
 */
-void Sys_FPU_SetFTZ( bool enable ) { //XXX Required
+void Sys_FPU_SetFTZ( bool enable ) {
+#ifdef ID_QNX_ARM
+	__asm__("MOV	r1, %[enable]\n"
+			"AND	r1, #0x1\n"
+			"LSL	r1, #24\n"
+			"FMRX	r0, FPSCR\n"
+			"BIC	r0, #(1<<24)\n"	// clear FTZ bit ((1<<24) == ARM_VFP_FPSCR_FZ)
+			"ORR	r0, r1\n"		// set the FTZ bit
+			"FMXR	FPSCR, r0"
+			:: [enable] "r" (enable) : "r0", "r1");
+#elif defined(ID_QNX_X86)
+	//XXX Required
+
 	DWORD dwData;
 
 	_asm {
@@ -775,4 +796,7 @@ void Sys_FPU_SetFTZ( bool enable ) { //XXX Required
 		mov		dwData, eax
 		LDMXCSR	dword ptr dwData
 	}
+#else
+#error Unknown CPU architecture
+#endif
 }

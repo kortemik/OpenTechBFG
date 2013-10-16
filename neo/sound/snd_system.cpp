@@ -351,7 +351,7 @@ void * idSoundSystemLocal::GetIXAudio2() const {
 #ifdef ID_WIN32
 	return (void *)hardware.GetIXAudio2();
 #else
-	return (void *)hardware.GetContext();
+	return (void *)hardware.GetOpenALDevice();
 #endif
 }
 
