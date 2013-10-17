@@ -86,6 +86,11 @@ enum fpuRounding_t {
 	FPU_ROUNDING_TO_ZERO				= 3
 };
 
+enum fpuVfpStride {
+	FPU_VFP_STRIDE_ONE					= 0,
+	FPU_VFP_STRIDE_TWO					= 3
+};
+
 enum joystickAxis_t {
 	AXIS_LEFT_X,
 	AXIS_LEFT_Y,

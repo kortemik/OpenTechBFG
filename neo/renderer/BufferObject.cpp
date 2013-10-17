@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ IsWriteCombined
 ==================
 */
 bool IsWriteCombined( void * base ) {
+#if ID_WIN32
 	MEMORY_BASIC_INFORMATION info;
 	SIZE_T size = VirtualQueryEx( GetCurrentProcess(), base, &info, sizeof( info ) );
 	if ( size == 0 ) {
@@ -50,6 +51,9 @@ bool IsWriteCombined( void * base ) {
 	}
 	bool isWriteCombined = ( ( info.AllocationProtect & PAGE_WRITECOMBINE ) != 0 );
 	return isWriteCombined;
+#else
+	return true; //XXX Is this fine?
+#endif
 }
 
 
@@ -784,7 +788,7 @@ float * idJointBuffer::MapBuffer( bufferMapType_t mapType ) const {
 	void * buffer = NULL;
 
 	qglBindBufferARB( GL_UNIFORM_BUFFER, reinterpret_cast< GLuint >( apiObject ) );
-	numBytes = numBytes;
+	//numBytes = numBytes;
 	assert( GetOffset() == 0 );
 	//buffer = qglMapBufferARB( GL_UNIFORM_BUFFER, GL_WRITE_ONLY_ARB );
 	buffer = qglMapBufferRange( GL_UNIFORM_BUFFER, 0, GetAllocedSize(), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_UNSYNCHRONIZED_BIT );

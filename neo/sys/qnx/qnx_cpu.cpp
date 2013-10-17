@@ -800,3 +800,26 @@ void Sys_FPU_SetFTZ( bool enable ) {
 #error Unknown CPU architecture
 #endif
 }
+
+/*
+================
+Sys_FPU_VFP_SetLEN_STRIDE
+
+Used by ARM VFP to process vectors
+================
+*/
+void Sys_FPU_VFP_SetLEN_STRIDE( int length, int stride ) {
+#ifdef ID_QNX_ARM
+	__asm__("FMRX r0, FPSCR\n"
+			"BIC r0, #((3<<20)|(7<<16))\n"
+			"MOV r1, %[stride]\n"
+			"AND r1, #3\n"
+			"LSL r1, #4\n"
+			"ORR r1, %[len]\n"
+			"AND r1, #((3<<4)|7)\n"
+			"LSL r1, #16\n"
+			"ORR r0, r1\n"
+			"FMXR FPSCR, r0"
+			:: [stride] "r" (stride), [len] "r" (length) : "r0", "r1");
+#endif
+}

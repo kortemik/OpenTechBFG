@@ -446,20 +446,20 @@ idFileHandle idFileSystemLocal::OpenOSFile( const char *fileName, fsMode_t mode 
 	}
 #else
 	int access = 0;
-	std::mode_t mode = 0;
+	mode_t fileMode = 0;
 
 	if ( mode == FS_WRITE ) {
 		access = O_RDWR | O_CREAT | O_TRUNC;
-		mode = S_IRWXU | S_IRGRP | S_IWGRP;
+		fileMode = S_IRWXU | S_IRGRP | S_IWGRP;
 	} else if ( mode == FS_READ ) {
 		access = O_RDONLY;
 	} else if ( mode == FS_APPEND ) {
 		access = O_RDWR;
 	}
 
-	fp = open( fileName, access, mode );
+	fp = open( fileName, access, fileMode );
 	if ( fp == -1 ) {
-		return NULL;
+		return (idFileHandle)NULL;
 	}
 #endif
 	return fp;

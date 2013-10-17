@@ -71,6 +71,9 @@ extern "C" {
 #ifndef GLclampd
 	typedef khronos_float_t GLclampd;
 #endif
+#ifndef GLsizeiptrARB
+	typedef GLsizeiptr GLsizeiptrARB;
+#endif
 
 //=============
 //Defines for functions that are defined but may not actually exist
@@ -97,6 +100,12 @@ extern "C" {
 #endif
 #ifndef GL_ARRAY_BUFFER_ARB
 	#define GL_ARRAY_BUFFER_ARB GL_ARRAY_BUFFER
+#endif
+#ifndef GL_DYNAMIC_DRAW_ARB
+	#define GL_DYNAMIC_DRAW_ARB GL_DYNAMIC_DRAW
+#endif
+#ifndef GL_STREAM_DRAW_ARB
+	#define GL_STREAM_DRAW_ARB GL_STREAM_DRAW
 #endif
 #ifndef PFNGLBINDBUFFERARBPROC
 	typedef void (GL_APIENTRYP PFNGLBINDBUFFERARBPROC) (GLenum target, GLuint buffer);

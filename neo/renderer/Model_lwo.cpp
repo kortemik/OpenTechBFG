@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -32,6 +32,14 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Model_lwo.h"
 
+#ifdef ID_WIN32
+#define LW_LIST_FREE_FUNC_PTR (void (__cdecl *)(void *))
+#define LW_LIST_INSERT_FUNC_PTR (int (__cdecl *)(void *,void *))
+#else
+#define LW_LIST_FREE_FUNC_PTR (void (*)(void *))
+#define LW_LIST_INSERT_FUNC_PTR (int (*)(void *,void *))
+#endif
+
 /*
 ======================================================================
 
@@ -50,8 +58,8 @@ Free memory used by an lwClip.
 void lwFreeClip( lwClip *clip )
 {
    if ( clip ) {
-      lwListFree( clip->ifilter, (void (__cdecl *)(void *))lwFreePlugin );
-      lwListFree( clip->pfilter, (void (__cdecl *)(void *))lwFreePlugin );
+      lwListFree( clip->ifilter, LW_LIST_FREE_FUNC_PTR lwFreePlugin );
+      lwListFree( clip->pfilter, LW_LIST_FREE_FUNC_PTR lwFreePlugin );
 	  switch( clip->type ) {
 		case ID_STIL: {
 	      if ( clip->source.still.name ) Mem_Free( clip->source.still.name );
@@ -317,7 +325,7 @@ void lwFreeEnvelope( lwEnvelope *env )
    if ( env ) {
       if ( env->name ) Mem_Free( env->name );
       lwListFree( env->key, lwFree );
-      lwListFree( env->cfilter, (void (__cdecl *)(void *))lwFreePlugin );
+      lwListFree( env->cfilter, LW_LIST_FREE_FUNC_PTR lwFreePlugin );
       Mem_Free( env );
    }
 }
@@ -395,7 +403,7 @@ lwEnvelope *lwGetEnvelope( idFile *fp, int cksize )
             if ( !key ) goto Fail;
             key->time = getF4( fp );
             key->value = getF4( fp );
-            lwListInsert( (void**)&env->key, key, (int (__cdecl *)(void *,void *))compare_keys );
+            lwListInsert( (void**)&env->key, key, LW_LIST_INSERT_FUNC_PTR compare_keys );
             env->nkeys++;
             break;
 
@@ -1410,7 +1418,7 @@ void lwFreeLayer( lwLayer *layer )
       if ( layer->name ) Mem_Free( layer->name );
       lwFreePoints( &layer->point );
       lwFreePolygons( &layer->polygon );
-      lwListFree( layer->vmap, (void (__cdecl *)(void *))lwFreeVMap );
+      lwListFree( layer->vmap, LW_LIST_FREE_FUNC_PTR lwFreeVMap );
       Mem_Free( layer );
    }
 }
@@ -1426,10 +1434,10 @@ Free memory used by an lwObject.
 void lwFreeObject( lwObject *object )
 {
    if ( object ) {
-      lwListFree( object->layer, (void (__cdecl *)(void *))lwFreeLayer );
-      lwListFree( object->env, (void (__cdecl *)(void *))lwFreeEnvelope );
-      lwListFree( object->clip, (void (__cdecl *)(void *))lwFreeClip );
-      lwListFree( object->surf, (void (__cdecl *)(void *))lwFreeSurface );
+      lwListFree( object->layer, LW_LIST_FREE_FUNC_PTR lwFreeLayer );
+      lwListFree( object->env, LW_LIST_FREE_FUNC_PTR lwFreeEnvelope );
+      lwListFree( object->clip, LW_LIST_FREE_FUNC_PTR lwFreeClip );
+      lwListFree( object->surf, LW_LIST_FREE_FUNC_PTR lwFreeSurface );
       lwFreeTags( &object->taglist );
       Mem_Free( object );
    }
@@ -2978,18 +2986,18 @@ void lwFreeSurface( lwSurface *surf )
 		if ( surf->name ) Mem_Free( surf->name );
 		if ( surf->srcname ) Mem_Free( surf->srcname );
 
-		lwListFree( surf->shader, (void (__cdecl *)(void *))lwFreePlugin );
+		lwListFree( surf->shader, LW_LIST_FREE_FUNC_PTR lwFreePlugin );
 
-		lwListFree( surf->color.tex, (void (__cdecl *)(void *))lwFreeTexture );
-		lwListFree( surf->luminosity.tex, (void (__cdecl *)(void *))lwFreeTexture );
-		lwListFree( surf->diffuse.tex, (void (__cdecl *)(void *))lwFreeTexture );
-		lwListFree( surf->specularity.tex, (void (__cdecl *)(void *))lwFreeTexture );
-		lwListFree( surf->glossiness.tex, (void (__cdecl *)(void *))lwFreeTexture );
-		lwListFree( surf->reflection.val.tex, (void (__cdecl *)(void *))lwFreeTexture );
-		lwListFree( surf->transparency.val.tex, (void (__cdecl *)(void *))lwFreeTexture );
-		lwListFree( surf->eta.tex, (void (__cdecl *)(void *))lwFreeTexture );
-		lwListFree( surf->translucency.tex, (void (__cdecl *)(void *))lwFreeTexture );
-		lwListFree( surf->bump.tex, (void (__cdecl *)(void *))lwFreeTexture );
+		lwListFree( surf->color.tex, LW_LIST_FREE_FUNC_PTR lwFreeTexture );
+		lwListFree( surf->luminosity.tex, LW_LIST_FREE_FUNC_PTR lwFreeTexture );
+		lwListFree( surf->diffuse.tex, LW_LIST_FREE_FUNC_PTR lwFreeTexture );
+		lwListFree( surf->specularity.tex, LW_LIST_FREE_FUNC_PTR lwFreeTexture );
+		lwListFree( surf->glossiness.tex, LW_LIST_FREE_FUNC_PTR lwFreeTexture );
+		lwListFree( surf->reflection.val.tex, LW_LIST_FREE_FUNC_PTR lwFreeTexture );
+		lwListFree( surf->transparency.val.tex, LW_LIST_FREE_FUNC_PTR lwFreeTexture );
+		lwListFree( surf->eta.tex, LW_LIST_FREE_FUNC_PTR lwFreeTexture );
+		lwListFree( surf->translucency.tex, LW_LIST_FREE_FUNC_PTR lwFreeTexture );
+		lwListFree( surf->bump.tex, LW_LIST_FREE_FUNC_PTR lwFreeTexture );
 
 		Mem_Free( surf );
 	}
@@ -3644,7 +3652,7 @@ static int add_texture( lwSurface *surf, lwTexture *tex )
       default:  return 0;
    }
 
-   lwListInsert( (void**)list, tex, (int (__cdecl *)(void *,void *))compare_textures );
+   lwListInsert( (void**)list, tex, LW_LIST_INSERT_FUNC_PTR compare_textures );
    return 1;
 }
 
@@ -3869,7 +3877,7 @@ lwSurface *lwGetSurface( idFile *fp, int cksize )
                case ID_SHDR:
                   shdr = lwGetShader( fp, sz - 4 );
                   if ( !shdr ) goto Fail;
-                  lwListInsert( (void**)&surf->shader, shdr, (int (__cdecl *)(void *,void *))compare_shaders );
+                  lwListInsert( (void**)&surf->shader, shdr, LW_LIST_INSERT_FUNC_PTR compare_shaders );
                   ++surf->nshaders;
                   set_flen( 4 + get_flen() );
                   break;
