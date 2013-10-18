@@ -435,9 +435,12 @@ typedef struct bitFlag_s {
 	int			bit;
 } bitFlag_t;
 
+#ifdef ID_QNX_X86
 static byte fpuState[128], *statePtr = fpuState;
+#endif
 static char fpuString[2048];
 static bitFlag_t controlWordFlags[] = {
+#ifdef ID_QNX_X86
 	{ "Invalid operation", 0 },
 	{ "Denormalized operand", 1 },
 	{ "Divide-by-zero", 2 },
@@ -445,21 +448,48 @@ static bitFlag_t controlWordFlags[] = {
 	{ "Numeric underflow", 4 },
 	{ "Inexact result (precision)", 5 },
 	{ "Infinity control", 12 },
+#elif defined(ID_QNX_ARM)
+	{ "Invalid operation", 8 },
+	{ "Divide-by-zero", 9 },
+	{ "Numeric overflow", 10 },
+	{ "Numeric underflow", 11 },
+	{ "Inexact result (precision)", 12 },
+	{ "Flush-to-Zero", 24 },
+#else
+#error Unknown CPU architecture
+#endif
 	{ "", 0 }
 };
 static char *precisionControlField[] = {
+#ifdef ID_QNX_X86
 	"Single Precision (24-bits)",
 	"Reserved",
 	"Double Precision (53-bits)",
 	"Double Extended Precision (64-bits)"
+#elif defined(ID_QNX_ARM)
+	"Single Precision",
+	"Double Precision",
+	"Extended Precision",
+	"Double Extended Precision"
+#else
+#error Unknown CPU architecture
+#endif
 };
 static char *roundingControlField[] = {
 	"Round to nearest",
+#ifdef ID_QNX_X86
 	"Round down",
 	"Round up",
+#elif defined(ID_QNX_ARM)
+	"Round up",
+	"Round down",
+#else
+#error Unknown CPU architecture
+#endif
 	"Round toward zero"
 };
 static bitFlag_t statusWordFlags[] = {
+#ifdef ID_QNX_X86
 	{ "Invalid operation", 0 },
 	{ "Denormalized operand", 1 },
 	{ "Divide-by-zero", 2 },
@@ -469,8 +499,39 @@ static bitFlag_t statusWordFlags[] = {
 	{ "Stack fault", 6 },
 	{ "Error summary status", 7 },
 	{ "FPU busy", 15 },
+#elif defined(ID_QNX_ARM)
+	{ "Invalid operation", 0 },
+	{ "Divide-by-zero", 1 },
+	{ "Numeric overflow", 2 },
+	{ "Numeric underflow", 3 },
+	{ "Inexact result (precision)", 4 },
+#else
+#error Unknown CPU architecture
+#endif
 	{ "", 0 }
 };
+#ifdef ID_QNX_ARM
+static char *strideControlField[] = {
+	"Stride of 1",
+	"Invalid Stride",
+	"Stride of 2"
+};
+
+#define FPU_SPECIFIC_ARM_ASM(opNeon,opVfp,asmIn) \
+	unsigned int cpuFlags = SYSPAGE_ENTRY(cpuinfo)->flags; \
+	if (cpuFlags & ARM_CPU_FLAG_NEON) { \
+		asmIn(opNeon) \
+	} else if (cpuFlags & CPU_FLAG_FPU) { \
+		asmIn(opVfp) \
+	}
+#define FPU_SPECIFIC_ARM_ASM_2OP(op1Neon,op2Neon,op1Vfp,op2Vfp,asmIn) \
+	unsigned int cpuFlags = SYSPAGE_ENTRY(cpuinfo)->flags; \
+	if (cpuFlags & ARM_CPU_FLAG_NEON) { \
+		asmIn(op1Neon,op2Neon) \
+	} else if (cpuFlags & CPU_FLAG_FPU) { \
+		asmIn(op1Vfp,op2Vfp) \
+	}
+#endif
 
 /*
 ===============
@@ -480,6 +541,27 @@ Sys_FPU_PrintStateFlags
 int Sys_FPU_PrintStateFlags( char *ptr, int ctrl, int stat, int tags, int inof, int inse, int opof, int opse ) {
 	int i, length = 0;
 
+#ifdef ID_QNX_ARM
+	length += sprintf( ptr+length,	"CTRL-STAT = %08x\n"
+									"PREC = %08x\n"
+									"\n",
+									ctrl, stat );
+
+	length += sprintf( ptr+length, "Control:\n" );
+	for ( i = 0; controlWordFlags[i].name[0]; i++ ) {
+		length += sprintf( ptr+length, "  %-30s = %s\n", controlWordFlags[i].name, ( ctrl & ( 1 << controlWordFlags[i].bit ) ) ? "true" : "false" );
+	}
+	length += sprintf( ptr+length, "  %-30s = %s\n", "Precision control", precisionControlField[stat&3] );
+	length += sprintf( ptr+length, "  %-30s = %s\n", "Rounding control", roundingControlField[(ctrl>>22)&3] );
+	length += sprintf( ptr+length, "  %-30s = %s\n", "Vector Stride control", strideControlField[(ctrl>>20)&3] );
+	length += sprintf( ptr+length, "  %-30s = %d\n", "Vector Length control", (((ctrl>>16)&7)+1) );
+
+	length += sprintf( ptr+length, "Status:\n" );
+	for ( i = 0; statusWordFlags[i].name[0]; i++ ) {
+		ptr += sprintf( ptr+length, "  %-30s = %s\n", statusWordFlags[i].name, ( ctrl & ( 1 << statusWordFlags[i].bit ) ) ? "true" : "false" );
+	}
+	length += sprintf( ptr+length, "  %-30s = N-%d, Z-%d, C-%d, V-%d\n", "Condition code", (ctrl>>31)&1, (ctrl>>30)&1, (ctrl>>29)&1, (ctrl>>28)&1 );
+#else
 	length += sprintf( ptr+length,	"CTRL = %08x\n"
 									"STAT = %08x\n"
 									"TAGS = %08x\n"
@@ -503,6 +585,7 @@ int Sys_FPU_PrintStateFlags( char *ptr, int ctrl, int stat, int tags, int inof, 
 	}
 	length += sprintf( ptr+length, "  %-30s = %d%d%d%d\n", "Condition code", (stat>>8)&1, (stat>>9)&1, (stat>>10)&1, (stat>>14)&1 );
 	length += sprintf( ptr+length, "  %-30s = %d\n", "Top of stack pointer", (stat>>11)&7 );
+#endif
 
 	return length;
 }
@@ -512,18 +595,26 @@ int Sys_FPU_PrintStateFlags( char *ptr, int ctrl, int stat, int tags, int inof, 
 Sys_FPU_StackIsEmpty
 ===============
 */
-bool Sys_FPU_StackIsEmpty() { //XXX Required
+bool Sys_FPU_StackIsEmpty() {
+#ifdef ID_QNX_ARM
+	return true; //ARM does not use a stack for VFP or NEON operations
+#elif defined(ID_QNX_X86)
+	//XXX Required
+
 	__asm {
-		mov			eax, statePtr
-		fnstenv		[eax]
-		mov			eax, [eax+8]
-		xor			eax, 0xFFFFFFFF
-		and			eax, 0x0000FFFF
-		jz			empty
-	}
-	return false;
-empty:
-	return true;
+			mov			eax, statePtr
+			fnstenv		[eax]
+			mov			eax, [eax+8]
+			xor			eax, 0xFFFFFFFF
+			and			eax, 0x0000FFFF
+			jz			empty
+		}
+		return false;
+	empty:
+		return true;
+#else
+#error Unknown CPU architecture
+#endif
 }
 
 /*
@@ -531,22 +622,30 @@ empty:
 Sys_FPU_ClearStack
 ===============
 */
-void Sys_FPU_ClearStack() { //XXX Required
+void Sys_FPU_ClearStack() {
+#ifdef ID_QNX_ARM
+	//ARM does not use a stack for VFP or NEON operations
+#elif defined(ID_QNX_X86)
+	//XXX Required
+
 	__asm {
-		mov			eax, statePtr
-		fnstenv		[eax]
-		mov			eax, [eax+8]
-		xor			eax, 0xFFFFFFFF
-		mov			edx, (3<<14)
-	emptyStack:
-		mov			ecx, eax
-		and			ecx, edx
-		jz			done
-		fstp		st
-		shr			edx, 2
-		jmp			emptyStack
-	done:
-	}
+			mov			eax, statePtr
+			fnstenv		[eax]
+			mov			eax, [eax+8]
+			xor			eax, 0xFFFFFFFF
+			mov			edx, (3<<14)
+		emptyStack:
+			mov			ecx, eax
+			and			ecx, edx
+			jz			done
+			fstp		st
+			shr			edx, 2
+			jmp			emptyStack
+		done:
+		}
+#else
+#error Unknown CPU architecture
+#endif
 }
 
 /*
@@ -556,11 +655,14 @@ Sys_FPU_GetState
   gets the FPU state without changing the state
 ===============
 */
-const char *Sys_FPU_GetState() { //XXX Required
+const char *Sys_FPU_GetState() {
+	char *ptr;
+#ifdef ID_QNX_X86
+	//XXX Required
+
 	double fpuStack[8] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 	double *fpuStackPtr = fpuStack;
 	int i, numValues;
-	char *ptr;
 
 	__asm {
 		mov			esi, statePtr
@@ -642,8 +744,19 @@ const char *Sys_FPU_GetState() { //XXX Required
 	int inse = *(int *)&fpuState[16];
 	int opof = *(int *)&fpuState[20];
 	int opse = *(int *)&fpuState[24];
+#elif defined(ID_QNX_ARM)
+	int ctrlStat = 0;
+#define FPU_GET_STATE( op ) __asm__(#op" %[ctst], FPSCR" : [ctst] "=r" (ctrlStat) ::);
+	FPU_SPECIFIC_ARM_ASM( VMRS, FMRX, FPU_GET_STATE )
+#undef FPU_GET_STATE
+
+	int prec = fp_precision( -1 );
+#else
+#error Unknown CPU architecture
+#endif
 
 	ptr = fpuString;
+#ifdef ID_QNX_X86
 	ptr += sprintf( ptr,"FPU State:\n"
 						"num values on stack = %d\n", numValues );
 	for ( i = 0; i < 8; i++ ) {
@@ -651,6 +764,13 @@ const char *Sys_FPU_GetState() { //XXX Required
 	}
 
 	Sys_FPU_PrintStateFlags( ptr, ctrl, stat, tags, inof, inse, opof, opse );
+#elif defined(ID_QNX_ARM)
+	ptr += sprintf( ptr,"FPU State:\n" );
+
+	Sys_FPU_PrintStateFlags( ptr, ctrlStat, prec, 0, 0, 0, 0, 0 );
+#else
+#error Unknown CPU architecture
+#endif
 
 	return fpuString;
 }
@@ -772,14 +892,22 @@ Sys_FPU_SetFTZ
 */
 void Sys_FPU_SetFTZ( bool enable ) {
 #ifdef ID_QNX_ARM
-	__asm__("MOV	r1, %[enable]\n"
-			"AND	r1, #0x1\n"
-			"LSL	r1, #24\n"
-			"FMRX	r0, FPSCR\n"
-			"BIC	r0, #(1<<24)\n"	// clear FTZ bit ((1<<24) == ARM_VFP_FPSCR_FZ)
-			"ORR	r0, r1\n"		// set the FTZ bit
-			"FMXR	FPSCR, r0"
+
+#define FPU_SET_FTZ( op1, op2 ) \
+	__asm__("MOV	r1, %[enable]\n" \
+			"AND	r1, #0x1\n" \
+			"LSL	r1, #24\n" \
+			#op1"	r0, FPSCR\n" \
+			"BIC	r0, #(1<<24)\n" \
+			"ORR	r0, r1\n" \
+			#op2"	FPSCR, r0" \
 			:: [enable] "r" (enable) : "r0", "r1");
+
+	//1<<24 == ARM_VFP_FPSCR_FZ
+	FPU_SPECIFIC_ARM_ASM_2OP( VMRS, VMSR, FMRX, FMXR, FPU_SET_FTZ )
+
+#undef FPU_SET_FTZ
+
 #elif defined(ID_QNX_X86)
 	//XXX Required
 
@@ -810,16 +938,23 @@ Used by ARM VFP to process vectors
 */
 void Sys_FPU_VFP_SetLEN_STRIDE( int length, int stride ) {
 #ifdef ID_QNX_ARM
-	__asm__("FMRX r0, FPSCR\n"
-			"BIC r0, #((3<<20)|(7<<16))\n"
-			"MOV r1, %[stride]\n"
-			"AND r1, #3\n"
-			"LSL r1, #4\n"
-			"ORR r1, %[len]\n"
-			"AND r1, #((3<<4)|7)\n"
-			"LSL r1, #16\n"
-			"ORR r0, r1\n"
-			"FMXR FPSCR, r0"
+
+#define FPU_SET_LEN_STRIDE( op1, op2 ) \
+	__asm__(#op1" r0, FPSCR\n" \
+			"BIC r0, #((3<<20)|(7<<16))\n" \
+			"MOV r1, %[stride]\n" \
+			"AND r1, #3\n" \
+			"LSL r1, #4\n" \
+			"ORR r1, %[len]\n" \
+			"AND r1, #((3<<4)|7)\n" \
+			"LSL r1, #16\n" \
+			"ORR r0, r1\n" \
+			#op2" FPSCR, r0" \
 			:: [stride] "r" (stride), [len] "r" (length) : "r0", "r1");
+
+	FPU_SPECIFIC_ARM_ASM_2OP( VMRS, VMSR, FMRX, FMXR, FPU_SET_LEN_STRIDE )
+
+#undef FPU_SET_LEN_STRIDE
+
 #endif
 }
