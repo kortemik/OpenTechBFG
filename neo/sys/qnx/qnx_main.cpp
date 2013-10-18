@@ -206,7 +206,6 @@ Sys_Printf
 ==============
 */
 #define MAXPRINTMSG 4096
-#define SLOG_CODE 2004
 void Sys_Printf( const char *fmt, ... ) {
 	char		msg[MAXPRINTMSG];
 

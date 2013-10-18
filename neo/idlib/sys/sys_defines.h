@@ -180,6 +180,9 @@ If you have questions concerning this license or the applicable additional terms
 #define ID_INLINE_EXTERN				__inline__
 #define ID_FORCE_INLINE_EXTERN			__attribute__((always_inline))
 
+//Identification code for SLOG2. 2004 was the date Doom 3 was released
+#define SLOG_CODE						2004
+
 #ifndef _alloca
 #define _alloca							alloca
 #endif
