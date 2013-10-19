@@ -114,6 +114,41 @@ void CopyBuffer( byte * dst, const byte * src, int numBytes ) {
 	_mm_sfence();
 }
 
+#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(ID_QNX_ARM_NEON_ASM)
+
+void CopyBuffer( byte * dst, const byte * src, int numBytes ) {
+	assert_16_byte_aligned( dst );
+	assert_16_byte_aligned( src );
+
+	int i = 0;
+	for ( ; i + 128 <= numBytes; i += 128 ) {
+		//neon intrinsics don't have functions that can load 4 neon registers at once, so it would result in 6 more instructions (8 in reality, minus 2 for the add ops)
+		__asm__ __volatile__(
+				"ADD r0, %[src], %[i]\n"
+				"ADD r1, %[dst], %[i]\n"
+				"VLD1.32 {D0, D1, D2, D3}, [r0]!\n"
+				"VLD1.32 {D4, D5, D6, D7}, [r0]!\n"
+				"VLD1.32 {D8, D9, D10, D11}, [r0]!\n"
+				"VLD1.32 {D12, D13, D14, D15}, [r0]!\n"
+				"VST1.32 {D0, D1, D2, D3}, [r1]!\n"
+				"VST1.32 {D4, D5, D6, D7}, [r1]!\n"
+				"VST1.32 {D8, D9, D10, D11}, [r1]!\n"
+				"VST1.32 {D12, D13, D14, D15}, [r1]!"
+				: [dst] "+&r" (dst) : [src] "r" (src), [i] "r" (i) : "r0", "r1", "memory" );
+	}
+	for ( ; i + 16 <= numBytes; i += 16 ) {
+		uint32x4_t d = vld1q_u32( (uint32_t *)&src[i] );
+		vst1q_u32( (uint32_t *)&dst[i], d );
+	}
+	for ( ; i + 4 <= numBytes; i += 4 ) {
+		*(uint32 *)&dst[i] = *(const uint32 *)&src[i];
+	}
+	for ( ; i < numBytes; i++ ) {
+		dst[i] = src[i];
+	}
+	__asm__ __volatile__("DMB ST" ::: "memory");
+}
+
 #else
 
 void CopyBuffer( byte * dst, const byte * src, int numBytes ) {
