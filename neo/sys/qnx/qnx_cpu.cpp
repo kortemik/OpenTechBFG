@@ -516,21 +516,6 @@ static char *strideControlField[] = {
 	"Invalid Stride",
 	"Stride of 2"
 };
-
-#define FPU_SPECIFIC_ARM_ASM(opNeon,opVfp,asmIn) \
-	unsigned int cpuFlags = SYSPAGE_ENTRY(cpuinfo)->flags; \
-	if (cpuFlags & ARM_CPU_FLAG_NEON) { \
-		asmIn(opNeon) \
-	} else if (cpuFlags & CPU_FLAG_FPU) { \
-		asmIn(opVfp) \
-	}
-#define FPU_SPECIFIC_ARM_ASM_2OP(op1Neon,op2Neon,op1Vfp,op2Vfp,asmIn) \
-	unsigned int cpuFlags = SYSPAGE_ENTRY(cpuinfo)->flags; \
-	if (cpuFlags & ARM_CPU_FLAG_NEON) { \
-		asmIn(op1Neon,op2Neon) \
-	} else if (cpuFlags & CPU_FLAG_FPU) { \
-		asmIn(op1Vfp,op2Vfp) \
-	}
 #endif
 
 /*
@@ -746,9 +731,11 @@ const char *Sys_FPU_GetState() {
 	int opse = *(int *)&fpuState[24];
 #elif defined(ID_QNX_ARM)
 	int ctrlStat = 0;
-#define FPU_GET_STATE( op ) __asm__(#op" %[ctst], FPSCR" : [ctst] "=r" (ctrlStat) ::);
-	FPU_SPECIFIC_ARM_ASM( VMRS, FMRX, FPU_GET_STATE )
-#undef FPU_GET_STATE
+#ifdef ID_QNX_ARM_NEON_ASM
+	__asm__("VMRS %[ctst], FPSCR" : [ctst] "=r" (ctrlStat) ::); //VFP would use FMRX instead of VMRS
+#else
+#error Must compile with -mfpu=neon
+#endif
 
 	int prec = fp_precision( -1 );
 #else
@@ -893,20 +880,20 @@ Sys_FPU_SetFTZ
 void Sys_FPU_SetFTZ( bool enable ) {
 #ifdef ID_QNX_ARM
 
-#define FPU_SET_FTZ( op1, op2 ) \
-	__asm__("MOV	r1, %[enable]\n" \
-			"AND	r1, #0x1\n" \
-			"LSL	r1, #24\n" \
-			#op1"	r0, FPSCR\n" \
-			"BIC	r0, #(1<<24)\n" \
-			"ORR	r0, r1\n" \
-			#op2"	FPSCR, r0" \
+#ifdef ID_QNX_ARM_NEON_ASM
+	//NEON: VMRS, VMSR
+	//VFP:  FMRX, FMXR
+	__asm__("MOV	r1, %[enable]\n"
+			"AND	r1, #0x1\n"
+			"LSL	r1, #24\n"
+			"VMRS	r0, FPSCR\n"
+			"BIC	r0, #(1<<24)\n"	//Clear FTZ bit (1<<24 == ARM_VFP_FPSCR_FZ)
+			"ORR	r0, r1\n"		//Set FTZ bit
+			"VMSR	FPSCR, r0"
 			:: [enable] "r" (enable) : "r0", "r1");
-
-	//1<<24 == ARM_VFP_FPSCR_FZ
-	FPU_SPECIFIC_ARM_ASM_2OP( VMRS, VMSR, FMRX, FMXR, FPU_SET_FTZ )
-
-#undef FPU_SET_FTZ
+#else
+#error Must compile with -mfpu=neon
+#endif
 
 #elif defined(ID_QNX_X86)
 	//XXX Required
@@ -939,22 +926,21 @@ Used by ARM VFP to process vectors
 void Sys_FPU_VFP_SetLEN_STRIDE( int length, int stride ) {
 #ifdef ID_QNX_ARM
 
-#define FPU_SET_LEN_STRIDE( op1, op2 ) \
-	__asm__(#op1" r0, FPSCR\n" \
-			"BIC r0, #((3<<20)|(7<<16))\n" \
-			"MOV r1, %[stride]\n" \
-			"AND r1, #3\n" \
-			"LSL r1, #4\n" \
-			"ORR r1, %[len]\n" \
-			"AND r1, #((3<<4)|7)\n" \
-			"LSL r1, #16\n" \
-			"ORR r0, r1\n" \
-			#op2" FPSCR, r0" \
+#ifdef ID_QNX_ARM_NEON_ASM
+	__asm__("VMRS r0, FPSCR\n"
+			"BIC r0, #((3<<20)|(7<<16))\n"
+			"MOV r1, %[stride]\n"
+			"AND r1, #3\n"
+			"LSL r1, #4\n"
+			"ORR r1, %[len]\n"
+			"AND r1, #((3<<4)|7)\n"
+			"LSL r1, #16\n"
+			"ORR r0, r1\n"
+			"VMSR FPSCR, r0"
 			:: [stride] "r" (stride), [len] "r" (length) : "r0", "r1");
-
-	FPU_SPECIFIC_ARM_ASM_2OP( VMRS, VMSR, FMRX, FMXR, FPU_SET_LEN_STRIDE )
-
-#undef FPU_SET_LEN_STRIDE
+#else
+#error Must compile with -mfpu=neon
+#endif
 
 #endif
 }

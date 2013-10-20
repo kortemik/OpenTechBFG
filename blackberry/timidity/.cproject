@@ -302,7 +302,9 @@
 									<listOptionValue builtIn="false" value="_D3XP"/>
 									<listOptionValue builtIn="false" value="CTF"/>
 								</option>
-								<option id="com.qnx.qcc.option.compiler.qccoptions.1314586345" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList"/>
+								<option id="com.qnx.qcc.option.compiler.qccoptions.1314586345" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-msse"/>
+								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.1914455561" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.1574757234" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
@@ -365,7 +367,9 @@
 									<listOptionValue builtIn="false" value="_D3XP"/>
 									<listOptionValue builtIn="false" value="CTF"/>
 								</option>
-								<option id="com.qnx.qcc.option.compiler.qccoptions.362455561" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList"/>
+								<option id="com.qnx.qcc.option.compiler.qccoptions.362455561" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-msse"/>
+								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.1380973916" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.107927028" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
@@ -429,7 +433,9 @@
 									<listOptionValue builtIn="false" value="_D3XP"/>
 									<listOptionValue builtIn="false" value="CTF"/>
 								</option>
-								<option id="com.qnx.qcc.option.compiler.qccoptions.1494059289" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList"/>
+								<option id="com.qnx.qcc.option.compiler.qccoptions.1494059289" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-msse"/>
+								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.72517209" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.157340859" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">

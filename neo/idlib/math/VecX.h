@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ NOTE: due to the temporary memory pool idVecX cannot be used by multiple threads
 class idVecX {
 	friend class idMatX;
 
-public:	
+public:
 	ID_INLINE					idVecX();
 	ID_INLINE					explicit idVecX( int length );
 	ID_INLINE					explicit idVecX( int length, float *data );
@@ -218,6 +218,11 @@ ID_INLINE idVecX idVecX::operator-() const {
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( m.p + i, _mm_xor_ps( _mm_load_ps( p + i ), (__m128 &) signBit[0] ) );
 	}
+#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
+	ALIGN16( unsigned int signBit[4] ) = { IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK };
+	for ( int i = 0; i < size; i += 4 ) {
+		vst1q_u32( (uint32_t *)(m.p + i), veorq_u32( vld1q_u32( (uint32_t *)(p + i) ), (uint32x4_t &) signBit[0] ) );
+	}
 #else
 	for ( int i = 0; i < size; i++ ) {
 		m.p[i] = -p[i];
@@ -231,11 +236,15 @@ ID_INLINE idVecX idVecX::operator-() const {
 idVecX::operator=
 ========================
 */
-ID_INLINE idVecX &idVecX::operator=( const idVecX &a ) { 
+ID_INLINE idVecX &idVecX::operator=( const idVecX &a ) {
 	SetSize( a.size );
 #if defined(ID_WIN_X86_SSE_INTRIN) && defined(VECX_SIMD)
 	for ( int i = 0; i < a.size; i += 4 ) {
 		_mm_store_ps( p + i, _mm_load_ps( a.p + i ) );
+	}
+#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
+	for ( int i = 0; i < a.size; i += 4 ) {
+		vst1q_f32( (float32_t *)(p + i), vld1q_f32( (float32_t *)(a.p + i) ) );
 	}
 #else
 	memcpy( p, a.p, a.size * sizeof( float ) );
@@ -257,6 +266,10 @@ ID_INLINE idVecX idVecX::operator+( const idVecX &a ) const {
 #if defined(ID_WIN_X86_SSE_INTRIN) && defined(VECX_SIMD)
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( m.p + i, _mm_add_ps( _mm_load_ps( p + i ), _mm_load_ps( a.p + i ) ) );
+	}
+#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
+	for ( int i = 0; i < size; i += 4 ) {
+		vst1q_f32( (float32_t *)(m.p + i), vaddq_f32( vld1q_f32( (float32_t *)(p + i) ), vld1q_f32( (float32_t *)(a.p + i) ) ) );
 	}
 #else
 	for ( int i = 0; i < size; i++ ) {
@@ -280,6 +293,10 @@ ID_INLINE idVecX idVecX::operator-( const idVecX &a ) const {
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( m.p + i, _mm_sub_ps( _mm_load_ps( p + i ), _mm_load_ps( a.p + i ) ) );
 	}
+#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
+	for ( int i = 0; i < size; i += 4 ) {
+		vst1q_f32( (float32_t *)(m.p + i), vsubq_f32( vld1q_f32( (float32_t *)(p + i) ), vld1q_f32( (float32_t *)(a.p + i) ) ) );
+	}
 #else
 	for ( int i = 0; i < size; i++ ) {
 		m.p[i] = p[i] - a.p[i];
@@ -298,6 +315,10 @@ ID_INLINE idVecX &idVecX::operator+=( const idVecX &a ) {
 #if defined(ID_WIN_X86_SSE_INTRIN) && defined(VECX_SIMD)
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( p + i, _mm_add_ps( _mm_load_ps( p + i ), _mm_load_ps( a.p + i ) ) );
+	}
+#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
+	for ( int i = 0; i < size; i += 4 ) {
+		vst1q_f32( (float32_t *)(p + i), vaddq_f32( vld1q_f32( (float32_t *)(p + i) ), vld1q_f32( (float32_t *)(a.p + i) ) ) );
 	}
 #else
 	for ( int i = 0; i < size; i++ ) {
@@ -318,6 +339,10 @@ ID_INLINE idVecX &idVecX::operator-=( const idVecX &a ) {
 #if defined(ID_WIN_X86_SSE_INTRIN) && defined(VECX_SIMD)
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( p + i, _mm_sub_ps( _mm_load_ps( p + i ), _mm_load_ps( a.p + i ) ) );
+	}
+#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
+	for ( int i = 0; i < size; i += 4 ) {
+		vst1q_f32( (float32_t *)(p + i), vsubq_f32( vld1q_f32( (float32_t *)(p + i) ), vld1q_f32( (float32_t *)(a.p + i) ) ) );
 	}
 #else
 	for ( int i = 0; i < size; i++ ) {
@@ -342,6 +367,11 @@ ID_INLINE idVecX idVecX::operator*( const float a ) const {
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( m.p + i, _mm_mul_ps( _mm_load_ps( p + i ), va ) );
 	}
+#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
+	float32x4_t va = vld1q_dup_f32( & a );
+	for ( int i = 0; i < size; i += 4 ) {
+		vst1q_f32( (float32_t *)(m.p + i), vmulq_f32( vld1q_f32( (float32_t *)(p + i) ), va ) );
+	}
 #else
 	for ( int i = 0; i < size; i++ ) {
 		m.p[i] = p[i] * a;
@@ -360,6 +390,11 @@ ID_INLINE idVecX &idVecX::operator*=( const float a ) {
 	__m128 va = _mm_load1_ps( & a );
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( p + i, _mm_mul_ps( _mm_load_ps( p + i ), va ) );
+	}
+#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
+	float32x4_t va = vld1q_dup_f32( & a );
+	for ( int i = 0; i < size; i += 4 ) {
+		vst1q_f32( (float32_t *)(p + i), vmulq_f32( vld1q_f32( (float32_t *)(p + i) ), va ) );
 	}
 #else
 	for ( int i = 0; i < size; i++ ) {
@@ -555,6 +590,12 @@ ID_INLINE void idVecX::Zero() {
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( p + i, _mm_setzero_ps() );
 	}
+#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
+	int32_t a = 0;
+	int32x4_t va = vld1q_dup_s32( & a );
+	for ( int i = 0; i < size; i += 4 ) {
+		vst1q_s32( (int32_t *)(p + i), va );
+	}
 #else
 	memset( p, 0, size * sizeof( float ) );
 #endif
@@ -570,6 +611,12 @@ ID_INLINE void idVecX::Zero( int length ) {
 #if defined(ID_WIN_X86_SSE_INTRIN) && defined(VECX_SIMD)
 	for ( int i = 0; i < length; i += 4 ) {
 		_mm_store_ps( p + i, _mm_setzero_ps() );
+	}
+#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
+	int32_t a = 0;
+	int32x4_t va = vld1q_dup_s32( & a );
+	for ( int i = 0; i < length; i += 4 ) {
+		vst1q_s32( (int32_t *)(p + i), va );
 	}
 #else
 	memset( p, 0, length * sizeof( float ) );
@@ -615,6 +662,11 @@ ID_INLINE void idVecX::Negate() {
 	ALIGN16( const unsigned int signBit[4] ) = { IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK };
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( p + i, _mm_xor_ps( _mm_load_ps( p + i ), (__m128 &) signBit[0] ) );
+	}
+#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
+	ALIGN16( const unsigned int signBit[4] ) = { IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK };
+	for ( int i = 0; i < size; i += 4 ) {
+		vst1q_u32( (uint32_t *)(p + i), veorq_u32( vld1q_u32( (uint32_t *)(p + i) ), (uint32x4_t &) signBit[0] ) );
 	}
 #else
 	for ( int i = 0; i < size; i++ ) {

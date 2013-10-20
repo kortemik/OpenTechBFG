@@ -187,6 +187,10 @@ If you have questions concerning this license or the applicable additional terms
 #define _alloca							alloca
 #endif
 
+#ifndef UINT_PTR
+#define UINT_PTR uintptr_t
+#endif
+
 //GCC warns us if the formats don't match the args anyway
 #define VERIFY_FORMAT_STRING
 

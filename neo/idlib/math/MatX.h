@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -393,6 +393,10 @@ ID_INLINE idMatX &idMatX::operator=( const idMatX &a ) {
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( mat + i, _mm_load_ps( a.mat + i ) );
 	}
+#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(MATX_SIMD)
+	for ( int i = 0; i < s; i += 4 ) {
+		vst1q_f32( (float32_t *)(mat + i), vld1q_f32( (float32_t *)(a.mat + i) ) );
+	}
 #else
 	memcpy( mat, a.mat, s * sizeof( float ) );
 #endif
@@ -414,6 +418,11 @@ ID_INLINE idMatX idMatX::operator*( const float a ) const {
 	__m128 va = _mm_load1_ps( & a );
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( m.mat + i, _mm_mul_ps( _mm_load_ps( mat + i ), va ) );
+	}
+#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(MATX_SIMD)
+	float32x4_t va = vld1q_dup_f32( & a );
+	for ( int i = 0; i < s; i += 4 ) {
+		vst1q_f32( (float32_t *)(m.mat + i), vmulq_f32( vld1q_f32( (float32_t *)(mat + i) ), va ) );
 	}
 #else
 	for ( int i = 0; i < s; i++ ) {
@@ -466,6 +475,10 @@ ID_INLINE idMatX idMatX::operator+( const idMatX &a ) const {
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( m.mat + i, _mm_add_ps( _mm_load_ps( mat + i ), _mm_load_ps( a.mat + i ) ) );
 	}
+#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(MATX_SIMD)
+	for ( int i = 0; i < s; i += 4 ) {
+		vst1q_f32( (float32_t *)(m.mat + i), vaddq_f32( vld1q_f32( (float32_t *)(mat + i) ), vld1q_f32( (float32_t *)(a.mat + i) ) ) );
+	}
 #else
 	for ( int i = 0; i < s; i++ ) {
 		m.mat[i] = mat[i] + a.mat[i];
@@ -489,6 +502,10 @@ ID_INLINE idMatX idMatX::operator-( const idMatX &a ) const {
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( m.mat + i, _mm_sub_ps( _mm_load_ps( mat + i ), _mm_load_ps( a.mat + i ) ) );
 	}
+#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(MATX_SIMD)
+	for ( int i = 0; i < s; i += 4 ) {
+		vst1q_f32( (float32_t *)(m.mat + i), vsubq_f32( vld1q_f32( (float32_t *)(mat + i) ), vld1q_f32( (float32_t *)(a.mat + i) ) ) );
+	}
 #else
 	for ( int i = 0; i < s; i++ ) {
 		m.mat[i] = mat[i] - a.mat[i];
@@ -508,6 +525,11 @@ ID_INLINE idMatX &idMatX::operator*=( const float a ) {
 	__m128 va = _mm_load1_ps( & a );
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( mat + i, _mm_mul_ps( _mm_load_ps( mat + i ), va ) );
+	}
+#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(MATX_SIMD)
+	float32x4_t va = vld1q_dup_f32( & a );
+	for ( int i = 0; i < s; i += 4 ) {
+		vst1q_f32( (float32_t *)(mat + i), vmulq_f32( vld1q_f32( (float32_t *)(mat + i) ), va ) );
 	}
 #else
 	for ( int i = 0; i < s; i++ ) {
@@ -541,6 +563,10 @@ ID_INLINE idMatX &idMatX::operator+=( const idMatX &a ) {
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( mat + i, _mm_add_ps( _mm_load_ps( mat + i ), _mm_load_ps( a.mat + i ) ) );
 	}
+#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(MATX_SIMD)
+	for ( int i = 0; i < s; i += 4 ) {
+		vst1q_f32( (float32_t *)(mat + i), vaddq_f32( vld1q_f32( (float32_t *)(mat + i) ), vld1q_f32( (float32_t *)(a.mat + i) ) ) );
+	}
 #else
 	for ( int i = 0; i < s; i++ ) {
 		mat[i] += a.mat[i];
@@ -562,6 +588,10 @@ ID_INLINE idMatX &idMatX::operator-=( const idMatX &a ) {
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( mat + i, _mm_sub_ps( _mm_load_ps( mat + i ), _mm_load_ps( a.mat + i ) ) );
 	}
+#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(MATX_SIMD)
+	for ( int i = 0; i < s; i += 4 ) {
+		vst1q_f32( (float32_t *)(mat + i), vsubq_f32( vld1q_f32( (float32_t *)(mat + i) ), vld1q_f32( (float32_t *)(a.mat + i) ) ) );
+	}
 #else
 	for ( int i = 0; i < s; i++ ) {
 		mat[i] -= a.mat[i];
@@ -582,7 +612,7 @@ ID_INLINE idMatX operator*( const float a, idMatX const &m ) {
 
 /*
 ========================
-operator* 
+operator*
 ========================
 */
 ID_INLINE idVecX operator*( const idVecX &vec, const idMatX &m ) {
@@ -748,6 +778,12 @@ ID_INLINE void idMatX::Zero() {
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( mat + i, _mm_setzero_ps() );
 	}
+#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(MATX_SIMD)
+	int32_t a = 0;
+	int32x4_t va = vld1q_dup_s32( & a );
+	for ( int i = 0; i < s; i += 4 ) {
+		vst1q_s32( (int32_t *)(mat + i), va );
+	}
 #else
 	s;
 	memset( mat, 0, numRows * numColumns * sizeof( float ) );
@@ -842,6 +878,11 @@ ID_INLINE void idMatX::Negate() {
 	ALIGN16( const unsigned int signBit[4] ) = { IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK };
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( mat + i, _mm_xor_ps( _mm_load_ps( mat + i ), (__m128 &) signBit[0] ) );
+	}
+#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(MATX_SIMD)
+	ALIGN16( const unsigned int signBit[4] ) = { IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK };
+	for ( int i = 0; i < s; i += 4 ) {
+		vst1q_u32( (uint32_t *)(mat + i), veorq_u32( vld1q_u32( (uint32_t *)(mat + i) ), (uint32x4_t &) signBit[0] ) );
 	}
 #else
 	for ( int i = 0; i < s; i++ ) {

@@ -114,7 +114,7 @@ void CopyBuffer( byte * dst, const byte * src, int numBytes ) {
 	_mm_sfence();
 }
 
-#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(ID_QNX_ARM_NEON_ASM)
+#elif defined(ID_QNX_ARM_NEON_ASM)
 
 void CopyBuffer( byte * dst, const byte * src, int numBytes ) {
 	assert_16_byte_aligned( dst );
@@ -137,8 +137,17 @@ void CopyBuffer( byte * dst, const byte * src, int numBytes ) {
 				: [dst] "+&r" (dst) : [src] "r" (src), [i] "r" (i) : "r0", "r1", "memory" );
 	}
 	for ( ; i + 16 <= numBytes; i += 16 ) {
+#ifdef ID_QNX_ARM_NEON_INTRIN
 		uint32x4_t d = vld1q_u32( (uint32_t *)&src[i] );
 		vst1q_u32( (uint32_t *)&dst[i], d );
+#else
+		__asm__ __volatile__(
+				"ADD r0, %[src], %[i]\n"
+				"ADD r1, %[dst], %[i]\n"
+				"VLD1.32 {D0, D1}, [r0]\n"
+				"VST1.32 {D0, D1}, [r1]"
+				: [dst] "+&r" (dst) : [src] "r" (src), [i] "r" (i) : "r0", "r1", "memory");
+#endif
 	}
 	for ( ; i + 4 <= numBytes; i += 4 ) {
 		*(uint32 *)&dst[i] = *(const uint32 *)&src[i];

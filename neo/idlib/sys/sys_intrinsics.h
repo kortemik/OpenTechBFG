@@ -86,9 +86,38 @@ ID_FORCE_INLINE void FlushCacheLine( const void * ptr, int offset ) {
 	_mm_clflush( bytePtr + 64 );
 }
 
-//XXX #elif defined(ID_QNX_ARM_NEON_INTRIN)
+#elif defined(ID_QNX_ARM_NEON_INTRIN)
 
-//TODO
+// The code below assumes that a cache line is 64 bytes.
+// We specify the cache line size as 128 here to make the code consistent with the consoles.
+#define CACHE_LINE_SIZE						128
+
+ID_FORCE_INLINE void Prefetch( const void * ptr, int offset ) {} //Could implement, but probably not worth it
+ID_FORCE_INLINE void ZeroCacheLine( void * ptr, int offset ) {
+	assert_128_byte_aligned( ptr );
+	char * bytePtr = ( (char *) ptr ) + offset;
+	int32_t a = 0;
+	int32x4_t zero = vld1q_dup_s32( & a );
+	vst1q_s32( (int32_t *)( bytePtr + 0*16 ), zero );
+	vst1q_s32( (int32_t *)( bytePtr + 1*16 ), zero );
+	vst1q_s32( (int32_t *)( bytePtr + 2*16 ), zero );
+	vst1q_s32( (int32_t *)( bytePtr + 3*16 ), zero );
+	vst1q_s32( (int32_t *)( bytePtr + 4*16 ), zero );
+	vst1q_s32( (int32_t *)( bytePtr + 5*16 ), zero );
+	vst1q_s32( (int32_t *)( bytePtr + 6*16 ), zero );
+	vst1q_s32( (int32_t *)( bytePtr + 7*16 ), zero );
+}
+ID_FORCE_INLINE void FlushCacheLine( const void * ptr, int offset ) {
+	off64_t addr;
+	char * bytePtr = ( (char *) ptr ) + offset;
+	if( mem_offset64( bytePtr, NOFD, CACHE_LINE_SIZE, &addr, NULL ) == 0) {
+		//cache_ctrl could probably be stored somewhere else so it doesn't get loaded every time, but no functions use FlushCacheLine so it's not needed
+		struct cache_ctrl ctrl;
+		cache_init( 0, &ctrl, NULL );
+		CACHE_FLUSH( &ctrl, bytePtr, addr, CACHE_LINE_SIZE );
+		cache_fini( &ctrl );
+	}
+}
 
 /*
 ================================================
