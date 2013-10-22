@@ -92,7 +92,9 @@ If you have questions concerning this license or the applicable additional terms
 #include <assert.h>
 #include <wctype.h>
 
-#include <qnx/gcc_builtins.h>
+#ifdef ID_QNX_X86
+#include <x86intrin.h>
+#endif
 
 //Only needed for FlushCacheLine
 #include <sys/mman.h>

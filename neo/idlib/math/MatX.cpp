@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -171,7 +171,7 @@ void idMatX::CopyLowerToUpperTriangle() {
 	assert( ( GetNumColumns() & 3 ) == 0 );
 	assert( GetNumColumns() >= GetNumRows() );
 
-#ifdef ID_WIN_X86_SSE_INTRIN
+#if defined(ID_WIN_X86_SSE_INTRIN) || ( defined(ID_QNX_X86_SSE_INTRIN) && defined(ID_QNX_X86_SSE2_INTRIN) )
 
 	const int n = GetNumColumns();
 	const int m = GetNumRows();
@@ -1204,7 +1204,7 @@ bool idMatX::LU_Factor( int *index, float *det ) {
 	}
 
 	return true;
-}   
+}
 
 /*
 ============
@@ -2675,8 +2675,8 @@ bool idMatX::Cholesky_UpdateRowColumn( const idVecX &v, int r ) {
 		if ( numColumns == 1 ) {
 			double v0 = v[0];
 			sum = (*this)[0][0];
-			sum = sum * sum; 
-			sum = sum + v0; 
+			sum = sum * sum;
+			sum = sum + v0;
 			if ( sum <= 0.0f ) {
 				return false;
 			}
@@ -3979,7 +3979,7 @@ bool idMatX::HessenbergToRealSchur( idMatX &H, idVecX &realEigenValues, idVecX &
 			}
 			l--;
 		}
-	   
+
 		// check for convergence
 		if ( l == n ) {			// one root found
 			H[n][n] = H[n][n] + exshift;
@@ -4187,7 +4187,7 @@ bool idMatX::HessenbergToRealSchur( idMatX &H, idVecX &realEigenValues, idVecX &
 			}
 		}
 	}
-	
+
 	// backsubstitute to find vectors of upper triangular form
 	if ( norm == 0.0f ) {
 		return false;
@@ -4521,7 +4521,7 @@ void idMatX::Test() {
 	// invert m1
 	m1.Inverse_GaussJordan();
 
-	// modify and invert m2 
+	// modify and invert m2
 	m2.Update_RankOne( v, w, 1.0f );
 	if ( !m2.Inverse_GaussJordan() ) {
 		assert( 0 );
@@ -4577,7 +4577,7 @@ void idMatX::Test() {
 	// invert m1
 	m1.Inverse_GaussJordan();
 
-	// modify and invert m2 
+	// modify and invert m2
 	m2.Update_Increment( v, w );
 	if ( !m2.Inverse_GaussJordan() ) {
 		assert( 0 );
@@ -4649,7 +4649,7 @@ void idMatX::Test() {
 	// factor m1
 	m1.LU_Factor( index1 );
 
-	// modify and factor m2 
+	// modify and factor m2
 	m2.Update_RankOne( v, w, 1.0f );
 	if ( !m2.LU_Factor( index2 ) ) {
 		assert( 0 );
@@ -4713,7 +4713,7 @@ void idMatX::Test() {
 	// factor m1
 	m1.LU_Factor( index1 );
 
-	// modify and factor m2 
+	// modify and factor m2
 	m2.Update_Increment( v, w );
 	if ( !m2.LU_Factor( index2 ) ) {
 		assert( 0 );
@@ -4819,7 +4819,7 @@ void idMatX::Test() {
 	m1.QR_Factor( c, d );
 	m1.QR_UnpackFactors( q1, r1, c, d );
 
-	// modify and factor m2 
+	// modify and factor m2
 	m2.Update_RankOne( v, w, 1.0f );
 	if ( !m2.QR_Factor( c, d ) ) {
 		assert( 0 );
@@ -4889,7 +4889,7 @@ void idMatX::Test() {
 	m1.QR_Factor( c, d );
 	m1.QR_UnpackFactors( q1, r1, c, d );
 
-	// modify and factor m2 
+	// modify and factor m2
 	m2.Update_Increment( v, w );
 	if ( !m2.QR_Factor( c, d ) ) {
 		assert( 0 );
@@ -5015,7 +5015,7 @@ void idMatX::Test() {
 	m1.Cholesky_Factor();
 	m1.ClearUpperTriangle();
 
-	// modify and factor m2 
+	// modify and factor m2
 	m2.Update_RankOneSymmetric( w, 1.0f );
 	if ( !m2.Cholesky_Factor() ) {
 		assert( 0 );
@@ -5078,7 +5078,7 @@ void idMatX::Test() {
 	// factor m1
 	m1.Cholesky_Factor();
 
-	// modify and factor m2 
+	// modify and factor m2
 	m2.Update_IncrementSymmetric( w );
 	if ( !m2.Cholesky_Factor() ) {
 		assert( 0 );
@@ -5171,7 +5171,7 @@ void idMatX::Test() {
 	m1.LDLT_Factor();
 	m1.ClearUpperTriangle();
 
-	// modify and factor m2 
+	// modify and factor m2
 	m2.Update_RankOneSymmetric( w, 1.0f );
 	if ( !m2.LDLT_Factor() ) {
 		assert( 0 );
@@ -5232,7 +5232,7 @@ void idMatX::Test() {
 	// factor m1
 	m1.LDLT_Factor();
 
-	// modify and factor m2 
+	// modify and factor m2
 	m2.Update_IncrementSymmetric( w );
 	if ( !m2.LDLT_Factor() ) {
 		assert( 0 );

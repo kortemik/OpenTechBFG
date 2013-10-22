@@ -317,8 +317,9 @@
 									<listOptionValue builtIn="false" value="_INLINEDEBUG"/>
 								</option>
 								<option id="com.qnx.qcc.option.compiler.ccoptions.27184091" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions"/>
-								<option id="com.qnx.qcc.option.compiler.qccoptions.1414109948" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
+								<option id="com.qnx.qcc.option.compiler.qccoptions.1414109948" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-msse"/>
+									<listOptionValue builtIn="false" value="-msse2"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.1652807160" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -385,8 +386,9 @@
 									<listOptionValue builtIn="false" value="_INLINEDEBUG"/>
 								</option>
 								<option id="com.qnx.qcc.option.compiler.ccoptions.1636896177" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions"/>
-								<option id="com.qnx.qcc.option.compiler.qccoptions.2090494324" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
+								<option id="com.qnx.qcc.option.compiler.qccoptions.2090494324" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-msse"/>
+									<listOptionValue builtIn="false" value="-msse2"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.901619135" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -454,8 +456,9 @@
 									<listOptionValue builtIn="false" value="_INLINEDEBUG"/>
 								</option>
 								<option id="com.qnx.qcc.option.compiler.ccoptions.1519344823" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions"/>
-								<option id="com.qnx.qcc.option.compiler.qccoptions.977810563" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
+								<option id="com.qnx.qcc.option.compiler.qccoptions.977810563" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-msse"/>
+									<listOptionValue builtIn="false" value="-msse2"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.1639567956" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>

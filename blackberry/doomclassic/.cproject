@@ -309,6 +309,7 @@
 								</option>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.597152615" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-msse"/>
+									<listOptionValue builtIn="false" value="-msse2"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.1888377998" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -375,6 +376,7 @@
 								</option>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.472213192" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-msse"/>
+									<listOptionValue builtIn="false" value="-msse2"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.67071526" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -442,6 +444,7 @@
 								</option>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.5196016" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-msse"/>
+									<listOptionValue builtIn="false" value="-msse2"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.659564180" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>

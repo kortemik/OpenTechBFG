@@ -79,12 +79,20 @@ If you have questions concerning this license or the applicable additional terms
 	#define ID_WIN32
 	#define ID_LITTLE_ENDIAN
 #elif defined(__QNXNTO__)
-	#ifdef __ARM_NEON__
-		#define ID_QNX_ARM_NEON_ASM
-		#define ID_QNX_ARM_NEON_INTRIN
-	#elif !defined(__ARM__)
+	#ifdef __ARM__
+		#define ID_QNX_ARM_ASM
+		#ifdef __ARM_NEON__
+			#define ID_QNX_ARM_NEON_ASM
+			#define ID_QNX_ARM_NEON_INTRIN
+		#endif
+	#else
 		#define ID_QNX_X86_ASM
-		#define ID_QNX_X86_SSE_INTRIN
+		#ifdef __SSE__
+			#define ID_QNX_X86_SSE_INTRIN
+		#endif
+		#ifdef __SSE2__
+			#define ID_QNX_X86_SSE2_INTRIN
+		#endif
 	#endif
 
 	#define ID_CONSOLE

@@ -35,6 +35,10 @@ If you have questions concerning this license or the applicable additional terms
 #include <inttypes.h>
 #include <fpstatus.h>
 
+#ifdef ID_QNX_X86
+#include <cpuid.h>
+#endif
+
 /*
 ==============================================================
 
@@ -110,7 +114,7 @@ static bool Has3DNow() {
 
 	// bit 31 of EDX denotes 3DNow! support
 	__cpuid( 0x80000001, a, b, c, d );
-	return d & ( 1 << 31 );
+	return d & bit_3DNOW;
 }
 
 /*
@@ -128,7 +132,7 @@ static bool HasSSE3() {
 	__cpuid( 1, a, b, c, d );
 
 	// bit 0 of ECX denotes SSE3 existence
-	return c & ( 1 << 0 );
+	return c & bit_SSE3;
 }
 #endif
 
@@ -159,7 +163,7 @@ static bool IsDAZEnabled() {
 
 	memset( FXArea, 0, sizeof( FXSaveArea ) );
 
-	__asm__ __volatile__("FXSAVE [%[area]]" : [area] "+r" (FXArea) :: "memory");
+	__asm__ __volatile__("FXSAVE (%[area])" : [area] "+r" (FXArea) :: "memory");
 
 	mask = *(unsigned int *)&FXArea[28];			// Read the MXCSR Mask
 	return ( ( mask & ( 1 << 6 ) ) == ( 1 << 6 ) );	// Return if the DAZ bit is set
