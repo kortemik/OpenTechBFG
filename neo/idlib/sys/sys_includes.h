@@ -92,6 +92,8 @@ If you have questions concerning this license or the applicable additional terms
 #include <assert.h>
 #include <wctype.h>
 
+#include <qnx/gcc_builtins.h>
+
 //Only needed for FlushCacheLine
 #include <sys/mman.h>
 #include <sys/cache.h>

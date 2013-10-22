@@ -82,6 +82,9 @@ If you have questions concerning this license or the applicable additional terms
 	#ifdef __ARM_NEON__
 		#define ID_QNX_ARM_NEON_ASM
 		#define ID_QNX_ARM_NEON_INTRIN
+	#elif !defined(__ARM__)
+		#define ID_QNX_X86_ASM
+		#define ID_QNX_X86_SSE_INTRIN
 	#endif
 
 	#define ID_CONSOLE

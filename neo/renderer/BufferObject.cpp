@@ -76,7 +76,7 @@ void UnbindBufferObjects() {
 	qglBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, 0 );
 }
 
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE_INTRIN)
 
 void CopyBuffer( byte * dst, const byte * src, int numBytes ) {
 	assert_16_byte_aligned( dst );
@@ -114,7 +114,7 @@ void CopyBuffer( byte * dst, const byte * src, int numBytes ) {
 	_mm_sfence();
 }
 
-#elif defined(ID_QNX_ARM_NEON_ASM)
+#elif defined(ID_QNX_ARM_NEON_INTRIN)
 
 void CopyBuffer( byte * dst, const byte * src, int numBytes ) {
 	assert_16_byte_aligned( dst );
@@ -122,32 +122,26 @@ void CopyBuffer( byte * dst, const byte * src, int numBytes ) {
 
 	int i = 0;
 	for ( ; i + 128 <= numBytes; i += 128 ) {
-		//neon intrinsics don't have functions that can load 4 neon registers at once, so it would result in 6 more instructions (8 in reality, minus 2 for the add ops)
-		__asm__ __volatile__(
-				"ADD r0, %[src], %[i]\n"
-				"ADD r1, %[dst], %[i]\n"
-				"VLD1.32 {D0, D1, D2, D3}, [r0]!\n"
-				"VLD1.32 {D4, D5, D6, D7}, [r0]!\n"
-				"VLD1.32 {D8, D9, D10, D11}, [r0]!\n"
-				"VLD1.32 {D12, D13, D14, D15}, [r0]!\n"
-				"VST1.32 {D0, D1, D2, D3}, [r1]!\n"
-				"VST1.32 {D4, D5, D6, D7}, [r1]!\n"
-				"VST1.32 {D8, D9, D10, D11}, [r1]!\n"
-				"VST1.32 {D12, D13, D14, D15}, [r1]!"
-				: [dst] "+&r" (dst) : [src] "r" (src), [i] "r" (i) : "r0", "r1", "memory" );
+		uint32x4_t d0 = vld1q_u32( (uint32_t *)&src[i + 0*16] );
+		uint32x4_t d1 = vld1q_u32( (uint32_t *)&src[i + 1*16] );
+		uint32x4_t d2 = vld1q_u32( (uint32_t *)&src[i + 2*16] );
+		uint32x4_t d3 = vld1q_u32( (uint32_t *)&src[i + 3*16] );
+		uint32x4_t d4 = vld1q_u32( (uint32_t *)&src[i + 4*16] );
+		uint32x4_t d5 = vld1q_u32( (uint32_t *)&src[i + 5*16] );
+		uint32x4_t d6 = vld1q_u32( (uint32_t *)&src[i + 6*16] );
+		uint32x4_t d7 = vld1q_u32( (uint32_t *)&src[i + 7*16] );
+		vst1q_u32( (uint32_t *)&dst[i + 0*16], d0 );
+		vst1q_u32( (uint32_t *)&dst[i + 1*16], d1 );
+		vst1q_u32( (uint32_t *)&dst[i + 2*16], d2 );
+		vst1q_u32( (uint32_t *)&dst[i + 3*16], d3 );
+		vst1q_u32( (uint32_t *)&dst[i + 4*16], d4 );
+		vst1q_u32( (uint32_t *)&dst[i + 5*16], d5 );
+		vst1q_u32( (uint32_t *)&dst[i + 6*16], d6 );
+		vst1q_u32( (uint32_t *)&dst[i + 7*16], d7 );
 	}
 	for ( ; i + 16 <= numBytes; i += 16 ) {
-#ifdef ID_QNX_ARM_NEON_INTRIN
 		uint32x4_t d = vld1q_u32( (uint32_t *)&src[i] );
 		vst1q_u32( (uint32_t *)&dst[i], d );
-#else
-		__asm__ __volatile__(
-				"ADD r0, %[src], %[i]\n"
-				"ADD r1, %[dst], %[i]\n"
-				"VLD1.32 {D0, D1}, [r0]\n"
-				"VST1.32 {D0, D1}, [r1]"
-				: [dst] "+&r" (dst) : [src] "r" (src), [i] "r" (i) : "r0", "r1", "memory");
-#endif
 	}
 	for ( ; i + 4 <= numBytes; i += 4 ) {
 		*(uint32 *)&dst[i] = *(const uint32 *)&src[i];

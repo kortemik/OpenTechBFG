@@ -71,68 +71,28 @@ double Sys_ClockTicksPerSecond() {
 */
 
 #ifdef ID_QNX_X86
-//TODO: switch to using QNX functions
-
-#define _REG_EAX		0
-#define _REG_EBX		1
-#define _REG_ECX		2
-#define _REG_EDX		3
-
-/*
-================
-CPUID
-================
-*/
-static void CPUID( int func, unsigned regs[4] ) {
-	unsigned regEAX, regEBX, regECX, regEDX;
-
-	__asm pusha
-	__asm mov eax, func
-	__asm __emit 00fh
-	__asm __emit 0a2h
-	__asm mov regEAX, eax
-	__asm mov regEBX, ebx
-	__asm mov regECX, ecx
-	__asm mov regEDX, edx
-	__asm popa
-
-	regs[_REG_EAX] = regEAX;
-	regs[_REG_EBX] = regEBX;
-	regs[_REG_ECX] = regECX;
-	regs[_REG_EDX] = regEDX;
-}
-
-
 /*
 ================
 IsAMD
 ================
 */
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 8
+#define IsAMD() __builtin_cpu_is( "amd" )
+#else
 static bool IsAMD() {
-	char pstring[16];
+	unsigned a, b, c, d;
 	char processorString[13];
 
 	// get name of processor
-	CPUID( 0, ( unsigned int * ) pstring );
-	processorString[0] = pstring[4];
-	processorString[1] = pstring[5];
-	processorString[2] = pstring[6];
-	processorString[3] = pstring[7];
-	processorString[4] = pstring[12];
-	processorString[5] = pstring[13];
-	processorString[6] = pstring[14];
-	processorString[7] = pstring[15];
-	processorString[8] = pstring[8];
-	processorString[9] = pstring[9];
-	processorString[10] = pstring[10];
-	processorString[11] = pstring[11];
+	__cpuid( 0, a, b, c, d );
+	*( ( unsigned * )&processorString[0] ) = b;
+	*( ( unsigned * )&processorString[4] ) = d;
+	*( ( unsigned * )&processorString[8] ) = c;
 	processorString[12] = 0;
 
-	if ( strcmp( processorString, "AuthenticAMD" ) == 0 ) {
-		return true;
-	}
-	return false;
+	return strcmp( processorString, "AuthenticAMD" ) == 0;
 }
+#endif
 
 /*
 ================
@@ -140,21 +100,17 @@ Has3DNow
 ================
 */
 static bool Has3DNow() {
-	unsigned regs[4];
+	unsigned a, b, c, d;
 
 	// check AMD-specific functions
-	CPUID( 0x80000000, regs );
-	if ( regs[_REG_EAX] < 0x80000000 ) {
+	__cpuid( 0x80000000, a, b, c, d );
+	if ( a < 0x80000000 ) {
 		return false;
 	}
 
 	// bit 31 of EDX denotes 3DNow! support
-	CPUID( 0x80000001, regs );
-	if ( regs[_REG_EDX] & ( 1 << 31 ) ) {
-		return true;
-	}
-
-	return false;
+	__cpuid( 0x80000001, a, b, c, d );
+	return d & ( 1 << 31 );
 }
 
 /*
@@ -162,18 +118,19 @@ static bool Has3DNow() {
 HasSSE3
 ================
 */
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 8
+#define HasSSE3() __builtin_cpu_supports( "sse3" )
+#else
 static bool HasSSE3() {
-	unsigned regs[4];
+	unsigned a, b, c, d;
 
 	// get CPU feature bits
-	CPUID( 1, regs );
+	__cpuid( 1, a, b, c, d );
 
 	// bit 0 of ECX denotes SSE3 existence
-	if ( regs[_REG_ECX] & ( 1 << 0 ) ) {
-		return true;
-	}
-	return false;
+	return c & ( 1 << 0 );
 }
+#endif
 
 /*
 ================
@@ -181,52 +138,31 @@ HasHTT
 ================
 */
 static bool HasHTT() {
-	unsigned regs[4];
-	int logicalNum, physicalNum, HTStatusFlag;
+	unsigned a, b, c, d;
 
 	// get CPU feature bits
-	CPUID( 1, regs );
+	__cpuid( 1, a, b, c, d );
 
 	// bit 28 of EDX denotes HTT existence
-	if ( !( regs[_REG_EDX] & ( 1 << 28 ) ) ) {
-		return false;
-	}
-
-	HTStatusFlag = CPUCount( logicalNum, physicalNum );
-	if ( HTStatusFlag != HT_ENABLED ) {
-		return false;
-	}
-	return true;
+	return d & ( 1 << 28 );
 }
 
 /*
 ================
-HasHTT
+IsDAZEnabled
 ================
 */
-static bool HasDAZ() {
-	__declspec(align(16)) unsigned char FXSaveArea[512];
+static bool IsDAZEnabled() {
+	unsigned char FXSaveArea[512] __attribute__((__aligned__(16)));
 	unsigned char *FXArea = FXSaveArea;
-	DWORD dwMask = 0;
-	unsigned regs[4];
-
-	// get CPU feature bits
-	CPUID( 1, regs );
-
-	// bit 24 of EDX denotes support for FXSAVE
-	if ( !( regs[_REG_EDX] & ( 1 << 24 ) ) ) {
-		return false;
-	}
+	unsigned int mask = 0;
 
 	memset( FXArea, 0, sizeof( FXSaveArea ) );
 
-	__asm {
-		mov		eax, FXArea
-		FXSAVE	[eax]
-	}
+	__asm__ __volatile__("FXSAVE [%[area]]" : [area] "+r" (FXArea) :: "memory");
 
-	dwMask = *(DWORD *)&FXArea[28];						// Read the MXCSR Mask
-	return ( ( dwMask & ( 1 << 6 ) ) == ( 1 << 6 ) );	// Return if the DAZ bit is set
+	mask = *(unsigned int *)&FXArea[28];			// Read the MXCSR Mask
+	return ( ( mask & ( 1 << 6 ) ) == ( 1 << 6 ) );	// Return if the DAZ bit is set
 }
 #endif
 
@@ -324,7 +260,7 @@ void Sys_CPUCount( int & numLogicalCPUCores, int & numPhysicalCPUCores, int & nu
 Sys_GetCPUId
 ================
 */
-cpuid_t Sys_GetCPUId() { //XXX Required
+cpuid_t Sys_GetCPUId() {
 	int flags;
 
 	unsigned int cpuFlags = SYSPAGE_ENTRY(cpuinfo)->flags;
@@ -370,6 +306,11 @@ cpuid_t Sys_GetCPUId() { //XXX Required
 		return CPUID_UNSUPPORTED;
 	}
 
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 8
+	// setup for checking CPU features
+	__builtin_cpu_init();
+#endif
+
 	// check for an AMD
 	if ( IsAMD() ) {
 		flags = CPUID_AMD;
@@ -413,7 +354,7 @@ cpuid_t Sys_GetCPUId() { //XXX Required
 	}
 
 	// check for Denormals-Are-Zero mode
-	if ( HasDAZ() ) {
+	if ( ( cpuFlags & X86_CPU_FXSR ) != 0 && IsDAZEnabled() ) {
 		flags |= CPUID_DAZ;
 	}
 #endif

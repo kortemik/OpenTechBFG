@@ -777,6 +777,11 @@
 			<locationURI>PARENT-2-PROJECT_LOC/neo/idlib/sys/sys_types.h</locationURI>
 		</link>
 		<link>
+			<name>src/sys/qnx/gcc_builtins.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/idlib/sys/qnx/gcc_builtins.h</locationURI>
+		</link>
+		<link>
 			<name>src/sys/qnx/qnx_thread.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/neo/idlib/sys/qnx/qnx_thread.cpp</locationURI>
