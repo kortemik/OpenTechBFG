@@ -171,7 +171,7 @@ void idMatX::CopyLowerToUpperTriangle() {
 	assert( ( GetNumColumns() & 3 ) == 0 );
 	assert( GetNumColumns() >= GetNumRows() );
 
-#if defined(ID_WIN_X86_SSE_INTRIN) || ( defined(ID_QNX_X86_SSE_INTRIN) && defined(ID_QNX_X86_SSE2_INTRIN) )
+#if defined( ID_WIN_X86_SSE_INTRIN ) || ( defined( ID_QNX_X86_SSE_INTRIN ) && defined( ID_QNX_X86_SSE2_INTRIN ) )
 
 	const int n = GetNumColumns();
 	const int m = GetNumRows();
@@ -306,6 +306,168 @@ void idMatX::CopyLowerToUpperTriangle() {
 		_mm_store_ps( basePtr + n2_masked, r2 );
 		_mm_store_ps( basePtr + n1_masked, r1 );
 		_mm_store_ps( basePtr + n0, r0 );
+	}
+
+#elif defined( ID_QNX_ARM_NEON_INTRIN )
+
+	const int n = GetNumColumns();
+	const int m = GetNumRows();
+
+	const int n0 = 0;
+	const int n1 = n;
+	const int n2 = ( n << 1 );
+	const int n3 = ( n << 1 ) + n;
+	const int n4 = ( n << 2 );
+
+	const int b1 = ( ( m - 0 ) >> 1 ) & 1;	// ( m & 3 ) > 1
+	const int b2 = ( ( m - 1 ) >> 1 ) & 1;	// ( m & 3 ) > 2 (provided ( m & 3 ) > 0)
+
+	const int n1_masked = ( n & -b1 );
+	const int n2_masked = ( n & -b1 ) + ( n & -b2 );
+
+	const int32x4_t mask0 = {  0,  0,  0, -1 };
+	const int32x4_t mask1 = {  0,  0, -1, -1 };
+	const int32x4_t mask2 = {  0, -1, -1, -1 };
+	const int32x4_t mask3 = { -1, -1, -1, -1 };
+
+	const int32x4_t bottomMask[2] = { neon_dup_s32( 0 ), neon_dup_s32( -1 ) };
+
+	float * __restrict basePtr = ToFloatPtr();
+
+	for ( int i = 0; i < m - 3; i += 4 ) {
+
+		// copy top left diagonal 4x4 block elements
+		int32x4_t r0 = vandq_s32( vld1q_s32( ( int32_t* )( basePtr + n0 ) ), mask0 );
+		int32x4_t r1 = vandq_s32( vld1q_s32( ( int32_t* )( basePtr + n1 ) ), mask1 );
+		int32x4_t r2 = vandq_s32( vld1q_s32( ( int32_t* )( basePtr + n2 ) ), mask2 );
+		int32x4_t r3 = vandq_s32( vld1q_s32( ( int32_t* )( basePtr + n3 ) ), mask3 );
+
+		// t0.val[0] x0, z0, x1, z1
+		// t0.val[1] x2, z2, x3, z3
+		int32x4x2_t t0 = vzipq_s32( r0, r2 );
+
+		// t1.val[0] y0, w0, y1, w1
+		// t1.val[1] y2, w2, y3, w3
+		int32x4x2_t t1 = vzipq_s32( r1, r3 );
+
+		// s0.val[0] x0, y0, z0, w0
+		// s0.val[1] x1, y1, z1, w1
+		int32x4x2_t s0 = vzipq_s32( t0.val[0], t1.val[0] );
+
+		// s1.val[0] x2, y2, z2, w2
+		// s1.val[1] x3, y3, z3, w3
+		int32x4x2_t s1 = vzipq_s32( t0.val[1], t1.val[1] );
+
+		r0 = vorrq_s32( r0, s0.val[0] );
+		r1 = vorrq_s32( r1, s0.val[1] );
+		r2 = vorrq_s32( r2, s1.val[0] );
+		r3 = vorrq_s32( r3, s1.val[1] );
+
+		vst1q_s32( ( int32_t* )( basePtr + n0 ), r0 );
+		vst1q_s32( ( int32_t* )( basePtr + n1 ), r1 );
+		vst1q_s32( ( int32_t* )( basePtr + n2 ), r2 );
+		vst1q_s32( ( int32_t* )( basePtr + n3 ), r3 );
+
+		// copy one column of 4x4 blocks to one row of 4x4 blocks
+		const float * __restrict srcPtr = basePtr;
+		float * __restrict dstPtr = basePtr;
+
+		for ( int j = i + 4; j < m - 3; j += 4 ) {
+			srcPtr += n4;
+			dstPtr += 4;
+
+			int32x4_t r0 = vld1q_s32( ( int32_t* )( srcPtr + n0 ) );
+			int32x4_t r1 = vld1q_s32( ( int32_t* )( srcPtr + n1 ) );
+			int32x4_t r2 = vld1q_s32( ( int32_t* )( srcPtr + n2 ) );
+			int32x4_t r3 = vld1q_s32( ( int32_t* )( srcPtr + n3 ) );
+
+			// t0.val[0] x0, z0, x1, z1
+			// t0.val[1] x2, z2, x3, z3
+			int32x4x2_t t0 = vzipq_s32( r0, r2 );
+
+			// t1.val[0] y0, w0, y1, w1
+			// t1.val[1] y2, w2, y3, w3
+			int32x4x2_t t1 = vzipq_s32( r1, r3 );
+
+			// s0.val[0] x0, y0, z0, w0
+			// s0.val[1] x1, y1, z1, w1
+			int32x4x2_t s0 = vzipq_s32( t0.val[0], t1.val[0] );
+
+			// s1.val[0] x2, y2, z2, w2
+			// s1.val[1] x3, y3, z3, w3
+			int32x4x2_t s1 = vzipq_s32( t0.val[1], t1.val[1] );
+
+			vst1q_s32( ( int32_t* )( dstPtr + n0 ), s0.val[0] );
+			vst1q_s32( ( int32_t* )( dstPtr + n1 ), s0.val[1] );
+			vst1q_s32( ( int32_t* )( dstPtr + n2 ), s1.val[0] );
+			vst1q_s32( ( int32_t* )( dstPtr + n3 ), s1.val[1] );
+		}
+
+		// copy the last partial 4x4 block elements
+		if ( m & 3 ) {
+			srcPtr += n4;
+			dstPtr += 4;
+
+			int32x4_t r0 = vld1q_s32( ( int32_t* )( srcPtr + n0 ) );
+			int32x4_t r1 = vandq_s32( vld1q_s32( ( int32_t* )( srcPtr + n1_masked ) ), bottomMask[b1] );
+			int32x4_t r2 = vandq_s32( vld1q_s32( ( int32_t* )( srcPtr + n2_masked ) ), bottomMask[b2] );
+			int32x4_t r3 = neon_dup_s32( 0 );
+
+			// t0.val[0] x0, z0, x1, z1
+			// t0.val[1] x2, z2, x3, z3
+			int32x4x2_t t0 = vzipq_s32( r0, r2 );
+
+			// t1.val[0] y0, w0, y1, w1
+			// t1.val[1] y2, w2, y3, w3
+			int32x4x2_t t1 = vzipq_s32( r1, r3 );
+
+			// s0.val[0] x0, y0, z0, w0
+			// s0.val[1] x1, y1, z1, w1
+			int32x4x2_t s0 = vzipq_s32( t0.val[0], t1.val[0] );
+
+			// s1.val[0] x2, y2, z2, w2
+			// s1.val[1] x3, y3, z3, w3
+			int32x4x2_t s1 = vzipq_s32( t0.val[1], t1.val[1] );
+
+			vst1q_s32( ( int32_t* )( dstPtr + n0 ), s0.val[0] );
+			vst1q_s32( ( int32_t* )( dstPtr + n1 ), s0.val[1] );
+			vst1q_s32( ( int32_t* )( dstPtr + n2 ), s1.val[0] );
+			vst1q_s32( ( int32_t* )( dstPtr + n3 ), s1.val[1] );
+		}
+
+		basePtr += n4 + 4;
+	}
+
+	// copy the lower right partial diagonal 4x4 block elements
+	if ( m & 3 ) {
+		int32x4_t r0 = vandq_s32( vld1q_s32( ( int32_t* )( basePtr + n0 ) ), mask0 );
+		int32x4_t r1 = vandq_s32( vld1q_s32( ( int32_t* )( basePtr + n1_masked ) ), vandq_s32( mask1, bottomMask[b1] ) );
+		int32x4_t r2 = vandq_s32( vld1q_s32( ( int32_t* )( basePtr + n2_masked ) ), vandq_s32( mask2, bottomMask[b2] ) );
+		int32x4_t r3 = neon_dup_s32( 0 );
+
+		// t0.val[0] x0, z0, x1, z1
+		// t0.val[1] x2, z2, x3, z3
+		int32x4x2_t t0 = vzipq_s32( r0, r2 );
+
+		// t1.val[0] y0, w0, y1, w1
+		// t1.val[1] y2, w2, y3, w3
+		int32x4x2_t t1 = vzipq_s32( r1, r3 );
+
+		// s0.val[0] x0, y0, z0, w0
+		// s0.val[1] x1, y1, z1, w1
+		int32x4x2_t s0 = vzipq_s32( t0.val[0], t1.val[0] );
+
+		// s1.val[0] x2, y2, z2, w2
+		// s1.val[1] x3, y3, z3, w3
+		int32x4x2_t s1 = vzipq_s32( t0.val[1], t1.val[1] );
+
+		r0 = vorrq_s32( r0, s0.val[0] );
+		r1 = vorrq_s32( r1, s0.val[1] );
+		r2 = vorrq_s32( r2, s1.val[0] );
+
+		vst1q_s32( ( int32_t* )( basePtr + n2_masked ), r2 );
+		vst1q_s32( ( int32_t* )( basePtr + n1_masked ), r1 );
+		vst1q_s32( ( int32_t* )( basePtr + n0 ), r0 );
 	}
 
 #else

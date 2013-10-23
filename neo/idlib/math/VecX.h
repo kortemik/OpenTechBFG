@@ -213,12 +213,12 @@ ID_INLINE idVecX idVecX::operator-() const {
 	idVecX m;
 
 	m.SetTempSize( size );
-#if ( defined(ID_WIN_X86_SSE_INTRIN) || defined(ID_QNX_X86_SSE_INTRIN) ) && defined(VECX_SIMD)
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	ALIGN16( unsigned int signBit[4] ) = { IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK };
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( m.p + i, _mm_xor_ps( _mm_load_ps( p + i ), (__m128 &) signBit[0] ) );
 	}
-#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
 	ALIGN16( unsigned int signBit[4] ) = { IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK };
 	for ( int i = 0; i < size; i += 4 ) {
 		vst1q_u32( (uint32_t *)(m.p + i), veorq_u32( vld1q_u32( (uint32_t *)(p + i) ), (uint32x4_t &) signBit[0] ) );
@@ -238,11 +238,11 @@ idVecX::operator=
 */
 ID_INLINE idVecX &idVecX::operator=( const idVecX &a ) {
 	SetSize( a.size );
-#if ( defined(ID_WIN_X86_SSE_INTRIN) || defined(ID_QNX_X86_SSE_INTRIN) ) && defined(VECX_SIMD)
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	for ( int i = 0; i < a.size; i += 4 ) {
 		_mm_store_ps( p + i, _mm_load_ps( a.p + i ) );
 	}
-#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
 	for ( int i = 0; i < a.size; i += 4 ) {
 		vst1q_f32( (float32_t *)(p + i), vld1q_f32( (float32_t *)(a.p + i) ) );
 	}
@@ -263,11 +263,11 @@ ID_INLINE idVecX idVecX::operator+( const idVecX &a ) const {
 
 	assert( size == a.size );
 	m.SetTempSize( size );
-#if ( defined(ID_WIN_X86_SSE_INTRIN) || defined(ID_QNX_X86_SSE_INTRIN) ) && defined(VECX_SIMD)
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( m.p + i, _mm_add_ps( _mm_load_ps( p + i ), _mm_load_ps( a.p + i ) ) );
 	}
-#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
 	for ( int i = 0; i < size; i += 4 ) {
 		vst1q_f32( (float32_t *)(m.p + i), vaddq_f32( vld1q_f32( (float32_t *)(p + i) ), vld1q_f32( (float32_t *)(a.p + i) ) ) );
 	}
@@ -289,11 +289,11 @@ ID_INLINE idVecX idVecX::operator-( const idVecX &a ) const {
 
 	assert( size == a.size );
 	m.SetTempSize( size );
-#if ( defined(ID_WIN_X86_SSE_INTRIN) || defined(ID_QNX_X86_SSE_INTRIN) ) && defined(VECX_SIMD)
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( m.p + i, _mm_sub_ps( _mm_load_ps( p + i ), _mm_load_ps( a.p + i ) ) );
 	}
-#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
 	for ( int i = 0; i < size; i += 4 ) {
 		vst1q_f32( (float32_t *)(m.p + i), vsubq_f32( vld1q_f32( (float32_t *)(p + i) ), vld1q_f32( (float32_t *)(a.p + i) ) ) );
 	}
@@ -312,11 +312,11 @@ idVecX::operator+=
 */
 ID_INLINE idVecX &idVecX::operator+=( const idVecX &a ) {
 	assert( size == a.size );
-#if ( defined(ID_WIN_X86_SSE_INTRIN) || defined(ID_QNX_X86_SSE_INTRIN) ) && defined(VECX_SIMD)
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( p + i, _mm_add_ps( _mm_load_ps( p + i ), _mm_load_ps( a.p + i ) ) );
 	}
-#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
 	for ( int i = 0; i < size; i += 4 ) {
 		vst1q_f32( (float32_t *)(p + i), vaddq_f32( vld1q_f32( (float32_t *)(p + i) ), vld1q_f32( (float32_t *)(a.p + i) ) ) );
 	}
@@ -336,11 +336,11 @@ idVecX::operator-=
 */
 ID_INLINE idVecX &idVecX::operator-=( const idVecX &a ) {
 	assert( size == a.size );
-#if ( defined(ID_WIN_X86_SSE_INTRIN) || defined(ID_QNX_X86_SSE_INTRIN) ) && defined(VECX_SIMD)
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( p + i, _mm_sub_ps( _mm_load_ps( p + i ), _mm_load_ps( a.p + i ) ) );
 	}
-#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
 	for ( int i = 0; i < size; i += 4 ) {
 		vst1q_f32( (float32_t *)(p + i), vsubq_f32( vld1q_f32( (float32_t *)(p + i) ), vld1q_f32( (float32_t *)(a.p + i) ) ) );
 	}
@@ -362,12 +362,12 @@ ID_INLINE idVecX idVecX::operator*( const float a ) const {
 	idVecX m;
 
 	m.SetTempSize( size );
-#if ( defined(ID_WIN_X86_SSE_INTRIN) || defined(ID_QNX_X86_SSE_INTRIN) ) && defined(VECX_SIMD)
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	__m128 va = _mm_load1_ps( & a );
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( m.p + i, _mm_mul_ps( _mm_load_ps( p + i ), va ) );
 	}
-#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
 	float32x4_t va = vld1q_dup_f32( & a );
 	for ( int i = 0; i < size; i += 4 ) {
 		vst1q_f32( (float32_t *)(m.p + i), vmulq_f32( vld1q_f32( (float32_t *)(p + i) ), va ) );
@@ -386,12 +386,12 @@ idVecX::operator*=
 ========================
 */
 ID_INLINE idVecX &idVecX::operator*=( const float a ) {
-#if ( defined(ID_WIN_X86_SSE_INTRIN) || defined(ID_QNX_X86_SSE_INTRIN) ) && defined(VECX_SIMD)
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	__m128 va = _mm_load1_ps( & a );
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( p + i, _mm_mul_ps( _mm_load_ps( p + i ), va ) );
 	}
-#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
 	float32x4_t va = vld1q_dup_f32( & a );
 	for ( int i = 0; i < size; i += 4 ) {
 		vst1q_f32( (float32_t *)(p + i), vmulq_f32( vld1q_f32( (float32_t *)(p + i) ), va ) );
@@ -586,13 +586,12 @@ idVecX::Zero
 ========================
 */
 ID_INLINE void idVecX::Zero() {
-#if ( defined(ID_WIN_X86_SSE_INTRIN) || defined(ID_QNX_X86_SSE_INTRIN) ) && defined(VECX_SIMD)
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( p + i, _mm_setzero_ps() );
 	}
-#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
-	int32_t a = 0;
-	int32x4_t va = vld1q_dup_s32( & a );
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
+	int32x4_t va = neon_dup_s32( 0 );
 	for ( int i = 0; i < size; i += 4 ) {
 		vst1q_s32( (int32_t *)(p + i), va );
 	}
@@ -608,13 +607,12 @@ idVecX::Zero
 */
 ID_INLINE void idVecX::Zero( int length ) {
 	SetSize( length );
-#if ( defined(ID_WIN_X86_SSE_INTRIN) || defined(ID_QNX_X86_SSE_INTRIN) ) && defined(VECX_SIMD)
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	for ( int i = 0; i < length; i += 4 ) {
 		_mm_store_ps( p + i, _mm_setzero_ps() );
 	}
-#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
-	int32_t a = 0;
-	int32x4_t va = vld1q_dup_s32( & a );
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
+	int32x4_t va = neon_dup_s32( 0 );
 	for ( int i = 0; i < length; i += 4 ) {
 		vst1q_s32( (int32_t *)(p + i), va );
 	}
@@ -658,12 +656,12 @@ idVecX::Negate
 ========================
 */
 ID_INLINE void idVecX::Negate() {
-#if ( defined(ID_WIN_X86_SSE_INTRIN) || defined(ID_QNX_X86_SSE_INTRIN) ) && defined(VECX_SIMD)
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	ALIGN16( const unsigned int signBit[4] ) = { IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK };
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( p + i, _mm_xor_ps( _mm_load_ps( p + i ), (__m128 &) signBit[0] ) );
 	}
-#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(VECX_SIMD)
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
 	ALIGN16( const unsigned int signBit[4] ) = { IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK };
 	for ( int i = 0; i < size; i += 4 ) {
 		vst1q_u32( (uint32_t *)(p + i), veorq_u32( vld1q_u32( (uint32_t *)(p + i) ), (uint32x4_t &) signBit[0] ) );

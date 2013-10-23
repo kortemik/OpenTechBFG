@@ -41,7 +41,7 @@ IsWriteCombined
 ==================
 */
 bool IsWriteCombined( void * base ) {
-#if ID_WIN32
+#ifdef ID_WIN32
 	MEMORY_BASIC_INFORMATION info;
 	SIZE_T size = VirtualQueryEx( GetCurrentProcess(), base, &info, sizeof( info ) );
 	if ( size == 0 ) {

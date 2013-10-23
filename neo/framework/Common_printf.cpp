@@ -27,9 +27,9 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #include "../idlib/precompiled.h"
-#ifdef ID_WIN32
 #pragma hdrstop
-#elif defined(ID_QNX)
+
+#ifdef ID_QNX
 #include <slog2.h>
 #endif
 

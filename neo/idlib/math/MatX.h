@@ -389,11 +389,11 @@ idMatX::operator=
 ID_INLINE idMatX &idMatX::operator=( const idMatX &a ) {
 	SetSize( a.numRows, a.numColumns );
 	int s = a.numRows * a.numColumns;
-#if ( defined(ID_WIN_X86_SSE_INTRIN) || defined(ID_QNX_X86_SSE_INTRIN) ) && defined(MATX_SIMD)
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( MATX_SIMD )
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( mat + i, _mm_load_ps( a.mat + i ) );
 	}
-#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(MATX_SIMD)
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( MATX_SIMD )
 	for ( int i = 0; i < s; i += 4 ) {
 		vst1q_f32( (float32_t *)(mat + i), vld1q_f32( (float32_t *)(a.mat + i) ) );
 	}
@@ -414,12 +414,12 @@ ID_INLINE idMatX idMatX::operator*( const float a ) const {
 
 	m.SetTempSize( numRows, numColumns );
 	int s = numRows * numColumns;
-#if ( defined(ID_WIN_X86_SSE_INTRIN) || defined(ID_QNX_X86_SSE_INTRIN) ) && defined(MATX_SIMD)
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( MATX_SIMD )
 	__m128 va = _mm_load1_ps( & a );
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( m.mat + i, _mm_mul_ps( _mm_load_ps( mat + i ), va ) );
 	}
-#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(MATX_SIMD)
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( MATX_SIMD )
 	float32x4_t va = vld1q_dup_f32( & a );
 	for ( int i = 0; i < s; i += 4 ) {
 		vst1q_f32( (float32_t *)(m.mat + i), vmulq_f32( vld1q_f32( (float32_t *)(mat + i) ), va ) );
@@ -471,11 +471,11 @@ ID_INLINE idMatX idMatX::operator+( const idMatX &a ) const {
 	assert( numRows == a.numRows && numColumns == a.numColumns );
 	m.SetTempSize( numRows, numColumns );
 	int s = numRows * numColumns;
-#if ( defined(ID_WIN_X86_SSE_INTRIN) || defined(ID_QNX_X86_SSE_INTRIN) ) && defined(MATX_SIMD)
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( MATX_SIMD )
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( m.mat + i, _mm_add_ps( _mm_load_ps( mat + i ), _mm_load_ps( a.mat + i ) ) );
 	}
-#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(MATX_SIMD)
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( MATX_SIMD )
 	for ( int i = 0; i < s; i += 4 ) {
 		vst1q_f32( (float32_t *)(m.mat + i), vaddq_f32( vld1q_f32( (float32_t *)(mat + i) ), vld1q_f32( (float32_t *)(a.mat + i) ) ) );
 	}
@@ -498,11 +498,11 @@ ID_INLINE idMatX idMatX::operator-( const idMatX &a ) const {
 	assert( numRows == a.numRows && numColumns == a.numColumns );
 	m.SetTempSize( numRows, numColumns );
 	int s = numRows * numColumns;
-#if ( defined(ID_WIN_X86_SSE_INTRIN) || defined(ID_QNX_X86_SSE_INTRIN) ) && defined(MATX_SIMD)
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( MATX_SIMD )
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( m.mat + i, _mm_sub_ps( _mm_load_ps( mat + i ), _mm_load_ps( a.mat + i ) ) );
 	}
-#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(MATX_SIMD)
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( MATX_SIMD )
 	for ( int i = 0; i < s; i += 4 ) {
 		vst1q_f32( (float32_t *)(m.mat + i), vsubq_f32( vld1q_f32( (float32_t *)(mat + i) ), vld1q_f32( (float32_t *)(a.mat + i) ) ) );
 	}
@@ -521,12 +521,12 @@ idMatX::operator*=
 */
 ID_INLINE idMatX &idMatX::operator*=( const float a ) {
 	int s = numRows * numColumns;
-#if ( defined(ID_WIN_X86_SSE_INTRIN) || defined(ID_QNX_X86_SSE_INTRIN) ) && defined(MATX_SIMD)
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( MATX_SIMD )
 	__m128 va = _mm_load1_ps( & a );
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( mat + i, _mm_mul_ps( _mm_load_ps( mat + i ), va ) );
 	}
-#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(MATX_SIMD)
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( MATX_SIMD )
 	float32x4_t va = vld1q_dup_f32( & a );
 	for ( int i = 0; i < s; i += 4 ) {
 		vst1q_f32( (float32_t *)(mat + i), vmulq_f32( vld1q_f32( (float32_t *)(mat + i) ), va ) );
@@ -559,11 +559,11 @@ idMatX::operator+=
 ID_INLINE idMatX &idMatX::operator+=( const idMatX &a ) {
 	assert( numRows == a.numRows && numColumns == a.numColumns );
 	int s = numRows * numColumns;
-#if ( defined(ID_WIN_X86_SSE_INTRIN) || defined(ID_QNX_X86_SSE_INTRIN) ) && defined(MATX_SIMD)
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( MATX_SIMD )
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( mat + i, _mm_add_ps( _mm_load_ps( mat + i ), _mm_load_ps( a.mat + i ) ) );
 	}
-#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(MATX_SIMD)
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( MATX_SIMD )
 	for ( int i = 0; i < s; i += 4 ) {
 		vst1q_f32( (float32_t *)(mat + i), vaddq_f32( vld1q_f32( (float32_t *)(mat + i) ), vld1q_f32( (float32_t *)(a.mat + i) ) ) );
 	}
@@ -584,11 +584,11 @@ idMatX::operator-=
 ID_INLINE idMatX &idMatX::operator-=( const idMatX &a ) {
 	assert( numRows == a.numRows && numColumns == a.numColumns );
 	int s = numRows * numColumns;
-#if ( defined(ID_WIN_X86_SSE_INTRIN) || defined(ID_QNX_X86_SSE_INTRIN) ) && defined(MATX_SIMD)
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( MATX_SIMD )
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( mat + i, _mm_sub_ps( _mm_load_ps( mat + i ), _mm_load_ps( a.mat + i ) ) );
 	}
-#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(MATX_SIMD)
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( MATX_SIMD )
 	for ( int i = 0; i < s; i += 4 ) {
 		vst1q_f32( (float32_t *)(mat + i), vsubq_f32( vld1q_f32( (float32_t *)(mat + i) ), vld1q_f32( (float32_t *)(a.mat + i) ) ) );
 	}
@@ -774,13 +774,12 @@ idMatX::Zero
 */
 ID_INLINE void idMatX::Zero() {
 	int s = numRows * numColumns;
-#if ( defined(ID_WIN_X86_SSE_INTRIN) || defined(ID_QNX_X86_SSE_INTRIN) ) && defined(MATX_SIMD)
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( MATX_SIMD )
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( mat + i, _mm_setzero_ps() );
 	}
-#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(MATX_SIMD)
-	int32_t a = 0;
-	int32x4_t va = vld1q_dup_s32( & a );
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( MATX_SIMD )
+	int32x4_t va = neon_dup_s32( 0 );
 	for ( int i = 0; i < s; i += 4 ) {
 		vst1q_s32( (int32_t *)(mat + i), va );
 	}
@@ -874,12 +873,12 @@ idMatX::Negate
 */
 ID_INLINE void idMatX::Negate() {
 	int s = numRows * numColumns;
-#if ( defined(ID_WIN_X86_SSE_INTRIN) || defined(ID_QNX_X86_SSE_INTRIN) ) && defined(MATX_SIMD)
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( MATX_SIMD )
 	ALIGN16( const unsigned int signBit[4] ) = { IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK };
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( mat + i, _mm_xor_ps( _mm_load_ps( mat + i ), (__m128 &) signBit[0] ) );
 	}
-#elif defined(ID_QNX_ARM_NEON_INTRIN) && defined(MATX_SIMD)
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( MATX_SIMD )
 	ALIGN16( const unsigned int signBit[4] ) = { IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK };
 	for ( int i = 0; i < s; i += 4 ) {
 		vst1q_u32( (uint32_t *)(mat + i), veorq_u32( vld1q_u32( (uint32_t *)(mat + i) ), (uint32x4_t &) signBit[0] ) );

@@ -56,7 +56,7 @@ ID_INLINE_EXTERN float __frndz( float x )						{	return (float)( (int)( x ) ); }
 ================================================================================================
 */
 
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined( ID_WIN_X86_SSE2_INTRIN ) || defined( ID_QNX_X86_SSE2_INTRIN )
 
 // The code below assumes that a cache line is 64 bytes.
 // We specify the cache line size as 128 here to make the code consistent with the consoles.
@@ -86,7 +86,7 @@ ID_FORCE_INLINE void FlushCacheLine( const void * ptr, int offset ) {
 	_mm_clflush( bytePtr + 64 );
 }
 
-#elif defined(ID_QNX_ARM_NEON_INTRIN)
+#elif defined( ID_QNX_ARM_NEON_INTRIN )
 
 // The code below assumes that a cache line is 64 bytes.
 // We specify the cache line size as 128 here to make the code consistent with the consoles.
@@ -187,7 +187,7 @@ ID_INLINE_EXTERN int CACHE_LINE_CLEAR_OVERFLOW_COUNT( int size ) {
 
 /*
 ================================================
-	PC Windows
+	x86
 ================================================
 */
 
@@ -195,9 +195,16 @@ ID_INLINE_EXTERN int CACHE_LINE_CLEAR_OVERFLOW_COUNT( int size ) {
 #define R_SHUFFLE_D( x, y, z, w )	(( (w) & 3 ) << 6 | ( (z) & 3 ) << 4 | ( (y) & 3 ) << 2 | ( (x) & 3 ))
 #endif
 
-#ifdef ID_WIN32
+#if defined( ID_WIN_X86_SSE2_INTRIN ) || ( defined( ID_QNX_X86_SSE_INTRIN ) && defined( ID_QNX_X86_SSE2_INTRIN ) )
+
+#ifdef ID_WIN_X86_SSE2_INTRIN
+#define DS_INTRIN_TYPE __declspec(intrin_type)
+#else
+#define DS_INTRIN_TYPE
+#endif
+
 // make the intrinsics "type unsafe"
-typedef union __declspec(intrin_type) _CRT_ALIGN(16) __m128c {
+typedef union __declspec(intrin_type) ALIGNTYPE16 __m128c {
 				__m128c() {}
 				__m128c( __m128 f ) { m128 = f; }
 				__m128c( __m128i i ) { m128i = i; }
@@ -205,7 +212,7 @@ typedef union __declspec(intrin_type) _CRT_ALIGN(16) __m128c {
 	operator	__m128i() { return m128i; }
 	__m128		m128;
 	__m128i		m128i;
-} __m128c;
+} ALIGNTYPE16_POST __m128c;
 
 #define _mm_madd_ps( a, b, c )				_mm_add_ps( _mm_mul_ps( (a), (b) ), (c) )
 #define _mm_nmsub_ps( a, b, c )				_mm_sub_ps( (c), _mm_mul_ps( (a), (b) ) )
@@ -261,13 +268,19 @@ ID_FORCE_INLINE_EXTERN __m128 _mm_div16_ps( __m128 x, __m128 y ) {
 
 /*
 ================================================
-	QNX
+	ARM
 ================================================
 */
 
-#ifdef ID_QNX
+#ifdef ID_QNX_ARM_NEON_INTRIN
 
-//TODO: QNX
+ID_FORCE_INLINE_EXTERN int32x4_t neon_dup_s32( int32_t i )	{
+	return vld1q_dup_s32( & i );
+}
+
+ID_FORCE_INLINE_EXTERN float32x4_t neon_dup_f32( float32_t i )	{ //XXX unused right now
+	return vld1q_dup_f32( & i );
+}
 
 #endif
 

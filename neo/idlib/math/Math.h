@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -199,7 +199,7 @@ IEEE_FLT_IS_IND
 ========================
 */
 ID_INLINE_EXTERN bool IEEE_FLT_IS_IND( float x ) {
-	return	(reinterpret_cast<const unsigned int &>(x) == 0xffc00000); 
+	return	(reinterpret_cast<const unsigned int &>(x) == 0xffc00000);
 }
 
 /*
@@ -209,7 +209,7 @@ IEEE_FLT_IS_DENORMAL
 */
 ID_INLINE_EXTERN bool IEEE_FLT_IS_DENORMAL( float x ) {
 	return ((reinterpret_cast<const unsigned int &>(x) & 0x7f800000) == 0x00000000 &&
-			(reinterpret_cast<const unsigned int &>(x) & 0x007fffff) != 0x00000000 ); 
+			(reinterpret_cast<const unsigned int &>(x) & 0x007fffff) != 0x00000000 );
 }
 
 
@@ -419,7 +419,7 @@ public:
 	static const float			FLT_EPSILON;				// smallest positive number such that 1.0+FLT_EPSILON != 1.0
 	static const float			FLT_SMALLEST_NON_DENORMAL;	// smallest non-denormal 32-bit floating point value
 
-#if defined( ID_WIN_X86_SSE_INTRIN )
+#if defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN )
 	static const __m128				SIMD_SP_zero;
 	static const __m128				SIMD_SP_255;
 	static const __m128				SIMD_SP_min_char;
@@ -430,13 +430,24 @@ public:
 	static const __m128				SIMD_SP_tiny;
 	static const __m128				SIMD_SP_rsqrt_c0;
 	static const __m128				SIMD_SP_rsqrt_c1;
+#elif defined( ID_QNX_ARM_NEON_INTRIN )
+	static const float32x4_t		SIMD_SP_zero;
+	static const float32x4_t		SIMD_SP_255;
+	static const float32x4_t		SIMD_SP_min_char;
+	static const float32x4_t		SIMD_SP_max_char;
+	static const float32x4_t		SIMD_SP_min_short;
+	static const float32x4_t		SIMD_SP_max_short;
+	static const float32x4_t		SIMD_SP_smallestNonDenorm;
+	static const float32x4_t		SIMD_SP_tiny;
+	static const float32x4_t		SIMD_SP_rsqrt_c0;
+	static const float32x4_t		SIMD_SP_rsqrt_c1;
 #endif
 
 private:
 	enum {
-		LOOKUP_BITS				= 8,							
-		EXP_POS					= 23,							
-		EXP_BIAS				= 127,							
+		LOOKUP_BITS				= 8,
+		EXP_POS					= 23,
+		EXP_BIAS				= 127,
 		LOOKUP_POS				= (EXP_POS-LOOKUP_BITS),
 		SEED_POS				= (EXP_POS-8),
 		SQRT_TABLE_SIZE			= (2<<LOOKUP_BITS),
@@ -452,8 +463,8 @@ private:
 	static bool					initialized;
 };
 
-ID_INLINE byte CLAMP_BYTE( int x )	{ 
-	return ( (x) < 0 ? (0) : ( (x) > 255 ? 255 : (byte)(x) ) ); 
+ID_INLINE byte CLAMP_BYTE( int x )	{
+	return ( (x) < 0 ? (0) : ( (x) > 255 ? 255 : (byte)(x) ) );
 }
 
 /*
@@ -1369,12 +1380,12 @@ ID_INLINE int idMath::FloatHash( const float *array, const int numFloats ) {
 }
 
 template< typename T >
-ID_INLINE_EXTERN T Lerp( const T from, const T to, float f ) { 
+ID_INLINE_EXTERN T Lerp( const T from, const T to, float f ) {
 	return from + ( ( to - from ) * f );
 }
 
 template<>
-ID_INLINE_EXTERN int Lerp( const int from, const int to, float f ) { 
+ID_INLINE_EXTERN int Lerp( const int from, const int to, float f ) {
 	return idMath::Ftoi( (float) from + ( ( (float) to - (float) from ) * f ) );
 }
 

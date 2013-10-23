@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ const float	idMath::INFINITY		= 1e30f;
 const float idMath::FLT_EPSILON		= 1.192092896e-07f;
 const float idMath::FLT_SMALLEST_NON_DENORMAL	= * reinterpret_cast< const float * >( & SMALLEST_NON_DENORMAL );	// 1.1754944e-038f
 
-#if defined( ID_WIN_X86_SSE_INTRIN )
+#if defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN )
 const __m128 idMath::SIMD_SP_zero				= { 0.0f, 0.0f, 0.0f, 0.0f };
 const __m128 idMath::SIMD_SP_255				= { 255.0f, 255.0f, 255.0f, 255.0f };
 const __m128 idMath::SIMD_SP_min_char			= { -128.0f, -128.0f, -128.0f, -128.0f };
@@ -62,6 +62,17 @@ const __m128 idMath::SIMD_SP_smallestNonDenorm	= { FLT_SMALLEST_NON_DENORMAL, FL
 const __m128 idMath::SIMD_SP_tiny				= { 1e-4f, 1e-4f, 1e-4f, 1e-4f };
 const __m128 idMath::SIMD_SP_rsqrt_c0			= { 3.0f, 3.0f, 3.0f, 3.0f };
 const __m128 idMath::SIMD_SP_rsqrt_c1			= { -0.5f, -0.5f, -0.5f, -0.5f };
+#elif defined( ID_QNX_ARM_NEON_INTRIN )
+const float32x4_t idMath::SIMD_SP_zero				= { 0.0f, 0.0f, 0.0f, 0.0f };
+const float32x4_t idMath::SIMD_SP_255				= { 255.0f, 255.0f, 255.0f, 255.0f };
+const float32x4_t idMath::SIMD_SP_min_char			= { -128.0f, -128.0f, -128.0f, -128.0f };
+const float32x4_t idMath::SIMD_SP_max_char			= { 127.0f, 127.0f, 127.0f, 127.0f };
+const float32x4_t idMath::SIMD_SP_min_short			= { -32768.0f, -32768.0f, -32768.0f, -32768.0f };
+const float32x4_t idMath::SIMD_SP_max_short			= { 32767.0f, 32767.0f, 32767.0f, 32767.0f };
+const float32x4_t idMath::SIMD_SP_smallestNonDenorm	= { FLT_SMALLEST_NON_DENORMAL, FLT_SMALLEST_NON_DENORMAL, FLT_SMALLEST_NON_DENORMAL, FLT_SMALLEST_NON_DENORMAL };
+const float32x4_t idMath::SIMD_SP_tiny				= { 1e-4f, 1e-4f, 1e-4f, 1e-4f };
+const float32x4_t idMath::SIMD_SP_rsqrt_c0			= { 3.0f, 3.0f, 3.0f, 3.0f };
+const float32x4_t idMath::SIMD_SP_rsqrt_c1			= { -0.5f, -0.5f, -0.5f, -0.5f };
 #endif
 
 bool		idMath::initialized		= false;
@@ -80,8 +91,8 @@ void idMath::Init() {
         fo.f	 = (float)( 1.0 / sqrt( fi.f ) );
         iSqrt[i] = ((dword)(((fo.i + (1<<(SEED_POS-2))) >> SEED_POS) & 0xFF))<<SEED_POS;
     }
-    
-	iSqrt[SQRT_TABLE_SIZE / 2] = ((dword)(0xFF))<<(SEED_POS); 
+
+	iSqrt[SQRT_TABLE_SIZE / 2] = ((dword)(0xFF))<<(SEED_POS);
 
 	initialized = true;
 }
