@@ -107,6 +107,7 @@
 									<listOptionValue builtIn="false" value="__IDLIB__"/>
 									<listOptionValue builtIn="false" value="_USE_32BIT_TIME_T"/>
 									<listOptionValue builtIn="false" value="NDEBUG"/>
+									<listOptionValue builtIn="false" value="NO_NEON_INTRIN"/>
 								</option>
 								<option id="com.qnx.qcc.option.compiler.pie.890952520" name="Position Independent Executable (-fPIE)" superClass="com.qnx.qcc.option.compiler.pie" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.309351010" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
@@ -177,6 +178,7 @@
 									<listOptionValue builtIn="false" value="_USE_32BIT_TIME_T"/>
 									<listOptionValue builtIn="false" value="_DEBUG"/>
 									<listOptionValue builtIn="false" value="_INLINEDEBUG"/>
+									<listOptionValue builtIn="false" value="NO_NEON_INTRIN"/>
 								</option>
 								<option id="com.qnx.qcc.option.compiler.ccoptions.1140395024" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions"/>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.1976137877" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">

@@ -37,6 +37,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #ifdef ID_QNX_X86
 #include <cpuid.h>
+#elif defined( ID_QNX_ARM )
+#include <arm/vfp.h>
+#else
+#error Unknown CPU architecture
 #endif
 
 /*
@@ -529,19 +533,15 @@ bool Sys_FPU_StackIsEmpty() {
 #ifdef ID_QNX_ARM
 	return true; //ARM does not use a stack for VFP or NEON operations
 #elif defined(ID_QNX_X86)
-	//XXX Required
-
-	__asm {
-			mov			eax, statePtr
-			fnstenv		[eax]
-			mov			eax, [eax+8]
-			xor			eax, 0xFFFFFFFF
-			and			eax, 0x0000FFFF
-			jz			empty
-		}
-		return false;
-	empty:
-		return true;
+	int ret;
+	__asm__ __volatile__(
+			"fnstenv	(%[state])\n"
+			"mov		8(%[state]), %[state]\n"
+			"xor		$0xFFFFFFFF, %[state]\n"
+			"and		$0x0000FFFF, %[state]\n"
+			"mov		%[state], %[ret]"
+			: [ret] "=r" (ret) : [state] "r" (statePtr) : "memory");
+	return ret == 0;
 #else
 #error Unknown CPU architecture
 #endif
@@ -556,23 +556,20 @@ void Sys_FPU_ClearStack() {
 #ifdef ID_QNX_ARM
 	//ARM does not use a stack for VFP or NEON operations
 #elif defined(ID_QNX_X86)
-	//XXX Required
-
-	__asm {
-			mov			eax, statePtr
-			fnstenv		[eax]
-			mov			eax, [eax+8]
-			xor			eax, 0xFFFFFFFF
-			mov			edx, (3<<14)
-		emptyStack:
-			mov			ecx, eax
-			and			ecx, edx
-			jz			done
-			fstp		st
-			shr			edx, 2
-			jmp			emptyStack
-		done:
-		}
+	__asm__ __volatile__(
+			"fnstenv	(%[state])\n"
+			"mov		8(%[state]), %[state]\n"
+			"xor		$0xFFFFFFFF, %[state]\n"
+			"mov		$(3<<14), %%edx\n"
+		"emptyStack:\n"
+			"mov		%[state], %%ecx\n"
+			"and		%%edx, %%ecx\n"
+			"jz			done\n"
+			"fstp		%%st\n"
+			"shr		$2, %%edx\n"
+			"jmp		emptyStack\n"
+		"done:"
+			:: [state] "r" (statePtr) : "ecx", "edx", "memory");
 #else
 #error Unknown CPU architecture
 #endif
@@ -587,85 +584,80 @@ Sys_FPU_GetState
 */
 const char *Sys_FPU_GetState() {
 	char *ptr;
+	int i;
 #ifdef ID_QNX_X86
-	//XXX Required
-
 	double fpuStack[8] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-	double *fpuStackPtr = fpuStack;
-	int i, numValues;
+	int numValues;
 
-	__asm {
-		mov			esi, statePtr
-		mov			edi, fpuStackPtr
-		fnstenv		[esi]
-		mov			esi, [esi+8]
-		xor			esi, 0xFFFFFFFF
-		mov			edx, (3<<14)
-		xor			eax, eax
-		mov			ecx, esi
-		and			ecx, edx
-		jz			done
-		fst			qword ptr [edi+0]
-		inc			eax
-		shr			edx, 2
-		mov			ecx, esi
-		and			ecx, edx
-		jz			done
-		fxch		st(1)
-		fst			qword ptr [edi+8]
-		inc			eax
-		fxch		st(1)
-		shr			edx, 2
-		mov			ecx, esi
-		and			ecx, edx
-		jz			done
-		fxch		st(2)
-		fst			qword ptr [edi+16]
-		inc			eax
-		fxch		st(2)
-		shr			edx, 2
-		mov			ecx, esi
-		and			ecx, edx
-		jz			done
-		fxch		st(3)
-		fst			qword ptr [edi+24]
-		inc			eax
-		fxch		st(3)
-		shr			edx, 2
-		mov			ecx, esi
-		and			ecx, edx
-		jz			done
-		fxch		st(4)
-		fst			qword ptr [edi+32]
-		inc			eax
-		fxch		st(4)
-		shr			edx, 2
-		mov			ecx, esi
-		and			ecx, edx
-		jz			done
-		fxch		st(5)
-		fst			qword ptr [edi+40]
-		inc			eax
-		fxch		st(5)
-		shr			edx, 2
-		mov			ecx, esi
-		and			ecx, edx
-		jz			done
-		fxch		st(6)
-		fst			qword ptr [edi+48]
-		inc			eax
-		fxch		st(6)
-		shr			edx, 2
-		mov			ecx, esi
-		and			ecx, edx
-		jz			done
-		fxch		st(7)
-		fst			qword ptr [edi+56]
-		inc			eax
-		fxch		st(7)
-	done:
-		mov			numValues, eax
-	}
+	__asm__ __volatile__(
+			"fnstenv	(%[state])\n"
+			"mov		8(%[state]), %[state]\n"
+			"xor		$0xFFFFFFFF, %[state]\n"
+			"mov		$(3<<14), %%edx\n"
+			"mov		%[state], %%ecx\n"
+			"xor		%[numValues], %[numValues]\n"
+			"and		%%edx, %%ecx\n"
+			"jz			done\n"
+			"fstl		0(%[fpuStack])\n"
+			"inc		%[numValues]\n"
+			"shr		$2, %%edx\n"
+			"mov		%[state], %%ecx\n"
+			"and		%%edx, %%ecx\n"
+			"jz			done\n"
+			"fxch		%%st(1)\n"
+			"fstl		8(%[fpuStack])\n"
+			"inc		%[numValues]\n"
+			"fxch		%%st(1)\n"
+			"shr		$2, %%edx\n"
+			"mov		%[state], %%ecx\n"
+			"and		%%edx, %%ecx\n"
+			"jz			done\n"
+			"fxch		%%st(2)\n"
+			"fstl		16(%[fpuStack])\n"
+			"inc		%[numValues]\n"
+			"fxch		%%st(2)\n"
+			"shr		$2, %%edx\n"
+			"mov		%[state], %%ecx\n"
+			"and		%%edx, %%ecx\n"
+			"jz			done\n"
+			"fxch		%%st(3)\n"
+			"fstl		24(%[fpuStack])\n"
+			"inc		%[numValues]\n"
+			"fxch		%%st(3)\n"
+			"shr		$2, %%edx\n"
+			"mov		%[state], %%ecx\n"
+			"and		%%edx, %%ecx\n"
+			"jz			done\n"
+			"fxch		%%st(4)\n"
+			"fstl		32(%[fpuStack])\n"
+			"inc		%[numValues]\n"
+			"fxch		%%st(4)\n"
+			"shr		$2, %%edx\n"
+			"mov		%[state], %%ecx\n"
+			"and		%%edx, %%ecx\n"
+			"jz			done\n"
+			"fxch		%%st(5)\n"
+			"fstl		40(%[fpuStack])\n"
+			"inc		%[numValues]\n"
+			"fxch		%%st(5)\n"
+			"shr		$2, %%edx\n"
+			"mov		%[state], %%ecx\n"
+			"and		%%edx, %%ecx\n"
+			"jz			done\n"
+			"fxch		%%st(6)\n"
+			"fstl		48(%[fpuStack])\n"
+			"inc		%[numValues]\n"
+			"fxch		%%st(6)\n"
+			"shr		$2, %%edx\n"
+			"mov		%[state], %%ecx\n"
+			"and		%%edx, %%ecx\n"
+			"jz			done\n"
+			"fxch		%%st(7)\n"
+			"fstl		56(%[fpuStack])\n"
+			"inc		%[numValues]\n"
+			"fxch		%%st(7)\n"
+		"done:\n"
+			: [numValues] "=r" (numValues) : [state] "r" (statePtr), [fpuStack] "r" (fpuStack) : "ecx", "edx", "memory");
 
 	int ctrl = *(int *)&fpuState[0];
 	int stat = *(int *)&fpuState[4];
@@ -797,21 +789,18 @@ void Sys_FPU_SetDAZ( bool enable ) {
 #ifdef ID_QNX_ARM
 	//ARM does not have something equivalent to x86's DAZ, though supposedly FTZ handles both input (x86's DAZ) and output (x86's FTZ)
 #elif defined(ID_QNX_X86)
-	//XXX Required
+	unsigned int data;
 
-	DWORD dwData;
-
-	_asm {
-		movzx	ecx, byte ptr enable
-		and		ecx, 1
-		shl		ecx, 6
-		STMXCSR	dword ptr dwData
-		mov		eax, dwData
-		and		eax, ~(1<<6)	// clear DAX bit
-		or		eax, ecx		// set the DAZ bit
-		mov		dwData, eax
-		LDMXCSR	dword ptr dwData
-	}
+	__asm__("movzxb		%[enable], %%ecx\n"
+			"and		$1, %%ecx\n"
+			"shl		$6, %%ecx\n"
+			"STMXCSR	%[data]\n"
+			"mov		%[data], %%eax\n"
+			"and		$(~(1<<6)), %%eax\n"	// clear DAX bit
+			"or			%%ecx, %%eax\n"			// set the DAZ bit
+			"mov		%%eax, %[data]\n"
+			"LDMXCSR	%[data]"
+			:: [enable] "r" (enable), [data] "g" (data) : "eax", "ecx");
 #else
 #error Unknown CPU architecture
 #endif
@@ -832,30 +821,27 @@ void Sys_FPU_SetFTZ( bool enable ) {
 			"AND	r1, #0x1\n"
 			"LSL	r1, #24\n"
 			"VMRS	r0, FPSCR\n"
-			"BIC	r0, #(1<<24)\n"	//Clear FTZ bit (1<<24 == ARM_VFP_FPSCR_FZ)
-			"ORR	r0, r1\n"		//Set FTZ bit
+			"BIC	r0, %[FZ_BIT]\n"	//Clear FTZ bit
+			"ORR	r0, r1\n"			//Set FTZ bit
 			"VMSR	FPSCR, r0"
-			:: [enable] "r" (enable) : "r0", "r1");
+			:: [enable] "r" (enable), [FZ_BIT] "I" (ARM_VFP_FPSCR_FZ) : "r0", "r1");
 #else
 #error Must compile with -mfpu=neon
 #endif
 
 #elif defined(ID_QNX_X86)
-	//XXX Required
+	unsigned int data;
 
-	DWORD dwData;
-
-	_asm {
-		movzx	ecx, byte ptr enable
-		and		ecx, 1
-		shl		ecx, 15
-		STMXCSR	dword ptr dwData
-		mov		eax, dwData
-		and		eax, ~(1<<15)	// clear FTZ bit
-		or		eax, ecx		// set the FTZ bit
-		mov		dwData, eax
-		LDMXCSR	dword ptr dwData
-	}
+	__asm__("movzxb		%[enable], %%ecx\n"
+			"and		$1, %%ecx\n"
+			"shl		$15, %%ecx\n"
+			"STMXCSR	%[data]\n"
+			"mov		%[data], %%eax\n"
+			"and		$(~(1<<15)), %%eax\n"	// clear FTZ bit
+			"or			%%ecx, %%eax\n"			// set the FTZ bit
+			"mov		%%eax, %[data]\n"
+			"LDMXCSR	%[data]"
+			:: [enable] "r" (enable), [data] "g" (data) : "eax", "ecx");
 #else
 #error Unknown CPU architecture
 #endif
@@ -873,7 +859,7 @@ void Sys_FPU_VFP_SetLEN_STRIDE( int length, int stride ) {
 
 #ifdef ID_QNX_ARM_NEON_ASM
 	__asm__("VMRS r0, FPSCR\n"
-			"BIC r0, #((3<<20)|(7<<16))\n"
+			"BIC r0, %[mask]\n"
 			"MOV r1, %[stride]\n"
 			"AND r1, #3\n"
 			"LSL r1, #4\n"
@@ -882,7 +868,7 @@ void Sys_FPU_VFP_SetLEN_STRIDE( int length, int stride ) {
 			"LSL r1, #16\n"
 			"ORR r0, r1\n"
 			"VMSR FPSCR, r0"
-			:: [stride] "r" (stride), [len] "r" (length) : "r0", "r1");
+			:: [stride] "r" (stride), [len] "r" (length), [mask] "I" (ARM_VFP_FPSCR_LEN|ARM_VFP_FPSCR_STRIDE) : "r0", "r1");
 #else
 #error Must compile with -mfpu=neon
 #endif

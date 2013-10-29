@@ -100,7 +100,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <sys/mman.h>
 #include <sys/cache.h>
 
-#ifdef ID_QNX_ARM_NEON_INTRIN
+#ifdef ID_QNX_ARM_NEON
 #include <arm_neon.h>
 #endif
 

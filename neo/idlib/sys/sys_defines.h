@@ -80,8 +80,11 @@ If you have questions concerning this license or the applicable additional terms
 	#ifdef __ARM__
 		#define ID_QNX_ARM_ASM
 		#ifdef __ARM_NEON__
+			#define ID_QNX_ARM_NEON
 			#define ID_QNX_ARM_NEON_ASM
-			#define ID_QNX_ARM_NEON_INTRIN
+			#ifndef NO_NEON_INTRIN
+				#define ID_QNX_ARM_NEON_INTRIN
+			#endif
 		#endif
 	#else
 		#define ID_QNX_X86_ASM

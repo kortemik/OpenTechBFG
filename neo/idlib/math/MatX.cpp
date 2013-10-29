@@ -470,6 +470,295 @@ void idMatX::CopyLowerToUpperTriangle() {
 		vst1q_s32( ( int32_t* )( basePtr + n0 ), r0 );
 	}
 
+#elif defined( ID_QNX_ARM_NEON_ASM )
+
+	const int n = GetNumColumns();
+	const int m = GetNumRows();
+
+	const int n0 = 0;
+	const int n1 = n;
+	const int n2 = ( n << 1 );
+	const int n3 = ( n << 1 ) + n;
+	const int n4 = ( n << 2 );
+
+	const int b1 = ( ( m - 0 ) >> 1 ) & 1;	// ( m & 3 ) > 1
+	const int b2 = ( ( m - 1 ) >> 1 ) & 1;	// ( m & 3 ) > 2 (provided ( m & 3 ) > 0)
+
+	const int n1_masked = ( n & -b1 );
+	const int n2_masked = ( n & -b1 ) + ( n & -b2 );
+
+	//Setup consts
+	//Q0 = { 0, 0, 0, 0} //bottomMask[0]
+	//Q1 = { 0, 0, 0,-1} //mask0
+	//Q2 = { 0, 0,-1,-1} //mask1
+	//Q3 = { 0,-1,-1,-1} //mask2
+	//Q4 = {-1,-1,-1,-1} //mask3, bottomMask[1]
+	int32_t negOne = -1;
+	__asm__ __volatile__(
+			"VBIC.I32 q0, #0\n"					//Q0 = {0,0,0,0}
+			"VLD1.32 {d8[], d9[]}, [%[nOne]]\n"	//Q4 = {-1,-1,-1,-1} (VORR.I32 Q4, #0xFFFFFFFF causes error)
+			"VMOV q1, q0\n"
+			"VMOV q2, q0\n"
+			"VMOV q3, q0\n"
+			"VMOV d5, d8\n"						//Q2 = {0,0,-1,-1}
+			"VMOV d7, d8\n"						//Q3* = {0,x,-1,-1}
+			"VLD1.32 {d3[1]}, [%[nOne]]\n"		//Q1 = {0,0,0,-1}
+			"VLD1.32 {d6[1]}, [%[nOne]]\n"		//Q3 = {0,-1,-1,-1}
+			:: [nOne] "r" (&negOne) :);
+
+	float * __restrict basePtr = ToFloatPtr();
+
+	for ( int i = 0; i < m - 3; i += 4 ) {
+
+		__asm__ __volatile__(
+				//Get addresses for vectors
+				"MOV r3, #4\n"
+				"MLA r0, %[n0], r3, %[d]\n"
+				"MLA r1, %[n1], r3, %[d]\n"
+				"MLA r2, %[n2], r3, %[d]\n"
+				"MLA r3, %[n3], r3, %[d]\n"
+
+				//Load vectors
+				// copy top left diagonal 4x4 block elements
+				"VLD1.32 {q5}, [r0]\n"
+				"VLD1.32 {q6}, [r1]\n"
+				"VLD1.32 {q7}, [r2]\n"
+				"VLD1.32 {q8}, [r3]\n"
+
+				//ANDing operations
+				"VAND q5, q5, q1\n"
+				"VAND q6, q6, q2\n"
+				"VAND q7, q7, q3\n"
+				"VAND q8, q8, q4\n"
+
+				//Transpose matrix
+
+				"VMOV q9, q5\n"
+				"VMOV q10, q7\n"
+				"VMOV q11, q6\n"
+				"VMOV q12, q8\n"
+
+				// Q9: x0, z0, x1, z1
+				// Q10: x2, z2, x3, z3
+				"VZIP.32 q10, q9\n"
+				// Q11: y0, w0, y1, w1
+				// Q12: y2, w2, y3, w3
+				"VZIP.32 q12, q11\n"
+				// Q9: x0, y0, z0, w0
+				// Q11: x1, y1, z1, w1
+				"VZIP.32 q11, q9\n"
+				// Q10: x2, y2, z2, w2
+				// Q12: x3, y3, z3, w3
+				"VZIP.32 q12, q10\n"
+
+				//OR vectors and masks
+				"VORR q5, q5, q9\n"
+				"VORR q6, q6, q11\n"
+				"VORR q7, q7, q10\n"
+				"VORR q8, q8, q12\n"
+
+				//Store vectors
+				"VST1.32 {q5}, [r0]\n"
+				"VST1.32 {q6}, [r1]\n"
+				"VST1.32 {q7}, [r2]\n"
+				"VST1.32 {q8}, [r3]\n"
+				: [d] "+r" (basePtr)
+				: [n0] "r" (n0), [n1] "r" (n1), [n2] "r" (n2), [n3] "r" (n3)
+				: "r0", "r1", "r2", "r3", "memory");
+
+		// copy one column of 4x4 blocks to one row of 4x4 blocks
+		const float * __restrict srcPtr = basePtr;
+		float * __restrict dstPtr = basePtr;
+
+		for ( int j = i + 4; j < m - 3; j += 4 ) {
+			srcPtr += n4;
+			dstPtr += 4;
+
+			__asm__ __volatile__(
+					//Get addresses for vectors
+					"MOV r3, #4\n"
+					"MLA r0, %[n0], r3, %[s]\n"
+					"MLA r1, %[n1], r3, %[s]\n"
+					"MLA r2, %[n2], r3, %[s]\n"
+					"MLA r3, %[n3], r3, %[s]\n"
+
+					//Load vectors
+					"VLD1.32 {q9}, [r0]\n"
+					"VLD1.32 {q10}, [r1]\n"
+					"VLD1.32 {q11}, [r2]\n"
+					"VLD1.32 {q12}, [r3]\n"
+
+					//Transpose matrix
+
+					// Q9: x0, z0, x1, z1
+					// Q11: x2, z2, x3, z3
+					"VZIP.32 q11, q9\n"
+					// Q10: y0, w0, y1, w1
+					// Q12: y2, w2, y3, w3
+					"VZIP.32 q12, q10\n"
+					// Q9: x0, y0, z0, w0
+					// Q10: x1, y1, z1, w1
+					"VZIP.32 q10, q9\n"
+					// Q11: x2, y2, z2, w2
+					// Q12: x3, y3, z3, w3
+					"VZIP.32 q12, q11\n"
+
+					//Get destination addresses for vectors
+					"SUB r4, %[s], %[d]\n"
+					"ADD r0, r0, r4\n"
+					"ADD r1, r1, r4\n"
+					"ADD r2, r2, r4\n"
+					"ADD r3, r3, r4\n"
+
+					//Save vectors
+					"VST1.32 {q9}, [r0]\n"
+					"VST1.32 {q10}, [r1]\n"
+					"VST1.32 {q11}, [r2]\n"
+					"VST1.32 {q12}, [r3]\n"
+					: [d] "+&r" (dstPtr)
+					: [s] "r" (srcPtr), [n0] "r" (n0), [n1] "r" (n1), [n2] "r" (n2), [n3] "r" (n3)
+					: "r0", "r1", "r2", "r3", "r4", "memory");
+		}
+
+		// copy the last partial 4x4 block elements
+		if ( m & 3 ) {
+			srcPtr += n4;
+			dstPtr += 4;
+
+			//Too many general registers are used, so we need to store it externally
+			int values[] = {n1_masked, n2_masked, b1, b2};
+
+			__asm__ __volatile__(
+					//Get addresses for vectors
+					"MOV r3, #4\n"
+					"MLA r0, %[n0], r3, %[s]\n"
+					"LDR r1, [%[v]]\n" //n1_masked
+					"MLA r1, r1, r3, %[s]\n"
+					"LDR r2, [%[v], #4]\n" //n2_masked
+					"MLA r2, r2, r3, %[s]\n"
+
+					//Load vectors
+					"VLD1.32 {q9}, [r0]\n"
+					"VLD1.32 {q10}, [r1]\n"
+					"VLD1.32 {q11}, [r2]\n"
+					"VMOV q12, q0\n"
+
+					//Perform ANDing operations
+					"LDR r3, [%[v], #8]\n" //b1
+					"CMP r3, #1\n"
+					"ITE EQ\n"
+					"VANDEQ q10, q10, q0\n"
+					"VANDNE q10, q10, q4\n"
+
+					"LDR r3, [%[v], #12]\n" //b2
+					"CMP r3, #1\n"
+					"ITE EQ\n"
+					"VANDEQ q11, q11, q0\n"
+					"VANDNE q11, q11, q4\n"
+
+					//Transpose matrix
+
+					// Q9: x0, z0, x1, z1
+					// Q11: x2, z2, x3, z3
+					"VZIP.32 q11, q9\n"
+					// Q10: y0, w0, y1, w1
+					// Q12: y2, w2, y3, w3
+					"VZIP.32 q12, q10\n"
+					// Q9: x0, y0, z0, w0
+					// Q10: x1, y1, z1, w1
+					"VZIP.32 q10, q9\n"
+					// Q11: x2, y2, z2, w2
+					// Q12: x3, y3, z3, w3
+					"VZIP.32 q12, q11\n"
+
+					//Get destination addresses for vectors
+					"MOV r3, #4\n"
+					"MLA r0, %[n0], r3, %[d]\n"
+					"MLA r1, %[n1], r3, %[d]\n"
+					"MLA r2, %[n2], r3, %[d]\n"
+					"MLA r3, %[n3], r3, %[d]\n"
+
+					//Save vectors
+					"VST1.32 {q9}, [r0]\n"
+					"VST1.32 {q10}, [r1]\n"
+					"VST1.32 {q11}, [r2]\n"
+					"VST1.32 {q12}, [r3]\n"
+					: [d] "+&r" (dstPtr)
+					: [s] "r" (srcPtr), [n0] "r" (n0), [n1] "r" (n1), [n2] "r" (n2), [n3] "r" (n3), [v] "r" (values)
+					: "r0", "r1", "r2", "r3", "memory");
+		}
+
+		basePtr += n4 + 4;
+	}
+
+	// copy the lower right partial diagonal 4x4 block elements
+	if ( m & 3 ) {
+		int values[] = {n1_masked, n2_masked, b1, b2};
+
+		__asm__ __volatile__(
+				//Get addresses for vectors
+				"MOV r2, #4\n"
+				"MLA r0, %[n0], r2, %[d]\n"
+				"MLA r1, %[n1m], r2, %[d]\n"
+				"MLA r2, %[n2m], r2, %[d]\n"
+
+				//Load vectors
+				"VLD1.32 {q5}, [r0]\n"
+				"VLD1.32 {q6}, [r1]\n"
+				"VLD1.32 {q7}, [r2]\n"
+				"VMOV q8, q0\n"
+
+				//Perform ANDing operations
+				"VAND q5, q5, q1\n"
+
+				"VMOV q9, q2\n"
+				"CMP %[b1], #1\n"
+				"ITE EQ\n"
+				"VANDEQ q9, q9, q0\n"
+				"VANDNE q9, q9, q4\n"
+				"VAND q6, q6, q9\n"
+
+				"VMOV q9, q3\n"
+				"CMP %[b2], #1\n"
+				"ITE EQ\n"
+				"VANDEQ q9, q9, q0\n"
+				"VANDNE q9, q9, q4\n"
+				"VAND q7, q7, q9\n"
+
+				//Transpose matrix
+
+				"VMOV q9, q5\n"
+				"VMOV q10, q7\n"
+				"VMOV q11, q6\n"
+				"VMOV q12, q8\n"
+
+				// Q9: x0, z0, x1, z1
+				// Q10: x2, z2, x3, z3
+				"VZIP.32 q10, q9\n"
+				// Q11: y0, w0, y1, w1
+				// Q12: y2, w2, y3, w3
+				"VZIP.32 q12, q11\n"
+				// Q9: x0, y0, z0, w0
+				// Q11: x1, y1, z1, w1
+				"VZIP.32 q11, q9\n"
+				// Q10: x2, y2, z2, w2
+				// Q12: x3, y3, z3, w3
+				"VZIP.32 q12, q10\n"
+
+				//OR vectors and masks
+				"VORR q5, q5, q9\n"
+				"VORR q6, q6, q11\n"
+				"VORR q7, q7, q10\n"
+
+				//Save vectors
+				"VST1.32 {q5}, [r0]\n"
+				"VST1.32 {q6}, [r1]\n"
+				"VST1.32 {q7}, [r2]\n"
+				: [d] "+r" (basePtr)
+				: [n0] "r" (n0), [n1m] "r" (n1_masked), [n2m] "r" (n2_masked), [b1] "r" (b1), [b2] "r" (b2)
+				: "r0", "r1", "r2", "memory");
+	}
+
 #else
 
 	const int n = GetNumColumns();

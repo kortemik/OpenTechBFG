@@ -86,15 +86,18 @@ ID_FORCE_INLINE void FlushCacheLine( const void * ptr, int offset ) {
 	_mm_clflush( bytePtr + 64 );
 }
 
-#elif defined( ID_QNX_ARM_NEON_INTRIN )
+#elif defined( ID_QNX_ARM_ASM )
 
 // The code below assumes that a cache line is 64 bytes.
 // We specify the cache line size as 128 here to make the code consistent with the consoles.
 #define CACHE_LINE_SIZE						128
 
-ID_FORCE_INLINE void Prefetch( const void * ptr, int offset ) {} //Could implement, but probably not worth it
+ID_FORCE_INLINE void Prefetch( const void * ptr, int offset ) {
+	__asm__ __volatile__("PLD [%[base], +%[off]]" :: [base] "r" (ptr), [off] "r" (offset) :);
+}
 ID_FORCE_INLINE void ZeroCacheLine( void * ptr, int offset ) {
 	assert_128_byte_aligned( ptr );
+#ifdef ID_QNX_ARM_NEON_INTRIN
 	char * bytePtr = ( (char *) ptr ) + offset;
 	int32_t a = 0;
 	int32x4_t zero = vld1q_dup_s32( & a );
@@ -106,6 +109,20 @@ ID_FORCE_INLINE void ZeroCacheLine( void * ptr, int offset ) {
 	vst1q_s32( (int32_t *)( bytePtr + 5*16 ), zero );
 	vst1q_s32( (int32_t *)( bytePtr + 6*16 ), zero );
 	vst1q_s32( (int32_t *)( bytePtr + 7*16 ), zero );
+#elif defined( ID_QNX_ARM_NEON_ASM )
+	__asm__ __volatile__(
+		"ADD %[ptr], %[ptr], %[off]\n"
+		"VBIC.I32 q0, #0\n"
+		"VMOV q1, q0\n"
+		"VST1.32 {d0,d1,d2,d3}, [%[ptr]]!\n"
+		"VST1.32 {d0,d1,d2,d3}, [%[ptr]]!\n"
+		"VST1.32 {d0,d1,d2,d3}, [%[ptr]]!\n"
+		"VST1.32 {d0,d1,d2,d3}, [%[ptr]]"
+		: [ptr] "+&r" (ptr) : [off] "r" (offset) : "memory");
+#else
+	char * bytePtr = ( (char *) ptr ) + offset;
+	memset( bytePtr, 0, CACHE_LINE_SIZE );
+#endif
 }
 ID_FORCE_INLINE void FlushCacheLine( const void * ptr, int offset ) {
 	off64_t addr;
@@ -276,10 +293,6 @@ ID_FORCE_INLINE_EXTERN __m128 _mm_div16_ps( __m128 x, __m128 y ) {
 
 ID_FORCE_INLINE_EXTERN int32x4_t neon_dup_s32( int32_t i )	{
 	return vld1q_dup_s32( & i );
-}
-
-ID_FORCE_INLINE_EXTERN float32x4_t neon_dup_f32( float32_t i )	{ //XXX unused right now
-	return vld1q_dup_f32( & i );
 }
 
 #endif

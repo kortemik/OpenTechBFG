@@ -62,7 +62,7 @@ const __m128 idMath::SIMD_SP_smallestNonDenorm	= { FLT_SMALLEST_NON_DENORMAL, FL
 const __m128 idMath::SIMD_SP_tiny				= { 1e-4f, 1e-4f, 1e-4f, 1e-4f };
 const __m128 idMath::SIMD_SP_rsqrt_c0			= { 3.0f, 3.0f, 3.0f, 3.0f };
 const __m128 idMath::SIMD_SP_rsqrt_c1			= { -0.5f, -0.5f, -0.5f, -0.5f };
-#elif defined( ID_QNX_ARM_NEON_INTRIN )
+#elif defined( ID_QNX_ARM_NEON )
 const float32x4_t idMath::SIMD_SP_zero				= { 0.0f, 0.0f, 0.0f, 0.0f };
 const float32x4_t idMath::SIMD_SP_255				= { 255.0f, 255.0f, 255.0f, 255.0f };
 const float32x4_t idMath::SIMD_SP_min_char			= { -128.0f, -128.0f, -128.0f, -128.0f };

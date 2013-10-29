@@ -105,6 +105,7 @@
 									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
 									<listOptionValue builtIn="false" value="_D3XP"/>
 									<listOptionValue builtIn="false" value="CTF"/>
+									<listOptionValue builtIn="false" value="NO_NEON_INTRIN"/>
 								</option>
 								<option id="com.qnx.qcc.option.compiler.pie.1446439643" name="Position Independent Executable (-fPIE)" superClass="com.qnx.qcc.option.compiler.pie" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.842766458" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
@@ -172,6 +173,7 @@
 									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
 									<listOptionValue builtIn="false" value="_D3XP"/>
 									<listOptionValue builtIn="false" value="CTF"/>
+									<listOptionValue builtIn="false" value="NO_NEON_INTRIN"/>
 								</option>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.1289208344" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
