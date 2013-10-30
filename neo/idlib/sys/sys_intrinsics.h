@@ -221,7 +221,7 @@ ID_INLINE_EXTERN int CACHE_LINE_CLEAR_OVERFLOW_COUNT( int size ) {
 #endif
 
 // make the intrinsics "type unsafe"
-typedef union __declspec(intrin_type) ALIGNTYPE16 __m128c {
+typedef union DS_INTRIN_TYPE ALIGNTYPE16 __m128c {
 				__m128c() {}
 				__m128c( __m128 f ) { m128 = f; }
 				__m128c( __m128i i ) { m128i = i; }
@@ -291,9 +291,7 @@ ID_FORCE_INLINE_EXTERN __m128 _mm_div16_ps( __m128 x, __m128 y ) {
 
 #ifdef ID_QNX_ARM_NEON_INTRIN
 
-ID_FORCE_INLINE_EXTERN int32x4_t neon_dup_s32( int32_t i )	{
-	return vld1q_dup_s32( & i );
-}
+#define neon_splatq_f32( x, i )		vdupq_n_f32( vgetq_lane_f32( x, 3 - ( i ) ) )
 
 #endif
 

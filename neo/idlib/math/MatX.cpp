@@ -330,7 +330,7 @@ void idMatX::CopyLowerToUpperTriangle() {
 	const int32x4_t mask2 = {  0, -1, -1, -1 };
 	const int32x4_t mask3 = { -1, -1, -1, -1 };
 
-	const int32x4_t bottomMask[2] = { neon_dup_s32( 0 ), neon_dup_s32( -1 ) };
+	const int32x4_t bottomMask[2] = { vdupq_n_s32( 0 ), vdupq_n_s32( -1 ) };
 
 	float * __restrict basePtr = ToFloatPtr();
 
@@ -411,7 +411,7 @@ void idMatX::CopyLowerToUpperTriangle() {
 			int32x4_t r0 = vld1q_s32( ( int32_t* )( srcPtr + n0 ) );
 			int32x4_t r1 = vandq_s32( vld1q_s32( ( int32_t* )( srcPtr + n1_masked ) ), bottomMask[b1] );
 			int32x4_t r2 = vandq_s32( vld1q_s32( ( int32_t* )( srcPtr + n2_masked ) ), bottomMask[b2] );
-			int32x4_t r3 = neon_dup_s32( 0 );
+			int32x4_t r3 = vdupq_n_s32( 0 );
 
 			// t0.val[0] x0, z0, x1, z1
 			// t0.val[1] x2, z2, x3, z3
@@ -443,7 +443,7 @@ void idMatX::CopyLowerToUpperTriangle() {
 		int32x4_t r0 = vandq_s32( vld1q_s32( ( int32_t* )( basePtr + n0 ) ), mask0 );
 		int32x4_t r1 = vandq_s32( vld1q_s32( ( int32_t* )( basePtr + n1_masked ) ), vandq_s32( mask1, bottomMask[b1] ) );
 		int32x4_t r2 = vandq_s32( vld1q_s32( ( int32_t* )( basePtr + n2_masked ) ), vandq_s32( mask2, bottomMask[b2] ) );
-		int32x4_t r3 = neon_dup_s32( 0 );
+		int32x4_t r3 = vdupq_n_s32( 0 );
 
 		// t0.val[0] x0, z0, x1, z1
 		// t0.val[1] x2, z2, x3, z3

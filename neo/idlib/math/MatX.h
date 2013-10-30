@@ -868,7 +868,7 @@ ID_INLINE void idMatX::Zero() {
 		_mm_store_ps( mat + i, _mm_setzero_ps() );
 	}
 #elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( MATX_SIMD )
-	int32x4_t va = neon_dup_s32( 0 );
+	int32x4_t va = vdupq_n_s32( 0 );
 	for ( int i = 0; i < s; i += 4 ) {
 		vst1q_s32( (int32_t *)(mat + i), va );
 	}

@@ -691,7 +691,7 @@ ID_INLINE void idVecX::Zero() {
 		_mm_store_ps( p + i, _mm_setzero_ps() );
 	}
 #elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
-	int32x4_t va = neon_dup_s32( 0 );
+	int32x4_t va = vdupq_n_s32( 0 );
 	for ( int i = 0; i < size; i += 4 ) {
 		vst1q_s32( (int32_t *)(p + i), va );
 	}
@@ -721,7 +721,7 @@ ID_INLINE void idVecX::Zero( int length ) {
 		_mm_store_ps( p + i, _mm_setzero_ps() );
 	}
 #elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
-	int32x4_t va = neon_dup_s32( 0 );
+	int32x4_t va = vdupq_n_s32( 0 );
 	for ( int i = 0; i < length; i += 4 ) {
 		vst1q_s32( (int32_t *)(p + i), va );
 	}

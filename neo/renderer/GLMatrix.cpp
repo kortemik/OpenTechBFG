@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ R_MatrixMultiply
 ==========================
 */
 void R_MatrixMultiply( const float a[16], const float b[16], float out[16] ) {
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined( ID_WIN_X86_SSE2_INTRIN ) || defined( ID_QNX_X86_SSE2_INTRIN )
 
 	__m128 a0 = _mm_loadu_ps( a + 0*4 );
 	__m128 a1 = _mm_loadu_ps( a + 1*4 );
@@ -108,6 +108,97 @@ void R_MatrixMultiply( const float a[16], const float b[16], float out[16] ) {
 	_mm_storeu_ps( out + 1*4, t1 );
 	_mm_storeu_ps( out + 2*4, t2 );
 	_mm_storeu_ps( out + 3*4, t3 );
+
+#elif defined( ID_QNX_ARM_NEON_INTRIN )
+
+	float32x4_t a0 = vld1q_f32( (float32_t *)( a + 0*4 ) );
+	float32x4_t a1 = vld1q_f32( (float32_t *)( a + 1*4 ) );
+	float32x4_t a2 = vld1q_f32( (float32_t *)( a + 2*4 ) );
+	float32x4_t a3 = vld1q_f32( (float32_t *)( a + 3*4 ) );
+
+	float32x4_t b0 = vld1q_f32( (float32_t *)( b + 0*4 ) );
+	float32x4_t b1 = vld1q_f32( (float32_t *)( b + 1*4 ) );
+	float32x4_t b2 = vld1q_f32( (float32_t *)( b + 2*4 ) );
+	float32x4_t b3 = vld1q_f32( (float32_t *)( b + 3*4 ) );
+
+	float32x4_t t0 = vmulq_f32( neon_splatq_f32( a0, 0 ), b0 );
+	float32x4_t t1 = vmulq_f32( neon_splatq_f32( a1, 0 ), b0 );
+	float32x4_t t2 = vmulq_f32( neon_splatq_f32( a2, 0 ), b0 );
+	float32x4_t t3 = vmulq_f32( neon_splatq_f32( a3, 0 ), b0 );
+
+	t0 = vmlaq_f32( neon_splatq_f32( a0, 1 ), b1, t0 );
+	t1 = vmlaq_f32( neon_splatq_f32( a1, 1 ), b1, t1 );
+	t2 = vmlaq_f32( neon_splatq_f32( a2, 1 ), b1, t2 );
+	t3 = vmlaq_f32( neon_splatq_f32( a3, 1 ), b1, t3 );
+
+	t0 = vmlaq_f32( neon_splatq_f32( a0, 2 ), b2, t0 );
+	t1 = vmlaq_f32( neon_splatq_f32( a1, 2 ), b2, t1 );
+	t2 = vmlaq_f32( neon_splatq_f32( a2, 2 ), b2, t2 );
+	t3 = vmlaq_f32( neon_splatq_f32( a3, 2 ), b2, t3 );
+
+	t0 = vmlaq_f32( neon_splatq_f32( a0, 3 ), b3, t0 );
+	t1 = vmlaq_f32( neon_splatq_f32( a1, 3 ), b3, t1 );
+	t2 = vmlaq_f32( neon_splatq_f32( a2, 3 ), b3, t2 );
+	t3 = vmlaq_f32( neon_splatq_f32( a3, 3 ), b3, t3 );
+
+	vst1q_f32( (float32_t *)( out + 0*4 ), t0 );
+	vst1q_f32( (float32_t *)( out + 1*4 ), t1 );
+	vst1q_f32( (float32_t *)( out + 2*4 ), t2 );
+	vst1q_f32( (float32_t *)( out + 3*4 ), t3 );
+
+#elif defined( ID_QNX_ARM_NEON_ASM )
+
+	__asm__ __volatile__(
+			"VLD1.32 {q0,q1}, [%[a]]!\n"
+			"VLD1.32 {q2,q3}, [%[a]]\n"
+			"VLD1.32 {q4,q5}, [%[b]]!\n"
+			"VLD1.32 {q6,q7}, [%[b]]\n"
+
+			"VDUP.32 q12, d1[1]\n"
+			"VDUP.32 q13, d3[1]\n"
+			"VDUP.32 q14, d5[1]\n"
+			"VDUP.32 q15, d7[1]\n"
+
+			"VMUL.F32 q8, q12, q4\n"
+			"VMUL.F32 q9, q13, q4\n"
+			"VMUL.F32 q10, q14, q4\n"
+			"VMUL.F32 q11, q15, q4\n"
+
+			"VDUP.32 q12, d1[0]\n"
+			"VDUP.32 q13, d3[0]\n"
+			"VDUP.32 q14, d5[0]\n"
+			"VDUP.32 q15, d7[0]\n"
+
+			"VMLA.F32 q8, q12, q5\n"
+			"VMLA.F32 q9, q13, q5\n"
+			"VMLA.F32 q10, q14, q5\n"
+			"VMLA.F32 q11, q15, q5\n"
+
+			"VDUP.32 q12, d0[1]\n"
+			"VDUP.32 q13, d2[1]\n"
+			"VDUP.32 q14, d4[1]\n"
+			"VDUP.32 q15, d6[1]\n"
+
+			"VMLA.F32 q8, q12, q6\n"
+			"VMLA.F32 q9, q13, q6\n"
+			"VMLA.F32 q10, q14, q6\n"
+			"VMLA.F32 q11, q15, q6\n"
+
+			"VDUP.32 q12, d0[0]\n"
+			"VDUP.32 q13, d2[0]\n"
+			"VDUP.32 q14, d4[0]\n"
+			"VDUP.32 q15, d6[0]\n"
+
+			"VMLA.F32 q8, q12, q7\n"
+			"VMLA.F32 q9, q13, q7\n"
+			"VMLA.F32 q10, q14, q7\n"
+			"VMLA.F32 q11, q15, q7\n"
+
+			"VST1.32 {q8,q9}, [%[d]]!\n"
+			"VST1.32 {q10,q11}, [%[d]]"
+			: [d] "+r" (out)
+			: [a] "r" (a), [b] "r" (b)
+			: "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12", "q13", "q14", "q15", "memory");
 
 #else
 
