@@ -126,20 +126,20 @@ void R_MatrixMultiply( const float a[16], const float b[16], float out[16] ) {
 	float32x4_t t2 = vmulq_f32( neon_splatq_f32( a2, 0 ), b0 );
 	float32x4_t t3 = vmulq_f32( neon_splatq_f32( a3, 0 ), b0 );
 
-	t0 = vmlaq_f32( neon_splatq_f32( a0, 1 ), b1, t0 );
-	t1 = vmlaq_f32( neon_splatq_f32( a1, 1 ), b1, t1 );
-	t2 = vmlaq_f32( neon_splatq_f32( a2, 1 ), b1, t2 );
-	t3 = vmlaq_f32( neon_splatq_f32( a3, 1 ), b1, t3 );
+	t0 = vmlaq_f32( t0, neon_splatq_f32( a0, 1 ), b1 );
+	t1 = vmlaq_f32( t1, neon_splatq_f32( a1, 1 ), b1 );
+	t2 = vmlaq_f32( t2, neon_splatq_f32( a2, 1 ), b1 );
+	t3 = vmlaq_f32( t3, neon_splatq_f32( a3, 1 ), b1 );
 
-	t0 = vmlaq_f32( neon_splatq_f32( a0, 2 ), b2, t0 );
-	t1 = vmlaq_f32( neon_splatq_f32( a1, 2 ), b2, t1 );
-	t2 = vmlaq_f32( neon_splatq_f32( a2, 2 ), b2, t2 );
-	t3 = vmlaq_f32( neon_splatq_f32( a3, 2 ), b2, t3 );
+	t0 = vmlaq_f32( t0, neon_splatq_f32( a0, 2 ), b2 );
+	t1 = vmlaq_f32( t1, neon_splatq_f32( a1, 2 ), b2 );
+	t2 = vmlaq_f32( t2, neon_splatq_f32( a2, 2 ), b2 );
+	t3 = vmlaq_f32( t3, neon_splatq_f32( a3, 2 ), b2 );
 
-	t0 = vmlaq_f32( neon_splatq_f32( a0, 3 ), b3, t0 );
-	t1 = vmlaq_f32( neon_splatq_f32( a1, 3 ), b3, t1 );
-	t2 = vmlaq_f32( neon_splatq_f32( a2, 3 ), b3, t2 );
-	t3 = vmlaq_f32( neon_splatq_f32( a3, 3 ), b3, t3 );
+	t0 = vmlaq_f32( t0, neon_splatq_f32( a0, 3 ), b3 );
+	t1 = vmlaq_f32( t1, neon_splatq_f32( a1, 3 ), b3 );
+	t2 = vmlaq_f32( t2, neon_splatq_f32( a2, 3 ), b3 );
+	t3 = vmlaq_f32( t3, neon_splatq_f32( a3, 3 ), b3 );
 
 	vst1q_f32( (float32_t *)( out + 0*4 ), t0 );
 	vst1q_f32( (float32_t *)( out + 1*4 ), t1 );

@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -193,7 +193,7 @@ Assumes input is in the range [-1, 1]
 ID_INLINE void VertexFloatToByte( const float & x, const float & y, const float & z, byte * bval ) {
 	assert_4_byte_aligned( bval );	// for __stvebx
 
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined( ID_WIN_X86_SSE2_INTRIN ) || defined( ID_QNX_X86_SSE2_INTRIN )
 
 	const __m128 vector_float_one			= { 1.0f, 1.0f, 1.0f, 1.0f };
 	const __m128 vector_float_half			= { 0.5f, 0.5f, 0.5f, 0.5f };
@@ -209,6 +209,46 @@ ID_INLINE void VertexFloatToByte( const float & x, const float & y, const float 
 	bval[0] = (byte)_mm_extract_epi16( xyz16, 0 );	// cannot use _mm_extract_epi8 because it is an SSE4 instruction
 	bval[1] = (byte)_mm_extract_epi16( xyz16, 1 );
 	bval[2] = (byte)_mm_extract_epi16( xyz16, 2 );
+
+#elif defined( ID_QNX_ARM_NEON_INTRIN )
+
+	const float32x4_t vector_float_one			= { 1.0f, 1.0f, 1.0f, 1.0f };
+	const float32x4_t vector_float_half			= { 0.5f, 0.5f, 0.5f, 0.5f };
+	const float32x4_t vector_float_255_over_2	= { 255.0f / 2.0f, 255.0f / 2.0f, 255.0f / 2.0f, 255.0f / 2.0f };
+
+	const float32x4x2_t xyzShuffle = vzipq_f32( vdupq_n_f32( x ), vdupq_n_f32( z ) );
+	const float32x4x2_t xyz = vzipq_f32( xyzShuffle.val[0], vdupq_n_f32( y ) );
+	const float32x4_t xyzScaled = vmlaq_f32( vector_float_half, vaddq_f32( xyz.val[0], vector_float_one ), vector_float_255_over_2 );
+	const int32x4_t xyzInt = vcvtq_s32_f32( xyzScaled );
+	const uint16x4_t xyzShortHalf = vqmovun_s32( xyzInt );
+	const uint16x8_t xyzShort = vcombine_u16( xyzShortHalf, xyzShortHalf );
+	const uint8x8_t xyzChar = vqmovn_u16( xyzShort );
+
+	bval[0] = vget_lane_u8( xyzChar, 0 );
+	bval[1] = vget_lane_u8( xyzChar, 1 );
+	bval[2] = vget_lane_u8( xyzChar, 2 );
+
+#elif defined( ID_QNX_ARM_NEON_ASM )
+
+	const float vector_data[]	= { 1.0f, 0.5f, 255.0f / 2.0f };
+
+	__asm__ __volatile__(
+			"VLD1.32 {d0[0]}, [%[x]]\n"
+			"VLD1.32 {d0[1]}, [%[y]]\n"
+			"VLD1.32 {d1[0]}, [%[z]]\n"
+			"VLD1.32 {d2[], d3[]}, [%[vd]]!\n" //1.0
+			"VADD.F32 q0, q0, q1\n"
+			"VLD1.32 {d2[], d3[]}, [%[vd]]!\n" //0.5
+			"VLD1.32 {d4[], d5[]}, [%[vd]]\n" //255 / 2
+			"VMLA.F32 q1, q0, q2\n"
+			"VCVT.S32.F32 q1, q1\n"
+			"VQMOVUN.S32 d0, q1\n"
+			"VQMOVN.U16 d0, q0\n"
+
+			"VST1.8 {d0[0]}, [%[d]]!\n"
+			"VST1.8 {d0[1]}, [%[d]]!\n"
+			"VST1.8 {d0[2]}, [%[d]]"
+			: [d] "+r" (bval) : [x] "r" (&x), [y] "r" (&y), [z] "r" (&z), [vd] "r" (&vector_data) : "q0", "q1", "q2", "memory");
 
 #else
 
@@ -617,13 +657,34 @@ ID_INLINE void WriteDrawVerts16( idDrawVert * destVerts, const idDrawVert * loca
 	assert_16_byte_aligned( destVerts );
 	assert_16_byte_aligned( localVerts );
 
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined( ID_WIN_X86_SSE2_INTRIN ) || defined( ID_QNX_X86_SSE2_INTRIN )
 
 	for ( int i = 0; i < numVerts; i++ ) {
 		__m128i v0 = _mm_load_si128( (const __m128i *)( (byte *)( localVerts + i ) +  0 ) );
 		__m128i v1 = _mm_load_si128( (const __m128i *)( (byte *)( localVerts + i ) + 16 ) );
 		_mm_stream_si128( (__m128i *)( (byte *)( destVerts + i ) +  0 ), v0 );
 		_mm_stream_si128( (__m128i *)( (byte *)( destVerts + i ) + 16 ), v1 );
+	}
+
+#elif defined( ID_QNX_ARM_NEON_INTRIN )
+
+	for ( int i = 0; i < numVerts; i++ ) {
+		int8x16_t v0 = vld1q_s8( (int8_t *)( localVerts + i ) +  0 );
+		int8x16_t v1 = vld1q_s8( (int8_t *)( localVerts + i ) + 16 );
+		vst1q_s8( (int8_t *)( destVerts + i ) +  0, v0 );
+		vst1q_s8( (int8_t *)( destVerts + i ) + 16, v1 );
+	}
+
+#elif defined( ID_QNX_ARM_NEON_ASM )
+
+	for ( int i = 0; i < numVerts; i++ ) {
+		__asm__ __volatile__(
+				"MOV r1, #32\n"
+				"MLA r0, %[i], r1, %[s]\n"
+				"MLA r1, %[i], r1, %[d]\n"
+				"VLD1.8 {q0, q1}, [r0]\n"
+				"VST1.8 {q0, q1}, [r1]"
+				: [d] "+r" (destVerts) : [i] "r" (i), [s] "r" (localVerts) : "r0", "r1", "q0", "q1", "memory");
 	}
 
 #else
