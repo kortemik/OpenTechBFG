@@ -504,7 +504,8 @@ void idMatX::CopyLowerToUpperTriangle() {
 			"VMOV d7, d8\n"						//Q3* = {0,x,-1,-1}
 			"VLD1.32 {d3[1]}, [%[nOne]]\n"		//Q1 = {0,0,0,-1}
 			"VLD1.32 {d6[1]}, [%[nOne]]\n"		//Q3 = {0,-1,-1,-1}
-			:: [nOne] "r" (&negOne) :);
+			:: [nOne] "r" (&negOne) : /*"q0", "q1", "q2", "q3", "q4"*/);
+	//Risky to do so, but don't indicate the registers used. We don't want them changed before the rest of the code executes (they are playing the role of constants)
 
 	float * __restrict basePtr = ToFloatPtr();
 
@@ -564,7 +565,7 @@ void idMatX::CopyLowerToUpperTriangle() {
 				"VST1.32 {q8}, [r3]\n"
 				: [d] "+r" (basePtr)
 				: [n0] "r" (n0), [n1] "r" (n1), [n2] "r" (n2), [n3] "r" (n3)
-				: "r0", "r1", "r2", "r3", "memory");
+				: "r0", "r1", "r2", "r3", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12", "memory");
 
 		// copy one column of 4x4 blocks to one row of 4x4 blocks
 		const float * __restrict srcPtr = basePtr;
@@ -617,7 +618,7 @@ void idMatX::CopyLowerToUpperTriangle() {
 					"VST1.32 {q12}, [r3]\n"
 					: [d] "+&r" (dstPtr)
 					: [s] "r" (srcPtr), [n0] "r" (n0), [n1] "r" (n1), [n2] "r" (n2), [n3] "r" (n3)
-					: "r0", "r1", "r2", "r3", "r4", "memory");
+					: "r0", "r1", "r2", "r3", "r4", "q9", "q10", "q11", "q12", "memory");
 		}
 
 		// copy the last partial 4x4 block elements
@@ -685,7 +686,7 @@ void idMatX::CopyLowerToUpperTriangle() {
 					"VST1.32 {q12}, [r3]\n"
 					: [d] "+&r" (dstPtr)
 					: [s] "r" (srcPtr), [n0] "r" (n0), [n1] "r" (n1), [n2] "r" (n2), [n3] "r" (n3), [v] "r" (values)
-					: "r0", "r1", "r2", "r3", "memory");
+					: "r0", "r1", "r2", "r3", "q0", "q1", "q2", "q3", "q9", "q10", "q11", "q12", "memory", "cc");
 		}
 
 		basePtr += n4 + 4;
@@ -756,7 +757,7 @@ void idMatX::CopyLowerToUpperTriangle() {
 				"VST1.32 {q7}, [r2]\n"
 				: [d] "+r" (basePtr)
 				: [n0] "r" (n0), [n1m] "r" (n1_masked), [n2m] "r" (n2_masked), [b1] "r" (b1), [b2] "r" (b2)
-				: "r0", "r1", "r2", "memory");
+				: "r0", "r1", "r2", "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12", "memory", "cc");
 	}
 
 #else

@@ -1189,7 +1189,7 @@ ID_INLINE int idMath::Ftoi( float f ) {
 		"VLD1.32 {d0[]}, [%[f]]\n"
 		"VCVT.S32.F32 d0, d0\n"
 		"VST1.32 {d0[0]}, [%[res]]"
-		:: [f] "r" (&f), [res] "r" (&res) :);
+		:: [f] "r" (&f), [res] "r" (&res) : "q0");
 	return res;
 #elif 0 // round chop (C/C++ standard)
 	int i, s, e, m, shift;
@@ -1231,7 +1231,7 @@ ID_INLINE char idMath::Ftoi8( float f ) {
 		"VMIN.F32 d0, d0, d3\n"
 		"VCVT.S32.F32 d0, d0\n"
 		"VST1.32 {d0[0]}, [%[res]]"
-		:: [f] "r" (&f), [res] "r" (&res), [min] "r" (&SIMD_SP_min_char), [max] "r" (&SIMD_SP_max_char) :);
+		:: [f] "r" (&f), [res] "r" (&res), [min] "r" (&SIMD_SP_min_char), [max] "r" (&SIMD_SP_max_char) : "q0", "q1");
 	return static_cast<char>( res );
 #else
 	// The converted result is clamped to the range [-128,127].
@@ -1271,7 +1271,7 @@ ID_INLINE short idMath::Ftoi16( float f ) {
 		"VMIN.F32 d0, d0, d3\n"
 		"VCVT.S32.F32 d0, d0\n"
 		"VST1.32 {d0[0]}, [%[res]]"
-		:: [f] "r" (&f), [res] "r" (&res), [min] "r" (&SIMD_SP_min_short), [max] "r" (&SIMD_SP_max_short) :);
+		:: [f] "r" (&f), [res] "r" (&res), [min] "r" (&SIMD_SP_min_short), [max] "r" (&SIMD_SP_max_short) : "q0", "q1");
 	return static_cast<short>( res );
 #else
 	// The converted result is clamped to the range [-32768,32767].
@@ -1331,7 +1331,7 @@ ID_INLINE byte idMath::Ftob( float f ) {
 		"VMIN.F32 d0, d0, d3\n"
 		"VCVT.S32.F32 d0, d0\n"
 		"VST1.32 {d0[0]}, [%[res]]"
-		:: [f] "r" (&f), [res] "r" (&res), [min] "r" (&SIMD_SP_zero), [max] "r" (&SIMD_SP_255) :);
+		:: [f] "r" (&f), [res] "r" (&res), [min] "r" (&SIMD_SP_zero), [max] "r" (&SIMD_SP_255) : "q0", "q1");
 	return static_cast<byte>( res );
 #else
 	// The converted result is clamped to the range [0,255].

@@ -151,7 +151,9 @@ void CopyBuffer( byte * dst, const byte * src, int numBytes ) {
 			"VST1.32 {D4, D5, D6, D7}, [r1]!\n"
 			"VST1.32 {D8, D9, D10, D11}, [r1]!\n"
 			"VST1.32 {D12, D13, D14, D15}, [r1]!"
-			: [dst] "+&r" (dst) : [src] "r" (src), [i] "r" (i) : "r0", "r1", "memory" );
+			: [dst] "+&r" (dst)
+			: [src] "r" (src), [i] "r" (i)
+			: "r0", "r1", "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "memory" );
 #endif
 	}
 	for ( ; i + 16 <= numBytes; i += 16 ) {
@@ -164,7 +166,7 @@ void CopyBuffer( byte * dst, const byte * src, int numBytes ) {
 			"ADD r1, %[dst], %[i]\n"
 			"VLD1.32 {D0, D1}, [r0]\n"
 			"VST1.32 {D0, D1}, [r1]"
-			: [dst] "+&r" (dst) : [src] "r" (src), [i] "r" (i) : "r0", "r1", "memory");
+			: [dst] "+&r" (dst) : [src] "r" (src), [i] "r" (i) : "r0", "r1", "q0", "memory");
 #endif
 	}
 	for ( ; i + 4 <= numBytes; i += 4 ) {

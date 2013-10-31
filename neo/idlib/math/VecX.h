@@ -232,7 +232,7 @@ ID_INLINE idVecX idVecX::operator-() const {
 				"VNEG.F32 D0, D0\n"
 				"VNEG.F32 D1, D1\n"
 				"VST1.32 {D0, D1}, [r1]"
-				: [d] "+r" (m.p) : [i] "r" (i), [s] "r" (p) : "r0", "r1", "memory");
+				: [d] "+r" (m.p) : [i] "r" (i), [s] "r" (p) : "r0", "r1", "q0", "memory");
 	}
 #else
 	for ( int i = 0; i < size; i++ ) {
@@ -265,7 +265,7 @@ ID_INLINE idVecX &idVecX::operator=( const idVecX &a ) {
 				"MLA r1, %[i], r1, %[d]\n"
 				"VLD1.32 {D0, D1}, [r0]\n"
 				"VST1.32 {D0, D1}, [r1]"
-				: [d] "+r" (p) : [i] "r" (i), [s] "r" (a.p) : "r0", "r1", "memory");
+				: [d] "+r" (p) : [i] "r" (i), [s] "r" (a.p) : "r0", "r1", "q0", "memory");
 	}
 #else
 	memcpy( p, a.p, a.size * sizeof( float ) );
@@ -304,7 +304,7 @@ ID_INLINE idVecX idVecX::operator+( const idVecX &a ) const {
 				"VADD.F32 D0, D0, D2\n"
 				"VADD.F32 D1, D1, D3\n"
 				"VST1.32 {D0, D1}, [r1]"
-				: [d] "+r" (m.p) : [i] "r" (i), [s] "r" (p), [e] "r" (a.p) : "r0", "r1", "r2", "memory");
+				: [d] "+r" (m.p) : [i] "r" (i), [s] "r" (p), [e] "r" (a.p) : "r0", "r1", "r2", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < size; i++ ) {
@@ -344,7 +344,7 @@ ID_INLINE idVecX idVecX::operator-( const idVecX &a ) const {
 				"VSUB.F32 D0, D0, D2\n"
 				"VSUB.F32 D1, D1, D3\n"
 				"VST1.32 {D0, D1}, [r1]"
-				: [d] "+r" (m.p) : [i] "r" (i), [s] "r" (p), [e] "r" (a.p) : "r0", "r1", "r2", "memory");
+				: [d] "+r" (m.p) : [i] "r" (i), [s] "r" (p), [e] "r" (a.p) : "r0", "r1", "r2", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < size; i++ ) {
@@ -380,7 +380,7 @@ ID_INLINE idVecX &idVecX::operator+=( const idVecX &a ) {
 				"VADD.F32 D0, D0, D2\n"
 				"VADD.F32 D1, D1, D3\n"
 				"VST1.32 {D0, D1}, [r0]"
-				: [s] "+r" (p) : [i] "r" (i), [e] "r" (a.p) : "r0", "r1", "memory");
+				: [s] "+r" (p) : [i] "r" (i), [e] "r" (a.p) : "r0", "r1", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < size; i++ ) {
@@ -417,7 +417,7 @@ ID_INLINE idVecX &idVecX::operator-=( const idVecX &a ) {
 				"VSUB.F32 D0, D0, D2\n"
 				"VSUB.F32 D1, D1, D3\n"
 				"VST1.32 {D0, D1}, [r0]"
-				: [s] "+r" (p) : [i] "r" (i), [e] "r" (a.p) : "r0", "r1", "memory");
+				: [s] "+r" (p) : [i] "r" (i), [e] "r" (a.p) : "r0", "r1", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < size; i++ ) {
@@ -458,7 +458,7 @@ ID_INLINE idVecX idVecX::operator*( const float a ) const {
 				"VMUL.F32 D0, D0, D2[0]\n"
 				"VMUL.F32 D1, D1, D2[0]\n"
 				"VST1.32 {D0, D1}, [r1]"
-				: [d] "+r" (m.p) : [i] "r" (i), [s] "r" (p), [f] "r" (&a) : "r0", "r1", "memory");
+				: [d] "+r" (m.p) : [i] "r" (i), [s] "r" (p), [f] "r" (&a) : "r0", "r1", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < size; i++ ) {
@@ -494,7 +494,7 @@ ID_INLINE idVecX &idVecX::operator*=( const float a ) {
 				"VMUL.F32 D0, D0, D2[0]\n"
 				"VMUL.F32 D1, D1, D2[0]\n"
 				"VST1.32 {D0, D1}, [r0]"
-				: [s] "+r" (p) : [i] "r" (i), [f] "r" (&a) : "r0", "memory");
+				: [s] "+r" (p) : [i] "r" (i), [f] "r" (&a) : "r0", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < size; i++ ) {
@@ -702,7 +702,7 @@ ID_INLINE void idVecX::Zero() {
 				"MLA r0, %[i], r0, %[s]\n"
 				"VBIC.I32 q0, #0\n"
 				"VST1.32 {d0, d1}, [r0]"
-				: [s] "+r" (p) : [i] "r" (i) : "r0", "memory");
+				: [s] "+r" (p) : [i] "r" (i) : "r0", "q0", "memory");
 	}
 #else
 	memset( p, 0, size * sizeof( float ) );
@@ -732,7 +732,7 @@ ID_INLINE void idVecX::Zero( int length ) {
 				"MLA r0, %[i], r0, %[s]\n"
 				"VBIC.I32 q0, #0\n"
 				"VST1.32 {d0, d1}, [r0]"
-				: [s] "+r" (p) : [i] "r" (i) : "r0", "memory");
+				: [s] "+r" (p) : [i] "r" (i) : "r0", "q0", "memory");
 	}
 #else
 	memset( p, 0, length * sizeof( float ) );
@@ -793,7 +793,7 @@ ID_INLINE void idVecX::Negate() {
 				"VNEG.F32 D0, D0\n"
 				"VNEG.F32 D1, D1\n"
 				"VST1.32 {D0, D1}, [r0]"
-				: [s] "+r" (p) : [i] "r" (i) : "r0", "memory");
+				: [s] "+r" (p) : [i] "r" (i) : "r0", "q0", "memory");
 	}
 #else
 	for ( int i = 0; i < size; i++ ) {

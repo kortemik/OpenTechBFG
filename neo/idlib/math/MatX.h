@@ -405,7 +405,7 @@ ID_INLINE idMatX &idMatX::operator=( const idMatX &a ) {
 				"MLA r1, %[i], r1, %[d]\n"
 				"VLD1.32 {D0, D1}, [r0]\n"
 				"VST1.32 {D0, D1}, [r1]"
-				: [d] "+r" (mat) : [i] "r" (i), [s] "r" (a.mat) : "r0", "r1", "memory");
+				: [d] "+r" (mat) : [i] "r" (i), [s] "r" (a.mat) : "r0", "r1", "q0", "memory");
 	}
 #else
 	memcpy( mat, a.mat, s * sizeof( float ) );
@@ -445,7 +445,7 @@ ID_INLINE idMatX idMatX::operator*( const float a ) const {
 				"VMUL.F32 D0, D0, D2[0]\n"
 				"VMUL.F32 D1, D1, D2[0]\n"
 				"VST1.32 {D0, D1}, [r1]"
-				: [d] "+r" (m.mat) : [i] "r" (i), [s] "r" (mat), [f] "r" (&a) : "r0", "r1", "memory");
+				: [d] "+r" (m.mat) : [i] "r" (i), [s] "r" (mat), [f] "r" (&a) : "r0", "r1", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < s; i++ ) {
@@ -514,7 +514,7 @@ ID_INLINE idMatX idMatX::operator+( const idMatX &a ) const {
 				"VADD.F32 D0, D0, D2\n"
 				"VADD.F32 D1, D1, D3\n"
 				"VST1.32 {D0, D1}, [r1]"
-				: [d] "+r" (m.mat) : [i] "r" (i), [s] "r" (mat), [e] "r" (a.mat) : "r0", "r1", "r2", "memory");
+				: [d] "+r" (m.mat) : [i] "r" (i), [s] "r" (mat), [e] "r" (a.mat) : "r0", "r1", "r2", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < s; i++ ) {
@@ -555,7 +555,7 @@ ID_INLINE idMatX idMatX::operator-( const idMatX &a ) const {
 				"VSUB.F32 D0, D0, D2\n"
 				"VSUB.F32 D1, D1, D3\n"
 				"VST1.32 {D0, D1}, [r1]"
-				: [d] "+r" (m.mat) : [i] "r" (i), [s] "r" (mat), [e] "r" (a.mat) : "r0", "r1", "r2", "memory");
+				: [d] "+r" (m.mat) : [i] "r" (i), [s] "r" (mat), [e] "r" (a.mat) : "r0", "r1", "r2", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < s; i++ ) {
@@ -592,7 +592,7 @@ ID_INLINE idMatX &idMatX::operator*=( const float a ) {
 				"VMUL.F32 D0, D0, D2[0]\n"
 				"VMUL.F32 D1, D1, D2[0]\n"
 				"VST1.32 {D0, D1}, [r0]"
-				: [s] "+r" (mat) : [i] "r" (i), [f] "r" (&a) : "r0", "memory");
+				: [s] "+r" (mat) : [i] "r" (i), [f] "r" (&a) : "r0", "q0", "memory");
 	}
 #else
 	for ( int i = 0; i < s; i++ ) {
@@ -641,7 +641,7 @@ ID_INLINE idMatX &idMatX::operator+=( const idMatX &a ) {
 				"VADD.F32 D0, D0, D2\n"
 				"VADD.F32 D1, D1, D3\n"
 				"VST1.32 {D0, D1}, [r0]"
-				: [s] "+r" (mat) : [i] "r" (i), [e] "r" (a.mat) : "r0", "r1", "memory");
+				: [s] "+r" (mat) : [i] "r" (i), [e] "r" (a.mat) : "r0", "r1", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < s; i++ ) {
@@ -679,7 +679,7 @@ ID_INLINE idMatX &idMatX::operator-=( const idMatX &a ) {
 				"VSUB.F32 D0, D0, D2\n"
 				"VSUB.F32 D1, D1, D3\n"
 				"VST1.32 {D0, D1}, [r0]"
-				: [s] "+r" (mat) : [i] "r" (i), [e] "r" (a.mat) : "r0", "r1", "memory");
+				: [s] "+r" (mat) : [i] "r" (i), [e] "r" (a.mat) : "r0", "r1", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < s; i++ ) {
@@ -879,7 +879,7 @@ ID_INLINE void idMatX::Zero() {
 				"MLA r0, %[i], r0, %[s]\n"
 				"VBIC.I32 q0, #0\n"
 				"VST1.32 {d0, d1}, [r0]"
-				: [s] "+r" (mat) : [i] "r" (i) : "r0", "memory");
+				: [s] "+r" (mat) : [i] "r" (i) : "r0", "q0", "memory");
 	}
 #else
 	s;
@@ -989,7 +989,7 @@ ID_INLINE void idMatX::Negate() {
 				"VNEG.F32 D0, D0\n"
 				"VNEG.F32 D1, D1\n"
 				"VST1.32 {D0, D1}, [r0]"
-				: [s] "+r" (mat) : [i] "r" (i) : "r0", "memory");
+				: [s] "+r" (mat) : [i] "r" (i) : "r0", "q0", "memory");
 	}
 #else
 	for ( int i = 0; i < s; i++ ) {
