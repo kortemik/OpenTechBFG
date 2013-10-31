@@ -541,16 +541,16 @@ void idMatX::CopyLowerToUpperTriangle() {
 
 				// Q9: x0, z0, x1, z1
 				// Q10: x2, z2, x3, z3
-				"VZIP.32 q10, q9\n"
+				"VZIP.32 q9, q10\n"
 				// Q11: y0, w0, y1, w1
 				// Q12: y2, w2, y3, w3
-				"VZIP.32 q12, q11\n"
+				"VZIP.32 q11, q12\n"
 				// Q9: x0, y0, z0, w0
 				// Q11: x1, y1, z1, w1
-				"VZIP.32 q11, q9\n"
+				"VZIP.32 q9, q11\n"
 				// Q10: x2, y2, z2, w2
 				// Q12: x3, y3, z3, w3
-				"VZIP.32 q12, q10\n"
+				"VZIP.32 q10, q12\n"
 
 				//OR vectors and masks
 				"VORR q5, q5, q9\n"
@@ -593,16 +593,16 @@ void idMatX::CopyLowerToUpperTriangle() {
 
 					// Q9: x0, z0, x1, z1
 					// Q11: x2, z2, x3, z3
-					"VZIP.32 q11, q9\n"
+					"VZIP.32 q9, q11\n"
 					// Q10: y0, w0, y1, w1
 					// Q12: y2, w2, y3, w3
-					"VZIP.32 q12, q10\n"
+					"VZIP.32 q10, q12\n"
 					// Q9: x0, y0, z0, w0
 					// Q10: x1, y1, z1, w1
-					"VZIP.32 q10, q9\n"
+					"VZIP.32 q9, q10\n"
 					// Q11: x2, y2, z2, w2
 					// Q12: x3, y3, z3, w3
-					"VZIP.32 q12, q11\n"
+					"VZIP.32 q11, q12\n"
 
 					//Get destination addresses for vectors
 					"SUB r4, %[s], %[d]\n"
@@ -661,16 +661,16 @@ void idMatX::CopyLowerToUpperTriangle() {
 
 					// Q9: x0, z0, x1, z1
 					// Q11: x2, z2, x3, z3
-					"VZIP.32 q11, q9\n"
+					"VZIP.32 q9, q11\n"
 					// Q10: y0, w0, y1, w1
 					// Q12: y2, w2, y3, w3
-					"VZIP.32 q12, q10\n"
+					"VZIP.32 q10, q12\n"
 					// Q9: x0, y0, z0, w0
 					// Q10: x1, y1, z1, w1
-					"VZIP.32 q10, q9\n"
+					"VZIP.32 q9, q10\n"
 					// Q11: x2, y2, z2, w2
 					// Q12: x3, y3, z3, w3
-					"VZIP.32 q12, q11\n"
+					"VZIP.32 q11, q12\n"
 
 					//Get destination addresses for vectors
 					"MOV r3, #4\n"
@@ -735,16 +735,16 @@ void idMatX::CopyLowerToUpperTriangle() {
 
 				// Q9: x0, z0, x1, z1
 				// Q10: x2, z2, x3, z3
-				"VZIP.32 q10, q9\n"
+				"VZIP.32 q9, q10\n"
 				// Q11: y0, w0, y1, w1
 				// Q12: y2, w2, y3, w3
-				"VZIP.32 q12, q11\n"
+				"VZIP.32 q11, q12\n"
 				// Q9: x0, y0, z0, w0
 				// Q11: x1, y1, z1, w1
-				"VZIP.32 q11, q9\n"
+				"VZIP.32 q9, q11\n"
 				// Q10: x2, y2, z2, w2
 				// Q12: x3, y3, z3, w3
-				"VZIP.32 q12, q10\n"
+				"VZIP.32 q10, q12\n"
 
 				//OR vectors and masks
 				"VORR q5, q5, q9\n"
