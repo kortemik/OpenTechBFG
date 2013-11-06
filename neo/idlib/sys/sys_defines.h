@@ -88,11 +88,17 @@ If you have questions concerning this license or the applicable additional terms
 		#endif
 	#else
 		#define ID_QNX_X86_ASM
+		#ifdef __MMX__
+			#define ID_QNX_X86_MMX_INTRIN
+		#endif
 		#ifdef __SSE__
 			#define ID_QNX_X86_SSE_INTRIN
 		#endif
 		#ifdef __SSE2__
 			#define ID_QNX_X86_SSE2_INTRIN
+		#endif
+		#ifdef __SSE3__
+			#define ID_QNX_X86_SSE3_INTRIN
 		#endif
 	#endif
 

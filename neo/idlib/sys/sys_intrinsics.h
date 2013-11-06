@@ -118,7 +118,7 @@ ID_FORCE_INLINE void ZeroCacheLine( void * ptr, int offset ) {
 		"VST1.32 {d0,d1,d2,d3}, [%[ptr]]!\n"
 		"VST1.32 {d0,d1,d2,d3}, [%[ptr]]!\n"
 		"VST1.32 {d0,d1,d2,d3}, [%[ptr]]"
-		: [ptr] "+&r" (ptr) : [off] "r" (offset) : "memory");
+		: [ptr] "+&r" (ptr) : [off] "r" (offset) : "q0", "q1", "memory");
 #else
 	char * bytePtr = ( (char *) ptr ) + offset;
 	memset( bytePtr, 0, CACHE_LINE_SIZE );
@@ -142,13 +142,6 @@ ID_FORCE_INLINE void FlushCacheLine( const void * ptr, int offset ) {
 ================================================
 */
 #else
-
-#ifndef UINT_PTR
-#if __SIZEOF_POINTER__ != __SIZEOF_INT__
-#error void* is not the same size as int
-#endif
-#define UINT_PTR unsigned int
-#endif
 
 #define CACHE_LINE_SIZE						128
 

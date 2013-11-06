@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef ID_WIN32
 	class idSysThreadLocalStorage {
 	public:
-		idSysThreadLocalStorage() { 
+		idSysThreadLocalStorage() {
 			tlsIndex = TlsAlloc();
 		}
 		idSysThreadLocalStorage( const ptrdiff_t &val ) {
@@ -87,7 +87,7 @@ If you have questions concerning this license or the applicable additional terms
 		const ptrdiff_t & operator = ( const ptrdiff_t &val ) {
 			TlsSetValue( tlsIndex, (LPVOID)val );
 			return val;
-		}	
+		}
 		DWORD	tlsIndex;
 	};
 #elif defined(ID_QNX)
@@ -109,7 +109,7 @@ If you have questions concerning this license or the applicable additional terms
 		const ptrdiff_t & operator = ( const ptrdiff_t &val ) {
 			pthread_setspecific( tlsKey, (void*) val );
 			return val;
-		}	
+		}
 		pthread_key_t	tlsKey;
 	};
 #endif
@@ -126,10 +126,6 @@ If you have questions concerning this license or the applicable additional terms
 
 ================================================================================================
 */
-
-#ifndef uintptr_t
-#define uintptr_t unsigned int
-#endif
 
 enum core_t {
 	CORE_ANY = -1,
@@ -157,8 +153,8 @@ enum xthreadPriority {
 uintptr_t			Sys_GetCurrentThreadID();
 
 // returns a threadHandle
-uintptr_t			Sys_CreateThread( xthread_t function, void *parms, xthreadPriority priority, 
-									  const char *name, core_t core, int stackSize = DEFAULT_THREAD_STACK_SIZE, 
+uintptr_t			Sys_CreateThread( xthread_t function, void *parms, xthreadPriority priority,
+									  const char *name, core_t core, int stackSize = DEFAULT_THREAD_STACK_SIZE,
 									  bool suspended = false );
 
 void				Sys_WaitForThread( uintptr_t threadHandle );

@@ -3,6 +3,8 @@
 
 Doom 3 BFG Edition GPL Source Code
 Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Robert Beckebans
+Copyright (C) 2013 Vincent Simonetti
 
 This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
@@ -86,6 +88,23 @@ protected:
 	bool			LoadGeneratedSample( const idStr &name );
 	void			WriteGeneratedSample( idFile *fileOut );
 
+	ALenum			GetOpenALBufferFormat() const;
+	void			CreateOpenALBuffer();
+
+	struct MS_ADPCM_decodeState_t
+	{
+		uint8 hPredictor;
+		int16 coef1;
+		int16 coef2;
+
+		uint16 iDelta;
+		int16 iSamp1;
+		int16 iSamp2;
+	};
+
+	int32			MS_ADPCM_nibble( MS_ADPCM_decodeState_t* state, int8 nybble );
+	int				MS_ADPCM_decode( uint8** audio_buf, uint32* audio_len );
+
 	struct sampleBuffer_t {
 		void * buffer;
 		int bufferSize;
@@ -105,6 +124,8 @@ protected:
 
 	int				totalBufferSize;	// total size of all the buffers
 	idList<sampleBuffer_t, TAG_AUDIO> buffers;
+
+	ALuint			openalBuffer;		// OpenAL buffer that contains all buffers
 
 	int				playBegin;
 	int				playLength;
