@@ -3,6 +3,7 @@
 
 Doom 3 BFG Edition GPL Source Code
 Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Robert Beckebans
 Copyright (C) 2013 Vincent Simonetti
 
 This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
@@ -89,7 +90,13 @@ private:
 	// Adjust the voice frequency based on the new sample rate for the buffer
 	void					SetSampleRate( uint32 newSampleRate, uint32 operationSet );
 
-	ALuint					sourceVoice;
+	bool					triggered;
+	ALuint					openalSource;
+	ALuint					openalStreamingBuffer[MAX_QUEUED_BUFFERS];
+	ALuint					lastOpenalStreamingBuffer[MAX_QUEUED_BUFFERS];
+	ALfloat					minGain;
+	ALfloat					maxGain;
+
 	idSoundSample_OpenAL *	leadinSample;
 	idSoundSample_OpenAL *	loopingSample;
 
@@ -100,7 +107,6 @@ private:
 	uint32					sourceVoiceRate;
 	uint32					sampleRate;
 
-	bool					hasVUMeter;
 	bool					paused;
 };
 typedef idSoundVoice_OpenAL idSoundVoice_Buffer;

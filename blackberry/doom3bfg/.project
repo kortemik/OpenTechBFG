@@ -1741,6 +1741,11 @@
 			<locationURI>PARENT-2-PROJECT_LOC/neo/sound/OpenAL/AL_SoundSample.h</locationURI>
 		</link>
 		<link>
+			<name>src/sound/OpenAL/AL_SoundVoice.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/sound/OpenAL/AL_SoundVoice.cpp</locationURI>
+		</link>
+		<link>
 			<name>src/sound/OpenAL/AL_SoundVoice.h</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/neo/sound/OpenAL/AL_SoundVoice.h</locationURI>

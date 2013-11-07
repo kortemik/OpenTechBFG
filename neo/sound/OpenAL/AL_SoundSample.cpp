@@ -469,7 +469,7 @@ void idSoundSample_OpenAL::MakeDefault() {
 	format.basic.formatTag = idWaveFile::FORMAT_PCM;
 	format.basic.numChannels = 1;
 	format.basic.bitsPerSample = 16;
-	format.basic.samplesPerSec = 22050; //XAUDIO2_MIN_SAMPLE_RATE;
+	format.basic.samplesPerSec = 22050; //XAUDIO2_MIN_SAMPLE_RATE; //XXX Should this be 44100?
 	format.basic.blockSize = format.basic.numChannels * format.basic.bitsPerSample / 8;
 	format.basic.avgBytesPerSec = format.basic.samplesPerSec * format.basic.blockSize;
 
@@ -479,14 +479,14 @@ void idSoundSample_OpenAL::MakeDefault() {
 
 	short * defaultBuffer = (short *)AllocBuffer( totalBufferSize, GetName() );
 	for ( int i = 0; i < DEFAULT_NUM_SAMPLES; i += 2 ) {
+		/*
 		float v = sin( idMath::PI * 2 * i / 64 );
 		int sample = v * 0x4000;
 		defaultBuffer[i + 0] = sample;
 		defaultBuffer[i + 1] = sample;
-		/*
+		*/
 		defaultBuffer[i + 0] = SHRT_MIN;
 		defaultBuffer[i + 1] = SHRT_MAX;
-		*/
 	}
 
 	buffers.SetNum( 1 );
