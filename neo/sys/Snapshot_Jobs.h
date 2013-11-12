@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -51,7 +52,7 @@ static const uint32 OBJ_SAME			= ( 1 << 5 );			// Objects are in both snaps, and
 
 // This struct is used to communicate data from the obj jobs to the lzw job
 struct ALIGNTYPE16 objHeader_t {
-	int32	objID;					// Id of object. 
+	int32	objID;					// Id of object.
 	int32	size;					// Size data object holds (will be 0 if the obj is being deleted)
 	int32	csize;					// Size after zrle compression
 	uint32	flags;					// Flags used to communicate state from obj job to lzw delta job
@@ -70,7 +71,7 @@ struct objJobState_t {
 };
 
 // Input to initial jobs that produce delta'd zrle compressed versions of all the snap obj's
-struct ALIGNTYPE16 objParms_t { 
+struct ALIGNTYPE16 objParms_t {
 	// Input
 	uint8				visIndex;
 
@@ -81,21 +82,21 @@ struct ALIGNTYPE16 objParms_t {
 	objHeader_t	*		destHeader;
 	uint8 *				dest;
 } ALIGNTYPE16_POST;
-	
+
 // Output from the job that takes the results of the delta'd zrle obj's.
 // This struct contains the start of where the final delta packet data is within lzwMem
-struct ALIGNTYPE16 lzwDelta_t { 
+struct ALIGNTYPE16 lzwDelta_t {
 	int					offset;						// Offset into lzwMem
 	int					size;
 	int					snapSequence;
 } ALIGNTYPE16_POST;
-		
+
 // Struct used to maintain state that needs to persist across lzw jobs
 struct ALIGNTYPE16 lzwInOutData_t {
 	int						numlzwDeltas;			// Num pending deltas written
 	bool					fullSnap;				// True if entire snap was written out in one delta
-	lzwDelta_t *			lzwDeltas;				// Info about each final delta packet written out	
-	int						maxlzwDeltas;			// Max lzw deltas 
+	lzwDelta_t *			lzwDeltas;				// Info about each final delta packet written out
+	int						maxlzwDeltas;			// Max lzw deltas
 	uint8 *					lzwMem;					// Resulting final lzw delta packet data
 	int						maxlzwMem;				// Max size in bytes that can fit in lzwMem
 	int						lzwDmaOut;				// How much of lzwMem needs to be DMA'ed back out
@@ -117,7 +118,7 @@ struct ALIGNTYPE16 lzwParm_t {
 	bool					saveDictionary;
 	bool					fragmented;				// This lzw stream should continue where the last one left off
 
-	// In/Out	
+	// In/Out
 	lzwInOutData_t *		ioData;					// In/Out
 } ALIGNTYPE16_POST;
 

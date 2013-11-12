@@ -3,6 +3,7 @@
 
 Doom 3 BFG Edition GPL Source Code
 Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Vincent Simonetti
 
 This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
@@ -60,7 +61,7 @@ extern "C" {
 //=============
 //General defines
 //=============
-#define GL_GLEXT_VERSION 1 //So that glext.h isn't included
+#define GL_GLEXT_VERSION 1 //So that glext.h isn't included in qgl.h
 
 //=============
 //Types

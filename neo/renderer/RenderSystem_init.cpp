@@ -3,6 +3,7 @@
 
 Doom 3 BFG Edition GPL Source Code
 Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Vincent Simonetti
 
 This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
@@ -350,6 +351,29 @@ R_CheckPortableExtensions
 */
 static void R_CheckPortableExtensions() {
 	glConfig.glVersion = atof( glConfig.version_string );
+#ifdef GL_ES_VERSION_2_0
+	// Probably a better way to do this...
+	if ( glConfig.glVersion < 2.0f ) {
+		idStr ver = glConfig.version_string;
+
+		// Version may start "OpenGL ES"
+		if ( ver.Icmpn( "OpenGL ES ", 10 ) == 0 ) {
+			ver = ver.Mid( 10, ver.Length() - 10 );
+		}
+
+		glConfig.glVersion = atof( ver.c_str() );
+
+		if ( glConfig.glVersion < 2.0f ) {
+			// Version may have sub-version after it: "2.0 2644020"
+			int index = ver.Find( ' ' );
+			if (index > 0 ) {
+				ver = ver.Left( index );
+
+				glConfig.glVersion = atof( ver.c_str() );
+			}
+		}
+	}
+#endif
 	const char * badVideoCard = idLocalization::GetString( "#str_06780" );
 	if ( glConfig.glVersion < 2.0f ) {
 		idLib::FatalError( badVideoCard );
@@ -402,7 +426,7 @@ static void R_CheckPortableExtensions() {
 		qglGetCompressedTexImageARB = (PFNGLGETCOMPRESSEDTEXIMAGEARBPROC)GLimp_ExtensionPointer( "glGetCompressedTexImageARB" );
 	}
 #else
-	glConfig.textureCompressionAvailable = R_CheckExtension( "GL_EXT_texture_compression_s3tc" ) || ( R_CheckExtension( "GL_EXT_texture_compression_dxt1" ) && R_CheckExtension( "GL_ANGLE_texture_compression_dxt5" ) );
+	glConfig.textureCompressionAvailable = R_CheckExtension( "GL_EXT_texture_compression_s3tc" ) || ( ( R_CheckExtension( "GL_EXT_texture_compression_dxt1" ) || R_CheckExtension( "GL_ANGLE_texture_compression_dxt1" ) ) && ( R_CheckExtension( "GL_EXT_texture_compression_dxt5" ) || R_CheckExtension( "GL_ANGLE_texture_compression_dxt5" ) ) );
 	qglCompressedTexImage2DARB = (PFNGLCOMPRESSEDTEXIMAGE2DARBPROC)GLimp_ExtensionPointer( "glCompressedTexImage2D" );
 	qglCompressedTexSubImage2DARB = (PFNGLCOMPRESSEDTEXSUBIMAGE2DARBPROC)GLimp_ExtensionPointer( "glCompressedTexSubImage2D" );
 	qglGetCompressedTexImageARB = NULL; //Not used
@@ -436,7 +460,7 @@ static void R_CheckPortableExtensions() {
 	r_useSeamlessCubeMap.SetModified();		// the CheckCvars() next frame will enable / disable it
 
 	// GL_ARB_framebuffer_sRGB
-	glConfig.sRGBFramebufferAvailable = R_CheckExtension( "GL_ARB_framebuffer_sRGB" );
+	glConfig.sRGBFramebufferAvailable = R_CheckExtension( "GL_ARB_framebuffer_sRGB" ) || R_CheckExtension( "GL_EXT_sRGB" );
 	r_useSRGB.SetModified();		// the CheckCvars() next frame will enable / disable it
 
 #ifndef GL_ES_VERSION_2_0
@@ -581,7 +605,7 @@ static void R_CheckPortableExtensions() {
 		}
 	}
 
-	// ATI_separate_stencil / OpenGL 2.0 separate stencil
+	// ATI_separate_stencil / OpenGL (ES) 2.0 separate stencil
 #ifndef GL_ES_VERSION_2_0
 	glConfig.twoSidedStencilAvailable = ( glConfig.glVersion >= 2.0f ) || R_CheckExtension( "GL_ATI_separate_stencil" );
 #else

@@ -3,6 +3,7 @@
 
 Doom 3 BFG Edition GPL Source Code
 Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Vincent Simonetti
 
 This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
@@ -25,6 +26,7 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
+#pragma hdrstop
 #include "../../precompiled.h"
 #include <pthread.h>
 #include <sched.h>
