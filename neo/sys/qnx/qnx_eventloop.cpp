@@ -33,7 +33,6 @@ If you have questions concerning this license or the applicable additional terms
 #include <bps/bps.h>
 #include <bps/event.h>
 #include <bps/navigator.h>
-#include <slog2.h>
 
 #include "qnx_local.h"
 

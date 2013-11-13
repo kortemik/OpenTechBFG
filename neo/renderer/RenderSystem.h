@@ -79,8 +79,10 @@ enum graphicsVendor_t {
 	VENDOR_NVIDIA,
 	VENDOR_AMD,
 	VENDOR_INTEL,
+	VENDOR_ARM,
 	VENDOR_QC,
-	VENDOR_IMG
+	VENDOR_IMG,
+	VENDOR_QNX
 };
 
 // Contains variables specific to the OpenGL configuration being run right now.

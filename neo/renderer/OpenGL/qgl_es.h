@@ -41,6 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef ID_OPENGL_ES_3
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>
+#include <GLES2/gl2ext.h> //XXX Is this correct?
 #elif defined(ID_OPENGL_ES_2)
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -401,6 +402,10 @@ extern "C" {
 
 #ifndef GL_STENCIL_INDEX
 	#define GL_STENCIL_INDEX GL_STENCIL_INDEX8
+#endif
+
+#ifndef GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT
+	#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
 #endif
 
 #ifdef __cplusplus

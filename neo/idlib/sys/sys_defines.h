@@ -218,6 +218,8 @@ If you have questions concerning this license or the applicable additional terms
 // guaranteed to be false in the following code
 #define NO_RETURN __attribute__((noreturn))
 
+#define CALLBACK
+
 #endif
 
 /*

@@ -97,6 +97,8 @@ If you have questions concerning this license or the applicable additional terms
 #include <x86intrin.h>
 #endif
 
+#include <slog2.h>
+
 //Only needed for FlushCacheLine
 #include <sys/mman.h>
 #include <sys/cache.h>

@@ -41,7 +41,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <bps/bps.h>
 #include <bps/navigator_invoke.h>
-#include <slog2.h>
 
 #include "../sys_local.h"
 #include "qnx_local.h"
