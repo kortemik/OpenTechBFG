@@ -346,8 +346,11 @@ void idRenderLog::OpenBlock( const char *label ) {
 	PC_BeginNamedEvent( label );
 
 	if ( logFile != NULL ) {
-		va_list list = NULL;
-		LogOpenBlock( RENDER_LOG_INDENT_MAIN_BLOCK, label, list );
+#ifdef ID_QNX
+		LogOpenBlock_GCCWorkaround( RENDER_LOG_INDENT_MAIN_BLOCK, label );
+#else
+		LogOpenBlock( RENDER_LOG_INDENT_MAIN_BLOCK, label, NULL );
+#endif
 	}
 }
 
@@ -385,6 +388,26 @@ void idRenderLog::Printf( const char *fmt, ... ) {
 	va_end( marker );
 //	logFile->Flush();		this makes it take waaaay too long
 }
+
+#ifdef ID_QNX
+
+/*
+========================
+idRenderLog::LogOpenBlock_GCCWorkaround
+
+GCC 4.6.3 is used and happens to have a "feature" where va_list is not a pointer. Meaning it can't be set to NULL (in OpenBlock).
+This is to prevent what is assumed to be a risky idea of creating a va_list from a function that doesn't have a ... param.
+========================
+*/
+void idRenderLog::LogOpenBlock_GCCWorkaround( renderLogIndentLabel_t label, const char * fmt, ... ) {
+
+	va_list list;
+	va_start( list, fmt );
+	LogOpenBlock( label, fmt, list );
+	va_end( list );
+}
+
+#endif
 
 /*
 ========================

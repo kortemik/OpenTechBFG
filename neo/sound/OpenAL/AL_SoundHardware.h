@@ -56,15 +56,14 @@ public:
 	int				GetNumZombieVoices() const { return zombieVoices.Num(); }
 	int				GetNumFreeVoices() const { return freeVoices.Num(); }
 
-protected:
 	// OpenAL info
 	static void		PrintDeviceList( const char* list );
 	static void		PrintALCInfo( ALCdevice* device );
 
+private:
 	friend class idSoundSample_OpenAL;
 	friend class idSoundVoice_OpenAL;
 
-private:
 	ALCdevice *			openalDevice;
 	ALCcontext *		openalContext;
 

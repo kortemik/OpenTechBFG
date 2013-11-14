@@ -499,10 +499,10 @@ static void R_CheckPortableExtensions() {
 		glConfig.maxTextureAnisotropy = 1;
 	}
 
-	// GL_EXT_texture_lod_bias
-	// The actual extension is broken as specificed, storing the state in the texture unit instead
-	// of the texture object.  The behavior in GL 1.4 is the behavior we use.
 #ifndef GL_ES_VERSION_2_0
+	// GL_EXT_texture_lod_bias
+	// The actual extension is broken as specified, storing the state in the texture unit instead
+	// of the texture object.  The behavior in GL 1.4 is the behavior we use.
 	glConfig.textureLODBiasAvailable = ( glConfig.glVersion >= 1.4 || R_CheckExtension( "GL_EXT_texture_lod_bias" ) );
 #else
 	glConfig.textureLODBiasAvailable = false; //TODO: does something similar to this exist? Is it something that can be emulated within RenderProgs?
@@ -612,12 +612,23 @@ static void R_CheckPortableExtensions() {
 	}
 	//TODO: based on the specification, this is just an extension function and a wrapper can be created
 
-	// GL_ARB_vertex_program / GL_ARB_fragment_program //XXX Need to review
+#ifndef GL_ES_VERSION_2_0
+	// GL_ARB_vertex_program / GL_ARB_fragment_program
 	glConfig.fragmentProgramAvailable = R_CheckExtension( "GL_ARB_fragment_program" );
+#else
+	glConfig.fragmentProgramAvailable = true;
+#endif
 	if ( glConfig.fragmentProgramAvailable ) {
 		qglVertexAttribPointerARB = (PFNGLVERTEXATTRIBPOINTERARBPROC)GLimp_ExtensionPointer( "glVertexAttribPointerARB" );
-		qglEnableVertexAttribArrayARB = (PFNGLENABLEVERTEXATTRIBARRAYARBPROC)GLimp_ExtensionPointer( "glEnableVertexAttribArrayARB" );
-		qglDisableVertexAttribArrayARB = (PFNGLDISABLEVERTEXATTRIBARRAYARBPROC)GLimp_ExtensionPointer( "glDisableVertexAttribArrayARB" );
+		if ( qglVertexAttribPointerARB == NULL ) {
+			qglVertexAttribPointerARB = (PFNGLVERTEXATTRIBPOINTERARBPROC)GLimp_ExtensionPointer( "glVertexAttribPointer" );
+			qglEnableVertexAttribArrayARB = (PFNGLENABLEVERTEXATTRIBARRAYARBPROC)GLimp_ExtensionPointer( "glEnableVertexAttribArray" );
+			qglDisableVertexAttribArrayARB = (PFNGLDISABLEVERTEXATTRIBARRAYARBPROC)GLimp_ExtensionPointer( "glDisableVertexAttribArray" );
+		} else {
+			qglEnableVertexAttribArrayARB = (PFNGLENABLEVERTEXATTRIBARRAYARBPROC)GLimp_ExtensionPointer( "glEnableVertexAttribArrayARB" );
+			qglDisableVertexAttribArrayARB = (PFNGLDISABLEVERTEXATTRIBARRAYARBPROC)GLimp_ExtensionPointer( "glDisableVertexAttribArrayARB" );
+		}
+		//Everything below is not needed outside of idRenderProgManager::LoadShader, which is never used
 		qglProgramStringARB = (PFNGLPROGRAMSTRINGARBPROC)GLimp_ExtensionPointer( "glProgramStringARB" );
 		qglBindProgramARB = (PFNGLBINDPROGRAMARBPROC)GLimp_ExtensionPointer( "glBindProgramARB" );
 		qglGenProgramsARB = (PFNGLGENPROGRAMSARBPROC)GLimp_ExtensionPointer( "glGenProgramsARB" );
@@ -629,7 +640,7 @@ static void R_CheckPortableExtensions() {
 		qglGetIntegerv( GL_MAX_TEXTURE_COORDS_ARB, (GLint *)&glConfig.maxTextureCoords );
 		qglGetIntegerv( GL_MAX_TEXTURE_IMAGE_UNITS_ARB, (GLint *)&glConfig.maxTextureImageUnits );
 #else
-		//XXX GL_MAX_TEXTURE_COORDS
+		glConfig.maxTextureCoords = 0x7FFFFFFF; //Shaders technically don't have a limit on texture coord since it is a user defined attribute
 		qglGetIntegerv( GL_MAX_TEXTURE_IMAGE_UNITS, (GLint *)&glConfig.maxTextureImageUnits );
 #endif
 	}
@@ -1118,6 +1129,10 @@ void GL_CheckErrors() {
 				break;
 			case GL_STACK_UNDERFLOW:
 				strcpy( s, "GL_STACK_UNDERFLOW" );
+				break;
+#else
+			case GL_INVALID_FRAMEBUFFER_OPERATION:
+				strcpy( s, "GL_INVALID_FRAMEBUFFER_OPERATION" );
 				break;
 #endif
 			case GL_OUT_OF_MEMORY:
