@@ -250,8 +250,8 @@ void GL_SetDefaultState() {
 	qglDisable( GL_POLYGON_OFFSET_FILL );
 #ifndef GL_ES_VERSION_2_0
 	qglDisable( GL_POLYGON_OFFSET_LINE );
+	qglPolygonMode( GL_FRONT_AND_BACK, GL_FILL ); //XXX
 #endif
-	qglPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
 	// These should never be changed
 #ifndef GL_ES_VERSION_2_0

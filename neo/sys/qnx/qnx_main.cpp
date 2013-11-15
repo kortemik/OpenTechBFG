@@ -41,6 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <bps/bps.h>
 #include <bps/navigator_invoke.h>
+#include <clipboard/clipboard.h>
 
 #include "../sys_local.h"
 #include "qnx_local.h"
@@ -444,27 +445,22 @@ Sys_GetClipboardData
 ================
 */
 char *Sys_GetClipboardData() {
-	/* TODO
 	char *data = NULL;
 	char *cliptext;
 
-	if ( OpenClipboard( NULL ) != 0 ) {
-		HANDLE hClipboardData;
+	if ( is_clipboard_format_present( "text/plain" ) == 0 ) {
+		int size;
+		if ( ( size = get_clipboard_data( "text/plain", &cliptext ) ) > 0 ) {
+			data = (char *)Mem_Alloc( size + 1, TAG_CRAP );
+			strncpy( data, cliptext, size );
+			data[size] = '\0';
+			free( cliptext );
 
-		if ( ( hClipboardData = GetClipboardData( CF_TEXT ) ) != 0 ) {
-			if ( ( cliptext = (char *)GlobalLock( hClipboardData ) ) != 0 ) {
-				data = (char *)Mem_Alloc( GlobalSize( hClipboardData ) + 1, TAG_CRAP );
-				strcpy( data, cliptext );
-				GlobalUnlock( hClipboardData );
-
-				strtok( data, "\n\r\b" );
-			}
+			strtok( data, "\n\r\b" );
 		}
-		CloseClipboard();
 	}
+
 	return data;
-	*/
-	return NULL;
 }
 
 /*
@@ -473,37 +469,16 @@ Sys_SetClipboardData
 ================
 */
 void Sys_SetClipboardData( const char *string ) {
-	/* TODO
-	HGLOBAL HMem;
-	char *PMem;
+	// Check if we can write
+	if ( string == NULL || get_clipboard_can_write() != 0 ) {
+		return;
+	}
 
-	// allocate memory block
-	HMem = (char *)::GlobalAlloc( GMEM_MOVEABLE | GMEM_DDESHARE, strlen( string ) + 1 );
-	if ( HMem == NULL ) {
-		return;
-	}
-	// lock allocated memory and obtain a pointer
-	PMem = (char *)::GlobalLock( HMem );
-	if ( PMem == NULL ) {
-		return;
-	}
-	// copy text into allocated memory block
-	lstrcpy( PMem, string );
-	// unlock allocated memory
-	::GlobalUnlock( HMem );
-	// open Clipboard
-	if ( !OpenClipboard( 0 ) ) {
-		::GlobalFree( HMem );
-		return;
-	}
-	// remove current Clipboard contents
-	EmptyClipboard();
-	// supply the memory handle to the Clipboard
-	SetClipboardData( CF_TEXT, HMem );
-	HMem = 0;
-	// close Clipboard
-	CloseClipboard();
-	*/
+	// Remove current clipboard contents
+	empty_clipboard();
+
+	// Write the data to the clipboard
+	set_clipboard_data( "text/plain", strlen( string ) + 1, string );
 }
 
 /*
@@ -951,6 +926,8 @@ void EmailCrashReport( const char* messageText ) {
 
 	lastEmailTime = Sys_Milliseconds();
 
+#define EMAIL_ADDRESS "account@domain.com"
+
 	/* XXX Works, but requires app to stay running
 	navigator_invoke_invocation_t *invoke = NULL;
 
@@ -958,7 +935,7 @@ void EmailCrashReport( const char* messageText ) {
 	navigator_invoke_invocation_set_action( invoke, "bb.action.OPEN" );
 	navigator_invoke_invocation_set_target( invoke, "sys.pim.uib.email.hybridcomposer" );
 	//XXX Message and "to" needs to be set and escaped (messageText)
-	navigator_invoke_invocation_set_uri( invoke, "mailto:account@domain.com?subject=DOOM%203%20Fatal%20Error&body=Stuff%20For%20You!" );
+	navigator_invoke_invocation_set_uri( invoke, "mailto:" EMAIL_ADDRESS "?subject=DOOM%203%20Fatal%20Error&body=Stuff%20For%20You!" );
 
 	navigator_invoke_invocation_send( invoke );
 
@@ -972,7 +949,7 @@ void EmailCrashReport( const char* messageText ) {
 	navigator_invoke_invocation_set_action( invoke, "bb.action.COMPOSE" );
 	navigator_invoke_invocation_set_target( invoke, "sys.pim.uib.email.hybridcomposer" );
 	navigator_invoke_invocation_set_type( invoke, "message/rfc822" );
-	const char* data = "{\"to\":[\"account@domain.com\"],\"subject\":\"DOOM 3 Fatal Error\",\"body\":\"%s\"}"; //XXX Message needs to be set (messageText)
+	const char* data = "{\"to\":[\"" EMAIL_ADDRESS "\"],\"subject\":\"DOOM 3 Fatal Error\",\"body\":\"%s\"}"; //XXX Message needs to be set (messageText)
 	navigator_invoke_invocation_set_data( invoke, data, strlen(data) + 1 );
 
 	navigator_invoke_invocation_send( invoke );

@@ -4367,6 +4367,13 @@ extern "C" {
 #define GL_IMPLEMENTATION_COLOR_READ_FORMAT_OES 0x8B9B
 #endif
 
+#ifndef GL_OES_mapbuffer
+#define GL_WRITE_ONLY_OES                 0x88B9
+#define GL_BUFFER_ACCESS_OES              0x88BB
+#define GL_BUFFER_MAPPED_OES              0x88BC
+#define GL_BUFFER_MAP_POINTER_OES         0x88BD
+#endif
+
 #ifndef GL_EXT_depth_bounds_test
 #define GL_DEPTH_BOUNDS_TEST_EXT          0x8890
 #define GL_DEPTH_BOUNDS_EXT               0x8891

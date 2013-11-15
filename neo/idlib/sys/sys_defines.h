@@ -214,7 +214,7 @@ If you have questions concerning this license or the applicable additional terms
 #define VERIFY_FORMAT_STRING
 
 // (From Windows) We need to inform the compiler that Error() and FatalError() will
-// never return, so any conditions that leeds to them being called are
+// never return, so any conditions that leads to them being called are
 // guaranteed to be false in the following code
 #define NO_RETURN __attribute__((noreturn))
 
