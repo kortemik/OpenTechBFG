@@ -1771,6 +1771,11 @@
 			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_main.cpp</locationURI>
 		</link>
 		<link>
+			<name>src/sys/qnx/qnx_shared.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_shared.cpp</locationURI>
+		</link>
+		<link>
 			<name>src/renderer/jobs/dynamicshadowvolume/DynamicShadowVolume.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/neo/renderer/jobs/dynamicshadowvolume/DynamicShadowVolume.cpp</locationURI>

@@ -30,9 +30,13 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 #include "../../idlib/precompiled.h"
 
+#include <sys/keycodes.h>
+#include <input/screen_helpers.h>
 #include <bps/bps.h>
 #include <bps/event.h>
+#include <bps/screen.h>
 #include <bps/navigator.h>
+#include <bps/virtualkeyboard.h>
 
 #include "qnx_local.h"
 
@@ -98,17 +102,61 @@ void Sys_PumpEvents() {
 		if ( event ) {
 			domain = bps_event_get_domain(event);
 
-			if ( domain == navigator_get_domain() ) {
+			if ( domain == screen_get_domain() ) {
+				screen_event_t screenEvent = screen_event_get_event( event );
+				screen_get_event_property_iv( screenEvent, SCREEN_PROPERTY_TYPE, &code );
+				switch ( code ) {
+				//TODO: everything from WM_SYSKEYDOWN and down in win_winproc
+				}
+			} else if ( domain == navigator_get_domain() ) {
 				code = bps_event_get_code( event );
-				switch(code) {
+				switch( code ) {
 				case NAVIGATOR_EXIT:
 					//Everything must stop within 3 seconds, otherwise the navigator will force-close the program
-					common->Quit();
+					//common->Quit();
+					soundSystem->SetMute( true );
+					cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "quit\n" ); //XXX Need to make sure that the navigator doesn't time out
 					break;
+
+				case NAVIGATOR_SWIPE_DOWN:
+					// Acts like pressing the escape key, causing the menu to show up
+					Sys_QueEvent( SE_KEY, K_ESCAPE, true, 0, NULL, 0 );
+					Sys_QueEvent( SE_KEY, K_ESCAPE, false, 0, NULL, 0 );
+					break;
+
+				case NAVIGATOR_WINDOW_STATE: {
+					navigator_window_state_t state = navigator_event_get_window_state( event );
+
+					// Pause the game (fake-press the escape key) if minimized
+					if ( state != NAVIGATOR_WINDOW_FULLSCREEN && game && game->IsInGame() && !game->Shell_IsActive() ) {
+						Sys_QueEvent( SE_KEY, K_ESCAPE, true, 0, NULL, 0 );
+						Sys_QueEvent( SE_KEY, K_ESCAPE, false, 0, NULL, 0 );
+					}
+
+					soundSystem->SetMute( state != NAVIGATOR_WINDOW_FULLSCREEN );
+					break;
+				}
+
 				//TODO
+				//NAVIGATOR_ORIENTATION_CHECK
+				//NAVIGATOR_ORIENTATION
+				//NAVIGATOR_BACK (console access?)
+				//NAVIGATOR_ORIENTATION_DONE (similar to WM_SIZING)
+				//NAVIGATOR_INVOKE_QUERY_RESULT
+				//NAVIGATOR_INVOKE_TARGET_RESULT
+				//NAVIGATOR_INVOKE_VIEWER_RESULT
+				//NAVIGATOR_INVOKE_VIEWER_RELAY
+				//NAVIGATOR_INVOKE_VIEWER_STOPPED
+				//NAVIGATOR_KEYBOARD_STATE
+				//NAVIGATOR_KEYBOARD_POSITION
+				//NAVIGATOR_INVOKE_VIEWER_RELAY_RESULT
+				//NAVIGATOR_WINDOW_COVER_ENTER
+				//NAVIGATOR_WINDOW_COVER_EXIT
+				//NAVIGATOR_CARD_PEEK_STARTED
+				//NAVIGATOR_CARD_PEEK_STOPPED
+				//NAVIGATOR_ORIENTATION_SIZE
 				}
 			}
-			//TODO
 		} else {
 			break;
 		}

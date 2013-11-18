@@ -32,8 +32,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+#ifdef ID_WIN32
 // Vista OpenGL wrapper check
 #include "../sys/win32/win_local.h"
+#endif
 
 // DeviceContext bypasses RenderSystem to work directly with this
 idGuiModel * tr_guiModel;
@@ -361,6 +363,19 @@ GLvoid* APIENTRY glMapBufferRangeImpl( GLenum target, GLintptr offset, GLsizeipt
 	return buffer;
 }
 
+/*
+========================
+glDrawElementsBaseVertex
+========================
+*/
+void APIENTRY glDrawElementsBaseVertexImpl( GLenum mode, GLsizei count, GLenum type, const GLvoid *indices, GLint basevertex ) {
+	if ( basevertex == 0 ) {
+		// No offset, just draw like normal
+		qglDrawElements( mode, count, type, indices );
+	} else {
+		//TODO: http://www.opengl.org/registry/specs/ARB/draw_elements_base_vertex.txt, will also need to figure out if there is a more efficent way to do this
+	}
+}
 
 /*
 =================
@@ -483,11 +498,12 @@ static void R_CheckPortableExtensions() {
 		qglGetCompressedTexImageARB = (PFNGLGETCOMPRESSEDTEXIMAGEARBPROC)GLimp_ExtensionPointer( "glGetCompressedTexImageARB" );
 	}
 #else
-	// The functions exist, but the supported compressions may not //XXX
+	// The functions exist, but the supported compressions may not
 	glConfig.textureCompressionAvailable = R_CheckExtension( "GL_EXT_texture_compression_s3tc" ) || ( ( R_CheckExtension( "GL_EXT_texture_compression_dxt1" ) || R_CheckExtension( "GL_ANGLE_texture_compression_dxt1" ) ) && ( R_CheckExtension( "GL_EXT_texture_compression_dxt5" ) || R_CheckExtension( "GL_ANGLE_texture_compression_dxt5" ) ) );
 	qglCompressedTexImage2DARB = (PFNGLCOMPRESSEDTEXIMAGE2DARBPROC)GLimp_ExtensionPointer( "glCompressedTexImage2D" );
 	qglCompressedTexSubImage2DARB = (PFNGLCOMPRESSEDTEXSUBIMAGE2DARBPROC)GLimp_ExtensionPointer( "glCompressedTexSubImage2D" );
 	qglGetCompressedTexImageARB = (PFNGLGETCOMPRESSEDTEXIMAGEARBPROC)GLimp_ExtensionPointer( "glGetCompressedTexImage" ); //Not used
+	//TODO: figure out/replace texture compression. Everything supports ETC1, GLES 3.0 supports ETC2. If DXT isn't supported, use those
 #endif
 
 	// GL_EXT_texture_filter_anisotropic
@@ -582,6 +598,7 @@ static void R_CheckPortableExtensions() {
 			qglMapBufferRange = (PFNGLMAPBUFFERRANGEPROC)GLimp_ExtensionPointer( "glMapBufferRangeEXT" );
 			if ( qglMapBufferRange == NULL && qglMapBufferARB != NULL ) {
 				qglMapBufferRange = glMapBufferRangeImpl;
+				common->Printf( "...using fake %s\n", "GL_EXT_map_buffer_range" );
 			} else {
 				// Hmm, guess it's not supported
 				glConfig.mapBufferRangeAvailable = false;
@@ -609,10 +626,15 @@ static void R_CheckPortableExtensions() {
 
 	// GL_ARB_draw_elements_base_vertex
 	glConfig.drawElementsBaseVertexAvailable = R_CheckExtension( "GL_ARB_draw_elements_base_vertex" );
+	glConfig.drawElementsBaseVertexFakeAvailable = false; //XXX If this variable isn't needed, remove it
 	if ( glConfig.drawElementsBaseVertexAvailable ) {
 		qglDrawElementsBaseVertex = (PFNGLDRAWELEMENTSBASEVERTEXPROC)GLimp_ExtensionPointer( "glDrawElementsBaseVertex" );
+	} else if ( qglDrawElements != NULL ) {
+		qglDrawElementsBaseVertex = glDrawElementsBaseVertexImpl;
+		glConfig.drawElementsBaseVertexAvailable = true;
+		glConfig.drawElementsBaseVertexFakeAvailable = true;
+		common->Printf( "...using fake %s\n", "GL_ARB_draw_elements_base_vertex" );
 	}
-	//TODO: based on the specification, this is just an extension function and a wrapper can be created
 
 #ifndef GL_ES_VERSION_2_0
 	// GL_ARB_vertex_program / GL_ARB_fragment_program
