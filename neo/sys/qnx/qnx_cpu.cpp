@@ -742,7 +742,7 @@ Sys_FPU_SetPrecision
 void Sys_FPU_SetPrecision( int precision ) {
 	int val = -1;
 
-	switch( rounding ) {
+	switch( precision ) {
 	case FPU_PRECISION_SINGLE:
 		val = _FP_PREC_FLOAT;
 		break;

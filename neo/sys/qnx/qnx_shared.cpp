@@ -33,6 +33,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "qnx_local.h"
 
 #include <sys/mman.h>
+#include <sys/statvfs.h>
+#include <sys/syspage.h>
+#include <malloc.h>
 
 /*
 ================
@@ -40,7 +43,14 @@ Sys_Milliseconds
 ================
 */
 int Sys_Milliseconds() {
-	//TODO
+	static struct timespec sys_timeBase = {0};
+	struct timespec ts;
+
+	if ( sys_timeBase.tv_sec == 0 ) {
+		clock_gettime( CLOCK_MONOTONIC, &sys_timeBase );
+	}
+	clock_gettime( CLOCK_MONOTONIC, &ts );
+	return ( timespec2nsec( &ts ) - timespec2nsec( &sys_timeBase ) ) / 1000000;
 }
 
 /*
@@ -52,7 +62,7 @@ uint64 Sys_Microseconds() {
 	static uint64 ticksPerMicrosecondTimes1024 = 0;
 
 	if ( ticksPerMicrosecondTimes1024 == 0 ) {
-		ticksPerMicrosecondTimes1024 = ( (uint64)Sys_ClockTicksPerSecond() << 10 ) / 1000000; //XXX Is this the right divisor?
+		ticksPerMicrosecondTimes1024 = ( (uint64)Sys_ClockTicksPerSecond() << 10 ) / 1000000;
 		assert( ticksPerMicrosecondTimes1024 > 0 );
 	}
 
@@ -67,16 +77,21 @@ Sys_GetSystemRam
 ================
 */
 int Sys_GetSystemRam() {
-	//TODO
-	/*
-	MEMORYSTATUSEX statex;
-	statex.dwLength = sizeof ( statex );
-	GlobalMemoryStatusEx (&statex);
-	int physRam = statex.ullTotalPhys / ( 1024 * 1024 );
-	// HACK: For some reason, ullTotalPhys is sometimes off by a meg or two, so we round up to the nearest 16 megs
-	physRam = ( physRam + 8 ) & ~15;
-	return physRam;
-	*/
+	//Based off http://www.qssl.com/developers/docs/6.3.2/momentics/release_notes/rel_6.3.2.html (section "System page")
+	char *str = SYSPAGE_ENTRY(strings)->data;
+	struct asinfo_entry *as = SYSPAGE_ENTRY(asinfo);
+	uint64_t total = 0;
+	unsigned num;
+
+	for(num = _syspage_ptr->asinfo.entry_size / sizeof(*as); num > 0; --num)
+	{
+		if(strcmp(&str[as->name], "ram") == 0)
+		{
+			total += as->end - as->start + 1;
+		}
+		++as;
+	}
+	return total / ( 1024 * 1024 );
 }
 
 
@@ -87,18 +102,12 @@ returns in megabytes
 ================
 */
 int Sys_GetDriveFreeSpace( const char *path ) {
-	//TODO
-	/*
-	DWORDLONG lpFreeBytesAvailable;
-	DWORDLONG lpTotalNumberOfBytes;
-	DWORDLONG lpTotalNumberOfFreeBytes;
+	struct statvfs64 stv;
 	int ret = 26;
-	//FIXME: see why this is failing on some machines
-	if ( ::GetDiskFreeSpaceEx( path, (PULARGE_INTEGER)&lpFreeBytesAvailable, (PULARGE_INTEGER)&lpTotalNumberOfBytes, (PULARGE_INTEGER)&lpTotalNumberOfFreeBytes ) ) {
-		ret = ( double )( lpFreeBytesAvailable ) / ( 1024.0 * 1024.0 );
+	if ( statvfs64( path, &stv ) == 0 ) {
+		ret = ( double )( stv.f_bavail * stv.f_frsize ) / ( 1024.0 * 1024.0 );
 	}
 	return ret;
-	*/
 }
 
 /*
@@ -107,18 +116,12 @@ Sys_GetDriveFreeSpaceInBytes
 ========================
 */
 int64 Sys_GetDriveFreeSpaceInBytes( const char * path ) {
-	//TODO
-	/*
-	DWORDLONG lpFreeBytesAvailable;
-	DWORDLONG lpTotalNumberOfBytes;
-	DWORDLONG lpTotalNumberOfFreeBytes;
+	struct statvfs64 stv;
 	int64 ret = 1;
-	//FIXME: see why this is failing on some machines
-	if ( ::GetDiskFreeSpaceEx( path, (PULARGE_INTEGER)&lpFreeBytesAvailable, (PULARGE_INTEGER)&lpTotalNumberOfBytes, (PULARGE_INTEGER)&lpTotalNumberOfFreeBytes ) ) {
-		ret = lpFreeBytesAvailable;
+	if ( statvfs64( path, &stv ) == 0 ) {
+		ret = stv.f_bavail * stv.f_frsize;
 	}
 	return ret;
-	*/
 }
 
 /*
@@ -188,39 +191,48 @@ Sys_GetCurrentMemoryStatus
 ================
 */
 void Sys_GetCurrentMemoryStatus( sysMemoryStats_t &stats ) {
-	//TODO
-	/*
-	MEMORYSTATUSEX statex = {};
-	unsigned __int64 work;
+#if __SIZEOF_POINTER__ != __SIZEOF_INT__
+#error Pointer is not the same size as a pointer, meaning mallopt won't work
+#endif
 
-	statex.dwLength = sizeof( statex );
-	GlobalMemoryStatusEx( &statex );
+	char *str = SYSPAGE_ENTRY(strings)->data;
+	struct asinfo_entry *as = SYSPAGE_ENTRY(asinfo);
+	uint64_t total = 0;
+	unsigned num;
 
-	memset( &stats, 0, sizeof( stats ) );
+	struct malloc_stats _malloc_stats;
+	mallopt(MALLOC_STATS, &_malloc_stats);
 
-	stats.memoryLoad = statex.dwMemoryLoad;
+	// Get memory amount and availability in bytes
+	for(num = _syspage_ptr->asinfo.entry_size / sizeof(*as); num > 0; --num)
+	{
+		if(strcmp(&str[as->name], "ram") == 0)
+		{
+			total += as->end - as->start + 1;
+		}
+		++as;
+	}
+	stats.totalPhysical = total;
 
-	work = statex.ullTotalPhys >> 20;
-	stats.totalPhysical = *(int*)&work;
+	//XXX Is this correct and/or "complete"?
+	total = _malloc_stats.m_allocmem + _malloc_stats.m_small_allocmem; //Get to the amount of memory allocated
 
-	work = statex.ullAvailPhys >> 20;
-	stats.availPhysical = *(int*)&work;
+	stats.availPhysical = stats.totalPhysical - total;
 
-	work = statex.ullAvailPageFile >> 20;
-	stats.availPageFile = *(int*)&work;
+	stats.memoryLoad = ( int )( ( ( float )total / stats.totalPhysical ) * 100 );
 
-	work = statex.ullTotalPageFile >> 20;
-	stats.totalPageFile = *(int*)&work;
+	// Adjust memory amount and availability in kb
+	stats.totalPhysical /= 1024;
+	stats.availPhysical /= 1024;
 
-	work = statex.ullTotalVirtual >> 20;
-	stats.totalVirtual = *(int*)&work;
+	// There is no such thing as a page file on QNX
+	stats.availPageFile = 0;
+	stats.totalPageFile = 0;
 
-	work = statex.ullAvailVirtual >> 20;
-	stats.availVirtual = *(int*)&work;
-
-	work = statex.ullAvailExtendedVirtual >> 20;
-	stats.availExtendedVirtual = *(int*)&work;
-	*/
+	// Virtual memory (mostly limited by physics memory)
+	stats.totalVirtual = stats.totalPhysical;
+	stats.availVirtual = stats.availPhysical;
+	stats.availExtendedVirtual = 0;
 }
 
 /*
@@ -247,32 +259,7 @@ Sys_SetPhysicalWorkMemory
 ================
 */
 void Sys_SetPhysicalWorkMemory( int minBytes, int maxBytes ) {
-	//TODO
-	//::SetProcessWorkingSetSize( GetCurrentProcess(), minBytes, maxBytes );
-}
-
-/*
-================
-Sys_GetCurrentUser
-================
-*/
-char *Sys_GetCurrentUser() {
-	//TODO: maybe just get what parameter it's in and return that
-	/*
-	static char s_userName[1024];
-	unsigned long size = sizeof( s_userName );
-
-
-	if ( !GetUserName( s_userName, &size ) ) {
-		strcpy( s_userName, "player" );
-	}
-
-	if ( !s_userName[0] ) {
-		strcpy( s_userName, "player" );
-	}
-
-	return s_userName;
-	*/
+	// Not really a possibility on QNX
 }
 
 
@@ -539,9 +526,11 @@ void Sym_GetFuncInfo( long addr, idStr &module, idStr &funcName ) {
 
 #elif defined(_DEBUG)
 
+/*
 DWORD lastAllocationBase = -1;
 HANDLE processHandle;
 idStr lastModule;
+*/
 
 /*
 ==================
@@ -685,6 +674,7 @@ GetFuncAddr
 */
 address_t GetFuncAddr( address_t midPtPtr ) {
 	//TODO
+	return 0;
 	/*
 	long temp;
 	do {
@@ -706,6 +696,7 @@ GetCallerAddr
 */
 address_t GetCallerAddr( long _ebp ) {
 	//TODO
+	return 0;
 	/*
 	long midPtPtr;
 	long res = 0;

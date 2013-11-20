@@ -30,12 +30,19 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __QNX_LOCAL_H__
 #define __QNX_LOCAL_H__
 
+#include "../../renderer/OpenGL/qgl_es.h"
+
+void	Sys_QueEvent( sysEventType_t type, int value, int value2, int ptrLength, void *ptr, int inputDeviceNum );
+
 cpuid_t	Sys_GetCPUId();
 
-uint64 Sys_Microseconds();
+uint64	Sys_Microseconds();
 
 typedef struct {
-	//TODO
+	cpuid_t			cpuid;
+
+	//TODO: opengl vars
+
 	static idCVar	sys_arch;
 	static idCVar	sys_cpustring;
 } QNXVars_t;
