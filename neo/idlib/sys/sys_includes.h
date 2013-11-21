@@ -93,6 +93,8 @@ If you have questions concerning this license or the applicable additional terms
 #include <assert.h>
 #include <wctype.h>
 
+#include <unistd.h>
+
 #ifdef ID_QNX_X86
 #include <x86intrin.h>
 #endif

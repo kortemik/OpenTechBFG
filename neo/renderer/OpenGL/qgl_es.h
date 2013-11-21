@@ -41,7 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef ID_OPENGL_ES_3
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>
-#include <GLES2/gl2ext.h> //XXX Is this correct?
+#include <GLES2/gl2ext.h>
 #elif defined(ID_OPENGL_ES_2)
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -78,8 +78,21 @@ extern "C" {
 #endif
 
 //=============
-//Defines for functions that are defined but may not actually exist
+//Helper macros
 //=============
+#define ID_GLES_VAR_DEF( x ) glesSpecific_##x
+#define ID_GLES_VAR_REPLACE_DEF( x ) ( glConfig.ID_GLES_VAR_DEF( x ) )
+
+//=============
+//Defines for functions and their enums that are defined but may not actually exist
+//=============
+#ifndef PFNGLACTIVETEXTUREPROC
+	typedef void (GL_APIENTRYP PFNGLACTIVETEXTUREPROC) (GLenum texture);
+#endif
+#ifndef PFNGLCLIENTACTIVETEXTUREPROC
+	typedef void (GL_APIENTRYP PFNGLCLIENTACTIVETEXTUREPROC) (GLenum texture);
+#endif
+
 #ifndef GL_TEXTURE0_ARB
 	#define GL_TEXTURE0_ARB GL_TEXTURE0
 #endif
@@ -152,6 +165,10 @@ extern "C" {
 	#else
 		typedef void (GL_APIENTRYP PFNGLGETBUFFERPOINTERVARBPROC) (GLenum target, GLenum pname, GLvoid* *params);
 	#endif
+#endif
+
+#ifndef PFNGLGETSTRINGIPROC
+	typedef const GLubyte * (GL_APIENTRYP PFNGLGETSTRINGIPROC) (GLenum name, GLuint index);
 #endif
 
 #ifndef PFNGLMAPBUFFERRANGEPROC
@@ -390,6 +407,9 @@ extern "C" {
 	#endif
 #endif
 
+//=============
+//Defines for enums that are defined but may not actually exist
+//=============
 #ifndef GL_TEXTURE_CUBE_MAP_SEAMLESS
 	#define GL_TEXTURE_CUBE_MAP_SEAMLESS 0x884F
 #endif
@@ -406,17 +426,37 @@ extern "C" {
 	#define GL_FRAMEBUFFER_SRGB 0x8DB9
 #endif
 
+#ifndef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
+	#ifdef GL_COMPRESSED_RGBA_S3TC_DXT5_ANGLE
+		#define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT GL_COMPRESSED_RGBA_S3TC_DXT5_ANGLE
+	#else
+		#define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83F3
+	#endif
+#endif
+
+#ifndef GL_TEXTURE_LOD_BIAS_EXT
+	#define GL_TEXTURE_LOD_BIAS_EXT 0x8501
+#endif
+
 #ifndef GL_MULTISAMPLE_ARB
 	#define GL_MULTISAMPLE_ARB 0x809D
 #endif
 
-#ifndef GL_RGBA8
+#ifndef GL_CLAMP_TO_BORDER
+	#define GL_CLAMP_TO_BORDER GL_CLAMP_TO_EDGE
+#endif
+
+#ifdef GL_RGBA8
+	#define ID_GLES_REAL_GL_RGBA8 0x8058
+	#undef GL_RGBA8
+#else
 	#ifdef GL_RGBA8_OES
-		#define GL_RGBA8 GL_RGBA8_OES
+		#define ID_GLES_REAL_GL_RGBA8 GL_RGBA8_OES
 	#else
-		#define GL_RGBA8 GL_RGBA
+		#define ID_GLES_REAL_GL_RGBA8 GL_RGBA
 	#endif
 #endif
+#define GL_RGBA8 ID_GLES_VAR_REPLACE_DEF( GL_RGBA8 )
 
 #ifndef GL_STENCIL_INDEX
 	#define GL_STENCIL_INDEX GL_STENCIL_INDEX8

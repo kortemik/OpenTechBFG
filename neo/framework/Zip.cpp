@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -245,7 +245,7 @@ int ziplocal_putValue( idFile* filestream, unsigned long x, int nbByte ) {
         buf[n] = (unsigned char)( x & 0xff );
         x >>= 8;
     }
-    if ( x != 0 ) {     
+    if ( x != 0 ) {
 		/* data overflow - hack for ZIP64 (X Roche) */
 		for ( int n = 0; n < nbByte; n++ ) {
           buf[n] = 0xff;
@@ -270,7 +270,7 @@ void ziplocal_putValue_inmemory( void* dest, unsigned long x, int nbByte ){
         x >>= 8;
     }
 
-    if ( x != 0 ) {     
+    if ( x != 0 ) {
 		/* data overflow - hack for ZIP64 */
 		for ( int n = 0; n < nbByte; n++ ) {
           buf[n] = 0xff;
@@ -801,7 +801,7 @@ int zipOpenNewFileInZip3( zipFile file, const char* filename, const zip_fileinfo
 	if ( err == ZIP_OK ) {
         err = ziplocal_putValue( zi->filestream, (unsigned long)0, 4 ); /* crc 32, unknown */
 	}
-	
+
 	if ( err == ZIP_OK ) {
         err = ziplocal_putValue( zi->filestream, (unsigned long)0, 4 ); /* compressed size, unknown */
 	}
@@ -1269,11 +1269,13 @@ idZipBuilder::GetFileTime
 ========================
 */
 bool idZipBuilder::GetFileTime( const idStr &filename, unsigned long *dostime ) const {
+	//XXX BB10 support would require either a custom implementation of opendir or a global variable based ftw call. This function isn't used, so it doesn't matter right now
+#ifdef ID_WIN32
 	{
 		FILETIME filetime;
 		WIN32_FIND_DATA fileData;
 		HANDLE			findHandle = FindFirstFile( filename.c_str(), &fileData );
-		if ( findHandle != INVALID_HANDLE_VALUE ) { 
+		if ( findHandle != INVALID_HANDLE_VALUE ) {
 			FileTimeToLocalFileTime( &(fileData.ftLastWriteTime), &filetime );
 			FileTimeToDosDateTime( &filetime, ((LPWORD)dostime) + 1, ((LPWORD)dostime) + 0 );
 			FindClose( findHandle );
@@ -1281,6 +1283,7 @@ bool idZipBuilder::GetFileTime( const idStr &filename, unsigned long *dostime ) 
 		}
 		FindClose( findHandle );
 	}
+#endif
 	return false;
 }
 
@@ -1372,7 +1375,7 @@ bool idZipBuilder::CreateZipFile( bool appendFiles ) {
 
 	// enumerate the files to zip up in the source folder
 	idStrStatic< MAX_OSPATH > relPath;
-	relPath = 
+	relPath =
 	fileSystem->OSPathToRelativePath( sourceFolderName );
 	idFileList *files = fileSystem->ListFilesTree( relPath, "*.*" );
 
@@ -1405,14 +1408,14 @@ bool idZipBuilder::CreateZipFile( bool appendFiles ) {
 		// add each file to the zip file
 		zip_fileinfo zi;
 		memset( &zi, 0, sizeof( zip_fileinfo ) );
-		
+
 		idStr filename = files->GetFile( i );
 
 		if ( IsFiltered( filename ) ) {
 			idLib::PrintfIf( zip_verbosity.GetBool(), "...Skipping: '%s'\n", filename.c_str() );
-			continue;				
+			continue;
 		}
-		
+
 		idStr filenameInZip = filename;
 		filenameInZip.Strip( relPath );
 		filenameInZip.StripLeading( "/" );
@@ -1429,7 +1432,7 @@ bool idZipBuilder::CreateZipFile( bool appendFiles ) {
 		}
 
 		int errcode = zipOpenNewFileInZip3( zf, filenameInZip, &zi, NULL, 0, NULL, 0, NULL /* comment*/,
-											compressionMethod,	DEFAULT_COMPRESSION_LEVEL, 0, -MAX_WBITS, DEF_MEM_LEVEL, 
+											compressionMethod,	DEFAULT_COMPRESSION_LEVEL, 0, -MAX_WBITS, DEF_MEM_LEVEL,
 											Z_DEFAULT_STRATEGY, NULL /*password*/, 0 /*fileCRC*/ );
 
 		if ( errcode != ZIP_OK ) {
@@ -1545,7 +1548,7 @@ bool idZipBuilder::CreateZipFileFromFiles( const idList< idFile_Memory * > & src
 		}
 
 		int errcode = zipOpenNewFileInZip3( zf, src->GetName(), &zi, NULL, 0, NULL, 0, NULL /* comment*/,
-			compressionMethod,	DEFAULT_COMPRESSION_LEVEL, 0, -MAX_WBITS, DEF_MEM_LEVEL, 
+			compressionMethod,	DEFAULT_COMPRESSION_LEVEL, 0, -MAX_WBITS, DEF_MEM_LEVEL,
 			Z_DEFAULT_STRATEGY, NULL /*password*/, 0 /*fileCRC*/ );
 
 		if ( errcode != ZIP_OK ) {
@@ -1635,7 +1638,7 @@ bool idZipBuilder::AddFile( zipFile zf, idFile_Memory *src, bool deleteFile ) {
 	}
 
 	int errcode = zipOpenNewFileInZip3( zf, src->GetName(), &zi, NULL, 0, NULL, 0, NULL /* comment*/,
-		compressionMethod,	DEFAULT_COMPRESSION_LEVEL, 0, -MAX_WBITS, DEF_MEM_LEVEL, 
+		compressionMethod,	DEFAULT_COMPRESSION_LEVEL, 0, -MAX_WBITS, DEF_MEM_LEVEL,
 		Z_DEFAULT_STRATEGY, NULL /*password*/, 0 /*fileCRC*/ );
 
 	if ( errcode != ZIP_OK ) {
@@ -1723,7 +1726,7 @@ void idZipBuilder::CleanSourceFolder() {
 	basePath.ToLower();
 	// path must be off of our base path, ospath can't have .map on the end, and
 	// do some additional sanity checks
-	if ( ( ospath.Find( basePath ) == 0 ) && ( ospath.Right( 4 ) != ".map" ) && 
+	if ( ( ospath.Find( basePath ) == 0 ) && ( ospath.Right( 4 ) != ".map" ) &&
 		( ospath != "c:\\" ) && ( ospath.Length() > basePath.Length() ) ) {
 			// get the files in the current directory
 			idFileList *files = fileSystem->ListFilesTree( relPath, "*.*" );
@@ -1862,7 +1865,7 @@ CONSOLE_COMMAND( testZipBuilderCombineFiles, "test routine for memory zip file b
 	if ( args.Argc() > 2 ) {
 		idLib::Printf( "usage: testZipBuilderExtractFiles [numFiles]\n" );
 		return;
-	} 
+	}
 
 	for ( int arg = 1; arg < args.Argc(); arg++ ) {
 		numFiles = atoi( args.Argv( arg ) );
@@ -1980,7 +1983,7 @@ CONSOLE_COMMAND( testZipBuilderExtractFiles, "test routine for memory zip file e
 	if ( args.Argc() > 2 ) {
 		idLib::Printf( "usage: testZipBuilderExtractFiles [numFiles]\n" );
 		return;
-	} 
+	}
 
 	for ( int arg = 1; arg < args.Argc(); arg++ ) {
 		numFiles = atoi( args.Argv( arg ) );
@@ -2000,7 +2003,7 @@ CONSOLE_COMMAND( testZipBuilderExtractFiles, "test routine for memory zip file e
 		// combine the files into a single memory file
 		idZipBuilder zip;
 		zipfile = zip.CombineFiles( list );
-		
+
 		success = ( zipfile != NULL );
 		overallSuccess &= success;
 		idLib::Printf( "Zip file created: %s\n", success ? "^2PASS" : "^1FAIL" );
@@ -2035,7 +2038,7 @@ CONSOLE_COMMAND( testZipBuilderExtractFiles, "test routine for memory zip file e
 			bool nameSuccess = ( file->GetName() == filename );
 			overallSuccess &= nameSuccess;
 
-			// test the string 
+			// test the string
 			bool contentSuccess = ( str == contents );
 			overallSuccess &= contentSuccess;
 

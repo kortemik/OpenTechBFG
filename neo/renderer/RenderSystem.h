@@ -131,6 +131,10 @@ struct glconfig_t {
 	bool				debugOutputAvailable;
 	bool				swapControlTearAvailable;
 
+#ifdef GL_ES_VERSION_2_0
+	GLenum				ID_GLES_VAR_DEF( GL_RGBA8 );
+#endif
+
 	stereo3DMode_t		stereo3Dmode;
 	int					nativeScreenWidth; // this is the native screen width resolution of the renderer
 	int					nativeScreenHeight; // this is the native screen height resolution of the renderer

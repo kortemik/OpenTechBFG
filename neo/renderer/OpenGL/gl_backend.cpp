@@ -122,7 +122,7 @@ const void GL_BlockingSwapBuffers() {
 	const int beforeFinish = Sys_Milliseconds();
 
 	if ( !glConfig.syncAvailable ) {
-		glFinish();
+		qglFinish();
 	}
 
 	const int beforeSwap = Sys_Milliseconds();
@@ -337,7 +337,7 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t * const allCmds
 		stereoRenderImages[0]->Bind();
 		RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
 
-		glDrawBuffer( GL_BACK_LEFT );
+		qglDrawBuffer( GL_BACK_LEFT );
 		GL_SelectTexture( 1 );
 		stereoRenderImages[1]->Bind();
 		GL_SelectTexture( 0 );
@@ -362,8 +362,8 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t * const allCmds
 		RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
 
 		// force the HDMI 720P 3D guard band to a constant color
-		glScissor( 0, 720, 1280, 30 );
-		glClear( GL_COLOR_BUFFER_BIT );
+		qglScissor( 0, 720, 1280, 30 );
+		qglClear( GL_COLOR_BUFFER_BIT );
 		break;
 	default:
 	case STEREO3D_SIDE_BY_SIDE:
@@ -377,9 +377,9 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t * const allCmds
 			// clear the entire screen to black
 			// we could be smart and only clear the areas we aren't going to draw on, but
 			// clears are fast...
-			glScissor ( 0, 0, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight );
-			glClearColor( 0, 0, 0, 0 );
-			glClear( GL_COLOR_BUFFER_BIT );
+			qglScissor ( 0, 0, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight );
+			qglClearColor( 0, 0, 0, 0 );
+			qglClear( GL_COLOR_BUFFER_BIT );
 
 			// the size of the box that will get the warped pixels
 			// With the 7" displays, this will be less than half the screen width
@@ -388,10 +388,10 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t * const allCmds
 			// Always scissor to the half-screen boundary, but the viewports
 			// might cross that boundary if the lenses can be adjusted closer
 			// together.
-			glViewport( ( glConfig.nativeScreenWidth >> 1 ) - pixelDimensions,
+			qglViewport( ( glConfig.nativeScreenWidth >> 1 ) - pixelDimensions,
 				( glConfig.nativeScreenHeight >> 1 ) - ( pixelDimensions >> 1 ),
 				pixelDimensions, pixelDimensions );
-			glScissor ( 0, 0, glConfig.nativeScreenWidth >> 1, glConfig.nativeScreenHeight );
+			qglScissor ( 0, 0, glConfig.nativeScreenWidth >> 1, glConfig.nativeScreenHeight );
 
 			idVec4	color( stereoRender_warpCenterX.GetFloat(), stereoRender_warpCenterY.GetFloat(), stereoRender_warpParmZ.GetFloat(), stereoRender_warpParmW.GetFloat() );
 			// don't use GL_Color(), because we don't want to clamp
@@ -407,10 +407,10 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t * const allCmds
 			// don't use GL_Color(), because we don't want to clamp
 			renderProgManager.SetRenderParm( RENDERPARM_COLOR, color2.ToFloatPtr() );
 
-			glViewport( ( glConfig.nativeScreenWidth >> 1 ),
+			qglViewport( ( glConfig.nativeScreenWidth >> 1 ),
 				( glConfig.nativeScreenHeight >> 1 ) - ( pixelDimensions >> 1 ),
 				pixelDimensions, pixelDimensions );
-			glScissor ( glConfig.nativeScreenWidth >> 1, 0, glConfig.nativeScreenWidth >> 1, glConfig.nativeScreenHeight );
+			qglScissor ( glConfig.nativeScreenWidth >> 1, 0, glConfig.nativeScreenWidth >> 1, glConfig.nativeScreenHeight );
 
 			GL_SelectTexture( 0 );
 			stereoRenderImages[1]->Bind();

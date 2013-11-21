@@ -1152,7 +1152,11 @@ idFile_Permanent::idFile_Permanent
 */
 idFile_Permanent::idFile_Permanent() {
 	name = "invalid";
+#ifdef ID_WIN32
 	o = NULL;
+#else
+	o = 0;
+#endif
 	mode = 0;
 	fileSize = 0;
 	handleSync = false;
@@ -1165,7 +1169,11 @@ idFile_Permanent::~idFile_Permanent
 */
 idFile_Permanent::~idFile_Permanent() {
 	if ( o ) {
+#ifdef ID_WIN32
 		CloseHandle( o );
+#else
+		close( o );
+#endif
 	}
 }
 
@@ -1263,7 +1271,7 @@ int idFile_Permanent::Write( const void *buffer, int len ) {
 		WriteFile( o, buf, block, &bytesWritten, NULL );
 		written = bytesWritten;
 #else
-		written = write( o, buf, block );
+		written = ::write( o, buf, block );
 #endif
 		if ( written == 0 ) {
 			if ( !tries ) {
@@ -1321,7 +1329,7 @@ int idFile_Permanent::Tell() const {
 #ifdef ID_WIN32
 	return SetFilePointer( o, 0, NULL, FILE_CURRENT );
 #else
-	return tell( o );
+	return ::tell( o );
 #endif
 }
 
@@ -1363,9 +1371,9 @@ int idFile_Permanent::Seek( long offset, fsOrigin_t origin ) {
 #else
 	int retVal = -1;
 	switch( origin ) {
-		case FS_SEEK_CUR: retVal = lseek( o, offset, SEEK_CUR ); break;
-		case FS_SEEK_END: retVal = lseek( o, offset, SEEK_END ); break;
-		case FS_SEEK_SET: retVal = lseek( o, offset, SEEK_SET ); break;
+		case FS_SEEK_CUR: retVal = ::lseek( o, offset, SEEK_CUR ); break;
+		case FS_SEEK_END: retVal = ::lseek( o, offset, SEEK_END ); break;
+		case FS_SEEK_SET: retVal = ::lseek( o, offset, SEEK_SET ); break;
 	}
 	return ( retVal == -1 ) ? -1 : 0;
 #endif

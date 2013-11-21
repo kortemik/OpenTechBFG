@@ -93,6 +93,7 @@ void RB_DrawBounds( const idBounds &bounds ) {
 	if ( bounds.IsCleared() ) {
 		return;
 	}
+#ifndef GL_ES_VERSION_2_0
 	qglBegin( GL_LINE_LOOP );
 	qglVertex3f( bounds[0][0], bounds[0][1], bounds[0][2] );
 	qglVertex3f( bounds[0][0], bounds[1][1], bounds[0][2] );
@@ -119,6 +120,9 @@ void RB_DrawBounds( const idBounds &bounds ) {
 	qglVertex3f( bounds[1][0], bounds[1][1], bounds[0][2] );
 	qglVertex3f( bounds[1][0], bounds[1][1], bounds[1][2] );
 	qglEnd();
+#else
+	//TODO
+#endif
 }
 
 
@@ -130,7 +134,11 @@ RB_SimpleSurfaceSetup
 static void RB_SimpleSurfaceSetup( const drawSurf_t *drawSurf ) {
 	// change the matrix if needed
 	if ( drawSurf->space != backEnd.currentSpace ) {
+#ifndef GL_ES_VERSION_2_0
 		qglLoadMatrixf( drawSurf->space->modelViewMatrix );
+#else
+		//TODO
+#endif
 		backEnd.currentSpace = drawSurf->space;
 	}
 
@@ -152,8 +160,11 @@ RB_SimpleWorldSetup
 static void RB_SimpleWorldSetup() {
 	backEnd.currentSpace = &backEnd.viewDef->worldSpace;
 
-
+#ifndef GL_ES_VERSION_2_0
 	qglLoadMatrixf( backEnd.viewDef->worldSpace.modelViewMatrix );
+#else
+	//TODO
+#endif
 
 	GL_Scissor( backEnd.viewDef->viewport.x1 + backEnd.viewDef->scissor.x1,
 				backEnd.viewDef->viewport.y1 + backEnd.viewDef->scissor.y1,
@@ -173,6 +184,7 @@ stenciling will matter.
 =================
 */
 void RB_PolygonClear() {
+#ifndef GL_ES_VERSION_2_0
 	qglPushMatrix();
 	qglPushAttrib( GL_ALL_ATTRIB_BITS  );
 	qglLoadIdentity();
@@ -188,6 +200,9 @@ void RB_PolygonClear() {
 	qglEnd();
 	qglPopAttrib();
 	qglPopMatrix();
+#else
+	//TODO
+#endif
 }
 
 /*
@@ -416,6 +431,7 @@ static void RB_ShowIntensity() {
 	}
 
 	// draw it back to the screen
+#ifndef GL_ES_VERSION_2_0
 	qglLoadIdentity();
 	qglMatrixMode( GL_PROJECTION );
 	GL_State( GLS_DEPTHFUNC_ALWAYS );
@@ -429,6 +445,9 @@ static void RB_ShowIntensity() {
 	qglMatrixMode( GL_MODELVIEW );
 
 	qglDrawPixels( renderSystem->GetWidth(), renderSystem->GetHeight(), GL_RGBA , GL_UNSIGNED_BYTE, colorReadback );
+#else
+	//TODO
+#endif
 
 	R_StaticFree( colorReadback );
 }
@@ -448,6 +467,7 @@ static void RB_ShowDepthBuffer() {
 		return;
 	}
 
+#ifndef GL_ES_VERSION_2_0
 	qglPushMatrix();
 	qglLoadIdentity();
 	qglMatrixMode( GL_PROJECTION );
@@ -458,6 +478,9 @@ static void RB_ShowDepthBuffer() {
 	qglPopMatrix();
 	qglMatrixMode( GL_MODELVIEW );
 	qglPopMatrix();
+#else
+	//TODO
+#endif
 
 	GL_State( GLS_DEPTHFUNC_ALWAYS );
 	GL_Color( 1, 1, 1 );
@@ -477,7 +500,11 @@ static void RB_ShowDepthBuffer() {
 	}
 #endif
 
+#ifndef GL_ES_VERSION_2_0
 	qglDrawPixels( renderSystem->GetWidth(), renderSystem->GetHeight(), GL_RGBA , GL_UNSIGNED_BYTE, depthReadback );
+#else
+	//TODO
+#endif
 	R_StaticFree( depthReadback );
 }
 
@@ -560,9 +587,13 @@ static void RB_EnterWeaponDepthHack() {
 	matrix[10] *= modelDepthHack;
 	matrix[14] *= modelDepthHack;
 
+#ifndef GL_ES_VERSION_2_0
 	qglMatrixMode( GL_PROJECTION );
 	qglLoadMatrixf( matrix );
 	qglMatrixMode( GL_MODELVIEW );
+#else
+	//TODO
+#endif
 }
 
 /*
@@ -577,9 +608,13 @@ static void RB_EnterModelDepthHack( float depth ) {
 
 	matrix[14] -= depth;
 
+#ifndef GL_ES_VERSION_2_0
 	qglMatrixMode( GL_PROJECTION );
 	qglLoadMatrixf( matrix );
 	qglMatrixMode( GL_MODELVIEW );
+#else
+	//TODO
+#endif
 }
 
 /*
@@ -588,9 +623,13 @@ RB_LeaveDepthHack
 ===============
 */
 static void RB_LeaveDepthHack() {
+#ifndef GL_ES_VERSION_2_0
 	qglMatrixMode( GL_PROJECTION );
 	qglLoadMatrixf( backEnd.viewDef->projectionMatrix );
 	qglMatrixMode( GL_MODELVIEW );
+#else
+	//TODO
+#endif
 }
 
 /*
@@ -601,7 +640,11 @@ does a glLoadMatrixf after optionally applying the low-latency bypass matrix
 =============
 */
 static void RB_LoadMatrixWithBypass( const float m[16] ) {
-	glLoadMatrixf( m );
+#ifndef GL_ES_VERSION_2_0
+	qglLoadMatrixf( m );
+#else
+	//TODO
+#endif
 }
 
 /*
@@ -885,7 +928,11 @@ static void RB_ShowViewEntitys( viewEntity_t *vModels ) {
 	for ( const viewEntity_t * vModel = vModels; vModel; vModel = vModel->next ) {
 		idBounds	b;
 
+#ifndef GL_ES_VERSION_2_0
 		qglLoadMatrixf( vModel->modelViewMatrix );
+#else
+		//TODO
+#endif
 
 		const idRenderEntityLocal * edef = vModel->entityDef;
 		if ( !edef ) {
@@ -964,6 +1011,7 @@ static void RB_ShowTexturePolarity( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 
 		RB_SimpleSurfaceSetup( drawSurf );
 
+#ifndef GL_ES_VERSION_2_0
 		qglBegin( GL_TRIANGLES );
 		for ( j = 0; j < tri->numIndexes; j+=3 ) {
 			idDrawVert	*a, *b, *c;
@@ -998,6 +1046,9 @@ static void RB_ShowTexturePolarity( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 			qglVertex3fv( c->xyz.ToFloatPtr() );
 		}
 		qglEnd();
+#else
+		//TODO
+#endif
 	}
 
 	GL_State( GLS_DEFAULT );
@@ -1034,6 +1085,7 @@ static void RB_ShowUnsmoothedTangents( drawSurf_t **drawSurfs, int numDrawSurfs 
 		RB_SimpleSurfaceSetup( drawSurf );
 
 		tri = drawSurf->frontEndGeo;
+#ifndef GL_ES_VERSION_2_0
 		qglBegin( GL_TRIANGLES );
 		for ( j = 0; j < tri->numIndexes; j+=3 ) {
 			idDrawVert	*a, *b, *c;
@@ -1047,6 +1099,9 @@ static void RB_ShowUnsmoothedTangents( drawSurf_t **drawSurfs, int numDrawSurfs 
 			qglVertex3fv( c->xyz.ToFloatPtr() );
 		}
 		qglEnd();
+#else
+		//TODO
+#endif
 	}
 
 	GL_State( GLS_DEFAULT );
@@ -1083,6 +1138,7 @@ static void RB_ShowTangentSpace( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 		if ( !tri->verts ) {
 			continue;
 		}
+#ifndef GL_ES_VERSION_2_0
 		qglBegin( GL_TRIANGLES );
 		for ( j = 0; j < tri->numIndexes; j++ ) {
 			const idDrawVert *v;
@@ -1105,6 +1161,9 @@ static void RB_ShowTangentSpace( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 			qglVertex3fv( v->xyz.ToFloatPtr() );
 		}
 		qglEnd();
+#else
+		//TODO
+#endif
 	}
 
 	GL_State( GLS_DEFAULT );
@@ -1138,6 +1197,7 @@ static void RB_ShowVertexColor( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 		if ( !tri->verts ) {
 			continue;
 		}
+#ifndef GL_ES_VERSION_2_0
 		qglBegin( GL_TRIANGLES );
 		for ( j = 0; j < tri->numIndexes; j++ ) {
 			const idDrawVert *v;
@@ -1147,6 +1207,9 @@ static void RB_ShowVertexColor( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 			qglVertex3fv( v->xyz.ToFloatPtr() );
 		}
 		qglEnd();
+#else
+		//TODO
+#endif
 	}
 
 	GL_State( GLS_DEFAULT );
@@ -1198,6 +1261,7 @@ static void RB_ShowNormals( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 			continue;
 		}
 
+#ifndef GL_ES_VERSION_2_0
 		qglBegin( GL_LINES );
 		for ( j = 0; j < tri->numVerts; j++ ) {
 			const idVec3 normal = tri->verts[j].GetNormal();
@@ -1219,6 +1283,9 @@ static void RB_ShowNormals( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 			qglVertex3fv( end.ToFloatPtr() );
 		}
 		qglEnd();
+#else
+		//TODO
+#endif
 	}
 
 	if ( showNumbers ) {
@@ -1342,6 +1409,7 @@ static void RB_ShowTextureVectors( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 		RB_SimpleSurfaceSetup( drawSurf );
 
 		// draw non-shared edges in yellow
+#ifndef GL_ES_VERSION_2_0
 		qglBegin( GL_LINES );
 
 		for ( int j = 0; j < tri->numIndexes; j+= 3 ) {
@@ -1407,6 +1475,9 @@ static void RB_ShowTextureVectors( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 		}
 
 		qglEnd();
+#else
+		//TODO
+#endif
 	}
 }
 
@@ -1429,7 +1500,11 @@ static void RB_ShowDominantTris( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 	GL_State( GLS_DEPTHFUNC_LESS );
 
 	GL_PolygonOffset( -1, -2 );
+#ifndef GL_ES_VERSION_2_0
 	qglEnable( GL_POLYGON_OFFSET_LINE );
+#else
+	//TODO
+#endif
 
 	globalImages->BindNull();
 
@@ -1447,6 +1522,7 @@ static void RB_ShowDominantTris( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 		RB_SimpleSurfaceSetup( drawSurf );
 
 		GL_Color( 1, 1, 0 );
+#ifndef GL_ES_VERSION_2_0
 		qglBegin( GL_LINES );
 
 		for ( j = 0; j < tri->numVerts; j++ ) {
@@ -1466,8 +1542,15 @@ static void RB_ShowDominantTris( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 		}
 
 		qglEnd();
+#else
+		//TODO
+#endif
 	}
+#ifndef GL_ES_VERSION_2_0
 	qglDisable( GL_POLYGON_OFFSET_LINE );
+#else
+	//TODO
+#endif
 }
 
 /*
@@ -1506,6 +1589,7 @@ static void RB_ShowEdges( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 
 		// draw non-shared edges in yellow
 		GL_Color( 1, 1, 0 );
+#ifndef GL_ES_VERSION_2_0
 		qglBegin( GL_LINES );
 
 		for ( j = 0; j < tri->numIndexes; j+= 3 ) {
@@ -1538,6 +1622,9 @@ static void RB_ShowEdges( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 		}
 
 		qglEnd();
+#else
+		//TODO
+#endif
 
 		// draw dangling sil edges in red
 		if ( !tri->silEdges ) {
@@ -1550,6 +1637,7 @@ static void RB_ShowEdges( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 
 		GL_Color( 1, 0, 0 );
 
+#ifndef GL_ES_VERSION_2_0
 		qglBegin( GL_LINES );
 		for ( j = 0; j < tri->numSilEdges; j++ ) {
 			edge = tri->silEdges + j;
@@ -1562,6 +1650,9 @@ static void RB_ShowEdges( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 			qglVertex3fv( ac[ edge->v2 ].xyz.ToFloatPtr() );
 		}
 		qglEnd();
+#else
+		//TODO
+#endif
 	}
 }
 
@@ -1583,8 +1674,12 @@ static void RB_ShowLights() {
 	GL_State( GLS_DEFAULT );
 
 	// we use the 'vLight->invProjectMVPMatrix'
+#ifndef GL_ES_VERSION_2_0
 	qglMatrixMode( GL_PROJECTION );
 	qglLoadIdentity();
+#else
+	//TODO
+#endif
 
 	globalImages->BindNull();
 
@@ -1624,10 +1719,14 @@ static void RB_ShowLights() {
 	common->Printf( " = %i total\n", count );
 
 	// set back the default projection matrix
+#ifndef GL_ES_VERSION_2_0
 	qglMatrixMode( GL_PROJECTION );
 	qglLoadMatrixf( backEnd.viewDef->projectionMatrix );
 	qglMatrixMode( GL_MODELVIEW );
 	qglLoadIdentity();
+#else
+	//TODO
+#endif
 }
 
 /*
@@ -1768,6 +1867,7 @@ static void RB_DrawText( const char *text, const idVec3 &origin, float scale, co
 	idVec3 org, p1, p2;
 
 	if ( text && *text ) {
+#ifndef GL_ES_VERSION_2_0
 		qglBegin( GL_LINES );
 		qglColor3fv( color.ToFloatPtr() );
 
@@ -1828,6 +1928,9 @@ static void RB_DrawText( const char *text, const idVec3 &origin, float scale, co
 		}
 
 		qglEnd();
+#else
+		//TODO
+#endif
 	}
 }
 
@@ -1972,6 +2075,7 @@ void RB_ShowDebugLines() {
 		GL_State( GLS_POLYMODE_LINE );
 	}
 
+#ifndef GL_ES_VERSION_2_0
 	qglBegin( GL_LINES );
 
 	line = rb_debugLines;
@@ -1983,11 +2087,15 @@ void RB_ShowDebugLines() {
 		}
 	}
 	qglEnd();
+#else
+	//TODO
+#endif
 
 	if ( !r_debugLineDepthTest.GetBool() ) {
 		GL_State( GLS_POLYMODE_LINE );
 	}
 
+#ifndef GL_ES_VERSION_2_0
 	qglBegin( GL_LINES );
 
 	line = rb_debugLines;
@@ -2000,6 +2108,9 @@ void RB_ShowDebugLines() {
 	}
 
 	qglEnd();
+#else
+	//TODO
+#endif
 
 	qglLineWidth( 1 );
 	GL_State( GLS_DEFAULT );
@@ -2086,6 +2197,7 @@ void RB_ShowDebugPolygons() {
 	for ( i = 0; i < rb_numDebugPolygons; i++, poly++ ) {
 //		if ( !poly->depthTest ) {
 
+#ifndef GL_ES_VERSION_2_0
 			qglColor4fv( poly->rgb.ToFloatPtr() );
 
 			qglBegin( GL_POLYGON );
@@ -2095,6 +2207,9 @@ void RB_ShowDebugPolygons() {
 			}
 
 			qglEnd();
+#else
+			//TODO
+#endif
 //		}
 	}
 
@@ -2103,7 +2218,11 @@ void RB_ShowDebugPolygons() {
 	if ( r_debugPolygonFilled.GetBool() ) {
 		qglDisable( GL_POLYGON_OFFSET_FILL );
 	} else {
+#ifndef GL_ES_VERSION_2_0
 		qglDisable( GL_POLYGON_OFFSET_LINE );
+#else
+		//TODO
+#endif
 	}
 
 	GL_State( GLS_DEFAULT );
@@ -2150,25 +2269,25 @@ void RB_ShowLines() {
 		return;
 	}
 
-	glEnable( GL_SCISSOR_TEST );
+	qglEnable( GL_SCISSOR_TEST );
 	if ( backEnd.viewDef->renderView.viewEyeBuffer == 0 ) {
-		glClearColor( 1, 0, 0, 1 );
+		qglClearColor( 1, 0, 0, 1 );
 	} else if ( backEnd.viewDef->renderView.viewEyeBuffer == 1 ) {
-		glClearColor( 0, 1, 0, 1 );
+		qglClearColor( 0, 1, 0, 1 );
 	} else {
-		glClearColor( 0, 0, 1, 1 );
+		qglClearColor( 0, 0, 1, 1 );
 	}
 
 	const int start = ( r_showLines.GetInteger() > 2 );	// 1,3 = horizontal, 2,4 = vertical
 	if ( r_showLines.GetInteger() == 1 || r_showLines.GetInteger() == 3 ) {
 		for ( int i = start ; i < tr.GetHeight() ; i+=2 ) {
-			glScissor( 0, i, tr.GetWidth(), 1 );
-			glClear( GL_COLOR_BUFFER_BIT );
+			qglScissor( 0, i, tr.GetWidth(), 1 );
+			qglClear( GL_COLOR_BUFFER_BIT );
 		}
 	} else {
 		for ( int i = start ; i < tr.GetWidth() ; i+=2 ) {
-			glScissor( i, 0, 1, tr.GetHeight() );
-			glClear( GL_COLOR_BUFFER_BIT );
+			qglScissor( i, 0, 1, tr.GetHeight() );
+			qglClear( GL_COLOR_BUFFER_BIT );
 		}
 	}
 }
@@ -2251,6 +2370,7 @@ void RB_TestGamma() {
 		}
 	}
 
+#ifndef GL_ES_VERSION_2_0
 	qglLoadIdentity();
 
 	qglMatrixMode( GL_PROJECTION );
@@ -2265,6 +2385,9 @@ void RB_TestGamma() {
 	qglPopMatrix();
 	qglEnable( GL_TEXTURE_2D );
 	qglMatrixMode( GL_MODELVIEW );
+#else
+	//TODO
+#endif
 }
 
 
@@ -2301,6 +2424,7 @@ static void RB_TestGammaBias() {
 		}
 	}
 
+#ifndef GL_ES_VERSION_2_0
 	qglLoadIdentity();
 	qglMatrixMode( GL_PROJECTION );
 	GL_State( GLS_DEPTHFUNC_ALWAYS );
@@ -2314,6 +2438,9 @@ static void RB_TestGammaBias() {
 	qglPopMatrix();
 	qglEnable( GL_TEXTURE_2D );
 	qglMatrixMode( GL_MODELVIEW );
+#else
+	//TODO
+#endif
 }
 
 /*
@@ -2399,10 +2526,14 @@ void RB_TestImage() {
 	float projMatrixTranspose[16];
 	R_MatrixTranspose( finalOrtho, projMatrixTranspose );
 	renderProgManager.SetRenderParms( RENDERPARM_MVPMATRIX_X, projMatrixTranspose, 4 );
+#ifndef GL_ES_VERSION_2_0
 	qglMatrixMode( GL_PROJECTION );
 	qglLoadMatrixf( finalOrtho );
 	qglMatrixMode( GL_MODELVIEW );
 	qglLoadIdentity();
+#else
+	//TODO
+#endif
 
 	// Set Color
 	GL_Color( 1, 1, 1, 1 );
@@ -2458,6 +2589,7 @@ void RB_DrawExpandedTriangles( const srfTriangles_t *tri, const float radius, co
 		dir[1].Normalize();
 		dir[2].Normalize();
 
+#ifndef GL_ES_VERSION_2_0
 		qglBegin( GL_LINE_LOOP );
 
 		for ( j = 0; j < 3; j++ ) {
@@ -2489,6 +2621,9 @@ void RB_DrawExpandedTriangles( const srfTriangles_t *tri, const float radius, co
 		}
 
 		qglEnd();
+#else
+		//TODO
+#endif
 	}
 }
 
@@ -2545,7 +2680,11 @@ void RB_ShowTrace( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 			continue;
 		}
 
+#ifndef GL_ES_VERSION_2_0
 		qglLoadMatrixf( surf->space->modelViewMatrix );
+#else
+		//TODO
+#endif
 
 		// highlight the surface
 		GL_State( GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA );

@@ -124,9 +124,9 @@ void idSoundVoice_OpenAL::Create( const idSoundSample * leadinSample_, const idS
 
 		if ( s_debugHardware.GetBool() ) {
 			if ( loopingSample == NULL || loopingSample == leadinSample ) {
-				idLib::Printf( "%dms: %p created for %s\n", Sys_Milliseconds(), pSourceVoice, leadinSample ? leadinSample->GetName() : "<null>" );
+				idLib::Printf( "%dms: %d created for %s\n", Sys_Milliseconds(), openalSource, leadinSample ? leadinSample->GetName() : "<null>" );
 			} else {
-				idLib::Printf( "%dms: %p created for %s and %s\n", Sys_Milliseconds(), pSourceVoice, leadinSample ? leadinSample->GetName() : "<null>", loopingSample ? loopingSample->GetName() : "<null>" );
+				idLib::Printf( "%dms: %d created for %s and %s\n", Sys_Milliseconds(), openalSource, leadinSample ? leadinSample->GetName() : "<null>", loopingSample ? loopingSample->GetName() : "<null>" );
 			}
 		}
 	}
@@ -145,7 +145,7 @@ idSoundVoice_OpenAL::DestroyInternal
 void idSoundVoice_OpenAL::DestroyInternal() {
 	if ( alIsSource( openalSource ) ) {
 		if ( s_debugHardware.GetBool() ) {
-			idLib::Printf( "%dms: %p destroyed\n", Sys_Milliseconds(), pSourceVoice );
+			idLib::Printf( "%dms: %d destroyed\n", Sys_Milliseconds(), openalSource );
 		}
 		alDeleteSources( 1, &openalSource );
 		openalSource = 0;
@@ -182,7 +182,7 @@ idSoundVoice_OpenAL::Start
 void idSoundVoice_OpenAL::Start( int offsetMS, int ssFlags ) {
 
 	if ( s_debugHardware.GetBool() ) {
-		idLib::Printf( "%dms: %p starting %s @ %dms\n", Sys_Milliseconds(), pSourceVoice, leadinSample ? leadinSample->GetName() : "<null>", offsetMS );
+		idLib::Printf( "%dms: %d starting %s @ %dms\n", Sys_Milliseconds(), openalSource, leadinSample ? leadinSample->GetName() : "<null>", offsetMS );
 	}
 
 	if ( !leadinSample ) {
@@ -334,7 +334,7 @@ bool idSoundVoice_OpenAL::IsPlaying() {
 		return false;
 	}
 	ALint queued;
-	alGetSourceiv( source, AL_BUFFERS_QUEUED, &queued );
+	alGetSourceiv( openalSource, AL_BUFFERS_QUEUED, &queued );
 	return ( queued != 0 );
 }
 
@@ -387,7 +387,7 @@ void idSoundVoice_OpenAL::Pause() {
 		return;
 	}
 	if ( s_debugHardware.GetBool() ) {
-		idLib::Printf( "%dms: %p pausing %s\n", Sys_Milliseconds(), pSourceVoice, leadinSample ? leadinSample->GetName() : "<null>" );
+		idLib::Printf( "%dms: %d pausing %s\n", Sys_Milliseconds(), openalSource, leadinSample ? leadinSample->GetName() : "<null>" );
 	}
 	alSourcePause( openalSource );
 	paused = true;
@@ -403,7 +403,7 @@ void idSoundVoice_OpenAL::UnPause() {
 		return;
 	}
 	if ( s_debugHardware.GetBool() ) {
-		idLib::Printf( "%dms: %p unpausing %s\n", Sys_Milliseconds(), pSourceVoice, leadinSample ? leadinSample->GetName() : "<null>" );
+		idLib::Printf( "%dms: %d unpausing %s\n", Sys_Milliseconds(), openalSource, leadinSample ? leadinSample->GetName() : "<null>" );
 	}
 	alSourcePlay( openalSource );
 	paused = false;
@@ -420,7 +420,7 @@ void idSoundVoice_OpenAL::Stop() {
 	}
 	if ( !paused ) {
 		if ( s_debugHardware.GetBool() ) {
-			idLib::Printf( "%dms: %p stopping %s\n", Sys_Milliseconds(), pSourceVoice, leadinSample ? leadinSample->GetName() : "<null>" );
+			idLib::Printf( "%dms: %d stopping %s\n", Sys_Milliseconds(), openalSource, leadinSample ? leadinSample->GetName() : "<null>" );
 		}
 		alSourceStop( openalSource );
 		FlushSourceBuffers();

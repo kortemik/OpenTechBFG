@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -88,11 +88,14 @@ void idImage::SubImageUpload( int mipLevel, int x, int y, int z, int width, int 
 	qglBindTexture( target, texnum );
 
 	if ( pixelPitch != 0 ) {
-		qglPixelStorei( GL_UNPACK_ROW_LENGTH, pixelPitch );
+		qglPixelStorei( GL_UNPACK_ROW_LENGTH, pixelPitch ); //XXX Only on OpenGL ES 3.0
 	}
+#ifndef GL_ES_VERSION_2_0
+	//XXX Should something be done about this?
 	if ( opts.format == FMT_RGB565 ) {
-		glPixelStorei( GL_UNPACK_SWAP_BYTES, GL_TRUE );
+		qglPixelStorei( GL_UNPACK_SWAP_BYTES, GL_TRUE );
 	}
+#endif
 #ifdef DEBUG
 	GL_CheckErrors();
 #endif
@@ -115,9 +118,12 @@ void idImage::SubImageUpload( int mipLevel, int x, int y, int z, int width, int 
 #ifdef DEBUG
 	GL_CheckErrors();
 #endif
+#ifndef GL_ES_VERSION_2_0
+	//XXX
 	if ( opts.format == FMT_RGB565 ) {
-		glPixelStorei( GL_UNPACK_SWAP_BYTES, GL_FALSE );
+		qglPixelStorei( GL_UNPACK_SWAP_BYTES, GL_FALSE );
 	}
+#endif
 	if ( pixelPitch != 0 ) {
 		qglPixelStorei( GL_UNPACK_ROW_LENGTH, 0 );
 	}
@@ -237,7 +243,11 @@ void idImage::SetTexParameters() {
 	}
 	if ( glConfig.textureLODBiasAvailable && ( usage != TD_FONT ) ) {
 		// use a blurring LOD bias in combination with high anisotropy to fix our aliasing grate textures...
+#ifndef GL_ES_VERSION_2_0
 		qglTexParameterf(target, GL_TEXTURE_LOD_BIAS_EXT, r_lodBias.GetFloat() );
+#else
+		//TODO
+#endif
 	}
 
 	// set the wrap/clamp modes
@@ -247,15 +257,19 @@ void idImage::SetTexParameters() {
 			qglTexParameterf( target, GL_TEXTURE_WRAP_T, GL_REPEAT );
 			break;
 		case TR_CLAMP_TO_ZERO: {
+#ifdef GL_TEXTURE_BORDER_COLOR
 			float color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 			qglTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, color );
+#endif
 			qglTexParameterf( target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
 			qglTexParameterf( target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
 			}
 			break;
 		case TR_CLAMP_TO_ZERO_ALPHA: {
+#ifdef GL_TEXTURE_BORDER_COLOR
 			float color[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 			qglTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, color );
+#endif
 			qglTexParameterf( target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
 			qglTexParameterf( target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
 			}
@@ -273,7 +287,7 @@ void idImage::SetTexParameters() {
 ========================
 idImage::AllocImage
 
-Every image will pass through this function. Allocates all the necessary MipMap levels for the 
+Every image will pass through this function. Allocates all the necessary MipMap levels for the
 Image, but doesn't put anything in them.
 
 This should not be done during normal game-play, if you can avoid it.
@@ -355,12 +369,20 @@ void idImage::AllocImage() {
 		dataType = GL_UNSIGNED_BYTE;
 		break;
 	case FMT_X16:
+#ifndef GL_ES_VERSION_2_0
 		internalFormat = GL_INTENSITY16;
+#else
+		internalFormat = GL_LUMINANCE; // No code returns FMT_X16, so this will never occur
+#endif
 		dataFormat = GL_LUMINANCE;
 		dataType = GL_UNSIGNED_SHORT;
 		break;
 	case FMT_Y16_X16:
+#ifndef GL_ES_VERSION_2_0
 		internalFormat = GL_LUMINANCE16_ALPHA16;
+#else
+		internalFormat = GL_LUMINANCE_ALPHA; // No code returns FMT_Y16_X16, so this will never occur
+#endif
 		dataFormat = GL_LUMINANCE_ALPHA;
 		dataType = GL_UNSIGNED_SHORT;
 		break;
@@ -416,6 +438,7 @@ void idImage::AllocImage() {
 			if ( IsCompressed() ) {
 				int compressedSize = ( ((w+3)/4) * ((h+3)/4) * int64( 16 ) * BitsForFormat( opts.format ) ) / 8;
 
+#ifndef GL_ES_VERSION_2_0
 				// Even though the OpenGL specification allows the 'data' pointer to be NULL, for some
 				// drivers we actually need to upload data to get it to allocate the texture.
 				// However, on 32-bit systems we may fail to allocate a large block of memory for large
@@ -429,6 +452,9 @@ void idImage::AllocImage() {
 				if ( data != NULL ) {
 					HeapFree( GetProcessHeap(), 0, data );
 				}
+#else
+				qglCompressedTexImage2DARB( uploadTarget+side, level, internalFormat, w, h, 0, compressedSize, NULL );
+#endif
 			} else {
 				qglTexImage2D( uploadTarget + side, level, internalFormat, w, h, 0, dataFormat, dataType, NULL );
 			}

@@ -71,7 +71,11 @@ idCVar r_useSeamlessCubeMap( "r_useSeamlessCubeMap", "1", CVAR_RENDERER | CVAR_B
 idCVar r_useSRGB( "r_useSRGB", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "1 = both texture and framebuffer, 2 = framebuffer only, 3 = texture only" );
 idCVar r_maxAnisotropicFiltering( "r_maxAnisotropicFiltering", "8", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "limit aniso filtering" );
 idCVar r_useTrilinearFiltering( "r_useTrilinearFiltering", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Extra quality filtering" );
+#ifdef GL_ES_VERSION_3_0
+idAdjustableMinMaxCVar r_lodBias( "r_lodBias", "0.5", CVAR_RENDERER | CVAR_ARCHIVE, "image lod bias", -1.0f, 1.0f );
+#else
 idCVar r_lodBias( "r_lodBias", "0.5", CVAR_RENDERER | CVAR_ARCHIVE, "image lod bias" );
+#endif
 
 idCVar r_useStateCaching( "r_useStateCaching", "1", CVAR_RENDERER | CVAR_BOOL, "avoid redundant state changes in GL_*() calls" );
 
@@ -373,7 +377,7 @@ void APIENTRY glDrawElementsBaseVertexImpl( GLenum mode, GLsizei count, GLenum t
 		// No offset, just draw like normal
 		qglDrawElements( mode, count, type, indices );
 	} else {
-		//TODO: http://www.opengl.org/registry/specs/ARB/draw_elements_base_vertex.txt, will also need to figure out if there is a more efficent way to do this
+		//TODO: http://www.opengl.org/registry/specs/ARB/draw_elements_base_vertex.txt, will also need to figure out if there is a more efficient way to do this
 	}
 }
 
@@ -520,14 +524,14 @@ static void R_CheckPortableExtensions() {
 	// The actual extension is broken as specified, storing the state in the texture unit instead
 	// of the texture object.  The behavior in GL 1.4 is the behavior we use.
 	glConfig.textureLODBiasAvailable = ( glConfig.glVersion >= 1.4 || R_CheckExtension( "GL_EXT_texture_lod_bias" ) );
-#else
-	glConfig.textureLODBiasAvailable = false; //TODO: does something similar to this exist? Is it something that can be emulated within RenderProgs?
-#endif
 	if ( glConfig.textureLODBiasAvailable ) {
 		common->Printf( "...using %s\n", "GL_EXT_texture_lod_bias" );
 	} else {
 		common->Printf( "X..%s not found\n", "GL_EXT_texture_lod_bias" );
 	}
+#else
+	glConfig.textureLODBiasAvailable = true; //Shaders support a bias value
+#endif
 
 	// GL_ARB_seamless_cube_map
 	glConfig.seamlessCubeMapAvailable = R_CheckExtension( "GL_ARB_seamless_cube_map" );
@@ -883,7 +887,34 @@ static void R_CheckPortableExtensions() {
 
 }
 
+#ifdef GL_ES_VERSION_2_0
 
+/*
+=============================
+R_CheckGLESVariableReplacements
+
+Some variables depend on configuration and can't be set at compile time, adjust them here
+=============================
+*/
+void R_CheckGLESVariableReplacements() {
+
+	if ( ( glConfig.glVersion >= 3.0f ) || R_CheckExtension( "GL_OES_required_internalformat" ) ) {
+		glConfig.ID_GLES_VAR_DEF( GL_RGBA8 ) = ID_GLES_REAL_GL_RGBA8;
+	} else {
+		glConfig.ID_GLES_VAR_DEF( GL_RGBA8 ) = GL_RGBA;
+	}
+
+#ifdef GL_ES_VERSION_3_0
+	if ( glConfig.textureLODBiasAvailable ) {
+		float max;
+		qglGetFloatv( GL_MAX_TEXTURE_LOD_BIAS, &max );
+		r_lodBias.SetMaxValue( max );
+		r_lodBias.SetMinValue( -max );
+	}
+#endif
+}
+
+#endif
 
 static bool r_initialized = false;
 
@@ -1088,6 +1119,10 @@ void R_InitOpenGL() {
 
 	// recheck all the extensions (FIXME: this might be dangerous)
 	R_CheckPortableExtensions();
+
+#ifdef GL_ES_VERSION_2_0
+	R_CheckGLESVariableReplacements();
+#endif
 
 	renderProgManager.Init();
 

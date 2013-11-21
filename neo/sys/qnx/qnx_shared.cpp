@@ -71,12 +71,11 @@ uint64 Sys_Microseconds() {
 
 /*
 ================
-Sys_GetSystemRam
-
-	returns amount of physical memory in MB
+Sys_GetSystemRamInBytes
 ================
 */
-int Sys_GetSystemRam() {
+int64 Sys_GetSystemRamInBytes() {
+#if 1
 	//Based off http://www.qssl.com/developers/docs/6.3.2/momentics/release_notes/rel_6.3.2.html (section "System page")
 	char *str = SYSPAGE_ENTRY(strings)->data;
 	struct asinfo_entry *as = SYSPAGE_ENTRY(asinfo);
@@ -91,7 +90,46 @@ int Sys_GetSystemRam() {
 		}
 		++as;
 	}
-	return total / ( 1024 * 1024 );
+	return total;
+#else
+	//Usable, but a lot of reading and writing... requires libpps to be added
+	int fd = open("/pps/services/hw_info/inventory", O_RDONLY);
+	lseek(fd, 0, SEEK_END);
+	int size = tell(fd) + 1;
+	lseek(fd, 0, SEEK_SET);
+
+	char* data = (char*)calloc(size, sizeof(char));
+	read(fd, data, size - 1);
+	close(fd);
+
+	int ramSize = 0;
+	pps_decoder_t dec;
+	if(pps_decoder_initialize(&dec, data) == PPS_DECODER_OK) {
+
+		if(pps_decoder_push(&dec, "@inventory") == PPS_DECODER_OK) {
+			const char* ram;
+			if(pps_decoder_get_string(&dec, "RAM_Size", &ram) == PPS_DECODER_OK) {
+				ramSize = atoi(ram);
+			}
+		}
+
+		pps_decoder_cleanup(&dec);
+	}
+	free(data);
+
+	return ramSize;
+#endif
+}
+
+/*
+================
+Sys_GetSystemRam
+
+	returns amount of physical memory in MB
+================
+*/
+int Sys_GetSystemRam() {
+	return Sys_GetSystemRamInBytes() / ( 1024 * 1024 );
 }
 
 
@@ -195,27 +233,13 @@ void Sys_GetCurrentMemoryStatus( sysMemoryStats_t &stats ) {
 #error Pointer is not the same size as a pointer, meaning mallopt won't work
 #endif
 
-	char *str = SYSPAGE_ENTRY(strings)->data;
-	struct asinfo_entry *as = SYSPAGE_ENTRY(asinfo);
-	uint64_t total = 0;
-	unsigned num;
-
 	struct malloc_stats _malloc_stats;
-	mallopt(MALLOC_STATS, &_malloc_stats);
+	mallopt(MALLOC_STATS, ( int )( &_malloc_stats ));
 
-	// Get memory amount and availability in bytes
-	for(num = _syspage_ptr->asinfo.entry_size / sizeof(*as); num > 0; --num)
-	{
-		if(strcmp(&str[as->name], "ram") == 0)
-		{
-			total += as->end - as->start + 1;
-		}
-		++as;
-	}
-	stats.totalPhysical = total;
+	stats.totalPhysical = Sys_GetSystemRamInBytes();
 
 	//XXX Is this correct and/or "complete"?
-	total = _malloc_stats.m_allocmem + _malloc_stats.m_small_allocmem; //Get to the amount of memory allocated
+	uint64_t total = _malloc_stats.m_allocmem + _malloc_stats.m_small_allocmem; //Get to the amount of memory allocated
 
 	stats.availPhysical = stats.totalPhysical - total;
 
@@ -274,7 +298,8 @@ void Sys_SetPhysicalWorkMemory( int minBytes, int maxBytes ) {
 
 #define PROLOGUE_SIGNATURE 0x00EC8B55
 
-//#include <dbghelp.h>
+/*
+#include <dbghelp.h>
 
 const int UNDECORATE_FLAGS =	UNDNAME_NO_MS_KEYWORDS |
 								UNDNAME_NO_ACCESS_SPECIFIERS |
@@ -282,6 +307,7 @@ const int UNDECORATE_FLAGS =	UNDNAME_NO_MS_KEYWORDS |
 								UNDNAME_NO_ALLOCATION_MODEL |
 								UNDNAME_NO_ALLOCATION_LANGUAGE |
 								UNDNAME_NO_MEMBER_TYPE;
+*/
 
 #if defined(_DEBUG) && 1
 
