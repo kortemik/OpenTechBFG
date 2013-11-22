@@ -100,14 +100,139 @@ void Sys_QuitDelay( int value ) {
 =============
 Sys_TranslateKey
 
-Not the most ideal way to do it, but keyNum_t isn't "in" an order
+Not the most ideal way to do it, but keyNum_t isn't "in" an order and QNX KEYCODE_* values are
+flagged, so they could go into the thousands, making a simple map not-to-useful.
+
+See http://community.bistudio.com/wiki/DIK_KeyCodes for what K_* was originally defined as.
 =============
 */
 int Sys_TranslateKey( int key ) {
+#define KEY_CASE( x ) case KEYCODE_##x: return K_##x
+#define KEY_CASE_CAP( x ) case KEYCODE_CAPITAL_##x: case KEYCODE_##x: return K_##x
 	switch( key ) {
-	//TODO
+	KEY_CASE( ESCAPE );
+	case KEYCODE_ZERO:			return K_0;
+	case KEYCODE_ONE:			return K_1;
+	case KEYCODE_TWO:			return K_2;
+	case KEYCODE_THREE:			return K_3;
+	case KEYCODE_FOUR:			return K_4;
+	case KEYCODE_FIVE:			return K_5;
+	case KEYCODE_SIX:			return K_6;
+	case KEYCODE_SEVEN:			return K_7;
+	case KEYCODE_EIGHT:			return K_8;
+	case KEYCODE_NINE:			return K_9;
+	KEY_CASE( MINUS );
+	case KEYCODE_EQUAL:			return K_EQUALS;
+	KEY_CASE( BACKSPACE );
+	KEY_CASE( TAB );
+	KEY_CASE_CAP( A );
+	KEY_CASE_CAP( B );
+	KEY_CASE_CAP( C );
+	KEY_CASE_CAP( D );
+	KEY_CASE_CAP( E );
+	KEY_CASE_CAP( F );
+	KEY_CASE_CAP( G );
+	KEY_CASE_CAP( H );
+	KEY_CASE_CAP( I );
+	KEY_CASE_CAP( J );
+	KEY_CASE_CAP( K );
+	KEY_CASE_CAP( L );
+	KEY_CASE_CAP( M );
+	KEY_CASE_CAP( N );
+	KEY_CASE_CAP( O );
+	KEY_CASE_CAP( P );
+	KEY_CASE_CAP( Q );
+	KEY_CASE_CAP( R );
+	KEY_CASE_CAP( S );
+	KEY_CASE_CAP( T );
+	KEY_CASE_CAP( U );
+	KEY_CASE_CAP( V );
+	KEY_CASE_CAP( W );
+	KEY_CASE_CAP( X );
+	KEY_CASE_CAP( Y );
+	KEY_CASE_CAP( Z );
+	case KEYCODE_LEFT_BRACKET:	return K_LBRACKET;
+	case KEYCODE_RIGHT_BRACKET:	return K_RBRACKET;
+	KEY_CASE( KP_ENTER );
+	case KEYCODE_LEFT_CTRL:		return K_LCTRL;
+	KEY_CASE( SEMICOLON );
+	KEY_CASE( APOSTROPHE );
+	KEY_CASE( GRAVE );
+	case KEYCODE_LEFT_SHIFT:	return K_LSHIFT;
+	case KEYCODE_BACK_SLASH:	return K_BACKSLASH;
+	KEY_CASE( COMMA );
+	KEY_CASE( PERIOD );
+	KEY_CASE( SLASH );
+	case KEYCODE_RIGHT_SHIFT:	return K_RSHIFT;
+	case KEYCODE_KP_MULTIPLY:	return K_KP_STAR;
+	case KEYCODE_LEFT_ALT:		return K_LALT;
+	KEY_CASE( SPACE );
+	case KEYCODE_CAPS_LOCK:		return K_CAPSLOCK;
+	KEY_CASE( F1 );
+	KEY_CASE( F2 );
+	KEY_CASE( F3 );
+	KEY_CASE( F4 );
+	KEY_CASE( F5 );
+	KEY_CASE( F6 );
+	KEY_CASE( F7 );
+	KEY_CASE( F8 );
+	KEY_CASE( F9 );
+	KEY_CASE( F10 );
+	KEY_CASE( F11 );
+	KEY_CASE( F12 );
+	case KEYCODE_NUM_LOCK:		return K_NUMLOCK;
+	case KEYCODE_SCROLL_LOCK:	return K_SCROLL;
+	case KEYCODE_KP_HOME:		return K_KP_7;
+	case KEYCODE_KP_UP:			return K_KP_8;
+	case KEYCODE_KP_PG_UP:		return K_KP_9;
+	KEY_CASE( KP_MINUS );
+	case KEYCODE_KP_LEFT:		return K_KP_4;
+	case KEYCODE_KP_FIVE:		return K_KP_5;
+	case KEYCODE_KP_RIGHT:		return K_KP_6;
+	KEY_CASE( KP_PLUS );
+	case KEYCODE_KP_END:		return K_KP_1;
+	case KEYCODE_KP_DOWN:		return K_KP_2;
+	case KEYCODE_KP_PG_DOWN:	return K_KP_3;
+	case KEYCODE_KP_INSERT:		return K_KP_0;
+	case KEYCODE_KP_DELETE:		return K_KP_DOT;
+	//K_KANA?
+	//K_CONVERT?
+	//K_NOCONVERT?
+	case KEYCODE_YEN_SIGN:		return K_YEN;
+	//K_KP_EQUALS?
+	KEY_CASE( CIRCUMFLEX );
+	KEY_CASE( AT );
+	KEY_CASE( COLON );
+	case KEYCODE_UNDERSCORE:	return K_UNDERLINE;
+	//K_KANJI?
+	KEY_CASE( STOP );
+	//K_AX?
+	//K_UNLABELED?
+	case KEYCODE_RETURN:		return K_ENTER;
+	case KEYCODE_RIGHT_CTRL:	return K_RCTRL;
+	//K_KP_COMMA?
+	case KEYCODE_KP_DIVIDE:		return K_KP_SLASH;
+	case KEYCODE_PRINT:			return K_PRINTSCREEN;
+	KEY_CASE( PAUSE );
+	KEY_CASE( HOME );
+	case KEYCODE_UP:			return K_UPARROW;
+	case KEYCODE_PG_UP:			return K_PGUP;
+	case KEYCODE_LEFT:			return K_LEFTARROW;
+	case KEYCODE_RIGHT:			return K_RIGHTARROW;
+	KEY_CASE( END );
+	case KEYCODE_DOWN:			return K_DOWNARROW;
+	case KEYCODE_PG_DOWN:		return K_PGDN;
+	case KEYCODE_INSERT:		return K_INS;
+	case KEYCODE_DELETE:		return K_DEL;
+	case KEYCODE_LEFT_HYPER:	return K_LWIN;
+	case KEYCODE_RIGHT_HYPER:	return K_RWIN;
+	case KEYCODE_MENU:			return K_APPS;
+	KEY_CASE( POWER );
+	KEY_CASE( SLEEP );
+	default:					return K_NONE;
 	}
-	return K_NONE;
+#undef KEY_CASE
+#undef KEY_CASE_CAP
 }
 
 /*
@@ -116,8 +241,23 @@ Sys_TranslateKeyToUnicode
 =============
 */
 int Sys_TranslateKeyToUnicode( int key ) {
-	//TODO
-	return '\0';
+	if (key >= KEYCODE_PC_KEYS && key <= UNICODE_PRIVATE_USE_AREA_LAST) {
+		switch (key) {
+		case KEYCODE_BACKSPACE:
+			return 0x0008;
+		case KEYCODE_TAB:
+			return 0x0009;
+		case KEYCODE_KP_ENTER:
+		case KEYCODE_RETURN:
+			return 0x000A;
+		case KEYCODE_ESCAPE:
+			return 0x001B;
+		// Win32 doesn't consider delete to be a key char.
+		default:
+			return 0;
+		}
+	}
+	return key;
 }
 
 /*
@@ -218,8 +358,8 @@ void Sys_PumpEvents() {
 					screen_get_event_property_iv(screenEvent, SCREEN_PROPERTY_KEY_FLAGS, &flags);
 					screen_get_event_property_iv(screenEvent, SCREEN_PROPERTY_KEY_SYM, &value);
 
-					if ( !( flags & KEY_REPEAT ) ) {
-						int key = Sys_TranslateKey( value );
+					int key = Sys_TranslateKey( value );
+					if ( !( flags & KEY_REPEAT ) && ( key != K_NONE ) ) {
 						if ( flags & KEY_DOWN ) {
 							//XXX Is this needed or is it just a windows thing? Without separate keyboard, there is no keyboard or pause keys
 							if ( key == K_NUMLOCK ) {
@@ -239,7 +379,8 @@ void Sys_PumpEvents() {
 					break;
 				}
 
-				//TODO: gamepad/joystick (connect and disconnect)
+				//TODO: SCREEN_EVENT_DEVICE for connect/disconnect
+				//TODO: SCREEN_EVENT_GAMEPAD/SCREEN_EVENT_JOYSTICK for values
 				}
 			} else if ( domain == navigator_get_domain() ) {
 				code = bps_event_get_code( event );

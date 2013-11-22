@@ -27,7 +27,7 @@
          May have multiple values for each language. See samples or xsd schema file. Optional. -->
 
     <!--  Name of author which is used for signing. Must match the developer name of your developer certificate. -->
-    <author>Example Inc.</author>
+    <author>Vincent Simonetti</author>
     <description>Doom 3: BFG</description>
     <category>core.games</category>
     <permission>use_gamepad</permission>

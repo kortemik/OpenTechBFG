@@ -103,10 +103,7 @@ void Sys_Error( const char *error, ... ) {
 	vsprintf( text, error, argptr );
 	va_end( argptr);
 
-	Conbuf_AppendText( text );
-	Conbuf_AppendText( "\n" );
-
-	Win_SetErrorText( text );
+	Win_SetErrorText( text ); //XXX Open email with error message (and stacktrace?)
 	Sys_ShowConsole( 1, true );
 
 	Sys_ShutdownInput();
@@ -116,7 +113,8 @@ void Sys_Error( const char *error, ... ) {
 	extern idCVar com_productionMode;
 	if ( com_productionMode.GetInteger() == 0 ) {
 		// wait for the user to quit
-		/* TODO: Need to continue to handle messages, but don't do anything specific until they quit
+		//TODO: Wait for email dialog to close, then exit
+		/*
 		while ( 1 ) {
 			if ( !GetMessage( &msg, NULL, 0, 0 ) ) {
 				common->Quit();
@@ -125,7 +123,6 @@ void Sys_Error( const char *error, ... ) {
 			DispatchMessage( &msg );
 		}*/
 	}
-	Sys_DestroyConsole();
 
 	exit (1);
 }
@@ -197,7 +194,6 @@ Sys_Quit
 */
 void Sys_Quit() {
 	Sys_ShutdownInput();
-	Sys_DestroyConsole();
 	exit( 0 );
 }
 
