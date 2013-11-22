@@ -32,6 +32,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../../renderer/OpenGL/qgl_es.h"
 
+#include <bps/navigator.h>
+
 void	Sys_QueEvent( sysEventType_t type, int value, int value2, int ptrLength, void *ptr, int inputDeviceNum );
 
 cpuid_t	Sys_GetCPUId();
@@ -39,12 +41,17 @@ cpuid_t	Sys_GetCPUId();
 uint64	Sys_Microseconds();
 
 typedef struct {
-	cpuid_t			cpuid;
+	cpuid_t						cpuid;
+
+	bool						quitStarted;
+	navigator_window_state_t	windowState;
+	int							mouseWheelPosition;
+	int							mouseButtonsPressed;
 
 	//TODO: opengl vars
 
-	static idCVar	sys_arch;
-	static idCVar	sys_cpustring;
+	static idCVar				sys_arch;
+	static idCVar				sys_cpustring;
 } QNXVars_t;
 
 extern QNXVars_t	qnx;

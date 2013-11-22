@@ -898,7 +898,7 @@ Some variables depend on configuration and can't be set at compile time, adjust 
 */
 void R_CheckGLESVariableReplacements() {
 
-	if ( ( glConfig.glVersion >= 3.0f ) || R_CheckExtension( "GL_OES_required_internalformat" ) ) {
+	if ( ( glConfig.glVersion >= 3.0f ) || ( R_CheckExtension( "GL_OES_required_internalformat" ) && R_CheckExtension( "GL_OES_rgb8_rgba8" ) ) ) {
 		glConfig.ID_GLES_VAR_DEF( GL_RGBA8 ) = ID_GLES_REAL_GL_RGBA8;
 	} else {
 		glConfig.ID_GLES_VAR_DEF( GL_RGBA8 ) = GL_RGBA;

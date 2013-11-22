@@ -283,8 +283,7 @@ Sys_IsWindowVisible
 ==============
 */
 bool Sys_IsWindowVisible() {
-	//XXX return ( ::IsWindowVisible( win32.hWnd ) != 0 );
-	return true;
+	return ( qnx.windowState == NAVIGATOR_WINDOW_FULLSCREEN );
 }
 
 /*

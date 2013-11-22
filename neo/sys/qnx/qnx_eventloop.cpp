@@ -35,8 +35,9 @@ If you have questions concerning this license or the applicable additional terms
 #include <bps/bps.h>
 #include <bps/event.h>
 #include <bps/screen.h>
-#include <bps/navigator.h>
 #include <bps/virtualkeyboard.h>
+
+#include <signal.h>
 
 #include "qnx_local.h"
 
@@ -88,10 +89,44 @@ void Sys_QueEvent( sysEventType_t type, int value, int value2, int ptrLength, vo
 /*
 =============
 Sys_PumpEvents
-
-This allows windows to be moved during renderbump
 =============
 */
+void Sys_QuitDelay( int value ) {
+	navigator_extend_terminate();
+	alarm( 1 );
+}
+
+/*
+=============
+Sys_TranslateKey
+
+Not the most ideal way to do it, but keyNum_t isn't "in" an order
+=============
+*/
+int Sys_TranslateKey( int key ) {
+	switch( key ) {
+	//TODO
+	}
+	return K_NONE;
+}
+
+/*
+=============
+Sys_TranslateKeyToUnicode
+=============
+*/
+int Sys_TranslateKeyToUnicode( int key ) {
+	//TODO
+	return '\0';
+}
+
+/*
+=============
+Sys_PumpEvents
+=============
+*/
+#define WHEEL_DELTA 120
+
 void Sys_PumpEvents() {
 	bps_event_t* event = NULL;
 	int ret;
@@ -106,16 +141,137 @@ void Sys_PumpEvents() {
 				screen_event_t screenEvent = screen_event_get_event( event );
 				screen_get_event_property_iv( screenEvent, SCREEN_PROPERTY_TYPE, &code );
 				switch ( code ) {
-				//TODO: everything from WM_SYSKEYDOWN and down in win_winproc
+				case SCREEN_EVENT_POINTER: {
+					int buttons;
+					int wheel;
+					int position[2];
+
+					bool move = true;
+					bool left_move = false;
+
+					screen_get_event_property_iv(screenEvent, SCREEN_PROPERTY_BUTTONS, &buttons);
+					screen_get_event_property_iv(screenEvent, SCREEN_PROPERTY_SOURCE_POSITION, position);
+					screen_get_event_property_iv(screenEvent, SCREEN_PROPERTY_MOUSE_WHEEL, &wheel);
+
+					// Left mouse button
+					if ( buttons & SCREEN_LEFT_MOUSE_BUTTON ) {
+						if ( qnx.mouseButtonsPressed & SCREEN_LEFT_MOUSE_BUTTON ) {
+							left_move = true;
+						} else {
+							move = false;
+							qnx.mouseButtonsPressed |= SCREEN_LEFT_MOUSE_BUTTON;
+							Sys_QueEvent( SE_KEY, K_MOUSE1, 1, 0, NULL, 0 );
+						}
+					} else if ( qnx.mouseButtonsPressed & SCREEN_LEFT_MOUSE_BUTTON ) {
+						move = false;
+						qnx.mouseButtonsPressed &= ~SCREEN_LEFT_MOUSE_BUTTON;
+						Sys_QueEvent( SE_KEY, K_MOUSE1, 0, 0, NULL, 0 );
+					}
+
+					// Right mouse button
+					if ( buttons & SCREEN_RIGHT_MOUSE_BUTTON ) {
+						if ( !( qnx.mouseButtonsPressed & SCREEN_RIGHT_MOUSE_BUTTON ) ) {
+							move = false;
+							qnx.mouseButtonsPressed |= SCREEN_RIGHT_MOUSE_BUTTON;
+							Sys_QueEvent( SE_KEY, K_MOUSE2, 1, 0, NULL, 0 );
+						}
+					} else if ( qnx.mouseButtonsPressed & SCREEN_RIGHT_MOUSE_BUTTON ) {
+						move = false;
+						qnx.mouseButtonsPressed &= ~SCREEN_RIGHT_MOUSE_BUTTON;
+						Sys_QueEvent( SE_KEY, K_MOUSE2, 0, 0, NULL, 0 );
+					}
+
+					// Middle mouse button
+					if ( buttons & SCREEN_MIDDLE_MOUSE_BUTTON ) {
+						if ( !( qnx.mouseButtonsPressed & SCREEN_MIDDLE_MOUSE_BUTTON ) ) {
+							move = false;
+							qnx.mouseButtonsPressed |= SCREEN_MIDDLE_MOUSE_BUTTON;
+							Sys_QueEvent( SE_KEY, K_MOUSE3, 1, 0, NULL, 0 );
+						}
+					} else if ( qnx.mouseButtonsPressed & SCREEN_MIDDLE_MOUSE_BUTTON ) {
+						move = false;
+						qnx.mouseButtonsPressed &= ~SCREEN_MIDDLE_MOUSE_BUTTON;
+						Sys_QueEvent( SE_KEY, K_MOUSE3, 0, 0, NULL, 0 );
+					}
+
+					// Mouse position
+					if ( left_move || move ) {
+						Sys_QueEvent( SE_MOUSE_ABSOLUTE, position[0], position[1], 0, NULL, 0 );
+					}
+
+					// Mouse wheel
+					int delta = ( qnx.mouseWheelPosition - wheel ) / WHEEL_DELTA;
+					qnx.mouseWheelPosition -= wheel;
+					int key = delta < 0 ? K_MWHEELDOWN : K_MWHEELUP;
+					delta = abs( delta );
+					while( delta-- > 0 ) {
+						Sys_QueEvent( SE_KEY, key, true, 0, NULL, 0 );
+						Sys_QueEvent( SE_KEY, key, false, 0, NULL, 0 );
+					}
+					break;
+				}
+
+				case SCREEN_EVENT_KEYBOARD: {
+					int flags;
+					int value;
+
+					screen_get_event_property_iv(screenEvent, SCREEN_PROPERTY_KEY_FLAGS, &flags);
+					screen_get_event_property_iv(screenEvent, SCREEN_PROPERTY_KEY_SYM, &value);
+
+					if ( !( flags & KEY_REPEAT ) ) {
+						int key = Sys_TranslateKey( value );
+						if ( flags & KEY_DOWN ) {
+							//XXX Is this needed or is it just a windows thing? Without separate keyboard, there is no keyboard or pause keys
+							if ( key == K_NUMLOCK ) {
+								key = K_PAUSE;
+							} else if ( key == K_PAUSE ) {
+								key = K_NUMLOCK;
+							}
+						}
+						Sys_QueEvent( SE_KEY, key, ( flags & KEY_DOWN ), 0, NULL, 0 );
+						if ( flags & ( KEY_SYM_VALID | KEY_DOWN ) ) {
+							key = Sys_TranslateKeyToUnicode( value );
+							if ( key ) {
+								Sys_QueEvent( SE_CHAR, key, 0, 0, NULL, 0 );
+							}
+						}
+					}
+					break;
+				}
+
+				//TODO: gamepad/joystick (connect and disconnect)
 				}
 			} else if ( domain == navigator_get_domain() ) {
 				code = bps_event_get_code( event );
 				switch( code ) {
 				case NAVIGATOR_EXIT:
-					//Everything must stop within 3 seconds, otherwise the navigator will force-close the program
-					//common->Quit();
-					soundSystem->SetMute( true );
-					cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "quit\n" ); //XXX Need to make sure that the navigator doesn't time out
+					// Everything must stop within 3 seconds, otherwise the navigator will force-close the program.
+					// To prevent this, we setup a timer to delay shutdown until execution loop finishes.
+					// Shutdown timer will take 3 seconds before killing process, but extension only extends it by 2
+					// seconds. To prevent never closing, there is a limit of 15 delays or 30 seconds before the app
+					// will be force-closed.
+
+					struct sigaction act;
+					sigset_t set;
+
+					if ( !qnx.quitStarted ) {
+						qnx.quitStarted = true;
+
+						sigemptyset( &set );
+						sigaddset( &set, SIGALRM );
+
+						act.sa_flags = 0;
+						act.sa_mask = set;
+						act.sa_handler = &Sys_QuitDelay;
+
+						soundSystem->SetMute( true );
+						cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "quit\n" );
+						if ( sigaction( SIGALRM, &act, NULL ) != 0 ) {
+							cmdSystem->ExecuteCommandBuffer();
+						} else {
+							alarm( 2 );
+						}
+					}
 					break;
 
 				case NAVIGATOR_SWIPE_DOWN:
@@ -125,22 +281,29 @@ void Sys_PumpEvents() {
 					break;
 
 				case NAVIGATOR_WINDOW_STATE: {
-					navigator_window_state_t state = navigator_event_get_window_state( event );
+					qnx.windowState = navigator_event_get_window_state( event );
 
 					// Pause the game (fake-press the escape key) if minimized
-					if ( state != NAVIGATOR_WINDOW_FULLSCREEN && game && game->IsInGame() && !game->Shell_IsActive() ) {
+					if ( qnx.windowState != NAVIGATOR_WINDOW_FULLSCREEN && game && game->IsInGame() && !game->Shell_IsActive() ) {
 						Sys_QueEvent( SE_KEY, K_ESCAPE, true, 0, NULL, 0 );
 						Sys_QueEvent( SE_KEY, K_ESCAPE, false, 0, NULL, 0 );
 					}
 
-					soundSystem->SetMute( state != NAVIGATOR_WINDOW_FULLSCREEN );
+					soundSystem->SetMute( qnx.windowState != NAVIGATOR_WINDOW_FULLSCREEN );
 					break;
 				}
 
 				//TODO
 				//NAVIGATOR_ORIENTATION_CHECK
 				//NAVIGATOR_ORIENTATION
-				//NAVIGATOR_BACK (console access?)
+
+				case NAVIGATOR_BACK:
+					// Acts like pressing ~ to open in-game console //XXX This should be disabled if key-bindings is in use
+					Sys_QueEvent( SE_KEY, K_GRAVE, true, 0, NULL, 0 );
+					Sys_QueEvent( SE_KEY, K_GRAVE, false, 0, NULL, 0 );
+					break;
+
+				//TODO
 				//NAVIGATOR_ORIENTATION_DONE (similar to WM_SIZING)
 				//NAVIGATOR_INVOKE_QUERY_RESULT
 				//NAVIGATOR_INVOKE_TARGET_RESULT
@@ -173,7 +336,6 @@ Sys_GenerateEvents
 */
 void Sys_GenerateEvents() {
 	static int entered = false;
-	char *s;
 
 	if ( entered ) {
 		return;
@@ -182,18 +344,6 @@ void Sys_GenerateEvents() {
 
 	// pump the message loop
 	Sys_PumpEvents();
-
-	// check for console commands
-	s = Sys_ConsoleInput();
-	if ( s ) {
-		char	*b;
-		int		len;
-
-		len = strlen( s ) + 1;
-		b = (char *)Mem_Alloc( len, TAG_EVENTS );
-		strcpy( b, s );
-		Sys_QueEvent( SE_CONSOLE, 0, 0, len, b, 0 );
-	}
 
 	entered = false;
 }

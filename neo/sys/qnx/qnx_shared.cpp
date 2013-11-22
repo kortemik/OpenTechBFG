@@ -43,14 +43,14 @@ Sys_Milliseconds
 ================
 */
 int Sys_Milliseconds() {
-	static struct timespec sys_timeBase = {0};
+	static struct timespec sys_timeBase = { 0 };
 	struct timespec ts;
 
 	if ( sys_timeBase.tv_sec == 0 ) {
 		clock_gettime( CLOCK_MONOTONIC, &sys_timeBase );
 	}
 	clock_gettime( CLOCK_MONOTONIC, &ts );
-	return ( timespec2nsec( &ts ) - timespec2nsec( &sys_timeBase ) ) / 1000000;
+	return ( (1000.0 * ts.tv_sec) + (0.000001 * ts.tv_nsec) ) - ( (1000.0 * sys_timeBase.tv_sec) + (0.000001 * sys_timeBase.tv_nsec) );
 }
 
 /*
