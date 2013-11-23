@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -28,15 +29,19 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef	__ZIP_H__
 #define	__ZIP_H__
 
+#ifdef ID_QNX
+#include <zlib.h>
+#else
 #include "zlib/zlib.h"
+#endif
 
 /*
 ================================================================================================
 
 Contains external code for building ZipFiles.
 
-The Unzip Package allows extraction of a file from .ZIP file, compatible with 
-PKZip 2.04g, !WinZip, !InfoZip tools and compatibles. Encryption and multi-volume ZipFiles 
+The Unzip Package allows extraction of a file from .ZIP file, compatible with
+PKZip 2.04g, !WinZip, !InfoZip tools and compatibles. Encryption and multi-volume ZipFiles
 (span) are not supported. Old compressions used by old PKZip 1.x are not supported.
 
 ================================================================================================
@@ -63,7 +68,7 @@ PKZip 2.04g, !WinZip, !InfoZip tools and compatibles. Encryption and multi-volum
 
 /*
 ========================
-tm_zip 
+tm_zip
 contains date/time info
 ========================
 */
@@ -250,7 +255,7 @@ extern int zipClose( zipFile file, const char* global_comment );
 
 /*
 ================================================
-idZipBuilder 
+idZipBuilder
 
 simple interface for zipping up a folder of files
 by default, the source folder files are added recursively

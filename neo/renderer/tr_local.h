@@ -3,6 +3,7 @@
 
 Doom 3 BFG Edition GPL Source Code
 Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Vincent Simonetti
 
 This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
@@ -814,6 +815,10 @@ public:
 
 	idParallelJobList *		frontEndJobList;
 
+#ifdef GL_ES_VERSION_2_0
+	//TODO: framebuffers
+#endif
+
 	unsigned				timerQueryId;		// for GL_TIME_ELAPSED_EXT queries
 };
 
@@ -850,7 +855,7 @@ extern idCVar r_brightness;					// changes gamma tables
 extern idCVar r_checkBounds;				// compare all surface bounds with precalculated ones
 extern idCVar r_maxAnisotropicFiltering;	// texture filtering parameter
 extern idCVar r_useTrilinearFiltering;		// Extra quality filtering
-#ifdef GL_ES_VERSION_3_0
+#ifdef GL_ES_VERSION_2_0
 extern idAdjustableMinMaxCVar r_lodBias;	// lod bias
 #else
 extern idCVar r_lodBias;					// lod bias

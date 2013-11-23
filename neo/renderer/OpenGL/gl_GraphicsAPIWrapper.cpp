@@ -131,12 +131,20 @@ void GL_DepthBoundsTest( const float zmin, const float zmax ) {
 		return;
 	}
 
+#ifndef GL_ES_VERSION_2_0
 	if ( zmin == 0.0f && zmax == 0.0f ) {
 		qglDisable( GL_DEPTH_BOUNDS_TEST_EXT );
 	} else {
 		qglEnable( GL_DEPTH_BOUNDS_TEST_EXT );
 		qglDepthBoundsEXT( zmin, zmax );
 	}
+#else
+	// GL_DEPTH_TEST is always enabled, so we can do this
+	if ( zmin == 0.0f && zmax == 0.0f ) {
+		zmax = 1.0f; // Reset range
+	}
+	qglDepthRange( zmin, zmax );
+#endif
 }
 
 /*

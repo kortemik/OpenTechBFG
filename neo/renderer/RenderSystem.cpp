@@ -250,22 +250,30 @@ static void R_CheckCvars() {
 	if ( r_useSRGB.IsModified() ) {
 		r_useSRGB.ClearModified();
 		if ( glConfig.sRGBFramebufferAvailable ) {
+#ifdef GL_ES_VERSION_2_0
+			//TODO
+#else
 			if ( r_useSRGB.GetBool() ) {
 				qglEnable( GL_FRAMEBUFFER_SRGB );
 			} else {
 				qglDisable( GL_FRAMEBUFFER_SRGB );
 			}
+#endif
 		}
 	}
 
 
-	//XXX Need to change for GLES
 	if ( r_multiSamples.IsModified() ) {
+		r_multiSamples.ClearModified();
+#ifdef GL_ES_VERSION_2_0
+		//TODO: modify idRenderSystemLocal's framebuffer/renderbuffer list
+#else
 		if ( r_multiSamples.GetInteger() > 0 ) {
 			qglEnable( GL_MULTISAMPLE_ARB );
 		} else {
 			qglDisable( GL_MULTISAMPLE_ARB );
 		}
+#endif
 	}
 
 	// check for changes to logging state

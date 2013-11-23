@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -36,7 +37,7 @@ static const int PC_ATTRIB_INDEX_COLOR2		= 4;
 static const int PC_ATTRIB_INDEX_ST			= 8;
 static const int PC_ATTRIB_INDEX_TANGENT	= 9;
 
-// This enum list corresponds to the global constant register indecies as defined in global.inc for all
+// This enum list corresponds to the global constant register indices as defined in global.inc for all
 // shaders.  We used a shared pool to keeps things simple.  If something changes here then it also
 // needs to change in global.inc and vice versa
 enum renderParm_t {
@@ -67,7 +68,7 @@ enum renderParm_t {
 	RENDERPARM_VERTEXCOLOR_ADD,
 
 	// The following are new and can be in any order
-	
+
 	RENDERPARM_COLOR,
 	RENDERPARM_VIEWORIGIN,
 	RENDERPARM_GLOBALEYEPOS,

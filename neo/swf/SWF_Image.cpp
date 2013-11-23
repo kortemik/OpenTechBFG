@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,7 +30,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/precompiled.h"
 #include "../renderer/Image.h"
 //#include "../../renderer/ImageTools/ImageProcess.h"
+#ifdef ID_QNX
+#include <jpeglib.h>
+#else
 #include "../renderer/jpeg-6/jpeglib.h"
+#endif
 
 /*
 ========================
@@ -189,7 +194,7 @@ void idSWF::WriteSwfImageAtlas( const char *filename ) {
 	// without re-packing on the 360 and PS3.  The growth checks in RectAllocator()
 	// will always align, but a single image won't necessarily be.
 	atlasWidth = ( atlasWidth + 127 ) & ~127;
-	
+
 	idTempArray<byte> swfAtlas( atlasWidth * atlasHeight * 4 );
 
 	// fill everything with solid red
@@ -273,7 +278,7 @@ void idSWF::WriteSwfImageAtlas( const char *filename ) {
 				if ( srcX >= pack.trueSize.x ) {
 					srcX = pack.trueSize.x - 1;
 				}
-				((int *)swfAtlas.Ptr())[ (y+dstY) * atlasWidth + (x+dstX) ] = 
+				((int *)swfAtlas.Ptr())[ (y+dstY) * atlasWidth + (x+dstX) ] =
 					((int *)pack.imageData)[ srcY * pack.trueSize.x + srcX ];
 			}
 		}

@@ -34,7 +34,6 @@ If you have questions concerning this license or the applicable additional terms
 #include <input/screen_helpers.h>
 #include <bps/bps.h>
 #include <bps/event.h>
-#include <bps/screen.h>
 #include <bps/virtualkeyboard.h>
 
 #include <signal.h>

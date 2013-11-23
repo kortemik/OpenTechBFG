@@ -45,7 +45,11 @@ glconfig_t	glConfig;
 
 idCVar r_requestStereoPixelFormat( "r_requestStereoPixelFormat", "1", CVAR_RENDERER, "Ask for a stereo GL pixel format on startup" );
 idCVar r_debugContext( "r_debugContext", "0", CVAR_RENDERER, "Enable various levels of context debug." );
+#ifdef GL_ES_VERSION_2_0
+idCVar r_glDriver( "r_glDriver", "", CVAR_RENDERER, "\"libGLESv2\", etc." );
+#else
 idCVar r_glDriver( "r_glDriver", "", CVAR_RENDERER, "\"opengl32\", etc." );
+#endif
 idCVar r_skipIntelWorkarounds( "r_skipIntelWorkarounds", "0", CVAR_RENDERER | CVAR_BOOL, "skip workarounds for Intel driver bugs" );
 idCVar r_multiSamples( "r_multiSamples", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "number of antialiasing samples" );
 idCVar r_vidMode( "r_vidMode", "0", CVAR_ARCHIVE | CVAR_RENDERER | CVAR_INTEGER, "fullscreen video mode number" );
@@ -71,7 +75,7 @@ idCVar r_useSeamlessCubeMap( "r_useSeamlessCubeMap", "1", CVAR_RENDERER | CVAR_B
 idCVar r_useSRGB( "r_useSRGB", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "1 = both texture and framebuffer, 2 = framebuffer only, 3 = texture only" );
 idCVar r_maxAnisotropicFiltering( "r_maxAnisotropicFiltering", "8", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "limit aniso filtering" );
 idCVar r_useTrilinearFiltering( "r_useTrilinearFiltering", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Extra quality filtering" );
-#ifdef GL_ES_VERSION_3_0
+#ifdef GL_ES_VERSION_2_0
 idAdjustableMinMaxCVar r_lodBias( "r_lodBias", "0.5", CVAR_RENDERER | CVAR_ARCHIVE, "image lod bias", -1.0f, 1.0f );
 #else
 idCVar r_lodBias( "r_lodBias", "0.5", CVAR_RENDERER | CVAR_ARCHIVE, "image lod bias" );
@@ -503,11 +507,11 @@ static void R_CheckPortableExtensions() {
 	}
 #else
 	// The functions exist, but the supported compressions may not
-	glConfig.textureCompressionAvailable = R_CheckExtension( "GL_EXT_texture_compression_s3tc" ) || ( ( R_CheckExtension( "GL_EXT_texture_compression_dxt1" ) || R_CheckExtension( "GL_ANGLE_texture_compression_dxt1" ) ) && ( R_CheckExtension( "GL_EXT_texture_compression_dxt5" ) || R_CheckExtension( "GL_ANGLE_texture_compression_dxt5" ) ) );
+	glConfig.textureCompressionAvailable = R_CheckExtension( "GL_EXT_texture_compression_s3tc" ) || ( R_CheckExtension( "GL_EXT_texture_compression_dxt1" ) && R_CheckExtension( "GL_ANGLE_texture_compression_dxt5" ) );
 	qglCompressedTexImage2DARB = (PFNGLCOMPRESSEDTEXIMAGE2DARBPROC)GLimp_ExtensionPointer( "glCompressedTexImage2D" );
 	qglCompressedTexSubImage2DARB = (PFNGLCOMPRESSEDTEXSUBIMAGE2DARBPROC)GLimp_ExtensionPointer( "glCompressedTexSubImage2D" );
 	qglGetCompressedTexImageARB = (PFNGLGETCOMPRESSEDTEXIMAGEARBPROC)GLimp_ExtensionPointer( "glGetCompressedTexImage" ); //Not used
-	//TODO: figure out/replace texture compression. Everything supports ETC1, GLES 3.0 supports ETC2. If DXT isn't supported, use those
+	//TODO: figure out/replace texture compression. Everything supports ETC1, GLES 3.0 supports ETC2. If DXT isn't supported, use those (or ASTC)
 #endif
 
 	// GL_EXT_texture_filter_anisotropic
@@ -519,19 +523,24 @@ static void R_CheckPortableExtensions() {
 		glConfig.maxTextureAnisotropy = 1;
 	}
 
-#ifndef GL_ES_VERSION_2_0
 	// GL_EXT_texture_lod_bias
 	// The actual extension is broken as specified, storing the state in the texture unit instead
 	// of the texture object.  The behavior in GL 1.4 is the behavior we use.
+#ifndef GL_ES_VERSION_2_0
 	glConfig.textureLODBiasAvailable = ( glConfig.glVersion >= 1.4 || R_CheckExtension( "GL_EXT_texture_lod_bias" ) );
+	glConfig.textureLODBiasShaderOnlyAvailable = false;
+#else
+	glConfig.textureLODBiasAvailable = R_CheckExtension( "GL_EXT_texture_lod_bias" );
+	glConfig.textureLODBiasShaderOnlyAvailable = !glConfig.textureLODBiasAvailable; // Shaders support a bias value, so use that if GL_EXT_texture_lod_bias isn't supported
+#endif
 	if ( glConfig.textureLODBiasAvailable ) {
 		common->Printf( "...using %s\n", "GL_EXT_texture_lod_bias" );
 	} else {
 		common->Printf( "X..%s not found\n", "GL_EXT_texture_lod_bias" );
+		if ( glConfig.textureLODBiasShaderOnlyAvailable ) {
+			common->Printf( "...but shaders support LOD bias\n" );
+		}
 	}
-#else
-	glConfig.textureLODBiasAvailable = true; //Shaders support a bias value
-#endif
 
 	// GL_ARB_seamless_cube_map
 	glConfig.seamlessCubeMapAvailable = R_CheckExtension( "GL_ARB_seamless_cube_map" );
@@ -544,6 +553,13 @@ static void R_CheckPortableExtensions() {
 	glConfig.sRGBFramebufferAvailable = ( glConfig.glVersion >= 3.0 || R_CheckExtension( "GL_EXT_sRGB" ) );
 #endif
 	r_useSRGB.SetModified();		// the CheckCvars() next frame will enable / disable it
+
+	// GL_EXT_unpack_subimage
+#ifndef GL_ES_VERSION_2_0
+	glConfig.textureUnpackRowLengthAvaliable = true;
+#else
+	glConfig.textureUnpackRowLengthAvaliable = ( glConfig.glVersion >= 3.0 || R_CheckExtension( "GL_EXT_unpack_subimage" ) );
+#endif
 
 #ifndef GL_ES_VERSION_2_0
 	// GL_ARB_vertex_buffer_object
@@ -568,6 +584,7 @@ static void R_CheckPortableExtensions() {
 	qglBindBufferRange = (PFNGLBINDBUFFERRANGEPROC)GLimp_ExtensionPointer( "glBindBufferRange" );
 	if ( qglBindBufferRange == NULL ) {
 		qglBindBufferRange = glBindBufferRangeImpl;
+		common->Printf( "...using fake %s\n", "glBindBufferRange" );
 	}
 	qglDeleteBuffersARB = (PFNGLDELETEBUFFERSARBPROC)GLimp_ExtensionPointer( "glDeleteBuffers" );
 	qglGenBuffersARB = (PFNGLGENBUFFERSARBPROC)GLimp_ExtensionPointer( "glGenBuffers" );
@@ -602,7 +619,7 @@ static void R_CheckPortableExtensions() {
 			qglMapBufferRange = (PFNGLMAPBUFFERRANGEPROC)GLimp_ExtensionPointer( "glMapBufferRangeEXT" );
 			if ( qglMapBufferRange == NULL && qglMapBufferARB != NULL ) {
 				qglMapBufferRange = glMapBufferRangeImpl;
-				common->Printf( "...using fake %s\n", "GL_EXT_map_buffer_range" );
+				common->Printf( "...using fake %s\n", "glMapBufferRange" );
 			} else {
 				// Hmm, guess it's not supported
 				glConfig.mapBufferRangeAvailable = false;
@@ -730,12 +747,16 @@ static void R_CheckPortableExtensions() {
 		qglStencilFuncSeparate = (PFNGLSTENCILFUNCSEPARATEATIPROC)GLimp_ExtensionPointer( "glStencilFuncSeparate" );
 	}
 
+#ifndef GL_ES_VERSION_2_0
 	// GL_EXT_depth_bounds_test
  	glConfig.depthBoundsTestAvailable = R_CheckExtension( "GL_EXT_depth_bounds_test" );
  	if ( glConfig.depthBoundsTestAvailable ) {
  		qglDepthBoundsEXT = (PFNGLDEPTHBOUNDSEXTPROC)GLimp_ExtensionPointer( "glDepthBoundsEXT" );
  	}
- 	//XXX
+#else
+ 	// Use qglDepthRange (XXX Is this valid?)
+ 	glConfig.depthBoundsTestAvailable = true;
+#endif
 
 #ifndef GL_ES_VERSION_3_0
 	// GL_ARB_sync
@@ -801,7 +822,7 @@ static void R_CheckPortableExtensions() {
 	}
 
 	// GL_ARB_timer_query
-	glConfig.timerQueryAvailable = R_CheckExtension( "GL_ARB_timer_query" ) || R_CheckExtension( "GL_EXT_timer_query" );
+	glConfig.timerQueryAvailable = R_CheckExtension( "GL_ARB_timer_query" ) || R_CheckExtension( "GL_EXT_timer_query" ) || R_CheckExtension( "GL_EXT_disjoint_timer_query" );
 	if ( glConfig.timerQueryAvailable ) {
 		qglGetQueryObjectui64vEXT = (PFNGLGETQUERYOBJECTUI64VEXTPROC)GLimp_ExtensionPointer( "glGetQueryObjectui64vARB" );
 		if ( qglGetQueryObjectui64vEXT == NULL ) {
@@ -898,20 +919,22 @@ Some variables depend on configuration and can't be set at compile time, adjust 
 */
 void R_CheckGLESVariableReplacements() {
 
-	if ( ( glConfig.glVersion >= 3.0f ) || ( R_CheckExtension( "GL_OES_required_internalformat" ) && R_CheckExtension( "GL_OES_rgb8_rgba8" ) ) ) {
+	if ( ( glConfig.glVersion >= 3.0f ) || R_CheckExtension( "GL_OES_required_internalformat" ) ) {
 		glConfig.ID_GLES_VAR_DEF( GL_RGBA8 ) = ID_GLES_REAL_GL_RGBA8;
 	} else {
 		glConfig.ID_GLES_VAR_DEF( GL_RGBA8 ) = GL_RGBA;
 	}
 
-#ifdef GL_ES_VERSION_3_0
-	if ( glConfig.textureLODBiasAvailable ) {
+	if ( glConfig.textureLODBiasAvailable || glConfig.textureLODBiasShaderOnlyAvailable ) {
 		float max;
-		qglGetFloatv( GL_MAX_TEXTURE_LOD_BIAS, &max );
+		if ( glConfig.textureLODBiasAvailable ) {
+			qglGetFloatv( GL_MAX_TEXTURE_LOD_BIAS_EXT, &max );
+		} else {
+			qglGetFloatv( GL_MAX_TEXTURE_LOD_BIAS, &max );
+		}
 		r_lodBias.SetMaxValue( max );
 		r_lodBias.SetMinValue( -max );
 	}
-#endif
 }
 
 #endif
@@ -956,7 +979,6 @@ void R_SetNewMode( const bool fullInit ) {
 
 		glimpParms_t	parms;
 
-		//TODO
 		if ( r_fullscreen.GetInteger() <= 0 ) {
 			// use explicit position / size for window
 			parms.x = r_windowX.GetInteger();

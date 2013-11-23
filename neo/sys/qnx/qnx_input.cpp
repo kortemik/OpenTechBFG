@@ -26,39 +26,36 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
+
 #pragma hdrstop
-#include "../idlib/precompiled.h"
-#ifdef ID_QNX
-#include <zlib.h>
-#else
-#include "../framework/zlib/zlib.h"
-#endif
+#include "../../idlib/precompiled.h"
+
+#include "qnx_local.h"
 
 /*
-========================
-idSWF::Inflate
-========================
+===========
+Sys_ShutdownInput
+===========
 */
-bool idSWF::Inflate( const byte * input, int inputSize, byte * output, int outputSize ) {
-	struct local_swf_alloc_t {
-		static void * zalloc( void * opaque, uint32 items, uint32 size ) {
-			return Mem_Alloc( items * size, TAG_SWF );
-		}
-		static void zfree( void * opaque, void * ptr ) {
-			Mem_Free( ptr );
-		}
-	};
-	z_stream stream;
-	memset( &stream, 0, sizeof( stream ) );
-	stream.next_in = (Bytef *)input;
-	stream.avail_in = inputSize;
-	stream.next_out = (Bytef *)output;
-	stream.avail_out = outputSize;
-	stream.zalloc = local_swf_alloc_t::zalloc;
-	stream.zfree = local_swf_alloc_t::zfree;
-	inflateInit( &stream );
-	bool success = ( inflate( &stream, Z_FINISH ) == Z_STREAM_END );
-	inflateEnd( &stream );
+void Sys_ShutdownInput() {
+	if ( screen_stop_events( qnx.screenCtx ) != BPS_SUCCESS ) {
+		idLib::Warning( "Sys_ShutdownInput: Could not stop screen events" );
+	}
+	//TODO: cleanup gamepads
+}
 
-	return success;
+/*
+===========
+Sys_InitInput
+===========
+*/
+void Sys_InitInput() {
+	common->Printf ("\n------- Input Initialization -------\n");
+
+	//TODO: setup gamepads (find them and setup list for more to be loaded)
+	if ( screen_request_events( qnx.screenCtx ) != BPS_SUCCESS ) {
+		idLib::FatalError( "Sys_InitInput: Could not start requesting screen events" );
+	}
+
+	common->Printf ("------------------------------------\n");
 }

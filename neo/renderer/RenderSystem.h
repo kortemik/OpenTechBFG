@@ -113,7 +113,9 @@ struct glconfig_t {
 	bool				textureCompressionAvailable;
 	bool				anisotropicFilterAvailable;
 	bool				textureLODBiasAvailable;
+	bool				textureLODBiasShaderOnlyAvailable;
 	bool				seamlessCubeMapAvailable;
+	bool				textureUnpackRowLengthAvaliable;
 	bool				sRGBFramebufferAvailable;
 	bool				vertexBufferObjectAvailable;
 	bool				mapBufferRangeAvailable;

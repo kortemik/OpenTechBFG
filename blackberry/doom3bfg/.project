@@ -1761,6 +1761,11 @@
 			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_eventloop.cpp</locationURI>
 		</link>
 		<link>
+			<name>src/sys/qnx/qnx_input.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_input.cpp</locationURI>
+		</link>
+		<link>
 			<name>src/sys/qnx/qnx_local.h</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_local.h</locationURI>

@@ -33,6 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../../renderer/OpenGL/qgl_es.h"
 
 #include <bps/navigator.h>
+#include <bps/screen.h>
 
 void	Sys_QueEvent( sysEventType_t type, int value, int value2, int ptrLength, void *ptr, int inputDeviceNum );
 
@@ -48,6 +49,7 @@ typedef struct {
 	int							mouseWheelPosition;
 	int							mouseButtonsPressed;
 
+	screen_context_t			screenCtx;
 	//TODO: opengl vars
 
 	static idCVar				sys_arch;

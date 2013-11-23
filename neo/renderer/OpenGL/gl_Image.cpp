@@ -3,6 +3,7 @@
 
 Doom 3 BFG Edition GPL Source Code
 Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Vincent Simonetti
 
 This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
@@ -87,8 +88,8 @@ void idImage::SubImageUpload( int mipLevel, int x, int y, int z, int width, int 
 
 	qglBindTexture( target, texnum );
 
-	if ( pixelPitch != 0 ) {
-		qglPixelStorei( GL_UNPACK_ROW_LENGTH, pixelPitch ); //XXX Only on OpenGL ES 3.0
+	if ( pixelPitch != 0 && glConfig.textureUnpackRowLengthAvaliable ) {
+		qglPixelStorei( GL_UNPACK_ROW_LENGTH, pixelPitch ); //XXX What if this isn't available?
 	}
 #ifndef GL_ES_VERSION_2_0
 	//XXX Should something be done about this?
@@ -124,7 +125,7 @@ void idImage::SubImageUpload( int mipLevel, int x, int y, int z, int width, int 
 		qglPixelStorei( GL_UNPACK_SWAP_BYTES, GL_FALSE );
 	}
 #endif
-	if ( pixelPitch != 0 ) {
+	if ( pixelPitch != 0 && glConfig.textureUnpackRowLengthAvaliable ) {
 		qglPixelStorei( GL_UNPACK_ROW_LENGTH, 0 );
 	}
 }
@@ -241,13 +242,13 @@ void idImage::SetTexParameters() {
 			qglTexParameterf(target, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1 );
 		}
 	}
-	if ( glConfig.textureLODBiasAvailable && ( usage != TD_FONT ) ) {
+	if ( ( glConfig.textureLODBiasAvailable || glConfig.textureLODBiasShaderOnlyAvailable ) && ( usage != TD_FONT ) ) {
 		// use a blurring LOD bias in combination with high anisotropy to fix our aliasing grate textures...
-#ifndef GL_ES_VERSION_2_0
-		qglTexParameterf(target, GL_TEXTURE_LOD_BIAS_EXT, r_lodBias.GetFloat() );
-#else
-		//TODO
-#endif
+		if ( glConfig.textureLODBiasAvailable ) {
+			qglTexParameterf(target, GL_TEXTURE_LOD_BIAS_EXT, r_lodBias.GetFloat() );
+		} else {
+			//TODO: Set a uniform for LOD bias
+		}
 	}
 
 	// set the wrap/clamp modes
