@@ -158,6 +158,10 @@ void idImage::SetTexParameters() {
 			return;
 	}
 
+#if !defined( GL_ES_VERSION_2_0 ) || defined( GL_ES_VERSION_3_0 )
+#ifdef GL_ES_VERSION_3_0
+	if ( glConfig.textureSwizzleAvailable ) {
+#endif
 	// ALPHA, LUMINANCE, LUMINANCE_ALPHA, and INTENSITY have been removed
 	// in OpenGL 3.2. In order to mimic those modes, we use the swizzle operators
 #if defined( USE_CORE_PROFILE )
@@ -203,6 +207,17 @@ void idImage::SetTexParameters() {
 		qglTexParameteri( target, GL_TEXTURE_SWIZZLE_G, GL_ONE );
 		qglTexParameteri( target, GL_TEXTURE_SWIZZLE_B, GL_ONE );
 		qglTexParameteri( target, GL_TEXTURE_SWIZZLE_A, GL_RED );
+	}
+#endif
+#ifdef GL_ES_VERSION_3_0
+	} else {
+#endif
+#endif
+#ifdef GL_ES_VERSION_2_0
+#ifndef GL_ES_VERSION_3_0
+	{
+#endif
+	//TODO: GLES 2.0 texture swizzling (possibly a shader modification)
 	}
 #endif
 
@@ -258,19 +273,19 @@ void idImage::SetTexParameters() {
 			qglTexParameterf( target, GL_TEXTURE_WRAP_T, GL_REPEAT );
 			break;
 		case TR_CLAMP_TO_ZERO: {
-#ifdef GL_TEXTURE_BORDER_COLOR
-			float color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-			qglTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, color );
-#endif
+			if ( glConfig.clampToBorderAvailable ) {
+				float color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+				qglTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, color );
+			}
 			qglTexParameterf( target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
 			qglTexParameterf( target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
 			}
 			break;
 		case TR_CLAMP_TO_ZERO_ALPHA: {
-#ifdef GL_TEXTURE_BORDER_COLOR
-			float color[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-			qglTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, color );
-#endif
+			if ( glConfig.clampToBorderAvailable ) {
+				float color[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+				qglTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, color );
+			}
 			qglTexParameterf( target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
 			qglTexParameterf( target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
 			}

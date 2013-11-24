@@ -122,6 +122,10 @@ struct glconfig_t {
 	bool				vertexArrayObjectAvailable;
 	bool				drawElementsBaseVertexAvailable;
 	bool				drawElementsBaseVertexFakeAvailable;
+#ifdef GL_ES_VERSION_3_0
+	bool				textureSwizzleAvailable;
+#endif
+	bool				clampToBorderAvailable;
 	bool				fragmentProgramAvailable;
 	bool				glslAvailable;
 	bool				uniformBufferAvailable;
@@ -135,6 +139,7 @@ struct glconfig_t {
 
 #ifdef GL_ES_VERSION_2_0
 	GLenum				ID_GLES_VAR_DEF( GL_RGBA8 );
+	GLenum				ID_GLES_VAR_DEF( GL_CLAMP_TO_BORDER );
 #endif
 
 	stereo3DMode_t		stereo3Dmode;

@@ -561,6 +561,16 @@ static void R_CheckPortableExtensions() {
 	glConfig.textureUnpackRowLengthAvaliable = ( glConfig.glVersion >= 3.0 || R_CheckExtension( "GL_EXT_unpack_subimage" ) );
 #endif
 
+#ifdef GL_ES_VERSION_3_0
+	glConfig.textureSwizzleAvailable = ( glConfig.glVersion >= 3.0 );
+#endif
+
+#ifndef GL_ES_VERSION_2_0
+	glConfig.clampToBorderAvailable = true;
+#else
+	glConfig.clampToBorderAvailable = R_CheckExtension( "GL_NV_texture_border_clamp" );
+#endif
+
 #ifndef GL_ES_VERSION_2_0
 	// GL_ARB_vertex_buffer_object
 	glConfig.vertexBufferObjectAvailable = R_CheckExtension( "GL_ARB_vertex_buffer_object" );
@@ -919,12 +929,21 @@ Some variables depend on configuration and can't be set at compile time, adjust 
 */
 void R_CheckGLESVariableReplacements() {
 
+	// GL_RGBA8
 	if ( ( glConfig.glVersion >= 3.0f ) || R_CheckExtension( "GL_OES_required_internalformat" ) ) {
 		glConfig.ID_GLES_VAR_DEF( GL_RGBA8 ) = ID_GLES_REAL_GL_RGBA8;
 	} else {
 		glConfig.ID_GLES_VAR_DEF( GL_RGBA8 ) = GL_RGBA;
 	}
 
+	// GL_CLAMP_TO_BORDER
+	if ( glConfig.clampToBorderAvailable ) {
+		glConfig.ID_GLES_VAR_DEF( GL_CLAMP_TO_BORDER ) = ID_GLES_REAL_GL_CLAMP_TO_BORDER;
+	} else {
+		glConfig.ID_GLES_VAR_DEF( GL_CLAMP_TO_BORDER ) = GL_CLAMP_TO_EDGE;
+	}
+
+	// Texture LOD Bias
 	if ( glConfig.textureLODBiasAvailable || glConfig.textureLODBiasShaderOnlyAvailable ) {
 		float max;
 		if ( glConfig.textureLODBiasAvailable ) {
