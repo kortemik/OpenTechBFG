@@ -49,6 +49,8 @@ typedef struct {
 	int							mouseWheelPosition;
 	int							mouseButtonsPressed;
 
+	void*						eglLib;
+	void*						openGLLib;
 	screen_context_t			screenCtx;
 	//TODO: opengl vars
 

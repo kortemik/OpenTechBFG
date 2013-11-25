@@ -768,8 +768,8 @@ static void RB_ShowSilhouette() {
 				qglBindBufferARB( GL_ARRAY_BUFFER_ARB, (GLuint)vertexBuffer.GetAPIObject() );
 				int vertOffset = vertexBuffer.GetOffset();
 
-				qglVertexPointer( 3, GL_FLOAT, sizeof( idShadowVert ), (void *)vertOffset );
 #ifndef GL_ES_VERSION_2_0
+				qglVertexPointer( 3, GL_FLOAT, sizeof( idShadowVert ), (void *)vertOffset );
 				qglBegin( GL_LINES );
 
 				for ( int j = 0; j < tri->numIndexes; j+=3 ) {

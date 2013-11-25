@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -39,7 +40,11 @@ If you have questions concerning this license or the applicable additional terms
 #define qglClear glClear
 #define qglClearAccum glClearAccum
 #define qglClearColor glClearColor
+#if !defined( GL_ES_VERSION_2_0 ) || defined( glClearDepth )
 #define qglClearDepth glClearDepth
+#else
+#define qglClearDepth glClearDepthf
+#endif
 #define qglClearIndex glClearIndex
 #define qglClearStencil glClearStencil
 #define qglClipPlane glClipPlane
@@ -92,7 +97,9 @@ If you have questions concerning this license or the applicable additional terms
 #define qglDisable glDisable
 #define qglDisableClientState glDisableClientState
 #define qglDrawArrays glDrawArrays
+#ifndef GL_ES_VERSION_2_0
 #define qglDrawBuffer glDrawBuffer
+#endif
 #define qglDrawElements glDrawElements
 #define qglDrawPixels glDrawPixels
 #define qglEdgeFlag glEdgeFlag
@@ -371,3 +378,5 @@ If you have questions concerning this license or the applicable additional terms
 #define qglXSwapBuffers glXSwapBuffers
 #define qglXGetProcAddressARB glXGetProcAddressARB
 #endif
+
+//TODO: EGL

@@ -1046,11 +1046,15 @@ void idRenderWorldLocal::ShowPortals() {
 				GL_Color( 0, 1, 0 );
 			}
 
+#ifndef GL_ES_VERSION_2_0
 			qglBegin( GL_LINE_LOOP );
 			for ( j = 0; j < w->GetNumPoints(); j++ ) {
 				qglVertex3fv( (*w)[j].ToFloatPtr() );
 			}
 			qglEnd();
+#else
+			//TODO
+#endif
 		}
 	}
 }

@@ -89,7 +89,7 @@ void idImage::SubImageUpload( int mipLevel, int x, int y, int z, int width, int 
 	qglBindTexture( target, texnum );
 
 	if ( pixelPitch != 0 && glConfig.textureUnpackRowLengthAvaliable ) {
-		qglPixelStorei( GL_UNPACK_ROW_LENGTH, pixelPitch ); //XXX What if this isn't available?
+		qglPixelStorei( GL_UNPACK_ROW_LENGTH, pixelPitch ); //XXX What if this isn't available, what will happen with the image?
 	}
 #ifndef GL_ES_VERSION_2_0
 	//XXX Should something be done about this?
@@ -482,7 +482,9 @@ void idImage::AllocImage() {
 		}
 	}
 
-	qglTexParameteri( target, GL_TEXTURE_MAX_LEVEL, opts.numLevels - 1 );
+	if ( glConfig.textureMaxLevelAvailable ) {
+		qglTexParameteri( target, GL_TEXTURE_MAX_LEVEL, opts.numLevels - 1 );
+	}
 
 	// see if we messed anything up
 	GL_CheckErrors();

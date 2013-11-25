@@ -126,6 +126,7 @@ struct glconfig_t {
 	bool				textureSwizzleAvailable;
 #endif
 	bool				clampToBorderAvailable;
+	bool				textureMaxLevelAvailable;
 	bool				fragmentProgramAvailable;
 	bool				glslAvailable;
 	bool				uniformBufferAvailable;

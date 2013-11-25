@@ -357,6 +357,7 @@ Sys_DefaultBasePath
 ==============
 */
 const char *Sys_DefaultBasePath() {
+	//TODO: make sure this points to game data
 	return Sys_Cwd();
 }
 
@@ -366,6 +367,7 @@ Sys_DefaultSavePath
 ==============
 */
 const char *Sys_DefaultSavePath() {
+	//TODO: Correct to point to a location that will save game data (just need to check where getcwd actually points to)
 	static char savePath[ PATH_MAX ];
 	memset( savePath, 0, PATH_MAX );
 
@@ -682,7 +684,7 @@ void Sys_DLL_Unload( int dllHandle ) {
 	int errorCode;
 	if ( ( errorCode = dlclose( (void*)dllHandle ) ) != 0 ) {
 		const char* error = dlerror();
-		Sys_Error( "Sys_DLL_Unload: FreeLibrary failed - %s (%d)", error, errorCode );
+		Sys_Error( "Sys_DLL_Unload: dlclose failed - %s (%d)", error, errorCode );
 	}
 }
 
@@ -889,8 +891,7 @@ Sys_GetProcessorId
 ================
 */
 cpuid_t Sys_GetProcessorId() {
-    //XXX return win32.cpuid;
-	return (cpuid_t)0;
+	return qnx.cpuid;
 }
 
 /*
@@ -899,8 +900,7 @@ Sys_GetProcessorString
 ================
 */
 const char *Sys_GetProcessorString() {
-	//XXX return win32.sys_cpustring.GetString();
-	return 0;
+	return qnx.sys_cpustring.GetString();
 }
 
 //=======================================================================

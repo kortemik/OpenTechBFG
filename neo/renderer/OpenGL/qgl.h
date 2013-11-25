@@ -518,7 +518,7 @@ extern  void ( APIENTRY * qglVertex4sv )(const GLshort *v);
 extern  void ( APIENTRY * qglVertexPointer )(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
 extern  void ( APIENTRY * qglViewport )(GLint x, GLint y, GLsizei width, GLsizei height);
 
-#ifndef ID_OPENGL_ES
+#ifdef ID_WIN32
 
 extern  int   ( WINAPI * qwglChoosePixelFormat )(HDC, CONST PIXELFORMATDESCRIPTOR *);
 extern  int   ( WINAPI * qwglDescribePixelFormat) (HDC, int, UINT, LPPIXELFORMATDESCRIPTOR);
@@ -549,8 +549,12 @@ extern int  ( WINAPI * qwglGetLayerPaletteEntries)(HDC, int, int, int,
 extern BOOL ( WINAPI * qwglRealizeLayerPalette)(HDC, int, BOOL);
 extern BOOL ( WINAPI * qwglSwapLayerBuffers)(HDC, UINT);
 
+#else
+
+//TODO: EGL
+
 #endif
 
-#endif	// hardlinlk vs dlopen
+#endif	// hardlink vs dlopen
 
 #endif

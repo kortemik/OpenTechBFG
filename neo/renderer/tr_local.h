@@ -816,7 +816,7 @@ public:
 	idParallelJobList *		frontEndJobList;
 
 #ifdef GL_ES_VERSION_2_0
-	//TODO: framebuffers
+	//TODO: framebuffers (4 of them [front, back, back_left, back_right])
 #endif
 
 	unsigned				timerQueryId;		// for GL_TIME_ELAPSED_EXT queries

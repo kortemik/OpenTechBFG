@@ -57,8 +57,6 @@ extern "C" {
 #   define GL_APIENTRYP GL_APIENTRY*
 #endif
 
-//Some workarounds for OpenGL ES functionality
-
 //=============
 //General defines
 //=============
@@ -75,6 +73,15 @@ extern "C" {
 #endif
 #ifndef GLsizeiptrARB
 	typedef GLsizeiptr GLsizeiptrARB;
+#endif
+
+//=============
+//OpenGL ES function definitions
+//=============
+//TODO
+
+#ifdef GL_ES_VERSION_3_0
+//TODO
 #endif
 
 //=============
@@ -509,6 +516,14 @@ extern "C" {
 
 #ifndef GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT
 	#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
+#endif
+
+#ifndef GL_TEXTURE_MAX_LEVEL
+	#ifdef GL_TEXTURE_MAX_LEVEL_APPLE
+		#define GL_TEXTURE_MAX_LEVEL GL_TEXTURE_MAX_LEVEL_APPLE
+	#else
+		#define GL_TEXTURE_MAX_LEVEL 0x813D
+	#endif
 #endif
 
 #ifndef GL_PROGRAM_FORMAT_ASCII_ARB

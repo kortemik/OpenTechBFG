@@ -59,3 +59,103 @@ void Sys_InitInput() {
 
 	common->Printf ("------------------------------------\n");
 }
+
+//XXX Can query screen context for devices (which can then be used for polling)
+
+//=====================================================================================
+//	Keyboard Input Handling
+//=====================================================================================
+
+/*
+===========
+Sys_PollKeyboardInputEvents
+===========
+*/
+int Sys_PollKeyboardInputEvents() {
+	//TODO
+	return 0;
+}
+
+/*
+===========
+Sys_ReturnKeyboardInputEvent
+===========
+*/
+int Sys_ReturnKeyboardInputEvent( const int n, int &ch, bool &state ) {
+	//TODO
+	return 0;
+}
+
+/*
+===========
+Sys_EndKeyboardInputEvents
+===========
+*/
+void Sys_EndKeyboardInputEvents() {
+	//TODO
+}
+
+//=====================================================================================
+//	Mouse Input Handling
+//=====================================================================================
+
+/*
+===========
+Sys_PollMouseInputEvents
+===========
+*/
+int Sys_PollMouseInputEvents( int mouseEvents[MAX_MOUSE_EVENTS][2] ) {
+	//TODO
+	return 0;
+}
+
+/*
+===========
+Sys_GrabMouseCursor
+===========
+*/
+void Sys_GrabMouseCursor( bool grabIt ) {
+	//TODO
+}
+
+//=====================================================================================
+//	Joystick Input Handling
+//=====================================================================================
+
+/*
+===========
+Sys_SetRumble
+===========
+*/
+void Sys_SetRumble( int device, int low, int hi ) {
+	//TODO
+}
+
+/*
+===========
+Sys_PollJoystickInputEvents
+===========
+*/
+int Sys_PollJoystickInputEvents( int deviceNum ) {
+	//TODO
+	return 0;
+}
+
+/*
+===========
+Sys_ReturnJoystickInputEvent
+===========
+*/
+int Sys_ReturnJoystickInputEvent( const int n, int &action, int &value ) {
+	//TODO
+	return 0;
+}
+
+/*
+===========
+Sys_EndJoystickInputEvents
+===========
+*/
+void Sys_EndJoystickInputEvents() {
+	//TODO
+}

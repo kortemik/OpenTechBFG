@@ -47,6 +47,7 @@ idCVar r_requestStereoPixelFormat( "r_requestStereoPixelFormat", "1", CVAR_RENDE
 idCVar r_debugContext( "r_debugContext", "0", CVAR_RENDERER, "Enable various levels of context debug." );
 #ifdef GL_ES_VERSION_2_0
 idCVar r_glDriver( "r_glDriver", "", CVAR_RENDERER, "\"libGLESv2\", etc." );
+idCVar r_eglDriver( "r_eglDriver", "", CVAR_RENDERER, "\"libEGL\", etc." );
 #else
 idCVar r_glDriver( "r_glDriver", "", CVAR_RENDERER, "\"opengl32\", etc." );
 #endif
@@ -569,6 +570,12 @@ static void R_CheckPortableExtensions() {
 	glConfig.clampToBorderAvailable = true;
 #else
 	glConfig.clampToBorderAvailable = R_CheckExtension( "GL_NV_texture_border_clamp" );
+#endif
+
+#ifndef GL_ES_VERSION_2_0
+	glConfig.textureMaxLevelAvailable = ( glConfig.glVersion >= 1.2 );
+#else
+	glConfig.textureMaxLevelAvailable = ( glConfig.glVersion >= 3.0 || R_CheckExtension( "GL_APPLE_texture_max_level" ) );
 #endif
 
 #ifndef GL_ES_VERSION_2_0

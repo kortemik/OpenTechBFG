@@ -1761,6 +1761,11 @@
 			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_eventloop.cpp</locationURI>
 		</link>
 		<link>
+			<name>src/sys/qnx/qnx_glimp.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_glimp.cpp</locationURI>
+		</link>
+		<link>
 			<name>src/sys/qnx/qnx_input.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_input.cpp</locationURI>
@@ -1774,6 +1779,11 @@
 			<name>src/sys/qnx/qnx_main.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_main.cpp</locationURI>
+		</link>
+		<link>
+			<name>src/sys/qnx/qnx_qgl.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_qgl.cpp</locationURI>
 		</link>
 		<link>
 			<name>src/sys/qnx/qnx_shared.cpp</name>
