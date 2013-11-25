@@ -379,4 +379,39 @@ If you have questions concerning this license or the applicable additional terms
 #define qglXGetProcAddressARB glXGetProcAddressARB
 #endif
 
-//TODO: EGL
+#ifdef EGL_VERSION_1_4
+#define qeglGetError eglGetError
+#define qeglGetDisplay eglGetDisplay
+#define qeglInitialize eglInitialize
+#define qeglTerminate eglTerminate
+#define qeglQueryString eglQueryString
+#define qeglGetConfigs eglGetConfigs
+#define qeglChooseConfig eglChooseConfig
+#define qeglGetConfigAttrib eglGetConfigAttrib
+#define qeglCreateWindowSurface eglCreateWindowSurface
+#define qeglCreatePbufferSurface eglCreatePbufferSurface
+#define qeglCreatePixmapSurface eglCreatePixmapSurface
+#define qeglDestroySurface eglDestroySurface
+#define qeglQuerySurface eglQuerySurface
+#define qeglBindAPI eglBindAPI
+#define qeglQueryAPI eglQueryAPI
+#define qeglWaitClient eglWaitClient
+#define qeglReleaseThread eglReleaseThread
+#define qeglCreatePbufferFromClientBuffer eglCreatePbufferFromClientBuffer
+#define qeglSurfaceAttrib eglSurfaceAttrib
+#define qeglBindTexImage eglBindTexImage
+#define qeglReleaseTexImage eglReleaseTexImage
+#define qeglSwapInterval eglSwapInterval
+#define qeglCreateContext eglCreateContext
+#define qeglDestroyContext eglDestroyContext
+#define qeglMakeCurrent eglMakeCurrent
+#define qeglGetCurrentContext eglGetCurrentContext
+#define qeglGetCurrentSurface eglGetCurrentSurface
+#define qeglGetCurrentDisplay eglGetCurrentDisplay
+#define qeglQueryContext eglQueryContext
+#define qeglWaitGL eglWaitGL
+#define qeglWaitNative eglWaitNative
+#define qeglSwapBuffers eglSwapBuffers
+#define qeglCopyBuffers eglCopyBuffers
+#define qeglGetProcAddress eglGetProcAddress
+#endif

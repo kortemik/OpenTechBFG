@@ -551,7 +551,40 @@ extern BOOL ( WINAPI * qwglSwapLayerBuffers)(HDC, UINT);
 
 #else
 
-//TODO: EGL
+extern EGLint ( APIENTRY * qeglGetError )(void);
+extern EGLDisplay ( APIENTRY * qeglGetDisplay )(EGLNativeDisplayType);
+extern EGLBoolean ( APIENTRY * qeglInitialize )(EGLDisplay, EGLint *, EGLint *);
+extern EGLBoolean ( APIENTRY * qeglTerminate )(EGLDisplay);
+extern const char * ( APIENTRY * qeglQueryString )(EGLDisplay, EGLint);
+extern EGLBoolean ( APIENTRY * qeglGetConfigs )(EGLDisplay, EGLConfig *, EGLint, EGLint *);
+extern EGLBoolean ( APIENTRY * qeglChooseConfig )(EGLDisplay, const EGLint *, EGLConfig *, EGLint, EGLint *);
+extern EGLBoolean ( APIENTRY * qeglGetConfigAttrib )(EGLDisplay, EGLConfig, EGLint, EGLint *);
+extern EGLSurface ( APIENTRY * qeglCreateWindowSurface )(EGLDisplay, EGLConfig, EGLNativeWindowType, const EGLint *);
+extern EGLSurface ( APIENTRY * qeglCreatePbufferSurface )(EGLDisplay, EGLConfig, const EGLint *);
+extern EGLSurface ( APIENTRY * qeglCreatePixmapSurface )(EGLDisplay, EGLConfig, EGLNativePixmapType, const EGLint *);
+extern EGLBoolean ( APIENTRY * qeglDestroySurface )(EGLDisplay, EGLSurface);
+extern EGLBoolean ( APIENTRY * qeglQuerySurface )(EGLDisplay, EGLSurface, EGLint, EGLint *);
+extern EGLBoolean ( APIENTRY * qeglBindAPI )(EGLenum);
+extern EGLenum ( APIENTRY * qeglQueryAPI )(void);
+extern EGLBoolean ( APIENTRY * qeglWaitClient )(void);
+extern EGLBoolean ( APIENTRY * qeglReleaseThread )(void);
+extern EGLSurface ( APIENTRY * qeglCreatePbufferFromClientBuffer )(EGLDisplay, EGLenum, EGLClientBuffer, EGLConfig, const EGLint *);
+extern EGLBoolean ( APIENTRY * qeglSurfaceAttrib )(EGLDisplay, EGLSurface, EGLint, EGLint);
+extern EGLBoolean ( APIENTRY * qeglBindTexImage )(EGLDisplay, EGLSurface, EGLint);
+extern EGLBoolean ( APIENTRY * qeglReleaseTexImage )(EGLDisplay, EGLSurface, EGLint);
+extern EGLBoolean ( APIENTRY * qeglSwapInterval )(EGLDisplay, EGLint);
+extern EGLContext ( APIENTRY * qeglCreateContext )(EGLDisplay, EGLConfig, EGLContext, const EGLint *);
+extern EGLBoolean ( APIENTRY * qeglDestroyContext )(EGLDisplay, EGLContext);
+extern EGLBoolean ( APIENTRY * qeglMakeCurrent )(EGLDisplay, EGLSurface, EGLSurface, EGLContext);
+extern EGLContext ( APIENTRY * qeglGetCurrentContext )(void);
+extern EGLSurface ( APIENTRY * qeglGetCurrentSurface )(EGLint);
+extern EGLDisplay ( APIENTRY * qeglGetCurrentDisplay )(void);
+extern EGLBoolean ( APIENTRY * qeglQueryContext )(EGLDisplay, EGLContext, EGLint, EGLint *);
+extern EGLBoolean ( APIENTRY * qeglWaitGL )(void);
+extern EGLBoolean ( APIENTRY * qeglWaitNative )(EGLint);
+extern EGLBoolean ( APIENTRY * qeglSwapBuffers )(EGLDisplay, EGLSurface);
+extern EGLBoolean ( APIENTRY * qeglCopyBuffers )(EGLDisplay, EGLSurface, EGLNativePixmapType);
+extern GLExtension_t ( APIENTRY * qeglGetProcAddress )(const char *);
 
 #endif
 

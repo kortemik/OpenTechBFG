@@ -41,20 +41,22 @@ idCVar r_useGLES3( "r_useGLES3", "0", CVAR_INTEGER, "0 = OpenGL ES 3.0 if availa
 bool QGL_Init( const char *dllname );
 void QGL_Shutdown();
 
-//eglGetDisplay
-//eglInitialize
-//eglBindAPI
-//eglChooseConfig
-//eglCreateContext
-//eglCreateWindowSurface
-//eglMakeCurrent
-//eglSwapInterval
-//eglDestroySurface
-//eglDestroyContext
-//eglTerminate
-//eglReleaseThread
-//eglSwapBuffers
-//eglGetProcAddress
+/*
+#define qeglGetDisplay eglGetDisplay
+#define qeglInitialize eglInitialize
+#define qeglBindAPI eglBindAPI
+#define qeglChooseConfig eglChooseConfig
+#define qeglCreateContext eglCreateContext
+#define qeglCreateWindowSurface eglCreateWindowSurface
+#define qeglMakeCurrent eglMakeCurrent
+#define qeglSwapInterval eglSwapInterval
+#define qeglDestroySurface eglDestroySurface
+#define qeglDestroyContext eglDestroyContext
+#define qeglTerminate eglTerminate
+#define qeglReleaseThread eglReleaseThread
+#define qeglSwapBuffers eglSwapBuffers
+#define qeglGetProcAddress eglGetProcAddress
+*/
 
 /*
 ========================
