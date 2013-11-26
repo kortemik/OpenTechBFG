@@ -421,6 +421,9 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
   unsigned char *out;
   byte	*fbuffer;
   byte  *bbuf;
+#ifdef ID_QNX
+  int len;
+#endif
 
   /* In this example we want to open the input file before doing anything else,
    * so that the setjmp() error recovery below can assume the file is open.
@@ -434,7 +437,9 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
 	*pic = NULL;		// until proven otherwise
   }
   {
+#ifndef ID_QNX
 		int		len;
+#endif
 		idFile *f;
 
 		f = fileSystem->OpenFileRead( filename );
@@ -469,7 +474,11 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
 
   /* Step 2: specify data source (eg, a file) */
 
+#ifdef ID_QNX
+  jpeg_mem_src(&cinfo, fbuffer, len);
+#else
   jpeg_stdio_src(&cinfo, fbuffer);
+#endif
 
   /* Step 3: read file parameters with jpeg_read_header() */
 

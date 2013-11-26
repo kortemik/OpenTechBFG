@@ -140,10 +140,11 @@ void GL_DepthBoundsTest( const float zmin, const float zmax ) {
 	}
 #else
 	// GL_DEPTH_TEST is always enabled, so we can do this
+	float newZmax = zmax;
 	if ( zmin == 0.0f && zmax == 0.0f ) {
-		zmax = 1.0f; // Reset range
+		newZmax = 1.0f; // Reset range
 	}
-	qglDepthRange( zmin, zmax );
+	qglDepthRange( zmin, newZmax );
 #endif
 }
 
