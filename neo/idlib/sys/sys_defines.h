@@ -220,6 +220,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #define CALLBACK
 
+#define USE_BUILTIN_ZLIB
+#define USE_BUILTIN_LIBJPEG
+
 #endif
 
 /*

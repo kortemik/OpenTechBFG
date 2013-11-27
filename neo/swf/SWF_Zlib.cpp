@@ -28,7 +28,7 @@ If you have questions concerning this license or the applicable additional terms
 */
 #pragma hdrstop
 #include "../idlib/precompiled.h"
-#ifdef ID_QNX
+#ifdef USE_BUILTIN_ZLIB
 #include <zlib.h>
 #else
 #include "../framework/zlib/zlib.h"

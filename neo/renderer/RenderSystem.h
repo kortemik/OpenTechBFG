@@ -92,7 +92,9 @@ struct glconfig_t {
 	const char *		vendor_string;
 	const char *		version_string;
 	const char *		extensions_string;
+#ifdef ID_WIN32
 	const char *		wgl_extensions_string;
+#endif
 	const char *		shading_language_string;
 
 	float				glVersion;				// atof( version_string )
@@ -103,6 +105,9 @@ struct glconfig_t {
 	int					maxTextureImageUnits;
 	int					uniformBufferOffsetAlignment;
 	float				maxTextureAnisotropy;
+#ifdef GL_ES_VERSION_2_0
+	int					maxMultisamples;
+#endif
 
 	int					colorBits;
 	int					depthBits;

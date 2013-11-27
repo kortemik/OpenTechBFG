@@ -961,6 +961,18 @@ void R_CheckGLESVariableReplacements() {
 		r_lodBias.SetMaxValue( max );
 		r_lodBias.SetMinValue( -max );
 	}
+
+	// Max multisamples
+	//TODO: glConfig.maxMultisamples
+}
+
+/*
+=============================
+R_InitializeFramebuffers
+=============================
+*/
+void R_InitializeFramebuffers() {
+	//TODO: Check multisamples and create framebuffers
 }
 
 #endif
@@ -1170,6 +1182,8 @@ void R_InitOpenGL() {
 
 #ifdef GL_ES_VERSION_2_0
 	R_CheckGLESVariableReplacements();
+
+	R_InitializeFramebuffers();
 #endif
 
 	renderProgManager.Init();
@@ -1988,12 +2002,17 @@ void GfxInfo_f( const idCmdArgs &args ) {
 	common->Printf( "GL_RENDERER: %s\n", glConfig.renderer_string );
 	common->Printf( "GL_VERSION: %s\n", glConfig.version_string );
 	common->Printf( "GL_EXTENSIONS: %s\n", glConfig.extensions_string );
+#ifdef ID_WIN32
 	if ( glConfig.wgl_extensions_string ) {
 		common->Printf( "WGL_EXTENSIONS: %s\n", glConfig.wgl_extensions_string );
 	}
+#endif
 	common->Printf( "GL_MAX_TEXTURE_SIZE: %d\n", glConfig.maxTextureSize );
 	common->Printf( "GL_MAX_TEXTURE_COORDS_ARB: %d\n", glConfig.maxTextureCoords );
 	common->Printf( "GL_MAX_TEXTURE_IMAGE_UNITS_ARB: %d\n", glConfig.maxTextureImageUnits );
+#ifdef GL_ES_VERSION_2_0
+	common->Printf( "GL_MAX_SAMPLES: %d\n", glConfig.maxMultisamples );
+#endif
 
 	// print all the display adapters, monitors, and video modes
 	void DumpAllDisplayDevices();

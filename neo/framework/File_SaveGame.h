@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __FILE_SAVEGAME_H__
 #define __FILE_SAVEGAME_H__
 
-#ifdef ID_QNX
+#ifdef USE_BUILTIN_ZLIB
 #include <zlib.h>
 #else
 #include "zlib/zlib.h"

@@ -41,7 +41,7 @@ void R_LoadImage( const char *name, byte **pic, int *width, int *height, bool ma
 
 */
 
-#ifdef ID_QNX
+#ifdef USE_BUILTIN_LIBJPEG
 #include <jpeglib.h>
 #else
 /*
@@ -421,7 +421,7 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
   unsigned char *out;
   byte	*fbuffer;
   byte  *bbuf;
-#ifdef ID_QNX
+#ifdef USE_BUILTIN_LIBJPEG
   int len;
 #endif
 
@@ -437,7 +437,7 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
 	*pic = NULL;		// until proven otherwise
   }
   {
-#ifndef ID_QNX
+#ifndef USE_BUILTIN_LIBJPEG
 		int		len;
 #endif
 		idFile *f;
@@ -474,7 +474,7 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
 
   /* Step 2: specify data source (eg, a file) */
 
-#ifdef ID_QNX
+#ifdef USE_BUILTIN_LIBJPEG
   jpeg_mem_src(&cinfo, fbuffer, len);
 #else
   jpeg_stdio_src(&cinfo, fbuffer);

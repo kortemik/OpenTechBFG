@@ -52,7 +52,12 @@ typedef struct {
 	void*						eglLib;
 	void*						openGLLib;
 	screen_context_t			screenCtx;
-	//TODO: opengl vars
+	screen_window_t				screenWin;
+
+	EGLContext					eglContext;
+	EGLDisplay					eglDisplay;
+	EGLSurface					eglSurface;
+	EGLConfig					eglConfig;
 
 	static idCVar				sys_arch;
 	static idCVar				sys_cpustring;

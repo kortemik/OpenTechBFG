@@ -260,7 +260,7 @@ Sys_Sleep
 */
 void Sys_Sleep( int msec ) {
 	struct timespec tm;
-	nsec2timespec( &tm, msec * 1000000 );
+	nsec2timespec( &tm, msec * 1000000 ); //XXX Should this be done by hand?
 	nanosleep( &tm, NULL );
 }
 
@@ -280,6 +280,14 @@ Sys_IsWindowVisible
 */
 bool Sys_IsWindowVisible() {
 	return ( qnx.windowState == NAVIGATOR_WINDOW_FULLSCREEN );
+}
+
+/*
+==================
+Sys_ShowConsole
+==================
+*/
+void Sys_ShowConsole( int visLevel, bool quitOnClose ) {
 }
 
 /*
@@ -722,7 +730,11 @@ void Sys_Init() {
 
 	bps_initialize();
 
-	/* TODO: Need to setup slog2 as well
+	//TODO: Setup slog2
+
+	//TODO: lock rotation
+
+	/* TODO
 	CoInitialize( NULL );
 
 	// get WM_TIMER messages pumped every millisecond

@@ -405,8 +405,8 @@ void idCommonLocal::DumpWarnings() {
 #ifdef ID_WIN32
 		WinExec( va( "Notepad.exe %s", osPath.c_str() ), SW_SHOW );
 #elif defined(ID_QNX)
-		fileSystem->CopyFile( osPath.c_str(), "./shared/misc" );
-		sys->OpenURL( "./shared/misc", false );
+		fileSystem->CopyFile( osPath.c_str(), "./shared/misc/warnings.txt" );
+		sys->OpenURL( "./shared/misc/warnings.txt", false );
 #endif
 #endif
 	}
