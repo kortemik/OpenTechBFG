@@ -1023,7 +1023,7 @@ struct glimpParms_t {
 
 bool		GLimp_Init( glimpParms_t parms );
 // If the desired mode can't be set satisfactorily, false will be returned.
-// If succesful, sets glConfig.nativeScreenWidth, glConfig.nativeScreenHeight, and glConfig.pixelAspect
+// If successful, sets glConfig.nativeScreenWidth, glConfig.nativeScreenHeight, and glConfig.pixelAspect
 
 // The renderer will then reset the glimpParms to "safe mode" of 640x480
 // fullscreen and try again.  If that also fails, the error will be fatal.
@@ -1049,16 +1049,16 @@ bool		GLimp_SpawnRenderThread( void (*function)() );
 void *		GLimp_BackEndSleep();
 void		GLimp_FrontEndSleep();
 void		GLimp_WakeBackEnd( void *data );
-// these functions implement the dual processor syncronization
+// these functions implement the dual processor synchronization
 
 void		GLimp_ActivateContext();
 void		GLimp_DeactivateContext();
 // These are used for managing SMP handoffs of the OpenGL context
-// between threads, and as a performance tunining aid.  Setting
+// between threads, and as a performance tuning aid.  Setting
 // 'r_skipRenderContext 1' will call GLimp_DeactivateContext() before
 // the 3D rendering code, and GLimp_ActivateContext() afterwards.  On
 // most OpenGL implementations, this will result in all OpenGL calls
-// being immediate returns, which lets us guage how much time is
+// being immediate returns, which lets us gauge how much time is
 // being spent inside OpenGL.
 
 void		GLimp_EnableLogging( bool enable );

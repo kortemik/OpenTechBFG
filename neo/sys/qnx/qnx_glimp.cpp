@@ -31,7 +31,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "../../idlib/precompiled.h"
 
 #include "qnx_local.h"
+#include <sys/syspage.h>
 #include "../../renderer/tr_local.h"
+#include <EGL/eglext.h>
 
 idCVar r_useGLES3( "r_useGLES3", "0", CVAR_INTEGER, "0 = OpenGL ES 3.0 if available, 1 = OpenGL ES 2.0, 2 = OpenGL 3.0", 0, 2 );
 
@@ -118,21 +120,19 @@ gammaTable_gmax_jmax=0-0x142F6 => 0-0xFFFF
 	*/
 }
 
-
 /*
 ====================
-PrintDevMode
+PrintDisplayMode
 ====================
 */
-static void PrintDevMode( DEVMODE & devmode ) {
-	common->Printf( "          dmPosition.x        : %i\n", devmode.dmPosition.x );
-	common->Printf( "          dmPosition.y        : %i\n", devmode.dmPosition.y );
-	common->Printf( "          dmBitsPerPel        : %i\n", devmode.dmBitsPerPel );
-	common->Printf( "          dmPelsWidth         : %i\n", devmode.dmPelsWidth );
-	common->Printf( "          dmPelsHeight        : %i\n", devmode.dmPelsHeight );
-	common->Printf( "          dmDisplayFixedOutput: %s\n", DMDFO( devmode.dmDisplayFixedOutput ) );
-	common->Printf( "          dmDisplayFlags      : 0x%x\n", devmode.dmDisplayFlags );
-	common->Printf( "          dmDisplayFrequency  : %i\n", devmode.dmDisplayFrequency );
+static void PrintDisplayMode( screen_display_mode_t & mode ) {
+	//common->Printf( "          display index: %i\n", mode.index );
+	common->Printf( "          width        : %i\n", mode.width );
+	common->Printf( "          height       : %i\n", mode.height );
+	common->Printf( "          refresh      : %i\n", mode.refresh );
+	common->Printf( "          interlaced   : 0x%x\n", mode.interlaced ); //XXX Can this be broken down to what interlaced mode it's in?
+	common->Printf( "          aspect_ratio : %ix%i\n", mode.aspect_ratio[0], mode.aspect_ratio[1] );
+	common->Printf( "          flags        : 0x%x\n", mode.flags ); //XXX Can this be broken down to what the flags are?
 }
 
 /*
@@ -141,7 +141,76 @@ DumpAllDisplayDevices
 ====================
 */
 void DumpAllDisplayDevices() {
-	//TODO
+	common->Printf( "\n" );
+
+	int displayCount = 1;
+	if ( screen_get_context_property_iv( qnx.screenCtx, SCREEN_PROPERTY_DISPLAY_COUNT, &displayCount ) != 0 ) {
+		common->Printf( "ERROR:  screen_get_context_property_iv(..., SCREEN_PROPERTY_DISPLAY_COUNT, ...) failed!\n\n" );
+		return;
+	}
+
+	screen_display_t* displayList = ( screen_display_t* )Mem_Alloc( sizeof( screen_display_t ) * displayCount, TAG_TEMP );
+	if ( screen_get_context_property_pv( qnx.screenCtx, SCREEN_PROPERTY_DISPLAYS, ( void** )displayList ) != 0 ) {
+		Mem_Free( displayList );
+		common->Printf( "ERROR:  screen_get_context_property_pv(..., SCREEN_PROPERTY_DISPLAYS, ...) failed!\n\n" );
+		return;
+	}
+
+	screen_display_t display;
+	screen_display_mode_t* modes;
+	char buffer[1024];
+	for ( int displayNum = 0; displayNum < displayCount; displayNum++ ) {
+		display = displayList[displayNum];
+
+		// General display stats
+		common->Printf( "display device: %i\n", deviceNum );
+		screen_get_display_property_cv( display, SCREEN_PROPERTY_ID_STRING, sizeof(buffer) - 1, buffer );
+		common->Printf( "  ID          : %s\n", buffer );
+		screen_get_display_property_cv( display, SCREEN_PROPERTY_VENDOR, sizeof(buffer) - 1, buffer );
+		common->Printf( "  Vendor      : %s\n", buffer );
+		screen_get_display_property_cv( display, SCREEN_PROPERTY_PRODUCT, sizeof(buffer) - 1, buffer );
+		common->Printf( "  Product     : %s\n", buffer );
+
+		// Detailed display stats
+		//XXX common->Printf( "      Product     : %s\n", buffer );
+		//TODO: type - screen_get_display_property_iv
+		//TODO: technology - screen_get_display_property_iv
+		//TODO: attached - screen_get_display_property_iv
+		//TODO: detachable - screen_get_display_property_iv
+		//TODO: rotation - screen_get_display_property_iv
+		//TODO: dpi - screen_get_display_property_iv
+		//TODO: native resolution - screen_get_display_property_iv
+		//TODO: physical size - screen_get_display_property_iv
+		//TODO: size - screen_get_display_property_iv
+		//TODO: transparency - screen_get_display_property_iv
+		//TODO: gamma - screen_get_display_property_iv
+		//TODO: intensity - screen_get_display_property_iv
+
+		//TODO: viewport position - screen_get_display_property_iv
+		//TODO: viewport size - screen_get_display_property_iv
+		//TODO: idle state - screen_get_display_property_iv
+		//TODO: idle timeout - screen_get_display_property_llv
+		//TODO: keep awakes - screen_get_display_property_iv
+		//TODO: mirror mode - screen_get_display_property_iv
+		//TODO: power mode - screen_get_display_property_iv
+		//TODO: protection enabled - screen_get_display_property_iv
+		//TODO: matrics - screen_get_display_property_llv
+		//TODO: current mode - screen_get_display_property_pv
+
+		// Formats
+		common->Printf( "          -------------------\n" );
+		//XXX common->Printf( "      Product     : %s\n", buffer );
+		//TODO
+
+		// Modes
+		common->Printf( "          -------------------\n" );
+		//TODO common->Printf( "          modeNum             : %i\n", modeNum );
+	}
+
+	Mem_Free( ( void* )displayList );
+
+	common->Printf( "\n" );
+#if 0
 	common->Printf( "\n" );
 	for ( int deviceNum = 0 ; ; deviceNum++ ) {
 		DISPLAY_DEVICE	device = {};
@@ -217,6 +286,7 @@ void DumpAllDisplayDevices() {
 		}
 	}
 	common->Printf( "\n" );
+#endif
 }
 
 /*
@@ -331,6 +401,21 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t> &
 }
 
 /*
+=================
+EGL_CheckExtension
+=================
+*/
+bool EGL_CheckExtension( char *name ) {
+	if ( !strstr( glConfig.egl_extensions_string, name ) ) {
+		common->Printf( "X..%s not found\n", name );
+		return false;
+	}
+
+	common->Printf( "...using %s\n", name );
+	return true;
+}
+
+/*
 ===================
 QNXGLimp_CreateWindow
 ===================
@@ -338,10 +423,17 @@ QNXGLimp_CreateWindow
 bool QNXGLimp_CreateWindow( int x, int y, int width, int height, int fullScreen ) {
 
 	const int screenFormat = SCREEN_FORMAT_RGBA8888;
+	const int screenIdleMode = SCREEN_IDLE_MODE_KEEP_AWAKE;
+
 #ifdef ID_QNX_X86
-	const int screenUsage = SCREEN_USAGE_OPENGL_ES2;
+	int screenUsage = 0;
 #else
-	const int screenUsage = SCREEN_USAGE_DISPLAY | SCREEN_USAGE_OPENGL_ES2; // Physical device copy directly into physical display
+	int screenUsage = SCREEN_USAGE_DISPLAY; // Physical device copy directly into physical display
+#endif
+#if defined(GL_ES_VERSION_3_0) && BBNDK_VERSION_AT_LEAST(10, 2, 0)
+	screenUsage |= ( ( r_useGLES3.GetInteger() != 1 ) ? SCREEN_USAGE_OPENGL_ES3 : SCREEN_USAGE_OPENGL_ES2 );
+#else
+	screenUsage |= SCREEN_USAGE_OPENGL_ES2;
 #endif
 
 	if ( screen_create_context( &qnx.screenCtx, 0 ) != 0 ) {
@@ -360,8 +452,40 @@ bool QNXGLimp_CreateWindow( int x, int y, int width, int height, int fullScreen 
 	}
 
 	if ( screen_set_window_property_iv( qnx.screenWin, SCREEN_PROPERTY_USAGE, &screenUsage ) != 0 ) {
+#if defined(GL_ES_VERSION_3_0) && BBNDK_VERSION_AT_LEAST(10, 2, 0)
+		// Try to fallback to GLES 2.0 for usage expectations
+#ifdef ID_QNX_X86
+		screenUsage = SCREEN_USAGE_OPENGL_ES2;
+#else
+		screenUsage = SCREEN_USAGE_DISPLAY | SCREEN_USAGE_OPENGL_ES2;
+#endif
+		if ( r_useGLES3.GetInteger() != 0 || screen_set_window_property_iv( qnx.screenWin, SCREEN_PROPERTY_USAGE, &screenUsage ) != 0 ) {
+			common->Printf( "Could not set window usage\n" );
+			return false;
+		}
+#else
 		common->Printf( "Could not set window usage\n" );
 		return false;
+#endif // defined(GL_ES_VERSION_3_0) && BBNDK_VERSION_AT_LEAST(10, 2, 0)
+	}
+
+	if ( screen_set_window_property_iv( qnx.screenWin, SCREEN_PROPERTY_IDLE_MODE, &screenIdleMode ) != 0 ) {
+		common->Printf( "Could not set window idle mode\n" );
+		return false;
+	}
+
+	if ( r_debugContext.GetBool() ) {
+		// Setup debug info (just a readout)
+		int debugFlags = SCREEN_DEBUG_GRAPH_FPS;
+		if ( r_debugContext.GetInteger() >= 2 ) {
+			debugFlags |= SCREEN_DEBUG_GRAPH_CPU_TIME | SCREEN_DEBUG_GRAPH_GPU_TIME;
+		}
+		if ( r_debugContext.GetInteger() >= 3 ) {
+			debugFlags = SCREEN_DEBUG_STATISTICS; // Note: We replace the value since it's not supposed to be a flag
+		}
+		if ( screen_set_window_property_iv( qnx.screenWin, SCREEN_PROPERTY_DEBUG, &debugFlags ) != 0 ) {
+			common->Printf( "Could not set window debug flags\n" );
+		}
 	}
 
 	const int position[2] = {x, y};
@@ -377,6 +501,7 @@ bool QNXGLimp_CreateWindow( int x, int y, int width, int height, int fullScreen 
 	}
 
 	// Change display if determined
+	screen_display_t display;
 	if ( fullScreen > 1 ) {
 		int displayCount = 1;
 		if ( screen_get_context_property_iv( qnx.screenCtx, SCREEN_PROPERTY_DISPLAY_COUNT, &displayCount ) != 0 ) {
@@ -395,13 +520,17 @@ bool QNXGLimp_CreateWindow( int x, int y, int width, int height, int fullScreen 
 			common->Printf( "Could not get displays\n" );
 			return false;
 		}
-		screen_display_t display = displayList[ fullScreen - 1 ];
+		display = displayList[ fullScreen - 1 ];
 		Mem_Free( ( void* )displayList );
 
 		if ( screen_set_window_property_pv( qnx.screenWin, SCREEN_PROPERTY_DISPLAY, ( void** )&display ) != 0 ) {
-			common->Printf( "Could not set window size\n" );
+			common->Printf( "Could not set window display\n" );
 			return false;
 		}
+	}
+
+	if ( screen_get_window_property_pv( qnx.screenWin, SCREEN_PROPERTY_DISPLAY, ( void** )&display ) == 0 ) {
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_ID, &qnx.screenDisplayID );
 	}
 
 	if ( screen_create_window_buffers( qnx.screenWin, 2 ) != 0 ) {
@@ -417,11 +546,13 @@ bool QNXGLimp_CreateWindow( int x, int y, int width, int height, int fullScreen 
 QNXGLimp_CreateEGLConfig
 ===================
 */
-bool QNXGLimp_CreateEGLConfig( int multisamples ) {
+bool QNXGLimp_CreateEGLConfig( int multisamples, bool gles3bit ) {
 	EGLint eglConfigAttrs[] =
 	{
+#ifdef GLES_MULTISAMPLE_EGL
 		EGL_SAMPLE_BUFFERS,     ( ( multisamples >= 1 ) ? 1 : 0 ),
 		EGL_SAMPLES,            multisamples,
+#endif
 		EGL_RED_SIZE,           8,
 		EGL_GREEN_SIZE,         8,
 		EGL_BLUE_SIZE,          8,
@@ -429,7 +560,11 @@ bool QNXGLimp_CreateEGLConfig( int multisamples ) {
 		EGL_DEPTH_SIZE,         24,
 		EGL_STENCIL_SIZE,       8,
 		EGL_SURFACE_TYPE,       EGL_WINDOW_BIT,
+#ifdef EGL_OPENGL_ES3_BIT_KHR
+		EGL_RENDERABLE_TYPE,    ( gles3bit ? EGL_OPENGL_ES3_BIT_KHR : EGL_OPENGL_ES2_BIT ),
+#else
 		EGL_RENDERABLE_TYPE,    EGL_OPENGL_ES2_BIT,
+#endif
 		EGL_NONE
 	};
 
@@ -438,6 +573,7 @@ bool QNXGLimp_CreateEGLConfig( int multisamples ) {
 
 	if ( qeglChooseConfig( qnx.eglDisplay, eglConfigAttrs, &qnx.eglConfig, 1, &eglConfigCount ) != EGL_TRUE || eglConfigCount == 0 ) {
 		success = false;
+#if 0 // While useful, if the specified number of samples isn't supported then we want it to re-pick a config instead of saying one config while having another set
 		while (multisamples) {
 			// Try lowering the MSAA sample count until we find a supported config
 			multisamples /= 2;
@@ -449,6 +585,7 @@ bool QNXGLimp_CreateEGLConfig( int multisamples ) {
 				break;
 			}
 		}
+#endif
 	}
 
 	return success;
@@ -459,12 +596,13 @@ bool QNXGLimp_CreateEGLConfig( int multisamples ) {
 QNXGLimp_CreateEGLSurface
 ===================
 */
-bool QNXGLimp_CreateEGLSurface( EGLNativeWindowType window, const int multisamples ) {
+bool QNXGLimp_CreateEGLSurface( EGLNativeWindowType window, const int multisamples, bool createContextAvaliable ) {
 	common->Printf( "Initializing OpenGL driver\n" );
 
 	EGLint eglContextAttrs[] =
 	{
-		EGL_CONTEXT_CLIENT_VERSION,    0,
+		EGL_CONTEXT_CLIENT_VERSION,		0,
+		EGL_NONE,						EGL_NONE,
 		EGL_NONE
 	};
 #ifdef GL_ES_VERSION_3_0
@@ -480,20 +618,23 @@ bool QNXGLimp_CreateEGLSurface( EGLNativeWindowType window, const int multisampl
 	}
 #endif
 
-	qnx.eglDisplay = qeglGetDisplay( EGL_DEFAULT_DISPLAY );
-	if ( qnx.eglDisplay == EGL_NO_DISPLAY ) {
-		common->Printf( "...^3Could not get EGL display^0\n");
-		return false;
+#if defined( EGL_CONTEXT_FLAGS_KHR ) && defined( EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR )
+	if ( r_debugContext.GetBool() && createContextAvaliable ) {
+		eglContextAttrs[2] = EGL_CONTEXT_FLAGS_KHR;
+		eglContextAttrs[3] = EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR;
 	}
+#endif
 
 	if ( qeglInitialize( qnx.eglDisplay, NULL, NULL ) != EGL_TRUE ) {
 		common->Printf( "...^3Could not initialize EGL display^0\n");
 		return false;
 	}
 
-	if ( !QNXGLimp_CreateEGLConfig( multisamples ) ) {
-		common->Printf( "...^3Could not determine EGL config^0\n");
-		return false;
+	if ( !QNXGLimp_CreateEGLConfig( multisamples, createContextAvaliable && r_useGLES3.GetInteger() != 1 ) ) {
+		if ( r_useGLES3.GetInteger() != 0 || !QNXGLimp_CreateEGLConfig( multisamples, false ) ) {
+			common->Printf( "...^3Could not determine EGL config^0\n");
+			return false;
+		}
 	}
 
 	for ( int config = 0; config < 2; config++ ) {
@@ -545,7 +686,7 @@ bool GLimp_Init( glimpParms_t parms ) {
 	const char	*driverName;
 
 	// Some early checks to make sure supported params exist
-	if ( parms.fullScreen == 0 ) {
+	if ( parms.x != 0 || parms.y != 0 || parms.fullScreen <= 0 || parms.stereo ) {
 		return false;
 	}
 
@@ -566,12 +707,20 @@ bool GLimp_Init( glimpParms_t parms ) {
 		return false;
 	}
 
+	qnx.eglDisplay = qeglGetDisplay( EGL_DEFAULT_DISPLAY );
+	if ( qnx.eglDisplay == EGL_NO_DISPLAY ) {
+		common->Printf( "...^3Could not get EGL display^0\n");
+		return false;
+	}
+
+	glConfig.egl_extensions_string = qeglQueryString( qnx.eglDisplay, EGL_EXTENSIONS );
+
 	if ( !QNXGLimp_CreateWindow( parms.x, parms.y, parms.width, parms.height, parms.fullScreen ) ) {
 		GLimp_Shutdown();
 		return false;
 	}
 
-	if ( !QNXGLimp_CreateEGLSurface( qnx.screenWin, parms.multiSamples ) ) {
+	if ( !QNXGLimp_CreateEGLSurface( qnx.screenWin, parms.multiSamples, EGL_CheckExtension( "EGL_KHR_create_context" ) ) ) {
 		GLimp_Shutdown();
 		return false;
 	}
@@ -580,10 +729,9 @@ bool GLimp_Init( glimpParms_t parms ) {
 	glConfig.swapControlTearAvailable = false;
 	glConfig.stereoPixelFormatAvailable = false;
 
-	//TODO
-	glConfig.colorBits = win32.pfd.cColorBits;
-	glConfig.depthBits = win32.pfd.cDepthBits;
-	glConfig.stencilBits = win32.pfd.cStencilBits;
+	qeglGetConfigAttrib( qnx.eglDisplay, qnx.eglConfig, EGL_BUFFER_SIZE, &glConfig.colorBits );
+	qeglGetConfigAttrib( qnx.eglDisplay, qnx.eglConfig, EGL_DEPTH_SIZE, &glConfig.depthBits );
+	qeglGetConfigAttrib( qnx.eglDisplay, qnx.eglConfig, EGL_STENCIL_SIZE, &glConfig.stencilBits );
 
 	//XXX Is rotation swapping needed for width/height and physicalScreenWidth?
 	glConfig.isFullscreen = parms.fullScreen;
@@ -618,42 +766,59 @@ Sets up the screen based on passed parms..
 ===================
 */
 bool GLimp_SetScreenParms( glimpParms_t parms ) {
-	//TODO
-	/*
-	// Optionally ChangeDisplaySettings to get a different fullscreen resolution.
-	if ( !GLW_ChangeDislaySettingsIfNeeded( parms ) ) {
+	// Some early checks to make sure supported params exist
+	if ( parms.x != 0 || parms.y != 0 || parms.fullScreen <= 0 || parms.stereo ) {
 		return false;
 	}
 
-	int x, y, w, h;
-	if ( !GLW_GetWindowDimensions( parms, x, y, w, h ) ) {
+	const int position[2] = {parms.x, parms.y};
+	if ( screen_set_window_property_iv( qnx.screenWin, SCREEN_PROPERTY_POSITION, position ) != 0 ) {
+		common->Printf( "Could not set window position\n" );
 		return false;
 	}
 
-	int exstyle;
-	int stylebits;
+	const int size[2] = {parms.width, parms.height};
+	if ( screen_set_window_property_iv( qnx.screenWin, SCREEN_PROPERTY_BUFFER_SIZE, size ) != 0 ) {
+		common->Printf( "Could not set window size\n" );
+		return false;
+	}
+	//XXX Is rotation swapping needed for width/height and physicalScreenWidth?
+	glConfig.nativeScreenWidth = parms.width;
+	glConfig.nativeScreenHeight = parms.height;
 
-	if ( parms.fullScreen ) {
-		exstyle = WS_EX_TOPMOST;
-		stylebits = WS_POPUP|WS_VISIBLE|WS_SYSMENU;
-	} else {
-		exstyle = 0;
-		stylebits = WINDOW_STYLE|WS_SYSMENU;
+	// Get displays
+	int displayCount = 1;
+	if ( screen_get_context_property_iv( qnx.screenCtx, SCREEN_PROPERTY_DISPLAY_COUNT, &displayCount ) != 0 ) {
+		common->Printf( "Could not get display count\n" );
+		return false;
 	}
 
-	SetWindowLong( win32.hWnd, GWL_STYLE, stylebits );
-	SetWindowLong( win32.hWnd, GWL_EXSTYLE, exstyle );
-	SetWindowPos( win32.hWnd, parms.fullScreen ? HWND_TOPMOST : HWND_NOTOPMOST, x, y, w, h, SWP_SHOWWINDOW );
+	if ( ( parms.fullScreen - 1 ) >= displayCount ) {
+		common->Printf( "fullScreen index does not correlate to a display\n" );
+		return false;
+	}
+
+	screen_display_t* displayList = ( screen_display_t* )Mem_Alloc( sizeof( screen_display_t ) * displayCount, TAG_TEMP );
+	if ( screen_get_context_property_pv( qnx.screenCtx, SCREEN_PROPERTY_DISPLAYS, ( void** )displayList ) != 0 ) {
+		Mem_Free( displayList );
+		common->Printf( "Could not get displays\n" );
+		return false;
+	}
+	screen_display_t display = displayList[ parms.fullScreen - 1 ];
+	Mem_Free( ( void* )displayList );
+
+	int displayId;
+	screen_get_display_property_iv( display, SCREEN_PROPERTY_ID, &displayId );
+	if ( displayId != qnx.screenDisplayID && screen_set_window_property_pv( qnx.screenWin, SCREEN_PROPERTY_DISPLAY, ( void** )&display ) != 0 ) {
+		common->Printf( "Could not set window display\n" );
+		return false;
+	}
+	qnx.screenDisplayID = displayId;
 
 	glConfig.isFullscreen = parms.fullScreen;
 	glConfig.pixelAspect = 1.0f;	// FIXME: some monitor modes may be distorted
 
-	glConfig.isFullscreen = parms.fullScreen;
-	glConfig.nativeScreenWidth = parms.width;
-	glConfig.nativeScreenHeight = parms.height;
-
 	return true;
-	*/
 }
 
 /*
@@ -707,7 +872,21 @@ void GLimp_Shutdown() {
 		qnx.screenCtx = NULL;
 	}
 
-	//XXX cleanup render thread handle...
+	if ( qnx.renderThread ) {
+		common->Printf( "...closing smp thread\n" );
+		Sys_DestroyThread( qnx.renderThread );
+		qnx.renderThread = NULL;
+	}
+
+	if ( qnx.renderCommandsEvent ) {
+		common->Printf( "...destroying smp signals\n" );
+		Sys_SignalDestroy( qnx.renderCommandsEvent );
+		Sys_SignalDestroy( qnx.renderCompletedEvent );
+		Sys_SignalDestroy( qnx.renderActiveEvent );
+		qnx.renderCommandsEvent = NULL;
+		qnx.renderCompletedEvent = NULL;
+		qnx.renderActiveEvent = NULL;
+	}
 
 	// shutdown QGL subsystem
 	QGL_Shutdown();
@@ -723,9 +902,7 @@ void GLimp_SwapBuffers() {
 		r_swapInterval.ClearModified();
 
 		int interval = 0;
-		if ( r_swapInterval.GetInteger() == 1 ) {
-			interval = ( glConfig.swapControlTearAvailable ) ? -1 : 1;
-		} else if ( r_swapInterval.GetInteger() == 2 ) {
+		if ( r_swapInterval.GetInteger() != 0 ) {
 			interval = 1;
 		}
 
@@ -750,12 +927,6 @@ GLimp_ActivateContext
 */
 void GLimp_ActivateContext() {
 	qeglMakeCurrent( qnx.eglDisplay, qnx.eglSurface, qnx.eglSurface, qnx.eglContext );
-	//TODO
-	/*
-	if ( !qwglMakeCurrent( win32.hDC, win32.hGLRC ) ) {
-		win32.wglErrors++;
-	}
-	*/
 }
 
 /*
@@ -766,13 +937,6 @@ GLimp_DeactivateContext
 void GLimp_DeactivateContext() {
 	qglFinish();
 	qeglMakeCurrent( qnx.eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT );
-	//TODO
-	/*
-	qglFinish();
-	if ( !qwglMakeCurrent( win32.hDC, NULL ) ) {
-		win32.wglErrors++;
-	}
-	*/
 }
 
 /*
@@ -780,14 +944,15 @@ void GLimp_DeactivateContext() {
 GLimp_RenderThreadWrapper
 ===================
 */
-static void GLimp_RenderThreadWrapper() {
-	//TODO
-	/*
-	win32.glimpRenderThread();
+static void* GLimp_RenderThreadWrapper( void* args ) {
+	void (*renderThread)() = ( void (*)() )args;
+
+	renderThread();
 
 	// unbind the context before we die
-	qwglMakeCurrent( win32.hDC, NULL );
-	*/
+	qeglMakeCurrent( qnx.eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT );
+
+	return NULL;
 }
 
 /*
@@ -798,44 +963,21 @@ Returns false if the system only has a single processor
 =======================
 */
 bool GLimp_SpawnRenderThread( void (*function)() ) {
-	//TODO
-	/*
-	SYSTEM_INFO info;
-
 	// check number of processors
-	GetSystemInfo( &info );
-	if ( info.dwNumberOfProcessors < 2 ) {
+	if ( _syspage_ptr->num_cpu < 2 ) {
 		return false;
 	}
 
+	//What if the values already exist? The Windows version doesn't do anything (though it doesn't seem to cleanup it's events either...)
+
 	// create the IPC elements
-	win32.renderCommandsEvent = CreateEvent( NULL, TRUE, FALSE, NULL );
-	win32.renderCompletedEvent = CreateEvent( NULL, TRUE, FALSE, NULL );
-	win32.renderActiveEvent = CreateEvent( NULL, TRUE, FALSE, NULL );
+	Sys_SignalCreate( qnx.renderCommandsEvent, true );
+	Sys_SignalCreate( qnx.renderCompletedEvent, true );
+	Sys_SignalCreate( qnx.renderActiveEvent, true );
 
-	win32.glimpRenderThread = function;
-
-	win32.renderThreadHandle = CreateThread(
-	   NULL,	// LPSECURITY_ATTRIBUTES lpsa,
-	   0,		// DWORD cbStack,
-	   (LPTHREAD_START_ROUTINE)GLimp_RenderThreadWrapper,	// LPTHREAD_START_ROUTINE lpStartAddr,
-	   0,			// LPVOID lpvThreadParm,
-	   0,			//   DWORD fdwCreate,
-	   &win32.renderThreadId );
-
-	if ( !win32.renderThreadHandle ) {
-		common->Error( "GLimp_SpawnRenderThread: failed" );
-	}
-
-	SetThreadPriority( win32.renderThreadHandle, THREAD_PRIORITY_ABOVE_NORMAL );
-#if 0
-	// make sure they always run on different processors
-	SetThreadAffinityMask( GetCurrentThread, 1 );
-	SetThreadAffinityMask( win32.renderThreadHandle, 2 );
-#endif
+	qnx.renderThread = Sys_CreateThread( GLimp_RenderThreadWrapper, function, THREAD_ABOVE_NORMAL, "qnx_renderThread", CORE_ANY );
 
 	return true;
-	*/
 }
 
 
@@ -847,33 +989,30 @@ GLimp_BackEndSleep
 ===================
 */
 void *GLimp_BackEndSleep() {
-	//TODO
-	/*
 	void	*data;
 
 #ifdef DEBUG_PRINTS
-OutputDebugString( "-->GLimp_BackEndSleep\n" );
+	slog2c( NULL, SLOG_CODE, SLOG2_DEBUG2, "-->GLimp_BackEndSleep\n" );
 #endif
-	ResetEvent( win32.renderActiveEvent );
+	Sys_SignalClear( qnx.renderActiveEvent );
 
 	// after this, the front end can exit GLimp_FrontEndSleep
-	SetEvent( win32.renderCompletedEvent );
+	Sys_SignalRaise( qnx.renderCompletedEvent );
 
-	WaitForSingleObject( win32.renderCommandsEvent, INFINITE );
+	Sys_SignalWait( qnx.renderCommandsEvent, idSysSignal::WAIT_INFINITE );
 
-	ResetEvent( win32.renderCompletedEvent );
-	ResetEvent( win32.renderCommandsEvent );
+	Sys_SignalClear( qnx.renderCompletedEvent );
+	Sys_SignalClear( qnx.renderCommandsEvent );
 
-	data = win32.smpData;
+	data = qnx.smpData;
 
 	// after this, the main thread can exit GLimp_WakeRenderer
-	SetEvent( win32.renderActiveEvent );
+	Sys_SignalRaise( qnx.renderActiveEvent );
 
 #ifdef DEBUG_PRINTS
-OutputDebugString( "<--GLimp_BackEndSleep\n" );
+	slog2c( NULL, SLOG_CODE, SLOG2_DEBUG2, "<--GLimp_BackEndSleep\n" );
 #endif
 	return data;
-	*/
 }
 
 /*
@@ -882,20 +1021,20 @@ GLimp_FrontEndSleep
 ===================
 */
 void GLimp_FrontEndSleep() {
-	//TODO
-	/*
 #ifdef DEBUG_PRINTS
-OutputDebugString( "-->GLimp_FrontEndSleep\n" );
+	slog2c( NULL, SLOG_CODE, SLOG2_DEBUG2, "-->GLimp_FrontEndSleep\n" );
 #endif
-	WaitForSingleObject( win32.renderCompletedEvent, INFINITE );
+	Sys_SignalWait( qnx.renderCompletedEvent, idSysSignal::WAIT_INFINITE );
 
 #ifdef DEBUG_PRINTS
-OutputDebugString( "<--GLimp_FrontEndSleep\n" );
+	slog2c( NULL, SLOG_CODE, SLOG2_DEBUG2, "<--GLimp_FrontEndSleep\n" );
 #endif
-	*/
 }
 
-//volatile bool	renderThreadActive;
+volatile bool	renderThreadActive;
+
+// We can use Sys_SignalWait, but it will simply return false if something goes wrong
+int Sys_SignalWait_ErrorReturn( signalHandle_t & handle, int timeout );
 
 /*
 ===================
@@ -903,42 +1042,40 @@ GLimp_WakeBackEnd
 ===================
 */
 void GLimp_WakeBackEnd( void *data ) {
-	//TODO
-	/*
 	int		r;
 
 #ifdef DEBUG_PRINTS
-OutputDebugString( "-->GLimp_WakeBackEnd\n" );
+	slog2c( NULL, SLOG_CODE, SLOG2_DEBUG2, "-->GLimp_WakeBackEnd\n" );
 #endif
-	win32.smpData = data;
+
+	qnx.smpData = data;
 
 	if ( renderThreadActive ) {
 		common->FatalError( "GLimp_WakeBackEnd: already active" );
 	}
 
-	r = WaitForSingleObject( win32.renderActiveEvent, 0 );
-	if ( r == WAIT_OBJECT_0 ) {
+	r = Sys_SignalWait_ErrorReturn( qnx.renderActiveEvent, 0 );
+	if ( r == EOK ) {
 		common->FatalError( "GLimp_WakeBackEnd: already signaled" );
 	}
 
-	r = WaitForSingleObject( win32.renderCommandsEvent, 0 );
-	if ( r == WAIT_OBJECT_0 ) {
+	r = Sys_SignalWait_ErrorReturn( qnx.renderCommandsEvent, 0 );
+	if ( r == EOK ) {
 		common->FatalError( "GLimp_WakeBackEnd: commands already signaled" );
 	}
 
 	// after this, the renderer can continue through GLimp_RendererSleep
-	SetEvent( win32.renderCommandsEvent );
+	Sys_SignalRaise( qnx.renderCommandsEvent );
 
-	r = WaitForSingleObject( win32.renderActiveEvent, 5000 );
+	r = Sys_SignalWait_ErrorReturn( qnx.renderActiveEvent, 5000 );
 
-	if ( r == WAIT_TIMEOUT ) {
+	if ( r == ETIMEDOUT ) {
 		common->FatalError( "GLimp_WakeBackEnd: WAIT_TIMEOUT" );
 	}
 
 #ifdef DEBUG_PRINTS
-OutputDebugString( "<--GLimp_WakeBackEnd\n" );
+	slog2c( NULL, SLOG_CODE, SLOG2_DEBUG2, "<--GLimp_WakeBackEnd\n" );
 #endif
-	 */
 }
 
 /*

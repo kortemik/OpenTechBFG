@@ -31,7 +31,6 @@ If you have questions concerning this license or the applicable additional terms
 #include <pthread.h>
 #include <sched.h>
 #include <atomic.h>
-#include <semaphore.h>
 #include <time.h>
 #include <errno.h>
 
@@ -183,8 +182,7 @@ Sys_SignalCreate
 ========================
 */
 void Sys_SignalCreate( signalHandle_t & handle, bool manualReset ) {
-	// Don't have a way to do anything with manualReset
-	sem_init( &handle, 0, 0 );
+	handle = new (TAG_THREAD) idSysThreadSignal( manualReset, false );
 }
 
 /*
@@ -193,7 +191,9 @@ Sys_SignalDestroy
 ========================
 */
 void Sys_SignalDestroy( signalHandle_t &handle ) {
-	sem_destroy( &handle );
+	if ( handle ) {
+		delete handle;
+	}
 }
 
 /*
@@ -202,7 +202,10 @@ Sys_SignalRaise
 ========================
 */
 void Sys_SignalRaise( signalHandle_t & handle ) {
-	sem_post( &handle );
+	pthread_mutex_lock( &handle->mutex );
+	handle->triggered = true;
+	pthread_cond_signal( &handle->cond );
+	pthread_mutex_unlock( &handle->mutex );
 }
 
 /*
@@ -211,7 +214,42 @@ Sys_SignalClear
 ========================
 */
 void Sys_SignalClear( signalHandle_t & handle ) {
-	// events are created as auto-reset so this should never be needed
+	pthread_mutex_lock( &handle->mutex );
+	handle->triggered = false;
+	pthread_mutex_unlock( &handle->mutex );
+}
+
+/*
+========================
+Sys_SignalWait_ErrorReturn
+========================
+*/
+int Sys_SignalWait_ErrorReturn( signalHandle_t & handle, int timeout ) {
+	int ret = EOK;
+	pthread_mutex_lock( &handle->mutex );
+	if ( timeout == idSysSignal::WAIT_INFINITE ) {
+		while ( !handle->triggered ) {
+			ret = pthread_cond_wait( &handle->cond, &handle->mutex );
+		}
+		if ( ret == EOK && !handle->manualReset ) {
+			handle->triggered = false;
+		}
+	} else {
+		struct timespec tm;
+		// Get the time, add the timeout "offset", wait. If it works, then we're good. If it doesn't, then we get the error
+		clock_gettime( CLOCK_MONOTONIC, &tm );
+		if ( timeout != 0 ) {
+			nsec2timespec( &tm, timespec2nsec( &tm ) + ( timeout * 1000000UL ) ); //Millisecond to nanosecond
+		}
+		while ( !handle->triggered && ret == EOK ) {
+			ret = pthread_cond_timedwait( &handle->cond, &handle->mutex, &tm );
+		}
+		if ( ret == EOK && !handle->manualReset ) {
+			handle->triggered = false;
+		}
+	}
+	pthread_mutex_unlock( &handle->mutex );
+	return ret;
 }
 
 /*
@@ -220,21 +258,7 @@ Sys_SignalWait
 ========================
 */
 bool Sys_SignalWait( signalHandle_t & handle, int timeout ) {
-	struct timespec tm;
-	int result;
-	if ( timeout == idSysSignal::WAIT_INFINITE ) {
-		result = sem_wait( &handle );
-	} else if ( timeout == 0 ) {
-		result = sem_trywait( &handle );
-	} else {
-		// Get the time, add the timeout "offset", wait. If it works, then we're good. If it doesn't, then we get the error and assert will take care of te rest
-		clock_gettime( CLOCK_MONOTONIC, &tm );
-		nsec2timespec( &tm, timespec2nsec( &tm ) + ( timeout * 1000000 ) ); //Millisecond to nanosecond
-		result = sem_timedwait_monotonic( &handle, &tm );
-		if ( result != 0 ) {
-			result = errno;
-		}
-	}
+	int result = Sys_SignalWait_ErrorReturn( handle, timeout );
 	assert( result == 0 || ( timeout != idSysSignal::WAIT_INFINITE && result == ETIMEDOUT ) );
 	return ( result == 0 );
 }

@@ -51,6 +51,8 @@ typedef struct {
 
 	void*						eglLib;
 	void*						openGLLib;
+	bool						glLoggingInit;
+	int							screenDisplayID;
 	screen_context_t			screenCtx;
 	screen_window_t				screenWin;
 
@@ -58,6 +60,13 @@ typedef struct {
 	EGLDisplay					eglDisplay;
 	EGLSurface					eglSurface;
 	EGLConfig					eglConfig;
+
+	signalHandle_t				renderCommandsEvent;
+	signalHandle_t				renderCompletedEvent;
+	signalHandle_t				renderActiveEvent;
+	uintptr_t					renderThread;
+	void*						smpData;
+	// SMP acceleration vars
 
 	static idCVar				sys_arch;
 	static idCVar				sys_cpustring;

@@ -251,7 +251,7 @@ static void R_CheckCvars() {
 		r_useSRGB.ClearModified();
 		if ( glConfig.sRGBFramebufferAvailable ) {
 #ifdef GL_ES_VERSION_2_0
-			//TODO
+			//TODO: modify idRenderSystemLocal's framebuffer/renderbuffer list and/or textures
 #else
 			if ( r_useSRGB.GetBool() ) {
 				qglEnable( GL_FRAMEBUFFER_SRGB );

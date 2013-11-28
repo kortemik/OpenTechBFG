@@ -50,8 +50,28 @@ If you have questions concerning this license or the applicable additional terms
 	#pragma intrinsic(_ReadWriteBarrier)
 	#define SYS_MEMORYBARRIER		_ReadWriteBarrier(); MemoryBarrier()
 #elif defined(ID_QNX)
+	class idSysThreadSignal {
+	public:
+		idSysThreadSignal( bool manReset, bool initState ) : manualReset( manReset ), triggered( initState ) {
+			pthread_condattr_t attr;
+			pthread_condattr_init( &attr);
+			pthread_condattr_setclock( &attr, CLOCK_MONOTONIC);
+			pthread_mutex_init( &mutex, NULL );
+			pthread_cond_init( &cond, &attr );
+			pthread_condattr_destroy( &attr );
+		}
+		~idSysThreadSignal() {
+			pthread_mutex_destroy( &mutex );
+			pthread_cond_destroy( &cond );
+		}
+		pthread_mutex_t mutex;
+		pthread_cond_t cond;
+		bool triggered;
+		bool manualReset;
+	};
+
 	typedef pthread_mutex_t			mutexHandle_t;
-	typedef sem_t					signalHandle_t;
+	typedef idSysThreadSignal*		signalHandle_t;
 	typedef int						interlockedInt_t;
 	#define SYS_MEMORYBARRIER		__cpu_membarrier(); //XXX Not sure if this is correct
 #endif

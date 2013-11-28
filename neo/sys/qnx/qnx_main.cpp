@@ -213,7 +213,7 @@ void Sys_Printf( const char *fmt, ... ) {
 	va_end(argptr);
 	msg[sizeof(msg)-1] = '\0';
 
-	slog2fa( NULL, SLOG_CODE, SLOG2_INFO, "%s", SLOG2_FA_STRING( msg ), SLOG2_FA_END );
+	slog2c( NULL, SLOG_CODE, SLOG2_INFO, msg );
 
 	/* XXX
 	if ( win32.win_outputEditString.GetBool() && idLib::IsMainThread() ) {
@@ -236,7 +236,7 @@ void Sys_DebugPrintf( const char *fmt, ... ) {
 	msg[ sizeof(msg)-1 ] = '\0';
 	va_end( argptr );
 
-	slog2fa( NULL, SLOG_CODE, SLOG2_DEBUG1, "%s", SLOG2_FA_STRING( msg ), SLOG2_FA_END );
+	slog2c( NULL, SLOG_CODE, SLOG2_DEBUG1, msg );
 }
 
 /*
@@ -250,7 +250,7 @@ void Sys_DebugVPrintf( const char *fmt, va_list arg ) {
 	idStr::vsnPrintf( msg, MAXPRINTMSG-1, fmt, arg );
 	msg[ sizeof(msg)-1 ] = '\0';
 
-	slog2fa( NULL, SLOG_CODE, SLOG2_DEBUG1, "%s", SLOG2_FA_STRING( msg ), SLOG2_FA_END );
+	slog2c( NULL, SLOG_CODE, SLOG2_DEBUG1, msg );
 }
 
 /*

@@ -966,15 +966,6 @@ void R_CheckGLESVariableReplacements() {
 	//TODO: glConfig.maxMultisamples
 }
 
-/*
-=============================
-R_InitializeFramebuffers
-=============================
-*/
-void R_InitializeFramebuffers() {
-	//TODO: Check multisamples and create framebuffers
-}
-
 #endif
 
 static bool r_initialized = false;
@@ -1182,8 +1173,6 @@ void R_InitOpenGL() {
 
 #ifdef GL_ES_VERSION_2_0
 	R_CheckGLESVariableReplacements();
-
-	R_InitializeFramebuffers();
 #endif
 
 	renderProgManager.Init();

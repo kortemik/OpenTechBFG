@@ -41,6 +41,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "qnx_local.h"
 #include "../../renderer/tr_local.h"
 
+void ( APIENTRY * qeglDebugEnableLoggingFunc )(EGLBoolean logging);
+
 #ifndef ID_GL_HARDLINK
 
 EGLint ( APIENTRY * qeglGetError )(void);
@@ -1755,8 +1757,11 @@ GLimp_EnableLogging
 */
 void GLimp_EnableLogging( bool enable ) {
 	// From EGL debug library: https://github.com/rcmaniac25/EGLdb
-	void ( * eglDebugEnableLoggingFunc )(EGLBoolean logging) = ( void (*)(EGLBoolean) )qeglGetProcAddress( "eglDebugEnableLogging" );
-	if ( eglDebugEnableLoggingFunc ) {
-		eglDebugEnableLoggingFunc( enable );
+	if ( !qnx.glLoggingInit ) {
+		qeglDebugEnableLoggingFunc = ( void (*)(EGLBoolean) )qeglGetProcAddress( "eglDebugEnableLogging" );
+		qnx.glLoggingInit = true;
+	}
+	if ( qeglDebugEnableLoggingFunc ) {
+		qeglDebugEnableLoggingFunc( enable );
 	}
 }

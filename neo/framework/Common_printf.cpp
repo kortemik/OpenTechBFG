@@ -159,7 +159,7 @@ void idCommonLocal::VPrintf( const char *fmt, va_list args ) {
 #ifdef ID_WIN32
 		OutputDebugString( msg );
 #elif defined(ID_QNX)
-		slog2fa( NULL, SLOG_CODE, SLOG2_DEBUG1, "%s", SLOG2_FA_STRING( msg ), SLOG2_FA_END );
+		slog2c( NULL, SLOG_CODE, SLOG2_DEBUG1, msg );
 #endif
 		return;
 	}
