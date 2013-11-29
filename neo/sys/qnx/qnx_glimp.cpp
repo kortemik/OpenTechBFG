@@ -127,12 +127,90 @@ PrintDisplayMode
 */
 static void PrintDisplayMode( screen_display_mode_t & mode ) {
 	//common->Printf( "          display index: %i\n", mode.index );
-	common->Printf( "          width        : %i\n", mode.width );
-	common->Printf( "          height       : %i\n", mode.height );
-	common->Printf( "          refresh      : %i\n", mode.refresh );
-	common->Printf( "          interlaced   : 0x%x\n", mode.interlaced ); //XXX Can this be broken down to what interlaced mode it's in?
-	common->Printf( "          aspect_ratio : %ix%i\n", mode.aspect_ratio[0], mode.aspect_ratio[1] );
-	common->Printf( "          flags        : 0x%x\n", mode.flags ); //XXX Can this be broken down to what the flags are?
+	common->Printf( "          width       : %i\n", mode.width );
+	common->Printf( "          height      : %i\n", mode.height );
+	common->Printf( "          refresh     : %i\n", mode.refresh );
+	common->Printf( "          interlaced  : 0x%x\n", mode.interlaced ); //XXX Can this be broken down to what interlaced mode it's in?
+	common->Printf( "          aspect_ratio: %ix%i\n", mode.aspect_ratio[0], mode.aspect_ratio[1] );
+	common->Printf( "          flags       : 0x%x\n", mode.flags ); //XXX Can this be broken down to what the flags are?
+}
+
+/*
+====================
+PrintDisplayType
+====================
+*/
+static void PrintDisplayType( int type ) {
+	const char * dispType;
+	switch ( type ) {
+	case SCREEN_DISPLAY_TYPE_INTERNAL:			dispType = "Internal"; break;
+	case SCREEN_DISPLAY_TYPE_COMPOSITE:			dispType = "Composite"; break;
+	case SCREEN_DISPLAY_TYPE_SVIDEO:			dispType = "S-Video"; break;
+	case SCREEN_DISPLAY_TYPE_COMPONENT_YPbPr:	dispType = "Component (YPbPr)"; break;
+	case SCREEN_DISPLAY_TYPE_COMPONENT_RGB:		dispType = "Component (RGB)"; break;
+	case SCREEN_DISPLAY_TYPE_COMPONENT_RGBHV:	dispType = "Component (RGBHV)"; break;
+	case SCREEN_DISPLAY_TYPE_DVI:				dispType = "DVI"; break;
+	case SCREEN_DISPLAY_TYPE_HDMI:				dispType = "HDMI"; break;
+	case SCREEN_DISPLAY_TYPE_DISPLAYPORT:		dispType = "DisplayPort"; break;
+	case SCREEN_DISPLAY_TYPE_OTHER:				dispType = "Other"; break;
+	default:									dispType = "Unknown"; break;
+	}
+	common->Printf( "      Type              : %s\n", dispType );
+}
+
+/*
+====================
+PrintDisplayType
+====================
+*/
+static void PrintDisplayTechnology( int tech ) {
+	const char * dispTech;
+	switch ( tech ) {
+	case SCREEN_DISPLAY_TECHNOLOGY_CRT:		dispTech = "CRT"; break;
+	case SCREEN_DISPLAY_TECHNOLOGY_LCD:		dispTech = "LCD"; break;
+	case SCREEN_DISPLAY_TECHNOLOGY_PLASMA:	dispTech = "Plasma"; break;
+	case SCREEN_DISPLAY_TECHNOLOGY_LED:		dispTech = "LED"; break;
+	case SCREEN_DISPLAY_TECHNOLOGY_OLED:	dispTech = "OLED"; break;
+	case SCREEN_DISPLAY_TECHNOLOGY_UNKNOWN:
+	default:								dispTech = "Unknown"; break;
+	}
+	common->Printf( "      Technology        : %s\n", dispTech );
+}
+
+/*
+====================
+PrintDisplayTransparency
+====================
+*/
+static void PrintDisplayTransparency( int trans ) {
+	const char * transTech;
+	switch ( trans ) {
+	case SCREEN_TRANSPARENCY_SOURCE:		transTech = "Source"; break;
+	case SCREEN_TRANSPARENCY_TEST:			transTech = "Test"; break;
+	case SCREEN_TRANSPARENCY_SOURCE_COLOR:	transTech = "Source Color"; break;
+	case SCREEN_TRANSPARENCY_SOURCE_OVER:	transTech = "Source Over"; break;
+	case SCREEN_TRANSPARENCY_NONE:			transTech = "None"; break;
+	case SCREEN_TRANSPARENCY_DISCARD:		transTech = "Discard"; break;
+	default:								transTech = "Unknown"; break;
+	}
+	common->Printf( "      Transparency      : %s\n", transTech );
+}
+
+/*
+====================
+PrintDisplayPowerMode
+====================
+*/
+static void PrintDisplayPowerMode( int power ) {
+	const char * powerTech;
+	switch ( power ) {
+	case SCREEN_POWER_MODE_OFF:			powerTech = "Off"; break;
+	case SCREEN_POWER_MODE_SUSPEND:		powerTech = "Suspend"; break;
+	case SCREEN_POWER_MODE_LIMITED_USE:	powerTech = "Limited Use"; break;
+	case SCREEN_POWER_MODE_ON:			powerTech = "On"; break;
+	default:							powerTech = "Unknown"; break;
+	}
+	common->Printf( "      Power Mode        : %s\n", transTech );
 }
 
 /*
@@ -157,136 +235,85 @@ void DumpAllDisplayDevices() {
 	}
 
 	screen_display_t display;
-	screen_display_mode_t* modes;
+	screen_display_mode_t * modes;
 	char buffer[1024];
+	int vals[2];
+	int64 longVal;
 	for ( int displayNum = 0; displayNum < displayCount; displayNum++ ) {
 		display = displayList[displayNum];
 
 		// General display stats
 		common->Printf( "display device: %i\n", deviceNum );
 		screen_get_display_property_cv( display, SCREEN_PROPERTY_ID_STRING, sizeof(buffer) - 1, buffer );
-		common->Printf( "  ID          : %s\n", buffer );
+		common->Printf( "  ID     : %s\n", buffer );
 		screen_get_display_property_cv( display, SCREEN_PROPERTY_VENDOR, sizeof(buffer) - 1, buffer );
-		common->Printf( "  Vendor      : %s\n", buffer );
+		common->Printf( "  Vendor : %s\n", buffer );
 		screen_get_display_property_cv( display, SCREEN_PROPERTY_PRODUCT, sizeof(buffer) - 1, buffer );
-		common->Printf( "  Product     : %s\n", buffer );
+		common->Printf( "  Product: %s\n", buffer );
 
 		// Detailed display stats
-		//XXX common->Printf( "      Product     : %s\n", buffer );
-		//TODO: type - screen_get_display_property_iv
-		//TODO: technology - screen_get_display_property_iv
-		//TODO: attached - screen_get_display_property_iv
-		//TODO: detachable - screen_get_display_property_iv
-		//TODO: rotation - screen_get_display_property_iv
-		//TODO: dpi - screen_get_display_property_iv
-		//TODO: native resolution - screen_get_display_property_iv
-		//TODO: physical size - screen_get_display_property_iv
-		//TODO: size - screen_get_display_property_iv
-		//TODO: transparency - screen_get_display_property_iv
-		//TODO: gamma - screen_get_display_property_iv
-		//TODO: intensity - screen_get_display_property_iv
-
-		//TODO: viewport position - screen_get_display_property_iv
-		//TODO: viewport size - screen_get_display_property_iv
-		//TODO: idle state - screen_get_display_property_iv
-		//TODO: idle timeout - screen_get_display_property_llv
-		//TODO: keep awakes - screen_get_display_property_iv
-		//TODO: mirror mode - screen_get_display_property_iv
-		//TODO: power mode - screen_get_display_property_iv
-		//TODO: protection enabled - screen_get_display_property_iv
-		//TODO: matrics - screen_get_display_property_llv
-		//TODO: current mode - screen_get_display_property_pv
-
-		// Formats
-		common->Printf( "          -------------------\n" );
-		//XXX common->Printf( "      Product     : %s\n", buffer );
-		//TODO
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_TYPE, vals );
+		PrintDisplayType( vals[0] );
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_TECHNOLOGY, vals );
+		PrintDisplayTechnology( vals[0] );
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_ATTACHED, vals );
+		common->Printf( "      Attached          : %s\n", ( vals[0] ? "True" : "False" ) );
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_DETACHABLE, vals );
+		common->Printf( "      Detachable        : %s\n", ( vals[0] ? "True" : "False" ) );
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_ROTATION, vals );
+		common->Printf( "      Rotation          : %i\n", vals[0] );
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_DPI, vals );
+		common->Printf( "      DPI               : %i\n", vals[0] );
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_NATIVE_RESOLUTION, vals );
+		common->Printf( "      Native Resolution : %ix%i\n", vals[0], vals[1] );
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_PHYSICAL_SIZE, vals );
+		common->Printf( "      Physical Size     : %ix%i\n", vals[0], vals[1] );
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_SIZE, vals );
+		common->Printf( "      Size              : %ix%i\n", vals[0], vals[1] );
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_TRANSPARENCY, vals );
+		PrintDisplayTransparency( vals[0] );
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_GAMMA, vals );
+		common->Printf( "      Gamma             : %i\n", vals[0] );
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_INTENSITY, vals );
+		common->Printf( "      Intensity         : %i\n", vals[0] );
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_IDLE_STATE, vals );
+		common->Printf( "      Idle              : %s\n", ( vals[0] ? "True" : "False" ) );
+		screen_get_display_property_llv( display, SCREEN_PROPERTY_IDLE_TIMEOUT, &longVal );
+		common->Printf( "      Idle Timeout      : %lld\n", longVal );
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_KEEP_AWAKES, vals );
+		common->Printf( "      Keep Awake        : %s\n", ( vals[0] ? "True" : "False" ) );
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_MIRROR_MODE, vals );
+		common->Printf( "      Mirror Mode       : %s\n", ( vals[0] ? "True" : "False" ) );
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_POWER_MODE, vals );
+		PrintDisplayPowerMode( vals[0] );
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_PROTECTION_ENABLE, vals );
+		common->Printf( "      Protection Enabled: %s\n", ( vals[0] ? "True" : "False" ) );
 
 		// Modes
-		common->Printf( "          -------------------\n" );
-		//TODO common->Printf( "          modeNum             : %i\n", modeNum );
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_MODE_COUNT, vals );
+		modes = ( screen_display_mode_t* )Mem_Alloc( sizeof( screen_display_mode_t ) * vals[0], TAG_TEMP );
+		if ( screen_get_display_property_pv( display, SCREEN_PROPERTY_MODE, modes ) == 0 ) {
+			for ( int mode = 0; mode < vals[0]; mode++ ) {
+				screen_display_mode_t & displayMode = modes[mode];
+
+				if ( displayMode.refresh < 60 ) {
+					continue;
+				}
+				if ( displayMode.height < 720 ) {
+					continue;
+				}
+
+				common->Printf( "          -------------------\n" );
+				common->Printf( "          modeNum     : %i\n", modeNum );
+				PrintDisplayMode( displayMode );
+			}
+		}
+		Mem_Free( ( void* )modes );
 	}
 
 	Mem_Free( ( void* )displayList );
 
 	common->Printf( "\n" );
-#if 0
-	common->Printf( "\n" );
-	for ( int deviceNum = 0 ; ; deviceNum++ ) {
-		DISPLAY_DEVICE	device = {};
-		device.cb = sizeof( device );
-		if ( !EnumDisplayDevices(
-				0,			// lpDevice
-				deviceNum,
-				&device,
-				0 /* dwFlags */ ) ) {
-			break;
-		}
-
-		common->Printf( "display device: %i\n", deviceNum );
-		common->Printf( "  DeviceName  : %s\n", device.DeviceName );
-		common->Printf( "  DeviceString: %s\n", device.DeviceString );
-		common->Printf( "  StateFlags  : 0x%x\n", device.StateFlags );
-		common->Printf( "  DeviceID    : %s\n", device.DeviceID );
-		common->Printf( "  DeviceKey   : %s\n", device.DeviceKey );
-
-		for ( int monitorNum = 0 ; ; monitorNum++ ) {
-			DISPLAY_DEVICE	monitor = {};
-			monitor.cb = sizeof( monitor );
-			if ( !EnumDisplayDevices(
-					device.DeviceName,
-					monitorNum,
-					&monitor,
-					0 /* dwFlags */ ) ) {
-				break;
-			}
-
-			common->Printf( "      DeviceName  : %s\n", monitor.DeviceName );
-			common->Printf( "      DeviceString: %s\n", monitor.DeviceString );
-			common->Printf( "      StateFlags  : 0x%x\n", monitor.StateFlags );
-			common->Printf( "      DeviceID    : %s\n", monitor.DeviceID );
-			common->Printf( "      DeviceKey   : %s\n", monitor.DeviceKey );
-
-			DEVMODE	currentDevmode = {};
-			if ( !EnumDisplaySettings( device.DeviceName,ENUM_CURRENT_SETTINGS, &currentDevmode ) ) {
-				common->Printf( "ERROR:  EnumDisplaySettings(ENUM_CURRENT_SETTINGS) failed!\n" );
-			}
-			common->Printf( "          -------------------\n" );
-			common->Printf( "          ENUM_CURRENT_SETTINGS\n" );
-			PrintDevMode( currentDevmode );
-
-			DEVMODE	registryDevmode = {};
-			if ( !EnumDisplaySettings( device.DeviceName,ENUM_REGISTRY_SETTINGS, &registryDevmode ) ) {
-				common->Printf( "ERROR:  EnumDisplaySettings(ENUM_CURRENT_SETTINGS) failed!\n" );
-			}
-			common->Printf( "          -------------------\n" );
-			common->Printf( "          ENUM_CURRENT_SETTINGS\n" );
-			PrintDevMode( registryDevmode );
-
-			for ( int modeNum = 0 ; ; modeNum++ ) {
-				DEVMODE	devmode = {};
-
-				if ( !EnumDisplaySettings( device.DeviceName,modeNum, &devmode ) ) {
-					break;
-				}
-
-				if ( devmode.dmBitsPerPel != 32 ) {
-					continue;
-				}
-				if ( devmode.dmDisplayFrequency < 60 ) {
-					continue;
-				}
-				if ( devmode.dmPelsHeight < 720 ) {
-					continue;
-				}
-				common->Printf( "          -------------------\n" );
-				common->Printf( "          modeNum             : %i\n", modeNum );
-				PrintDevMode( devmode );
-			}
-		}
-	}
-	common->Printf( "\n" );
-#endif
 }
 
 /*
@@ -297,107 +324,116 @@ R_GetModeListForDisplay
 bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t> & modeList ) {
 	modeList.Clear();
 
-	//TODO
-
-#if 0
-
 	bool	verbose = false;
 
+	int displayCount = 1;
+	if ( screen_get_context_property_iv( qnx.screenCtx, SCREEN_PROPERTY_DISPLAY_COUNT, &displayCount ) != 0 ) {
+		return false;
+	}
+
+	if ( requestedDisplayNum >= displayCount ) {
+		return false;
+	}
+
+	screen_display_t* displayList = ( screen_display_t* )Mem_Alloc( sizeof( screen_display_t ) * displayCount, TAG_TEMP );
+	if ( screen_get_context_property_pv( qnx.screenCtx, SCREEN_PROPERTY_DISPLAYS, ( void** )displayList ) != 0 ) {
+		Mem_Free( displayList );
+		return false;
+	}
+
+	screen_display_t display;
+	char buffer[1024];
+	int vals[2];
+	screen_display_mode_t * modes;
 	for ( int displayNum = requestedDisplayNum; ; displayNum++ ) {
-		DISPLAY_DEVICE	device;
-		device.cb = sizeof( device );
-		if ( !EnumDisplayDevices(
-				0,			// lpDevice
-				displayNum,
-				&device,
-				0 /* dwFlags */ ) ) {
+		if ( displayNum >= displayCount ) {
+			Mem_Free( displayList );
 			return false;
 		}
 
-		// get the monitor for this display
-		if ( ! (device.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP ) ) {
+		display = displayList[displayNum];
+
+		// Only get displays that are still attached
+		if ( screen_get_display_property_iv( display, SCREEN_PROPERTY_ATTACHED, vals ) != 0 || !vals[0] ) {
 			continue;
 		}
-
-		DISPLAY_DEVICE	monitor;
-		monitor.cb = sizeof( monitor );
-		if ( !EnumDisplayDevices(
-				device.DeviceName,
-				0,
-				&monitor,
-				0 /* dwFlags */ ) ) {
-			continue;
-		}
-
-		DEVMODE	devmode;
-		devmode.dmSize = sizeof( devmode );
 
 		if ( verbose ) {
 			common->Printf( "display device: %i\n", displayNum );
-			common->Printf( "  DeviceName  : %s\n", device.DeviceName );
-			common->Printf( "  DeviceString: %s\n", device.DeviceString );
-			common->Printf( "  StateFlags  : 0x%x\n", device.StateFlags );
-			common->Printf( "  DeviceID    : %s\n", device.DeviceID );
-			common->Printf( "  DeviceKey   : %s\n", device.DeviceKey );
-			common->Printf( "      DeviceName  : %s\n", monitor.DeviceName );
-			common->Printf( "      DeviceString: %s\n", monitor.DeviceString );
-			common->Printf( "      StateFlags  : 0x%x\n", monitor.StateFlags );
-			common->Printf( "      DeviceID    : %s\n", monitor.DeviceID );
-			common->Printf( "      DeviceKey   : %s\n", monitor.DeviceKey );
+			screen_get_display_property_cv( display, SCREEN_PROPERTY_ID_STRING, sizeof(buffer) - 1, buffer );
+			common->Printf( "  ID     : %s\n", buffer );
+			screen_get_display_property_cv( display, SCREEN_PROPERTY_VENDOR, sizeof(buffer) - 1, buffer );
+			common->Printf( "  Vendor : %s\n", buffer );
+			screen_get_display_property_cv( display, SCREEN_PROPERTY_PRODUCT, sizeof(buffer) - 1, buffer );
+			common->Printf( "  Product: %s\n", buffer );
+			screen_get_display_property_iv( display, SCREEN_PROPERTY_TYPE, vals );
+			PrintDisplayType( vals[0] );
+			screen_get_display_property_iv( display, SCREEN_PROPERTY_TECHNOLOGY, vals );
+			PrintDisplayTechnology( vals[0] );
+			screen_get_display_property_iv( display, SCREEN_PROPERTY_ROTATION, vals );
+			common->Printf( "      Rotation          : %i\n", vals[0] );
+			screen_get_display_property_iv( display, SCREEN_PROPERTY_DPI, vals );
+			common->Printf( "      DPI               : %i\n", vals[0] );
+			screen_get_display_property_iv( display, SCREEN_PROPERTY_NATIVE_RESOLUTION, vals );
+			common->Printf( "      Native Resolution : %ix%i\n", vals[0], vals[1] );
+			screen_get_display_property_iv( display, SCREEN_PROPERTY_PHYSICAL_SIZE, vals );
+			common->Printf( "      Physical Size     : %ix%i\n", vals[0], vals[1] );
 		}
 
-		for ( int modeNum = 0 ; ; modeNum++ ) {
-			if ( !EnumDisplaySettings( device.DeviceName,modeNum, &devmode ) ) {
-				break;
-			}
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_MODE_COUNT, vals );
+		modes = ( screen_display_mode_t* )Mem_Alloc( sizeof( screen_display_mode_t ) * vals[0], TAG_TEMP );
+		if ( screen_get_display_property_pv( display, SCREEN_PROPERTY_MODE, modes ) == 0 ) {
+			for ( int mode = 0; mode < vals[0]; mode++ ) {
+				screen_display_mode_t & displayMode = modes[mode];
 
-			if ( devmode.dmBitsPerPel != 32 ) {
-				continue;
-			}
-			if ( ( devmode.dmDisplayFrequency != 60 ) && ( devmode.dmDisplayFrequency != 120 ) ) {
-				continue;
-			}
-			if ( devmode.dmPelsHeight < 720 ) {
-				continue;
-			}
-			if ( verbose ) {
-				common->Printf( "          -------------------\n" );
-				common->Printf( "          modeNum             : %i\n", modeNum );
-				common->Printf( "          dmPosition.x        : %i\n", devmode.dmPosition.x );
-				common->Printf( "          dmPosition.y        : %i\n", devmode.dmPosition.y );
-				common->Printf( "          dmBitsPerPel        : %i\n", devmode.dmBitsPerPel );
-				common->Printf( "          dmPelsWidth         : %i\n", devmode.dmPelsWidth );
-				common->Printf( "          dmPelsHeight        : %i\n", devmode.dmPelsHeight );
-				common->Printf( "          dmDisplayFixedOutput: %s\n", DMDFO( devmode.dmDisplayFixedOutput ) );
-				common->Printf( "          dmDisplayFlags      : 0x%x\n", devmode.dmDisplayFlags );
-				common->Printf( "          dmDisplayFrequency  : %i\n", devmode.dmDisplayFrequency );
-			}
-			vidMode_t mode;
-			mode.width = devmode.dmPelsWidth;
-			mode.height = devmode.dmPelsHeight;
-			mode.displayHz = devmode.dmDisplayFrequency;
-			modeList.AddUnique( mode );
-		}
-		if ( modeList.Num() > 0 ) {
-
-			class idSort_VidMode : public idSort_Quick< vidMode_t, idSort_VidMode > {
-			public:
-				int Compare( const vidMode_t & a, const vidMode_t & b ) const {
-					int wd = a.width - b.width;
-					int hd = a.height - b.height;
-					int fd = a.displayHz - b.displayHz;
-					return ( hd != 0 ) ? hd : ( wd != 0 ) ? wd : fd;
+				if ( displayMode.refresh != 60 || displayMode.refresh != 120 ) {
+					continue;
 				}
-			};
+				if ( displayMode.height < 720 ) {
+					continue;
+				}
 
-			// sort with lowest resolution first
-			modeList.SortWithTemplate( idSort_VidMode() );
+				if ( verbose ) {
+					common->Printf( "          -------------------\n" );
+					common->Printf( "          modeNum     : %i\n", modeNum );
+					PrintDisplayMode( displayMode );
+				}
+				vidMode_t mode;
+				//XXX Is rotation swapping needed for width/height
+				mode.width = displayMode.width;
+				mode.height = displayMode.height;
+				mode.displayHz = displayMode.refresh;
+				modeList.AddUnique( mode );
+			}
+		}
+		Mem_Free( ( void* )modes );
 
-			return true;
+		if ( modeList.Num() > 0 ) {
+			break;
 		}
 	}
-	// Never gets here
-#endif
+
+	Mem_Free( ( void* )displayList );
+
+	if ( modeList.Num() > 0 ) {
+
+		class idSort_VidMode : public idSort_Quick< vidMode_t, idSort_VidMode > {
+		public:
+			int Compare( const vidMode_t & a, const vidMode_t & b ) const {
+				int wd = a.width - b.width;
+				int hd = a.height - b.height;
+				int fd = a.displayHz - b.displayHz;
+				return ( hd != 0 ) ? hd : ( wd != 0 ) ? wd : fd;
+			}
+		};
+
+		// sort with lowest resolution first
+		modeList.SortWithTemplate( idSort_VidMode() );
+
+		return true;
+	}
+
+	return false;
 }
 
 /*
@@ -748,7 +784,7 @@ bool GLimp_Init( glimpParms_t parms ) {
 	if ( screen_get_window_property_pv( qnx.screenWin, SCREEN_PROPERTY_DISPLAY, ( void** )&display ) == 0 ) {
 		int size[2];
 		if ( screen_get_display_property_iv( display, SCREEN_PROPERTY_PHYSICAL_SIZE, size ) == 0 ) {
-			glConfig.physicalScreenWidthInCentimeters = size[0] / 10.0f; //MM to CM
+			glConfig.physicalScreenWidthInCentimeters = size[0] * 0.1f; //MM to CM
 		}
 	}
 
@@ -782,7 +818,7 @@ bool GLimp_SetScreenParms( glimpParms_t parms ) {
 		common->Printf( "Could not set window size\n" );
 		return false;
 	}
-	//XXX Is rotation swapping needed for width/height and physicalScreenWidth?
+	//XXX Is rotation swapping needed for width/height?
 	glConfig.nativeScreenWidth = parms.width;
 	glConfig.nativeScreenHeight = parms.height;
 

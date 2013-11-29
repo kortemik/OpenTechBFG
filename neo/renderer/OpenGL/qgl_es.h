@@ -76,15 +76,6 @@ extern "C" {
 #endif
 
 //=============
-//OpenGL ES function definitions
-//=============
-//TODO
-
-#ifdef GL_ES_VERSION_3_0
-//TODO
-#endif
-
-//=============
 //Helper macros
 //=============
 #define ID_GLES_VAR_DEF( x ) glesSpecific_##x
