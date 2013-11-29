@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -85,9 +86,9 @@ public:
 	// data goes from the bottom to the top line of the image, as OpenGL expects it
 	// These perform an implicit Bind() on the current texture unit
 	// FIXME: should we implement cinematics this way, instead of with explicit calls?
-	void		GenerateImage( const byte *pic, int width, int height, 
+	void		GenerateImage( const byte *pic, int width, int height,
 					   textureFilter_t filter, textureRepeat_t repeat, textureUsage_t usage );
-	void		GenerateCubeImage( const byte *pic[6], int size, 
+	void		GenerateCubeImage( const byte *pic[6], int size,
 						textureFilter_t filter, textureUsage_t usage );
 
 	void		CopyFramebuffer( int x, int y, int width, int height );
@@ -125,24 +126,24 @@ public:
 	// or resized.
 	void		PurgeImage();
 
-	// z is 0 for 2D textures, 0 - 5 for cube maps, and 0 - uploadDepth for 3D textures. Only 
-	// one plane at a time of 3D textures can be uploaded. The data is assumed to be correct for 
-	// the format, either bytes, halfFloats, floats, or DXT compressed. The data is assumed to 
-	// be in OpenGL RGBA format, the consoles may have to reorganize. pixelPitch is only needed 
-	// when updating from a source subrect. Width, height, and dest* are always in pixels, so 
+	// z is 0 for 2D textures, 0 - 5 for cube maps, and 0 - uploadDepth for 3D textures. Only
+	// one plane at a time of 3D textures can be uploaded. The data is assumed to be correct for
+	// the format, either bytes, halfFloats, floats, or DXT compressed. The data is assumed to
+	// be in OpenGL RGBA format, the consoles may have to reorganize. pixelPitch is only needed
+	// when updating from a source subrect. Width, height, and dest* are always in pixels, so
 	// they must be a multiple of four for dxt data.
-	void		SubImageUpload( int mipLevel, int destX, int destY, int destZ, 
-								int width, int height, const void * data, 
+	void		SubImageUpload( int mipLevel, int destX, int destY, int destZ,
+								int width, int height, const void * data,
 								int pixelPitch = 0 ) const;
 
-	// SetPixel is assumed to be a fast memory write on consoles, degenerating to a 
+	// SetPixel is assumed to be a fast memory write on consoles, degenerating to a
 	// SubImageUpload on PCs.  Used to update the page mapping images.
 	// We could remove this now, because the consoles don't use the intermediate page mapping
 	// textures now that they can pack everything into the virtual page table images.
 	void		SetPixel( int mipLevel, int x, int y, const void * data, int dataSize );
 
-	// some scratch images are dynamically resized based on the display window size.  This 
-	// simply purges the image and recreates it if the sizes are different, so it should not be 
+	// some scratch images are dynamically resized based on the display window size.  This
+	// simply purges the image and recreates it if the sizes are different, so it should not be
 	// done under any normal circumstances, and probably not at all on consoles.
 	void		Resize( int width, int height );
 
@@ -220,7 +221,7 @@ void	R_WriteTGA( const char *filename, const byte *data, int width, int height, 
 class idImageManager {
 public:
 
-	idImageManager() 
+	idImageManager()
 	{
 		insideLevelLoad = false;
 		preloadingMapImages = false;
@@ -255,8 +256,13 @@ public:
 	// purges all the images before a vid_restart
 	void				PurgeAllImages();
 
-	// reloads all apropriate images after a vid_restart
+	// reloads all appropriate images after a vid_restart
 	void				ReloadImages( bool all );
+
+#ifdef GL_ES_VERSION_2_0
+	// reloads all images based on r_useSRGB settings
+	void				ReloadSRGBImages();
+#endif
 
 	// unbind all textures from all texture units
 	void				UnbindAll();
@@ -301,7 +307,7 @@ public:
 	idImage *			hellLoadingIconImage;				// loading icon must exist always
 
 	//--------------------------------------------------------
-	
+
 	idImage *			AllocImage( const char *name );
 	idImage *			AllocStandaloneImage( const char *name );
 

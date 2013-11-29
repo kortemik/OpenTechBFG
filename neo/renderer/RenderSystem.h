@@ -55,8 +55,8 @@ enum stereo3DMode_t {
 
 	// two full resolution views stacked with a 30 pixel guard band
 	// On the PC this can be configured as a custom video timing, but
-	// it definitely isn't a consumer level task.  The quad_buffer
-	// support can handle 720P-3D with apropriate driver support.
+	// it definitely isn't a consumer level task. The quad_buffer
+	// support can handle 720P-3D with appropriate driver support.
 	STEREO3D_HDMI_720
 };
 

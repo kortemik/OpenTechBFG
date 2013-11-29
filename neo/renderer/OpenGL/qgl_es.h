@@ -84,6 +84,13 @@ extern "C" {
 //=============
 //Defines for functions and their enums that are defined but may not actually exist
 //=============
+#ifndef GL_BACK_LEFT
+	#define GL_BACK_LEFT 0x0402
+#endif
+#ifndef GL_BACK_RIGHT
+	#define GL_BACK_RIGHT 0x0403
+#endif
+
 #ifndef PFNGLACTIVETEXTUREPROC
 	typedef void (GL_APIENTRYP PFNGLACTIVETEXTUREPROC) (GLenum texture);
 #endif

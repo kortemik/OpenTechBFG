@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -210,7 +211,7 @@ void R_ListImages_f( const idCmdArgs &args ) {
 			sortedArray[i].image->Print();
 			partialSize += sortedArray[i].image->StorageSize();
 			if ( ( (i+1) % 10 ) == 0 ) {
-				common->Printf( "-------- %5.1f of %5.1f megs --------\n", 
+				common->Printf( "-------- %5.1f of %5.1f megs --------\n",
 					partialSize / (1024*1024.0), totalSize / (1024*1024.0) );
 			}
 		}
@@ -355,7 +356,7 @@ Finds or loads the given image, always returning a valid image pointer.
 Loading of the image may be deferred for dynamic loading.
 ==============
 */
-idImage	*idImageManager::ImageFromFile( const char *_name, textureFilter_t filter, 
+idImage	*idImageManager::ImageFromFile( const char *_name, textureFilter_t filter,
 						 textureRepeat_t repeat, textureUsage_t usage, cubeFiles_t cubeMap ) {
 
 	if ( !_name || !_name[0] || idStr::Icmp( _name, "default" ) == 0 || idStr::Icmp( _name, "_default" ) == 0 ) {
@@ -491,7 +492,7 @@ idImage * idImageManager::ScratchImage( const char *_name, idImageOpts *imgOpts,
 	// create a new image
 	//
 	idImage* newImage = AllocImage( name );
-	if ( newImage != NULL ) {	
+	if ( newImage != NULL ) {
 		newImage->AllocImage( *imgOpts, filter, repeat );
 	}
 	return newImage;
@@ -553,6 +554,16 @@ void idImageManager::ReloadImages( bool all ) {
 		globalImages->images[ i ]->Reload( all );
 	}
 }
+
+#ifdef GL_ES_VERSION_2_0
+
+void idImageManager::ReloadSRGBImages() {
+	//TODO: r_useSRGB
+	for ( int i = 0 ; i < globalImages->images.Num() ; i++ ) {
+		globalImages->images[ i ]->Reload( true );
+	}
+}
+#endif
 
 /*
 ===============

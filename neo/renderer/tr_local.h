@@ -815,10 +815,6 @@ public:
 
 	idParallelJobList *		frontEndJobList;
 
-#ifdef GL_ES_VERSION_2_0
-	//TODO: framebuffers (4 of them [front, back, back_left, back_right])
-#endif
-
 	unsigned				timerQueryId;		// for GL_TIME_ELAPSED_EXT queries
 };
 
@@ -831,6 +827,9 @@ extern glconfig_t			glConfig;		// outside of TR since it shouldn't be cleared du
 //
 extern idCVar r_debugContext;				// enable various levels of context debug
 extern idCVar r_glDriver;					// "opengl32", etc
+#ifdef GL_ES_VERSION_2_0
+extern idCVar r_eglDriver;					// "libEGL", etc
+#endif
 extern idCVar r_skipIntelWorkarounds;		// skip work arounds for Intel driver bugs
 extern idCVar r_vidMode;					// video mode number
 extern idCVar r_displayRefresh;				// optional display refresh rate option for vid mode
@@ -980,6 +979,11 @@ INITIALIZATION
 
 void R_Init();
 void R_InitOpenGL();
+
+#ifdef GL_ES_VERSION_2_0
+void R_UpdateFramebuffers();
+void R_UpdateGLESVersion();
+#endif
 
 void R_SetColorMappings();
 

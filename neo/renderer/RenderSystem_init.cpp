@@ -1173,6 +1173,8 @@ void R_InitOpenGL() {
 
 #ifdef GL_ES_VERSION_2_0
 	R_CheckGLESVariableReplacements();
+
+	R_UpdateGLESVersion();
 #endif
 
 	renderProgManager.Init();

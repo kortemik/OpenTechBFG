@@ -103,8 +103,8 @@ void Sys_Error( const char *error, ... ) {
 	vsprintf( text, error, argptr );
 	va_end( argptr);
 
-	Win_SetErrorText( text ); //XXX Open email with error message (and stacktrace?)
-	Sys_ShowConsole( 1, true );
+	//Win_SetErrorText( text ); //XXX Open email with error message (and stacktrace?)
+	//Sys_ShowConsole( 1, true );
 
 	Sys_ShutdownInput();
 

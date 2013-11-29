@@ -246,12 +246,19 @@ static void R_CheckCvars() {
 		}
 	}
 
+#ifdef GL_ES_VERSION_2_0
+	bool updateFramebuffers = false;
+#endif
+
 	extern idCVar r_useSRGB;
 	if ( r_useSRGB.IsModified() ) {
 		r_useSRGB.ClearModified();
 		if ( glConfig.sRGBFramebufferAvailable ) {
 #ifdef GL_ES_VERSION_2_0
-			//TODO: modify idRenderSystemLocal's framebuffer/renderbuffer list and/or textures
+			updateFramebuffers = true;
+		}
+		{
+			globalImages->ReloadSRGBImages();
 #else
 			if ( r_useSRGB.GetBool() ) {
 				qglEnable( GL_FRAMEBUFFER_SRGB );
@@ -266,7 +273,7 @@ static void R_CheckCvars() {
 	if ( r_multiSamples.IsModified() ) {
 		r_multiSamples.ClearModified();
 #ifdef GL_ES_VERSION_2_0
-		//TODO: modify idRenderSystemLocal's framebuffer/renderbuffer list
+		updateFramebuffers = true;
 #else
 		if ( r_multiSamples.GetInteger() > 0 ) {
 			qglEnable( GL_MULTISAMPLE_ARB );
@@ -275,6 +282,13 @@ static void R_CheckCvars() {
 		}
 #endif
 	}
+
+#ifdef GL_ES_VERSION_2_0
+	// Update framebuffers if needed
+	if ( updateFramebuffers ) {
+		R_UpdateFramebuffers();
+	}
+#endif
 
 	// check for changes to logging state
 	GLimp_EnableLogging( r_logFile.GetInteger() != 0 );

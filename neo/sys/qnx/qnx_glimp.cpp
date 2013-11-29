@@ -37,10 +37,30 @@ If you have questions concerning this license or the applicable additional terms
 
 idCVar r_useGLES3( "r_useGLES3", "0", CVAR_INTEGER, "0 = OpenGL ES 3.0 if available, 1 = OpenGL ES 2.0, 2 = OpenGL 3.0", 0, 2 );
 
+/*
+========================
+GLimp_glReadBuffer
+========================
+*/
+void GLimp_glReadBuffer( GLenum mode ) {
+	//TODO
+}
+
+/*
+========================
+GLimp_glDrawBuffer
+========================
+*/
+void GLimp_glDrawBuffer( GLenum mode ) {
+	//TODO
+}
+
+//XXX Functions that might need replacing-glDrawBuffers, gl functions that read and draw
+
 //
 // function declaration
 //
-bool QGL_Init( const char *dllname );
+bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacements );
 void QGL_Shutdown();
 
 /*
@@ -438,6 +458,24 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t> &
 
 /*
 =================
+R_UpdateFramebuffers
+=================
+*/
+void R_UpdateFramebuffers() {
+	//TODO: change framebuffer formats (glConfig.sRGBFramebufferAvailable and r_useSRGB) and/or multisampling (r_multiSamples)
+}
+
+/*
+=================
+R_UpdateGLVersion
+=================
+*/
+void R_UpdateGLESVersion() {
+	//TODO: replace functions based on "actual" opengl version (glConfig.glVersion)
+}
+
+/*
+=================
 EGL_CheckExtension
 =================
 */
@@ -722,7 +760,7 @@ bool GLimp_Init( glimpParms_t parms ) {
 	const char	*driverName;
 
 	// Some early checks to make sure supported params exist
-	if ( parms.x != 0 || parms.y != 0 || parms.fullScreen <= 0 || parms.stereo ) {
+	if ( parms.x != 0 || parms.y != 0 || parms.fullScreen <= 0 ) {
 		return false;
 	}
 
@@ -734,11 +772,16 @@ bool GLimp_Init( glimpParms_t parms ) {
 	// this will load the dll and set all our qgl* function pointers,
 	// but doesn't create a window
 
+	const EGLFunctionReplacements_t replacements = {
+		GLimp_glReadBuffer,	// glReadBufferImpl
+		GLimp_glDrawBuffer	// glDrawBufferImpl
+	};
+
 	// r_glDriver is only intended for using instrumented OpenGL
 	// so-s.  Normal users should never have to use it, and it is
 	// not archived.
 	driverName = r_glDriver.GetString()[0] ? r_glDriver.GetString() : "libGLESv2.so";
-	if ( !QGL_Init( driverName ) ) {
+	if ( !QGL_Init( driverName, replacements ) ) {
 		common->Printf( "^3GLimp_Init() could not load r_glDriver \"%s\"^0\n", driverName );
 		return false;
 	}
@@ -763,7 +806,7 @@ bool GLimp_Init( glimpParms_t parms ) {
 
 	r_swapInterval.SetModified();	// force a set next frame
 	glConfig.swapControlTearAvailable = false;
-	glConfig.stereoPixelFormatAvailable = false;
+	glConfig.stereoPixelFormatAvailable = true;
 
 	qeglGetConfigAttrib( qnx.eglDisplay, qnx.eglConfig, EGL_BUFFER_SIZE, &glConfig.colorBits );
 	qeglGetConfigAttrib( qnx.eglDisplay, qnx.eglConfig, EGL_DEPTH_SIZE, &glConfig.depthBits );
@@ -803,9 +846,12 @@ Sets up the screen based on passed parms..
 */
 bool GLimp_SetScreenParms( glimpParms_t parms ) {
 	// Some early checks to make sure supported params exist
-	if ( parms.x != 0 || parms.y != 0 || parms.fullScreen <= 0 || parms.stereo ) {
+	if ( parms.x != 0 || parms.y != 0 || parms.fullScreen <= 0 ) {
 		return false;
 	}
+
+	//XXX If x,y,width, height have changed then change window properties
+	//XXX Need to destroy and recreate EGL surface if size/position are changing if window position and size change (reset interval too)
 
 	const int position[2] = {parms.x, parms.y};
 	if ( screen_set_window_property_iv( qnx.screenWin, SCREEN_PROPERTY_POSITION, position ) != 0 ) {
@@ -821,6 +867,9 @@ bool GLimp_SetScreenParms( glimpParms_t parms ) {
 	//XXX Is rotation swapping needed for width/height?
 	glConfig.nativeScreenWidth = parms.width;
 	glConfig.nativeScreenHeight = parms.height;
+
+	r_swapInterval.SetModified();
+	//XXX END changing window properties
 
 	// Get displays
 	int displayCount = 1;
@@ -934,6 +983,8 @@ GLimp_SwapBuffers
 =====================
 */
 void GLimp_SwapBuffers() {
+	//TODO: flush backbuffer to default framebuffer, then reset to prior buffer
+
 	if ( r_swapInterval.IsModified() ) {
 		r_swapInterval.ClearModified();
 

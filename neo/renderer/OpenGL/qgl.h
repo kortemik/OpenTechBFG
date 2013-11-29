@@ -522,6 +522,9 @@ extern  void ( APIENTRY * qglViewport )(GLint x, GLint y, GLsizei width, GLsizei
 
 #else
 
+extern  void ( APIENTRY * qglReadBuffer )(GLenum mode);
+extern  void ( APIENTRY * qglDrawBuffer )(GLenum mode);
+
 extern  void ( APIENTRY * qglActiveTexture )(GLenum texture);
 //extern  void ( APIENTRY * qglAttachShader )(GLuint program, GLuint shader);
 //extern  void ( APIENTRY * qglBindAttribLocation )(GLuint program, GLuint index, const GLchar* name);

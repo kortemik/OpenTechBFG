@@ -80,6 +80,10 @@ EGLBoolean ( APIENTRY * qeglSwapBuffers )(EGLDisplay dpy, EGLSurface surface);
 EGLBoolean ( APIENTRY * qeglCopyBuffers )(EGLDisplay dpy, EGLSurface surface, EGLNativePixmapType target);
 GLExtension_t ( APIENTRY * qeglGetProcAddress )(const char *procname);
 
+//Not actual GLES commands (glReadBuffer exists on GLES 3.0 but not the way it's needed)
+void ( APIENTRY * qglReadBuffer )(GLenum mode);
+void ( APIENTRY * qglDrawBuffer )(GLenum mode);
+
 void ( APIENTRY * qglActiveTexture )(GLenum texture);
 //void ( APIENTRY * qglAttachShader )(GLuint program, GLuint shader);
 //void ( APIENTRY * qglBindAttribLocation )(GLuint program, GLuint index, const GLchar* name);
@@ -1102,6 +1106,9 @@ void QGL_Shutdown( void )
 	qnx.openGLLib = NULL;
 	qnx.eglLib = NULL;
 
+	qglReadBuffer							= NULL;
+	qglDrawBuffer							= NULL;
+
 #ifndef ID_GL_HARDLINK
 
 	qglActiveTexture						= NULL;
@@ -1408,7 +1415,7 @@ void QGL_Shutdown( void )
 ** This is responsible for binding our qgl function pointers to
 ** the appropriate GL stuff.
 */
-bool QGL_Init( const char *dllname )
+bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacements )
 {
 	assert( qnx.eglLib == NULL );
 	assert( qnx.openGLLib == NULL );
@@ -1439,6 +1446,9 @@ bool QGL_Init( const char *dllname )
 		return false;
 	}
 	common->Printf( "succeeded\n" );
+
+	qglReadBuffer = replacements.glReadBufferImpl;
+	qglDrawBuffer = replacements.glDrawBufferImpl;
 
 #ifndef ID_GL_HARDLINK
 

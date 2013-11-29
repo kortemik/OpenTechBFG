@@ -61,6 +61,11 @@ typedef struct {
 	EGLSurface					eglSurface;
 	EGLConfig					eglConfig;
 
+	//TODO: framebuffers (4 symbols for them [front, back (aka, back_left), back_left, back_right])
+	GLenum						frontBuffer;
+	GLenum						backBuffer;
+	// Framebuffers for drawing
+
 	signalHandle_t				renderCommandsEvent;
 	signalHandle_t				renderCompletedEvent;
 	signalHandle_t				renderActiveEvent;
@@ -73,6 +78,11 @@ typedef struct {
 } QNXVars_t;
 
 extern QNXVars_t	qnx;
+
+typedef struct {
+	void ( * glReadBufferImpl )(GLenum);
+	void ( * glDrawBufferImpl )(GLenum);
+} EGLFunctionReplacements_t;
 
 //TODO
 /*
