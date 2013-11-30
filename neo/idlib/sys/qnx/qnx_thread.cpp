@@ -60,10 +60,10 @@ Sys_Createthread
 struct timespec thread_init_budget = { 2, 0 };
 struct timespec thread_repl_period = { 10, 0 };
 
-//Whenever the thread blocks or reaches it's execution limit, it has to be "replenished".
-//If this happens too much, the scheduling algorithm becomes a burden. So there is a upper-limit to the
-//number of replenishments that will happen before the thread is set as a lower priority.
-//The value 15 is arbitrary as there is no real upper or lower limit and it's unknown how often a thread might block.
+// Whenever the thread blocks or reaches it's execution limit, it has to be "replenished".
+// If this happens too much, the scheduling algorithm becomes a burden. So there is a upper-limit to the
+// number of replenishments that will happen before the thread is set as a lower priority.
+// The value 15 is arbitrary as there is no real upper or lower limit and it's unknown how often a thread might block.
 #define QNX_THREAD_MAX_REPL 15
 
 typedef void *(*pthread_function_t)(void *);

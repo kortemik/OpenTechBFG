@@ -230,7 +230,7 @@ static void PrintDisplayPowerMode( int power ) {
 	case SCREEN_POWER_MODE_ON:			powerTech = "On"; break;
 	default:							powerTech = "Unknown"; break;
 	}
-	common->Printf( "      Power Mode        : %s\n", transTech );
+	common->Printf( "      Power Mode        : %s\n", powerTech );
 }
 
 /*
@@ -263,7 +263,7 @@ void DumpAllDisplayDevices() {
 		display = displayList[displayNum];
 
 		// General display stats
-		common->Printf( "display device: %i\n", deviceNum );
+		common->Printf( "display device: %i\n", displayNum );
 		screen_get_display_property_cv( display, SCREEN_PROPERTY_ID_STRING, sizeof(buffer) - 1, buffer );
 		common->Printf( "  ID     : %s\n", buffer );
 		screen_get_display_property_cv( display, SCREEN_PROPERTY_VENDOR, sizeof(buffer) - 1, buffer );
@@ -312,7 +312,7 @@ void DumpAllDisplayDevices() {
 		// Modes
 		screen_get_display_property_iv( display, SCREEN_PROPERTY_MODE_COUNT, vals );
 		modes = ( screen_display_mode_t* )Mem_Alloc( sizeof( screen_display_mode_t ) * vals[0], TAG_TEMP );
-		if ( screen_get_display_property_pv( display, SCREEN_PROPERTY_MODE, modes ) == 0 ) {
+		if ( screen_get_display_modes( display, vals[0], modes ) == 0 ) {
 			for ( int mode = 0; mode < vals[0]; mode++ ) {
 				screen_display_mode_t & displayMode = modes[mode];
 
@@ -324,7 +324,7 @@ void DumpAllDisplayDevices() {
 				}
 
 				common->Printf( "          -------------------\n" );
-				common->Printf( "          modeNum     : %i\n", modeNum );
+				common->Printf( "          modeNum     : %i\n", mode );
 				PrintDisplayMode( displayMode );
 			}
 		}
@@ -335,6 +335,16 @@ void DumpAllDisplayDevices() {
 
 	common->Printf( "\n" );
 }
+
+class idSort_VidMode : public idSort_Quick< vidMode_t, idSort_VidMode > {
+public:
+	int Compare( const vidMode_t & a, const vidMode_t & b ) const {
+		int wd = a.width - b.width;
+		int hd = a.height - b.height;
+		int fd = a.displayHz - b.displayHz;
+		return ( hd != 0 ) ? hd : ( wd != 0 ) ? wd : fd;
+	}
+};
 
 /*
 ====================
@@ -402,7 +412,7 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t> &
 
 		screen_get_display_property_iv( display, SCREEN_PROPERTY_MODE_COUNT, vals );
 		modes = ( screen_display_mode_t* )Mem_Alloc( sizeof( screen_display_mode_t ) * vals[0], TAG_TEMP );
-		if ( screen_get_display_property_pv( display, SCREEN_PROPERTY_MODE, modes ) == 0 ) {
+		if ( screen_get_display_modes( display, vals[0], modes ) == 0 ) {
 			for ( int mode = 0; mode < vals[0]; mode++ ) {
 				screen_display_mode_t & displayMode = modes[mode];
 
@@ -415,7 +425,7 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t> &
 
 				if ( verbose ) {
 					common->Printf( "          -------------------\n" );
-					common->Printf( "          modeNum     : %i\n", modeNum );
+					common->Printf( "          modeNum     : %i\n", mode );
 					PrintDisplayMode( displayMode );
 				}
 				vidMode_t mode;
@@ -436,17 +446,6 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t> &
 	Mem_Free( ( void* )displayList );
 
 	if ( modeList.Num() > 0 ) {
-
-		class idSort_VidMode : public idSort_Quick< vidMode_t, idSort_VidMode > {
-		public:
-			int Compare( const vidMode_t & a, const vidMode_t & b ) const {
-				int wd = a.width - b.width;
-				int hd = a.height - b.height;
-				int fd = a.displayHz - b.displayHz;
-				return ( hd != 0 ) ? hd : ( wd != 0 ) ? wd : fd;
-			}
-		};
-
 		// sort with lowest resolution first
 		modeList.SortWithTemplate( idSort_VidMode() );
 
@@ -1031,15 +1030,13 @@ void GLimp_DeactivateContext() {
 GLimp_RenderThreadWrapper
 ===================
 */
-static void* GLimp_RenderThreadWrapper( void* args ) {
+static unsigned int GLimp_RenderThreadWrapper( void* args ) {
 	void (*renderThread)() = ( void (*)() )args;
 
 	renderThread();
 
 	// unbind the context before we die
-	qeglMakeCurrent( qnx.eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT );
-
-	return NULL;
+	return qeglMakeCurrent( qnx.eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT );
 }
 
 /*
@@ -1062,7 +1059,7 @@ bool GLimp_SpawnRenderThread( void (*function)() ) {
 	Sys_SignalCreate( qnx.renderCompletedEvent, true );
 	Sys_SignalCreate( qnx.renderActiveEvent, true );
 
-	qnx.renderThread = Sys_CreateThread( GLimp_RenderThreadWrapper, function, THREAD_ABOVE_NORMAL, "qnx_renderThread", CORE_ANY );
+	qnx.renderThread = Sys_CreateThread( GLimp_RenderThreadWrapper, ( void* )function, THREAD_ABOVE_NORMAL, "qnx_renderThread", CORE_ANY );
 
 	return true;
 }

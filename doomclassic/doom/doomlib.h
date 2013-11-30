@@ -35,7 +35,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "doomdef.h"
 #include "doominterface.h"
 
+#ifdef ID_QNX
+#include "../../neo/idlib/containers/Array.h"
+#else
 #include "idlib/containers/Array.h"
+#endif
 
 class idSysMutex;
 class idUserCmdMgr;

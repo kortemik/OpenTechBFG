@@ -273,7 +273,9 @@ static void R_CheckCvars() {
 	if ( r_multiSamples.IsModified() ) {
 		r_multiSamples.ClearModified();
 #ifdef GL_ES_VERSION_2_0
+#ifdef GLES_MULTISAMPLE_FRAMEBUFFER
 		updateFramebuffers = true;
+#endif
 #else
 		if ( r_multiSamples.GetInteger() > 0 ) {
 			qglEnable( GL_MULTISAMPLE_ARB );
