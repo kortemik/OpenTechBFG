@@ -26,45 +26,25 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
+#ifndef __QNX_ACHIEVEMENTS_H__
+#define __QNX_ACHIEVEMENTS_H__
 
-#pragma once
+/*
+================================================
+idAchievementSystemQnx
+================================================
+*/
+class idAchievementSystemQnx : public idAchievementSystem {
+public:
+			idAchievementSystemQnx();
 
-#include "idlib/precompiled.h"
+	bool	IsInitialized();
+	void	AchievementUnlock( idLocalUser * user, const int achievementID );
+	void	AchievementLock( idLocalUser * user, const int achievementID );
+	void	AchievementLockAll( idLocalUser * user, const int maxId );
+	void	Pump();
+	bool	GetAchievementDescription( idLocalUser * user, const int id, achievementDescription_t & data ) const;
+	bool	GetAchievementState( idLocalUser * user, idArray< bool, idAchievementSystem::MAX_ACHIEVEMENTS > & achievements ) const;
+};
 
-
-#include <stdio.h>
-#include <assert.h>
-#include <time.h>
-#include <stdlib.h>
-#include <string.h>
-#include <queue>
-
-#define ID_INLINE inline
-
-typedef unsigned char byte;
-typedef unsigned int dword;
-
-
-#include <Math.h>
-#include <Assert.h>
-
-#define ACTUALTEXTUREWIDTH	1024		// should always be equal to or larger
-#define ACTUALTEXTUREHEIGHT	1024
-
-#define GLOBAL_IMAGE_SCALER	3
-
-#define ORIGINAL_WIDTH		320
-#define ORIGINAL_HEIGHT		200
-
-#define WIDTH				( ORIGINAL_WIDTH * GLOBAL_IMAGE_SCALER )
-#define HEIGHT				( ORIGINAL_HEIGHT * GLOBAL_IMAGE_SCALER )
-
-#define TEXTUREWIDTH		WIDTH
-#define TEXTUREHEIGHT		HEIGHT
-
-#define	BASE_WIDTH			WIDTH
-#define SCREENWIDTH			WIDTH
-#define SCREENHEIGHT		HEIGHT
-
-#define MAXWIDTH			1120
-#define MAXHEIGHT			832
+#endif // __QNX_ACHIEVEMENTS_H__

@@ -26,45 +26,38 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
+#ifndef __QNX_SIGNIN_H__
+#define __QNX_SIGNIN_H__
 
-#pragma once
+#include "qnx_localuser.h"
 
-#include "idlib/precompiled.h"
+/*
+================================================
+idSignInManagerQnx
+================================================
+*/
+class idSignInManagerQnx : public idSignInManagerBase {
+public:
 
+			idSignInManagerQnx() : dlcVersionChecked( false ) {}
+	virtual ~idSignInManagerQnx() {}
 
-#include <stdio.h>
-#include <assert.h>
-#include <time.h>
-#include <stdlib.h>
-#include <string.h>
-#include <queue>
+	//==========================================================================================
+	// idSignInManagerBase interface
+	//==========================================================================================
+	virtual void					Pump();
+	virtual void					Shutdown();
+	virtual int						GetNumLocalUsers() const { return localUsers.Num(); }
+	virtual idLocalUser *			GetLocalUserByIndex( int index ) { return &localUsers[index]; }
+	virtual const idLocalUser *		GetLocalUserByIndex( int index ) const { return &localUsers[index]; }
+	virtual void					RemoveLocalUserByIndex( int index );
+	virtual void					RegisterLocalUser( int inputDevice );		// Register a local user to the passed in controller
 
-#define ID_INLINE inline
+	bool							CreateNewUser( winUserState_t & state );
 
-typedef unsigned char byte;
-typedef unsigned int dword;
+private:
+	idStaticList< idLocalUserQnx, MAX_INPUT_DEVICES >	localUsers;
+	bool												dlcVersionChecked;
+};
 
-
-#include <Math.h>
-#include <Assert.h>
-
-#define ACTUALTEXTUREWIDTH	1024		// should always be equal to or larger
-#define ACTUALTEXTUREHEIGHT	1024
-
-#define GLOBAL_IMAGE_SCALER	3
-
-#define ORIGINAL_WIDTH		320
-#define ORIGINAL_HEIGHT		200
-
-#define WIDTH				( ORIGINAL_WIDTH * GLOBAL_IMAGE_SCALER )
-#define HEIGHT				( ORIGINAL_HEIGHT * GLOBAL_IMAGE_SCALER )
-
-#define TEXTUREWIDTH		WIDTH
-#define TEXTUREHEIGHT		HEIGHT
-
-#define	BASE_WIDTH			WIDTH
-#define SCREENWIDTH			WIDTH
-#define SCREENHEIGHT		HEIGHT
-
-#define MAXWIDTH			1120
-#define MAXHEIGHT			832
+#endif

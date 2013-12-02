@@ -1751,6 +1751,16 @@
 			<locationURI>PARENT-2-PROJECT_LOC/neo/sound/OpenAL/AL_SoundVoice.h</locationURI>
 		</link>
 		<link>
+			<name>src/sys/qnx/qnx_achievements.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_achievements.cpp</locationURI>
+		</link>
+		<link>
+			<name>src/sys/qnx/qnx_achievements.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_achievements.h</locationURI>
+		</link>
+		<link>
 			<name>src/sys/qnx/qnx_cpu.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_cpu.cpp</locationURI>
@@ -1776,6 +1786,16 @@
 			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_local.h</locationURI>
 		</link>
 		<link>
+			<name>src/sys/qnx/qnx_localuser.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_localuser.cpp</locationURI>
+		</link>
+		<link>
+			<name>src/sys/qnx/qnx_localuser.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_localuser.h</locationURI>
+		</link>
+		<link>
 			<name>src/sys/qnx/qnx_main.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_main.cpp</locationURI>
@@ -1786,9 +1806,24 @@
 			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_qgl.cpp</locationURI>
 		</link>
 		<link>
+			<name>src/sys/qnx/qnx_session_local.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_session_local.cpp</locationURI>
+		</link>
+		<link>
 			<name>src/sys/qnx/qnx_shared.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_shared.cpp</locationURI>
+		</link>
+		<link>
+			<name>src/sys/qnx/qnx_signin.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_signin.cpp</locationURI>
+		</link>
+		<link>
+			<name>src/sys/qnx/qnx_signin.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_signin.h</locationURI>
 		</link>
 		<link>
 			<name>src/renderer/jobs/dynamicshadowvolume/DynamicShadowVolume.cpp</name>
