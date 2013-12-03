@@ -676,7 +676,8 @@ const char *Sys_FPU_GetState() {
 #error Must compile with -mfpu=neon
 #endif
 
-	int prec = fp_precision( -1 );
+	//XXX Missing fp_precision... int prec = fp_precision( -1 );
+	int prec = _FP_PREC_FLOAT;
 #else
 #error Unknown CPU architecture
 #endif
@@ -730,8 +731,8 @@ void Sys_FPU_EnableExceptions( int exceptions ) {
 	}
 
 	//No way to simply set, we have to toggle flags on and off
-	fp_exception_mask( _FP_EXC_ALL, 0 ); //Disable all exception mask flags
-	fp_exception_mask( flags, 1 ); //Set exception flags
+	//XXX Mising >> fp_exception_mask( _FP_EXC_ALL, 0 ); //Disable all exception mask flags
+	//XXX Mising >> fp_exception_mask( flags, 1 ); //Set exception flags
 }
 
 /*
@@ -753,7 +754,7 @@ void Sys_FPU_SetPrecision( int precision ) {
 		val = _FP_PREC_DOUBLE_EXTENDED;
 		break;
 	}
-	fp_precision( val );
+	//XXX Mising >> fp_precision( val );
 }
 
 /*
@@ -779,7 +780,7 @@ void Sys_FPU_SetRounding( int rounding ) {
 		val = _FP_ROUND_ZERO;
 		break;
 	}
-	fp_rounding( val );
+	//XXX Mising >> fp_rounding( val );
 }
 
 /*

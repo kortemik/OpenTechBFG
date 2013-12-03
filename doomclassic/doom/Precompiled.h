@@ -39,7 +39,9 @@ If you have questions concerning this license or the applicable additional terms
 #include <string.h>
 #include <queue>
 
+#ifndef ID_INLINE
 #define ID_INLINE inline
+#endif
 
 typedef unsigned char byte;
 typedef unsigned int dword;

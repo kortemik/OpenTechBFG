@@ -113,7 +113,7 @@ int idLocalUserQnx::GetPartyCount() const {
 idLocalUserQnx::VerifyUserState
 ========================
 */
-bool idLocalUserQnx::VerifyUserState( winUserState_t & state ) {
+bool idLocalUserQnx::VerifyUserState( qnxUserState_t & state ) {
 
 	if ( state.inputDevice != inputDevice ) {
 		return false;

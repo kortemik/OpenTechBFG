@@ -37,7 +37,7 @@
 #ifndef __UNZIP_H__
 #define __UNZIP_H__
 
-#ifdef USE_BUILTIN_ZLIB
+#ifdef USE_OS_ZLIB
 #include <zlib.h>
 #else
 #include "zlib/zlib.h"

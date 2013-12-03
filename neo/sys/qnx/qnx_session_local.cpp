@@ -39,6 +39,7 @@ extern idCVar net_port;
 idSessionLocalQnx::idSessionLocalQnx
 ========================
 */
+class idLobbyToSessionCBLocal;
 class idSessionLocalQnx : public idSessionLocal {
 friend class idLobbyToSessionCBLocal;
 
@@ -408,7 +409,7 @@ idSessionLocalQnx::IsSystemUIShowing
 ========================
 */
 bool idSessionLocalQnx::IsSystemUIShowing() const {
-	return !win32.activeApp || isSysUIShowing; // If the user alt+tabs away, treat it the same as bringing up the steam overlay
+	return ( qnx.windowState != NAVIGATOR_WINDOW_FULLSCREEN ) || isSysUIShowing; // If the user switches apps, treat it the same as bringing up the steam overlay
 }
 
 /*

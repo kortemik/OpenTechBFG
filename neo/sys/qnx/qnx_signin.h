@@ -53,7 +53,7 @@ public:
 	virtual void					RemoveLocalUserByIndex( int index );
 	virtual void					RegisterLocalUser( int inputDevice );		// Register a local user to the passed in controller
 
-	bool							CreateNewUser( winUserState_t & state );
+	bool							CreateNewUser( qnxUserState_t & state );
 
 private:
 	idStaticList< idLocalUserQnx, MAX_INPUT_DEVICES >	localUsers;

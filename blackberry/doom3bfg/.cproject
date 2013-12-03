@@ -80,6 +80,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="socket"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="EGL"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="GLESv2"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="screen"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.257941073" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -215,6 +216,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="socket"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="EGL"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="GLESv2"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="screen"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.823928155" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -353,6 +355,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="socket"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="EGL"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="GLESv2"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="screen"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.414524484" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -489,6 +492,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="socket"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="EGL"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="GLESv2"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="screen"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.1311123190" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -623,6 +627,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="socket"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="EGL"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="GLESv2"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="screen"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.2061379145" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -760,6 +765,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="socket"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="EGL"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="GLESv2"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="screen"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.324631596" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -896,6 +902,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="socket"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="EGL"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="GLESv2"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="screen"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.linker.809873610" superClass="com.qnx.qcc.inputType.linker">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>

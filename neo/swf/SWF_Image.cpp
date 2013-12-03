@@ -30,7 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/precompiled.h"
 #include "../renderer/Image.h"
 //#include "../../renderer/ImageTools/ImageProcess.h"
-#ifdef USE_BUILTIN_LIBJPEG
+#ifdef USE_OS_LIBJPEG
 #include <jpeglib.h>
 #else
 #include "../renderer/jpeg-6/jpeglib.h"

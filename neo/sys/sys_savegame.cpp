@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -93,7 +94,7 @@ This returns a comma delimited string of all the errors within the bitfield.  We
 the errors are bitfields so that they can be used to mask which errors we want to handle in the engine or leave up to the
 game.
 
-Example: 
+Example:
 	SAVEGAME_E_LOAD, SAVEGAME_E_INVALID_FILENAME
 ========================
 */
@@ -109,7 +110,7 @@ idStr GetSaveGameErrorString( int errorMask ) {
 			localError ^= mask;	// turn off this error so we can quickly see if we are done
 
 			continueProcessing = localError > 0;
-			
+
 			errorString.Append( saveGameErrorStrings[i] );
 
 			if ( continueProcessing ) {
@@ -215,8 +216,8 @@ bool SavegameReadDetailsFromFile( idFile * file, idSaveGameDetails & details ) {
 idSaveGameDetails::idSaveGameDetails
 ========================
 */
-idSaveGameDetails::idSaveGameDetails() { 
-	Clear(); 
+idSaveGameDetails::idSaveGameDetails() {
+	Clear();
 }
 
 /*
@@ -286,7 +287,7 @@ void idSaveLoadParms::Init() {
 	errorCode = SAVEGAME_E_NONE;
 	inputDeviceId = -1;
 	skipErrorDialogMask = 0;
-	
+
 	// These are not done when we set defaults because SetDefaults is called internally within the execution of the processor and
 	// these are set once and shouldn't be touched until the processor is re-initialized
 	// cancelled = false;
@@ -300,7 +301,7 @@ idSaveLoadParms::SetDefaults
 void idSaveLoadParms::SetDefaults( int newInputDevice ) {
 	// These are pulled out so SetDefaults() isn't called during global instantiation of objects that have savegame processors
 	// in them that then require a session reference.
-	Init();	
+	Init();
 
 	// fill in the user information (inputDeviceId & userId) from the master user
 	idLocalUser * user = NULL;
@@ -312,7 +313,11 @@ void idSaveLoadParms::SetDefaults( int newInputDevice ) {
 	}
 
 	if ( user != NULL ) {
+#ifdef ID_WIN32
 		idLocalUserWin * userWin = static_cast< idLocalUserWin * >( user );
+#else
+		idLocalUserQnx * userWin = static_cast< idLocalUserQnx * >( user );
+#endif
 		userId = idStr::Hash( userWin->GetGamerTag() );
 		idLib::PrintfIf( saveGame_verbose.GetBool(), "profile userId/gamertag: %s (%d)\n", userWin->GetGamerTag(), userId );
 		inputDeviceId = user->GetInputDevice();
@@ -382,11 +387,11 @@ bool idSaveGameProcessor::Init() {
 		idLib::Warning( "[%s] Someone is trying to execute this processor twice, this is really bad!", this->Name() );
 		return false;
 	}
-	
+
 	parms.ResetCancelled();
 	parms.SetDefaults();
 	savegameLogicTestIterator = 0;
-	working = false; 
+	working = false;
 	init = true;
 	completedCallbacks.Clear();
 
@@ -439,7 +444,7 @@ idSaveGameManager::idSaveGameManager() :
 idSaveGameManager::~idSaveGameManager
 ========================
 */
-idSaveGameManager::~idSaveGameManager() {	
+idSaveGameManager::~idSaveGameManager() {
 	processor = NULL;
 	enumeratedSaveGames.Clear();
 }
@@ -452,7 +457,7 @@ idSaveGameManager::ExecuteProcessor
 saveGameHandle_t idSaveGameManager::ExecuteProcessor( idSaveGameProcessor * processor ) {
 	idLib::PrintfIf( saveGame_verbose.GetBool(), "[%s] : %s\n", __FUNCTION__, processor->Name() );
 
-	// may not be running yet, but if we've init'd successfuly, the IsWorking() call should return true if this 
+	// may not be running yet, but if we've init'd successfuly, the IsWorking() call should return true if this
 	// method has been called.  You have problems when callees are asking if the processor is done working by using IsWorking()
 	// the next frame after they've executed the processor.
 	processor->working = true;
@@ -471,7 +476,7 @@ saveGameHandle_t idSaveGameManager::ExecuteProcessor( idSaveGameProcessor * proc
 	}
 
 	processorQueue.Append( processor );
-	
+
 	// Don't allow processors to start sub-processors.
 	// They need to manage their own internal state.
 	assert( idLib::IsMainThread() );
@@ -547,7 +552,7 @@ void idSaveGameManager::CancelAllProcessors( const bool forceCancelInFlightProce
 	assert( idLib::IsMainThread() );
 
 	cancel = true;
-	
+
 	if ( forceCancelInFlightProcessor ) {
 		if ( processor != NULL ) {
 			processor->GetSignal().Raise();
@@ -827,7 +832,7 @@ void idSaveGameManager::Pump() {
 				// If we don't return here, the completedCallback will be executed before it's done with it's async operation
 				// during it's last process stage.
 				return;
-			} else { 
+			} else {
 				continueProcessing = false;
 			}
 		}
@@ -849,7 +854,7 @@ void idSaveGameManager::Pump() {
 			// This ensures that the savegame manager will believe the processor is done when there is a potentially
 			// catastrophic thing that will happen within CompletedCallback which might try to sync all threads
 			// The most common case of this is executing a map change (which we no longer do).
-			// We flush the heap and wait for all background processes to finish.  After all this is called, we will 
+			// We flush the heap and wait for all background processes to finish.  After all this is called, we will
 			// cleanup the old processor within FinishProcessor()
 			idSaveGameProcessor * localProcessor = processor;
 			processor = NULL;
@@ -859,7 +864,7 @@ void idSaveGameManager::Pump() {
 			// At this point, the handle will be completed
 			// ------------------------------------
 			Sys_InterlockedIncrement( lastExecutedProcessorHandle );
-			
+
 			for ( int i = 0; i < localProcessor->completedCallbacks.Num(); i++ ) {
 				localProcessor->completedCallbacks[i]->Call();
 			}
@@ -882,7 +887,7 @@ void idSaveGameManager::Pump() {
 		public:
 			idSWFScriptFunction_TryAgain( idSaveGameManager * manager, idSaveGameProcessor * processor ) {
 				this->manager = manager;
-				this->processor = processor; 
+				this->processor = processor;
 			}
 			idSWFScriptVar Call ( idSWFScriptObject * thisObject, const idSWFParmList & parms ) {
 				common->Dialog().ClearDialog( GDM_ERROR_SAVING_SAVEGAME );

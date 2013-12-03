@@ -1801,9 +1801,19 @@
 			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_main.cpp</locationURI>
 		</link>
 		<link>
+			<name>src/sys/qnx/qnx_net.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_net.cpp</locationURI>
+		</link>
+		<link>
 			<name>src/sys/qnx/qnx_qgl.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_qgl.cpp</locationURI>
+		</link>
+		<link>
+			<name>src/sys/qnx/qnx_savegame.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_savegame.cpp</locationURI>
 		</link>
 		<link>
 			<name>src/sys/qnx/qnx_session_local.cpp</name>

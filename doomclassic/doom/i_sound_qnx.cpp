@@ -864,7 +864,7 @@ unsigned int WINAPI I_LoadSong( void* songname ) {
 	int length = 0;
 	Mus2Midi( musFile, midiConversionBuffer, &length );
 
-	doomMusic = Timidity_LoadSongMem( midiConversionBuffer, length );
+	doomMusic = Timidity_LoadSongMem( midiConversionBuffer, ( size_t )length );
 
 	if ( doomMusic ) {
 		musicBuffer = (byte *)malloc( MIDI_CHANNELS * MIDI_FORMAT_BYTES * doomMusic->samples );

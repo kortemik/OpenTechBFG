@@ -34,10 +34,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "qnx_signin.h"
 
 #ifdef _DEBUG
-idCVar win_userPersistent( "win_userPersistent", "1", CVAR_BOOL, "debugging cvar for profile persistence status" );
-idCVar win_userOnline( "win_userOnline", "1", CVAR_BOOL, "debugging cvar for profile online status" );
-idCVar win_isInParty( "win_isInParty", "0", CVAR_BOOL, "debugging cvar for platform party status" );
-idCVar win_partyCount( "win_partyCount", "0", CVAR_INTEGER, "debugginc var for platform party count" );
+idCVar qnx_userPersistent( "qnx_userPersistent", "1", CVAR_BOOL, "debugging cvar for profile persistence status" );
+idCVar qnx_userOnline( "qnx_userOnline", "1", CVAR_BOOL, "debugging cvar for profile online status" );
+idCVar qnx_isInParty( "qnx_isInParty", "0", CVAR_BOOL, "debugging cvar for platform party status" );
+idCVar qnx_partyCount( "qnx_partyCount", "0", CVAR_INTEGER, "debugginc var for platform party count" );
 #endif
 
 /*
@@ -109,13 +109,13 @@ void idSignInManagerQnx::RegisterLocalUser( int inputDevice ) {
 		int nameIndex = 0;
 		int numChars = 0;
 		name.Empty();
-		while ( nameIndex < nameLength && numChars++ < idLocalUserWin::MAX_GAMERTAG_CHARS ) {
+		while ( nameIndex < nameLength && numChars++ < idLocalUserQnx::MAX_GAMERTAG_CHARS ) {
 			uint32 c = idStr::UTF8Char( nameSource, nameIndex );
 			name.AppendUTF8Char( c );
 		}
 	}
 
-	idLocalUserWin & localUser = *localUsers.Alloc();
+	idLocalUserQnx & localUser = *localUsers.Alloc();
 
 	localUser.Init( inputDevice, name.c_str(), localUsers.Num() );
 	localUser.SetLocalUserHandle( GetUniqueLocalUserHandle( localUser.GetGamerTag() ) );
