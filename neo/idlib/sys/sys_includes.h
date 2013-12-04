@@ -85,6 +85,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef ID_QNX
 
 #include <stddef.h>
+#include <stdint.h>
 
 #include <semaphore.h>
 #include <pthread.h>

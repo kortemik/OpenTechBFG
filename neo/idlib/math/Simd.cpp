@@ -1287,4 +1287,15 @@ void idSIMD::Test_f( const idCmdArgs &args ) {
 	SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_NORMAL );
 }
 
+#else
+
+/*
+============
+idSIMD::Test_f
+============
+*/
+void idSIMD::Test_f( const idCmdArgs &args ) {
+	//TODO
+}
+
 #endif

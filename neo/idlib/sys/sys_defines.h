@@ -103,9 +103,9 @@ If you have questions concerning this license or the applicable additional terms
 		#endif
 	#endif
 
-	#define ID_PC
-	#define ID_QNX
+	#define ID_CONSOLE
 	#define ID_CONSOLE_QNX
+	#define ID_QNX
 	#define ID_LITTLE_ENDIAN
 	#define ID_OPENGL_ES
 #else

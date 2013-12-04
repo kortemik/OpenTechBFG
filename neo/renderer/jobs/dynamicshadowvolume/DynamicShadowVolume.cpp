@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#pragma hdrstop
 #include "DynamicShadowVolume_local.h"
 
 #include "../../../idlib/sys/sys_intrinsics.h"
@@ -521,7 +522,7 @@ static int CalculateTriangleFacingCulledSkinned( byte * __restrict facing, byte 
 			// count the number of facing triangles
 			numFrontFacing = _mm_add_epi32( numFrontFacing, _mm_and_si128( triangleFacing, vector_int_one ) );
 		}
-	
+
 		if ( insideShadowVolume != NULL ) {
 			for ( int k = batchStart, n = indexStart; k <= batchEnd - 3; k += 3, n++ ) {
 				if ( !facing[n] ) {
