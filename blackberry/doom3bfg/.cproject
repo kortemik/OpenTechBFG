@@ -41,7 +41,7 @@
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.696761276" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
 								<option id="com.qnx.qcc.option.assembler.debug.1946642777" name="Debug (-g)" superClass="com.qnx.qcc.option.assembler.debug" value="true" valueType="boolean"/>
-								<option id="com.qnx.qcc.option.assembler.includePath.504940173" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath" valueType="includePath"/>
+								<option id="com.qnx.qcc.option.assembler.includePath.504940173" name="Include Directories (-I)" superClass="com.qnx.qcc.option.assembler.includePath"/>
 								<inputType id="com.qnx.qcc.inputType.assembler.903401021" superClass="com.qnx.qcc.inputType.assembler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.linker.391464981" name="QCC Linker" superClass="com.qnx.qcc.tool.linker">
@@ -64,10 +64,10 @@
 									<listOptionValue builtIn="false" value="--stack,16777216"/>
 								</option>
 								<option id="com.qnx.qcc.option.linker.libraries.1230343137" name="Libraries (-l)" superClass="com.qnx.qcc.option.linker.libraries" valueType="libs">
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="slog2"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="bps"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="m"/>
@@ -200,10 +200,10 @@
 									<listOptionValue builtIn="false" value="--stack,16777216"/>
 								</option>
 								<option id="com.qnx.qcc.option.linker.libraries.548011228" name="Libraries (-l)" superClass="com.qnx.qcc.option.linker.libraries" valueType="libs">
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="slog2"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="bps"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="m"/>
@@ -339,10 +339,10 @@
 									<listOptionValue builtIn="false" value="--stack,16777216"/>
 								</option>
 								<option id="com.qnx.qcc.option.linker.libraries.2107871156" name="Libraries (-l)" superClass="com.qnx.qcc.option.linker.libraries" valueType="libs">
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="slog2"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="bps"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="m"/>
@@ -476,10 +476,10 @@
 									<listOptionValue builtIn="false" value="--stack,16777216"/>
 								</option>
 								<option id="com.qnx.qcc.option.linker.libraries.2100139382" name="Libraries (-l)" superClass="com.qnx.qcc.option.linker.libraries" valueType="libs">
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="slog2"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="bps"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="m"/>
@@ -611,10 +611,10 @@
 									<listOptionValue builtIn="false" value="--stack,16777216"/>
 								</option>
 								<option id="com.qnx.qcc.option.linker.libraries.651594070" name="Libraries (-l)" superClass="com.qnx.qcc.option.linker.libraries" valueType="libs">
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="slog2"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="bps"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="m"/>
@@ -749,10 +749,10 @@
 									<listOptionValue builtIn="false" value="--stack,16777216"/>
 								</option>
 								<option id="com.qnx.qcc.option.linker.libraries.1138562894" name="Libraries (-l)" superClass="com.qnx.qcc.option.linker.libraries" valueType="libs">
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="slog2"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="bps"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="m"/>
@@ -886,10 +886,10 @@
 									<listOptionValue builtIn="false" value="--stack,16777216"/>
 								</option>
 								<option id="com.qnx.qcc.option.linker.libraries.318323226" name="Libraries (-l)" superClass="com.qnx.qcc.option.linker.libraries" valueType="libs">
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="doomclassic"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="timidity"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="game-d3xp"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="idlib"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="slog2"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="bps"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="m"/>
