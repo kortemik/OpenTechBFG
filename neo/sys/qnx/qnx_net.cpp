@@ -690,13 +690,19 @@ void Sys_InitNetworking() {
 			continue;
 		}
 
-		idLib::Printf( "Found interface: %s of type %s - ", netstatus_interface_get_name( details ), Net_InterfaceType( netstatus_interface_get_type( details ) ) );
+		idLib::Printf( "Found interface: %s of type %s - \n", netstatus_interface_get_name( details ), Net_InterfaceType( netstatus_interface_get_type( details ) ) );
 
 		int ipCount = netstatus_interface_get_num_ip_addresses( details );
 
 		for ( int k = 0; k < ipCount; k++ ) {
 			const char* ipAddress = netstatus_interface_get_ip_address( details, k );
 			const char* ipMask = netstatus_interface_get_ip_address_netmask( details, k );
+
+			//Skip IPv6 since inet_addr doesn't like it
+			if( idStr::FindChar( ipAddress, ':' ) != -1 ) {
+				idLib::Printf( "     %s IPv6 address - skipped\n", ipAddress );
+				continue;
+			}
 
 			unsigned long ip_a, ip_m;
 			if( !idStr::Icmp( "127.0.0.1", ipAddress ) ) {
@@ -706,10 +712,10 @@ void Sys_InitNetworking() {
 			ip_m = ntohl( inet_addr( ipMask ) );
 			//skip null netmasks
 			if( !ip_m ) {
-				idLib::Printf( "%s NULL netmask - skipped\n", ipAddress );
+				idLib::Printf( "     %s NULL netmask - skipped\n", ipAddress );
 				continue;
 			}
-			idLib::Printf( "%s/%s\n", ipAddress, ipMask );
+			idLib::Printf( "     %s/%s\n", ipAddress, ipMask );
 			netint[num_interfaces].ip = ip_a;
 			netint[num_interfaces].mask = ip_m;
 			idStr::Copynz( netint[num_interfaces].addr, ipAddress, sizeof( netint[num_interfaces].addr ) );

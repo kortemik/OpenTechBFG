@@ -259,7 +259,7 @@ void GL_SetDefaultState() {
 	qglDisable( GL_POLYGON_OFFSET_FILL );
 #ifndef GL_ES_VERSION_2_0
 	qglDisable( GL_POLYGON_OFFSET_LINE );
-	qglPolygonMode( GL_FRONT_AND_BACK, GL_FILL ); //XXX
+	qglPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 #endif
 
 	// These should never be changed
@@ -374,7 +374,7 @@ void GL_State( uint64 stateBits, bool forceGlState ) {
 	}
 
 #ifndef GL_ES_VERSION_2_0
-	//XXX Any polygon being drawn needs to be adjusted. If GL_LINE is used, then use GL_LINE_LOOP primitives. If GL_FILL is used, then just use normal GL_TRIANGLES
+	//XXX Polygon rendering needs to be adjusted. GL_FILL is normal rendering, GL_LINE is essentially an edge shader
 	//
 	// fill/line mode
 	//
@@ -395,7 +395,7 @@ void GL_State( uint64 stateBits, bool forceGlState ) {
 			qglPolygonOffset( backEnd.glState.polyOfsScale, backEnd.glState.polyOfsBias );
 			qglEnable( GL_POLYGON_OFFSET_FILL );
 #ifndef GL_ES_VERSION_2_0
-			qglEnable( GL_POLYGON_OFFSET_LINE );
+			qglEnable( GL_POLYGON_OFFSET_LINE ); //XXX Only used when polygon mode is GL_LINE
 #endif
 		} else {
 			qglDisable( GL_POLYGON_OFFSET_FILL );

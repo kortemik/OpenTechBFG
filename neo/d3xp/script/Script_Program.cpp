@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -142,7 +143,7 @@ idTypeDef::idTypeDef( etype_t etype, idVarDef *edef, const char *ename, int esiz
 	def			= edef;
 	size		= esize;
 	auxType		= aux;
-	
+
 	parmTypes.SetGranularity( 1 );
 	parmNames.SetGranularity( 1 );
 	functions.SetGranularity( 1 );
@@ -645,7 +646,7 @@ idVarDef::SetObject
 */
 void idVarDef::SetObject( idScriptObject *object ) {
 	assert( typeDef );
-	initialized = initialized;
+	//initialized = initialized;
 	assert( typeDef->Inherits( &type_object ) );
 	*value.objectPtrPtr = object;
 }
@@ -725,7 +726,7 @@ void idVarDef::SetString( const char *string, bool constant ) {
 	} else {
 		initialized = initializedVariable;
 	}
-	
+
 	assert( typeDef && ( typeDef->Type() == ev_string ) );
 	idStr::Copynz( value.stringPtr, string, MAX_STRING_LEN );
 }
@@ -955,7 +956,7 @@ bool idScriptObject::SetType( const char *typeName ) {
 	newtype = gameLocal.program.FindType( typeName );
 
 	// only allocate memory if the object type changes
-	if ( newtype != type ) {	
+	if ( newtype != type ) {
 		Free();
 		if ( !newtype ) {
 			gameLocal.Warning( "idScriptObject::SetType: Unknown type '%s'", typeName );
@@ -1119,7 +1120,7 @@ idProgram::AllocType
 ============
 */
 idTypeDef *idProgram::AllocType( idTypeDef &type ) {
-	idTypeDef * newtype	= new (TAG_SCRIPT) idTypeDef( type ); 
+	idTypeDef * newtype	= new (TAG_SCRIPT) idTypeDef( type );
 	typesHash.Add( idStr::Hash( type.Name() ), types.Append( newtype ) );
 	return newtype;
 }
@@ -1408,7 +1409,7 @@ idProgram::FindFreeResultDef
 */
 idVarDef *idProgram::FindFreeResultDef( idTypeDef *type, const char *name, idVarDef *scope, const idVarDef *a, const idVarDef *b ) {
 	idVarDef *def;
-	
+
 	for( def = GetDefList( name ); def != NULL; def = def->Next() ) {
 		if ( def == a || def == b ) {
 			continue;
@@ -1667,7 +1668,7 @@ void idProgram::Disassemble() const {
 		for( instructionPointer = 0; instructionPointer < func->numStatements; instructionPointer++ ) {
 			DisassembleStatement( file, func->firstStatement + instructionPointer );
 		}
-	
+
 		file->Printf( "}\n" );
 	}
 
@@ -1782,7 +1783,7 @@ bool idProgram::CompileText( const char *source, const char *text, bool console 
 			}
 		}
 	}
-	
+
 	catch( idCompileError &err ) {
 		if ( console ) {
 			gameLocal.Printf( "%s\n", err.GetError() );
@@ -2077,7 +2078,7 @@ void idProgram::Restart() {
 	statements.SetNum( top_statements );
 	fileList.SetNum( top_files );
 	filename.Clear();
-	
+
 	// reset the variables to their default values
 	numVariables = variableDefaults.Num();
 	for( i = 0; i < numVariables; i++ ) {

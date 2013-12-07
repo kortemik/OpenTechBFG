@@ -103,41 +103,28 @@ The renderer calls this when the user adjusts r_gamma or r_brightness
 ========================
 */
 void GLimp_SetGamma( unsigned short red[256], unsigned short green[256], unsigned short blue[256] ) {
+	// XXX
+	// The proper thing to do would be to change screen gamma and brightness by inverse calculation of gamma values... but when OpenGL is in use, those values seem to get
+	// ignored by QNX. So it's not worth doing the calculation.
+
+	// Note: Below is calculation and ranges (actual code is in RenderSystem_init's R_SetColorMappings). If the calculation is ever implemented and done,
+	// and an error occurs, state which function failed (win32 uses SetDeviceGammaRamp, so the error is "common->Printf( "WARNING: SetDeviceGammaRamp failed.\n" );").
+
 	/*
-gammaTable = 0xFFFF * ((j/255)^(1/gamma) + 0.5)
+	gammaTable = 0xFFFF * ((j/255)^(1/gamma) + 0.5)
 
-j_min=0-128
-j_max=0-512
+	j_min=0-128
+	j_max=0-512
 
-gamma_min=0.5
-gamma_max=3
+	gamma_min=0.5
+	gamma_max=3
 
-gammaTable_gmin_jmin=0-0x4081
-gammaTable_gmin_jmax=0-0x4080D => 0-0xFFFF
+	gammaTable_gmin_jmin=0-0x4081
+	gammaTable_gmin_jmax=0-0x4080D => 0-0xFFFF
 
-gammaTable_gmax_jmin=0-0xCB74
-gammaTable_gmax_jmax=0-0x142F6 => 0-0xFFFF
+	gammaTable_gmax_jmin=0-0xCB74
+	gammaTable_gmax_jmax=0-0x142F6 => 0-0xFFFF
 	 */
-
-	//TODO
-	/*
-	unsigned short table[3][256];
-	int i;
-
-	if ( !win32.hDC ) {
-		return;
-	}
-
-	for ( i = 0; i < 256; i++ ) {
-		table[0][i] = red[i];
-		table[1][i] = green[i];
-		table[2][i] = blue[i];
-	}
-
-	if ( !SetDeviceGammaRamp( win32.hDC, table ) ) {
-		common->Printf( "WARNING: SetDeviceGammaRamp failed.\n" );
-	}
-	*/
 }
 
 /*
@@ -316,7 +303,7 @@ void DumpAllDisplayDevices() {
 			for ( int mode = 0; mode < vals[0]; mode++ ) {
 				screen_display_mode_t & displayMode = modes[mode];
 
-				if ( displayMode.refresh < 60 ) {
+				if ( displayMode.refresh < 30 ) {
 					continue;
 				}
 				if ( displayMode.height < 720 ) {
@@ -416,7 +403,8 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t> &
 			for ( int mode = 0; mode < vals[0]; mode++ ) {
 				screen_display_mode_t & displayMode = modes[mode];
 
-				if ( displayMode.refresh != 60 || displayMode.refresh != 120 ) {
+				// The internal display lists it's refresh rate at 59...
+				if ( displayMode.refresh != 59 || displayMode.refresh != 60 || displayMode.refresh != 120 ) {
 					continue;
 				}
 				if ( displayMode.height < 720 ) {

@@ -543,8 +543,12 @@ static void R_CheckPortableExtensions() {
 		}
 	}
 
+#ifndef GL_ES_VERSION_3_0
 	// GL_ARB_seamless_cube_map
 	glConfig.seamlessCubeMapAvailable = R_CheckExtension( "GL_ARB_seamless_cube_map" );
+#else
+	glConfig.seamlessCubeMapAvailable = ( glConfig.glVersion >= 3.0 );
+#endif
 	r_useSeamlessCubeMap.SetModified();		// the CheckCvars() next frame will enable / disable it
 
 #ifndef GL_ES_VERSION_2_0

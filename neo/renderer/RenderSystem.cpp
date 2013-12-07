@@ -238,11 +238,15 @@ static void R_CheckCvars() {
 	if ( r_useSeamlessCubeMap.IsModified() ) {
 		r_useSeamlessCubeMap.ClearModified();
 		if ( glConfig.seamlessCubeMapAvailable ) {
+#ifdef GL_ES_VERSION_3_0
+			//TODO: OpenGL ES 3.0 spec, section 3.8.9. If Texture filters are set to Linear, then neighboring-face texels will be used
+#else
 			if ( r_useSeamlessCubeMap.GetBool() ) {
 				qglEnable( GL_TEXTURE_CUBE_MAP_SEAMLESS );
 			} else {
 				qglDisable( GL_TEXTURE_CUBE_MAP_SEAMLESS );
 			}
+#endif
 		}
 	}
 
