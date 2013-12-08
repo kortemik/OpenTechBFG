@@ -4,6 +4,7 @@
 Doom 3 BFG Edition GPL Source Code
 Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 Copyright (C) 2013 Vincent Simonetti
+Copyright (C) 2013 Robert Beckebans
 
 This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
@@ -36,6 +37,8 @@ If you have questions concerning this license or the applicable additional terms
 #include <unistd.h>
 #include <time.h>
 #include <dlfcn.h>
+#include <dirent.h>
+#include <fnmatch.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -59,9 +62,7 @@ QNXVars_t	qnx;
 
 static char		sys_cmdline[MAX_STRING_CHARS];
 
-static sysMemoryStats_t exeLaunchMemoryStats;
-
-//static HANDLE hProcessMutex;
+static sysMemoryStats_t appLaunchMemoryStats;
 
 /*
 ================
@@ -69,23 +70,7 @@ Sys_GetExeLaunchMemoryStatus
 ================
 */
 void Sys_GetExeLaunchMemoryStatus( sysMemoryStats_t &stats ) {
-	stats = exeLaunchMemoryStats;
-}
-
-/*
-==================
-Sys_Sentry
-==================
-*/
-void Sys_Sentry() {
-}
-
-/*
-==================
-Sys_FlushCacheMemory
-==================
-*/
-void Sys_FlushCacheMemory( void *base, int bytes ) {
+	stats = appLaunchMemoryStats;
 }
 
 /*
@@ -361,8 +346,13 @@ Sys_DefaultBasePath
 ==============
 */
 const char *Sys_DefaultBasePath() {
-	//TODO: make sure this points to game data
-	return Sys_Cwd();
+	static char basePath[ PATH_MAX ];
+	memset( basePath, 0, PATH_MAX );
+
+	strcpy( basePath, Sys_Cwd() );
+	strcat( basePath, "/shared/misc/doom3bfg" ); //XXX possibly change to "/cache"
+
+	return basePath;
 }
 
 /*
@@ -371,11 +361,10 @@ Sys_DefaultSavePath
 ==============
 */
 const char *Sys_DefaultSavePath() {
-	//TODO: Correct to point to a location that will save game data (just need to check where getcwd actually points to)
 	static char savePath[ PATH_MAX ];
 	memset( savePath, 0, PATH_MAX );
 
-	strcpy( savePath, Sys_Cwd() ); //XXX Is this correct?
+	strcpy( savePath, Sys_Cwd() );
 	strcat( savePath, SAVE_PATH );
 
 	return savePath;
@@ -387,8 +376,13 @@ Sys_EXEPath
 ==============
 */
 const char *Sys_EXEPath() {
-	static char exe[ MAX_OSPATH ];
-	//XXX GetModuleFileName( NULL, exe, sizeof( exe ) - 1 );
+	static char exe[ MAX_OSPATH ] = { 0 };
+	if ( exe[0] == '\0' ) {
+		int fd = open( "/proc/self/exefile", O_RDONLY );
+		int pos = read( fd, exe, MAX_OSPATH - 1 );
+		close( fd );
+		exe[pos] = '\0';
+	}
 	return exe;
 }
 
@@ -398,47 +392,79 @@ Sys_ListFiles
 ==============
 */
 int Sys_ListFiles( const char *directory, const char *extension, idStrList &list ) {
-	/* TODO
-	idStr		search;
-	struct _finddata_t findinfo;
-	int			findhandle;
-	int			flag;
+	// (very) slight modification of RBDOOM3's function
+	struct dirent* d;
+	DIR* fdir;
+	bool dironly = false;
+	char search[MAX_OSPATH];
+	struct stat st;
 
-	if ( !extension) {
+	if ( !extension ) {
 		extension = "";
 	}
 
-	// passing a slash as extension will find directories
-	if ( extension[0] == '/' && extension[1] == 0 ) {
-		extension = "";
-		flag = 0;
-	} else {
-		flag = _A_SUBDIR;
-	}
-
-	sprintf( search, "%s\\*%s", directory, extension );
-
-	// search
 	list.Clear();
 
-	findhandle = _findfirst( search, &findinfo );
-	if ( findhandle == -1 ) {
+	// DG: we use fnmatch for shell-style pattern matching
+	// so the pattern should at least contain "*" to match everything,
+	// the extension will be added behind that (if !dironly)
+	idStr pattern( "*" );
+
+	// passing a slash as extension will find directories
+	if( extension[0] == '/' && extension[1] == 0 ) {
+		dironly = true;
+	} else {
+		// so we have *<extension>, the same as in the windows code basically
+		pattern += extension;
+	}
+	// DG end
+
+	// NOTE: case sensitivity of directory path can screw us up here
+	if ( ( fdir = opendir( directory ) ) == NULL ) {
 		return -1;
 	}
 
-	do {
-		if ( flag ^ ( findinfo.attrib & _A_SUBDIR ) ) {
-			list.Append( findinfo.name );
-		}
-	} while ( _findnext( findhandle, &findinfo ) != -1 );
+	// DG: use readdir_r instead of readdir for thread safety
+	// the following lines are from the readdir_r manpage.. fscking ugly.
+	int nameMax = pathconf( directory, _PC_NAME_MAX );
+	if ( nameMax == -1 )
+		nameMax = 255;
+	int direntLen = offsetof( struct dirent, d_name ) + nameMax + 1;
 
-	_findclose( findhandle );
+	struct dirent* entry = ( struct dirent* )Mem_Alloc( direntLen, TAG_CRAP );
+
+	if ( entry == NULL ) {
+		common->Warning( "Sys_ListFiles: Mem_Alloc for entry failed!" );
+		closedir( fdir );
+		return 0;
+	}
+
+	while ( readdir_r( fdir, entry, &d ) == 0 && d != NULL ) {
+		// DG end
+		idStr::snPrintf( search, sizeof( search ), "%s/%s", directory, d->d_name );
+		if ( stat( search, &st ) == -1 )
+			continue;
+		if ( !dironly ) {
+			// DG: the original code didn't work because d3 bfg abuses the extension
+			// to match whole filenames and patterns in the savegame-code, not just file extensions...
+			// so just use fnmatch() which supports matching shell wildcard patterns ("*.foo" etc)
+			// if we should ever need case insensitivity, use FNM_CASEFOLD as third flag
+			if( fnmatch( pattern.c_str(), d->d_name, 0 ) != 0 )
+				continue;
+			// DG end
+		}
+		if ( ( dironly && !( st.st_mode & S_IFDIR ) ) ||
+				( !dironly && ( st.st_mode & S_IFDIR ) ) )
+			continue;
+
+		list.Append( d->d_name );
+	}
+
+	closedir( fdir );
+	Mem_Free( entry );
 
 	return list.Num();
-	*/
-	return 0;
 }
-
 
 /*
 ================
@@ -1004,14 +1030,29 @@ int main( int argc, char** argv ) {
 
 	Sys_SetPhysicalWorkMemory( 192 << 20, 1024 << 20 );
 
-	Sys_GetCurrentMemoryStatus( exeLaunchMemoryStats );
+	Sys_GetCurrentMemoryStatus( appLaunchMemoryStats );
 
-	//TODO idStr::Copynz( sys_cmdline, lpCmdLine, sizeof( sys_cmdline ) );
+	// build command line
+	{
+		idCmdArgs args;
+		for ( int i = 1; i < argc; i++ ) {
+			args.AppendArg( argv[i] );
+		}
+		idStr::Copynz( sys_cmdline, args.Args( 0, -1, true ), sizeof( sys_cmdline ) );
+	}
 
 	// get the initial time base
 	Sys_Milliseconds();
 
-	common->Init( argc - 1, &argv[1], NULL );
+	// check for data, copy if it doesn't exist
+	//TODO
+
+	// initialize system
+	if ( argc > 1 ) {
+		common->Init( argc - 1, &argv[1], NULL );
+	} else {
+		common->Init( 0, NULL, NULL );
+	}
 
 	// main game loop
 	while( 1 ) {

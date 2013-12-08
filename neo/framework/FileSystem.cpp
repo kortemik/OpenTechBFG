@@ -3232,7 +3232,7 @@ void idFileSystemLocal::FindDLL( const char *name, char _dllPath[ MAX_OSPATH ] )
 	char dllName[MAX_OSPATH];
 	sys->DLL_GetFileName( name, dllName, MAX_OSPATH );
 
-	// from executable directory first - this is handy for developement
+	// from executable directory first - this is handy for development
 	idStr dllPath = Sys_EXEPath( );
 	dllPath.StripFilename( );
 	dllPath.AppendPath( dllName );

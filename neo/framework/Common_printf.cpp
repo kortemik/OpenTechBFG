@@ -494,9 +494,11 @@ void idCommonLocal::Error( const char *fmt, ... ) {
 		Printf( "********************\nERROR: %s\n********************\n", errorMessage );
 	}
 
+#ifndef ID_QNX
 	if ( cvarSystem->GetCVarBool( "r_fullscreen" ) ) {
 		cmdSystem->BufferCommandText( CMD_EXEC_NOW, "vid_restart partial windowed\n" );
 	}
+#endif
 
 	Sys_Error( "%s", errorMessage );
 
@@ -542,9 +544,11 @@ void idCommonLocal::FatalError( const char *fmt, ... ) {
 	va_end( argptr );
 	errorMessage[sizeof(errorMessage)-1] = '\0';
 
+#ifndef ID_QNX
 	if ( cvarSystem->GetCVarBool( "r_fullscreen" ) ) {
 		cmdSystem->BufferCommandText( CMD_EXEC_NOW, "vid_restart partial windowed\n" );
 	}
+#endif
 
 	Sys_SetFatalError( errorMessage );
 
