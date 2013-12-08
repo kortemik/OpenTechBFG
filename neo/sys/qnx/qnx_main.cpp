@@ -41,7 +41,11 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <bps/bps.h>
 #include <bps/navigator_invoke.h>
+#include <bps/deviceinfo.h>
+#include <bps/battery.h>
 #include <clipboard/clipboard.h>
+
+#include <sys/slog2.h>
 
 #include "../sys_local.h"
 #include "qnx_local.h"
@@ -79,9 +83,6 @@ void Sys_Sentry() {
 /*
 ==================
 Sys_FlushCacheMemory
-
-On windows, the vertex buffers are write combined, so they
-don't need to be flushed from the cache
 ==================
 */
 void Sys_FlushCacheMemory( void *base, int bytes ) {
@@ -214,11 +215,6 @@ void Sys_Printf( const char *fmt, ... ) {
 	msg[sizeof(msg)-1] = '\0';
 
 	slog2c( NULL, SLOG_CODE, SLOG2_INFO, msg );
-
-	/* XXX
-	if ( win32.win_outputEditString.GetBool() && idLib::IsMainThread() ) {
-		Conbuf_AppendText( msg );
-	}*/
 }
 
 /*
@@ -719,6 +715,8 @@ bool Sys_AlreadyRunning() {
 	return false;
 }
 
+extern char* __progname;
+
 /*
 ================
 Sys_Init
@@ -730,129 +728,136 @@ void Sys_Init() {
 
 	bps_initialize();
 
-	//TODO: Setup slog2
+	//
+	// SLOG2 setup
+	//
+	slog2_buffer_set_config_t buffer_config;
 
-	//TODO: lock rotation
+	// Setup log info
+	buffer_config.buffer_set_name = __progname;
+	buffer_config.num_buffers = SLOG_BUFFER_COUNT;
+	buffer_config.verbosity_level = SLOG2_DEBUG1;
 
-	/* TODO
-	CoInitialize( NULL );
+	// Setup each buffer
+	buffer_config.buffer_config[0].buffer_name = "doom3";
+	buffer_config.buffer_config[0].num_pages = 9;
 
-	// get WM_TIMER messages pumped every millisecond
-//	SetTimer( NULL, 0, 100, NULL );
+	// Register
+	if ( slog2_register( &buffer_config, qnx.logBuffers, 0 ) == -1 )
+		Sys_Error( "Couldn't setup SLOG2" );
+
+	// Set the default log
+	slog2_set_default_buffer( qnx.logBuffers[0] );
+
+	//
+	// Navigator and event setup
+	//
+	navigator_rotation_lock( true );
+
+	if ( navigator_request_events( 0 ) != BPS_SUCCESS )
+		Sys_Error( "Couldn't request navigator events" );
+	battery_request_events( 0 );
 
 	cmdSystem->AddCommand( "in_restart", Sys_In_Restart_f, CMD_FL_SYSTEM, "restarts the input system" );
 
 	//
-	// Windows user name
+	// QNX version
 	//
-	win32.win_username.SetString( Sys_GetCurrentUser() );
+	deviceinfo_details_t *devDetails;
+	if ( deviceinfo_get_details( &devDetails ) != BPS_SUCCESS )
+		Sys_Error( "Couldn't get device info" );
 
-	//
-	// Windows version
-	//
-	win32.osversion.dwOSVersionInfoSize = sizeof( win32.osversion );
+	qnx.sys_arch.SetString( deviceinfo_details_get_device_os( devDetails ) );
 
-	if ( !GetVersionEx( (LPOSVERSIONINFO)&win32.osversion ) )
-		Sys_Error( "Couldn't get OS info" );
-
-	if ( win32.osversion.dwMajorVersion < 4 ) {
-		Sys_Error( GAME_NAME " requires Windows version 4 (NT) or greater" );
-	}
-	if ( win32.osversion.dwPlatformId == VER_PLATFORM_WIN32s ) {
-		Sys_Error( GAME_NAME " doesn't run on Win32s" );
-	}
-
-	if( win32.osversion.dwPlatformId == VER_PLATFORM_WIN32_NT ) {
-		if( win32.osversion.dwMajorVersion <= 4 ) {
-			win32.sys_arch.SetString( "WinNT (NT)" );
-		} else if( win32.osversion.dwMajorVersion == 5 && win32.osversion.dwMinorVersion == 0 ) {
-			win32.sys_arch.SetString( "Win2K (NT)" );
-		} else if( win32.osversion.dwMajorVersion == 5 && win32.osversion.dwMinorVersion == 1 ) {
-			win32.sys_arch.SetString( "WinXP (NT)" );
-		} else if ( win32.osversion.dwMajorVersion == 6 ) {
-			win32.sys_arch.SetString( "Vista" );
-		} else {
-			win32.sys_arch.SetString( "Unknown NT variant" );
-		}
-	} else if( win32.osversion.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS ) {
-		if( win32.osversion.dwMajorVersion == 4 && win32.osversion.dwMinorVersion == 0 ) {
-			// Win95
-			if( win32.osversion.szCSDVersion[1] == 'C' ) {
-				win32.sys_arch.SetString( "Win95 OSR2 (95)" );
-			} else {
-				win32.sys_arch.SetString( "Win95 (95)" );
-			}
-		} else if( win32.osversion.dwMajorVersion == 4 && win32.osversion.dwMinorVersion == 10 ) {
-			// Win98
-			if( win32.osversion.szCSDVersion[1] == 'A' ) {
-				win32.sys_arch.SetString( "Win98SE (95)" );
-			} else {
-				win32.sys_arch.SetString( "Win98 (95)" );
-			}
-		} else if( win32.osversion.dwMajorVersion == 4 && win32.osversion.dwMinorVersion == 90 ) {
-			// WinMe
-		  	win32.sys_arch.SetString( "WinMe (95)" );
-		} else {
-		  	win32.sys_arch.SetString( "Unknown 95 variant" );
-		}
-	} else {
-		win32.sys_arch.SetString( "unknown Windows variant" );
-	}
+	deviceinfo_free_details( &devDetails );
 
 	//
 	// CPU type
 	//
-	if ( !idStr::Icmp( win32.sys_cpustring.GetString(), "detect" ) ) {
+	if ( !idStr::Icmp( qnx.sys_cpustring.GetString(), "detect" ) ) {
 		idStr string;
 
 		common->Printf( "%1.0f MHz ", Sys_ClockTicksPerSecond() / 1000000.0f );
 
-		win32.cpuid = Sys_GetCPUId();
+		qnx.cpuid = Sys_GetCPUId();
 
 		string.Clear();
 
-		if ( win32.cpuid & CPUID_AMD ) {
+#ifdef ID_QNX_X86
+
+		if ( qnx.cpuid & CPUID_AMD ) {
 			string += "AMD CPU";
-		} else if ( win32.cpuid & CPUID_INTEL ) {
+		} else if ( qnx.cpuid & CPUID_INTEL ) {
 			string += "Intel CPU";
-		} else if ( win32.cpuid & CPUID_UNSUPPORTED ) {
+		} else if ( qnx.cpuid & CPUID_UNSUPPORTED ) {
 			string += "unsupported CPU";
 		} else {
 			string += "generic CPU";
 		}
 
 		string += " with ";
-		if ( win32.cpuid & CPUID_MMX ) {
+		if ( qnx.cpuid & CPUID_MMX ) {
 			string += "MMX & ";
 		}
-		if ( win32.cpuid & CPUID_3DNOW ) {
+		if ( qnx.cpuid & CPUID_3DNOW ) {
 			string += "3DNow! & ";
 		}
-		if ( win32.cpuid & CPUID_SSE ) {
+		if ( qnx.cpuid & CPUID_SSE ) {
 			string += "SSE & ";
 		}
-		if ( win32.cpuid & CPUID_SSE2 ) {
-            string += "SSE2 & ";
+		if ( qnx.cpuid & CPUID_SSE2 ) {
+			string += "SSE2 & ";
 		}
-		if ( win32.cpuid & CPUID_SSE3 ) {
+		if ( qnx.cpuid & CPUID_SSE3 ) {
 			string += "SSE3 & ";
 		}
-		if ( win32.cpuid & CPUID_HTT ) {
+		if ( qnx.cpuid & CPUID_HTT ) {
 			string += "HTT & ";
 		}
+
+#elif defined(ID_QNX_ARM)
+
+		if ( qnx.cpuid & CPUID_TI ) {
+			string += "Texas Instruments CPU";
+		} else if ( qnx.cpuid & CPUID_QC ) {
+			string += "Qualcomm CPU";
+		} else if ( qnx.cpuid & CPUID_UNSUPPORTED ) {
+			string += "unsupported CPU";
+		} else {
+			string += "generic CPU";
+		}
+
+		string += " with ";
+		if ( qnx.cpuid & CPUID_VFP ) {
+			string += "VFP & ";
+		}
+		if ( qnx.cpuid & CPUID_NEON ) {
+			string += "NEON & ";
+		}
+		if ( qnx.cpuid & CPUID_WMMX2 ) {
+			string += "WMMX2 & ";
+		}
+
+#else
+#error Unknown CPU architecture
+#endif
 		string.StripTrailing( " & " );
 		string.StripTrailing( " with " );
-		win32.sys_cpustring.SetString( string );
+		qnx.sys_cpustring.SetString( string );
 	} else {
 		common->Printf( "forcing CPU type to " );
-		idLexer src( win32.sys_cpustring.GetString(), idStr::Length( win32.sys_cpustring.GetString() ), "sys_cpustring" );
+		idLexer src( qnx.sys_cpustring.GetString(), idStr::Length( qnx.sys_cpustring.GetString() ), "sys_cpustring" );
 		idToken token;
 
 		int id = CPUID_NONE;
 		while( src.ReadToken( &token ) ) {
 			if ( token.Icmp( "generic" ) == 0 ) {
 				id |= CPUID_GENERIC;
-			} else if ( token.Icmp( "intel" ) == 0 ) {
+				continue;
+			}
+#ifdef ID_QNX_X86
+
+			if ( token.Icmp( "intel" ) == 0 ) {
 				id |= CPUID_INTEL;
 			} else if ( token.Icmp( "amd" ) == 0 ) {
 				id |= CPUID_AMD;
@@ -869,23 +874,46 @@ void Sys_Init() {
 			} else if ( token.Icmp( "htt" ) == 0 ) {
 				id |= CPUID_HTT;
 			}
+
+#elif defined(ID_QNX_ARM)
+
+			if ( token.Icmp( "ti" ) == 0 ) {
+				id |= CPUID_TI;
+			} else if ( token.Icmp( "qualcomm" ) == 0 ) {
+				id |= CPUID_QC;
+			} else if ( token.Icmp( "vfp" ) == 0 ) {
+				id |= CPUID_VFP;
+			} else if ( token.Icmp( "neon" ) == 0 ) {
+				id |= CPUID_NEON;
+			} else if ( token.Icmp( "wmmx2" ) == 0 ) {
+				id |= CPUID_WMMX2;
+			}
+
+#else
+#error Unknown CPU architecture
+#endif
 		}
 		if ( id == CPUID_NONE ) {
-			common->Printf( "WARNING: unknown sys_cpustring '%s'\n", win32.sys_cpustring.GetString() );
+			common->Printf( "WARNING: unknown sys_cpustring '%s'\n", qnx.sys_cpustring.GetString() );
 			id = CPUID_GENERIC;
 		}
-		win32.cpuid = (cpuid_t) id;
+		qnx.cpuid = (cpuid_t) id;
 	}
 
-	common->Printf( "%s\n", win32.sys_cpustring.GetString() );
+	common->Printf( "%s\n", qnx.sys_cpustring.GetString() );
 	common->Printf( "%d MB System Memory\n", Sys_GetSystemRam() );
-	common->Printf( "%d MB Video Memory\n", Sys_GetVideoRam() );
-	if ( ( win32.cpuid & CPUID_SSE2 ) == 0 ) {
+	//common->Printf( "%d MB Video Memory\n", Sys_GetVideoRam() );
+#ifdef ID_QNX_X86
+	if ( ( qnx.cpuid & CPUID_SSE2 ) == 0 ) {
 		common->Error( "SSE2 not supported!" );
 	}
-
-	win32.g_Joystick.Init();
-	*/
+#elif defined(ID_QNX_ARM)
+	if ( ( qnx.cpuid & CPUID_NEON ) == 0 ) {
+		common->Error( "NEON not supported!" );
+	}
+#else
+#error Unknown CPU architecture
+#endif
 }
 
 /*
@@ -894,6 +922,8 @@ Sys_Shutdown
 ================
 */
 void Sys_Shutdown() {
+	battery_stop_events( 0 );
+	navigator_stop_events( 0 );
 	bps_shutdown();
 }
 
@@ -972,93 +1002,22 @@ main
 */
 int main( int argc, char** argv ) {
 
-	/* TODO
-	const HCURSOR hcurSave = ::SetCursor( LoadCursor( 0, IDC_WAIT ) );
-
 	Sys_SetPhysicalWorkMemory( 192 << 20, 1024 << 20 );
 
 	Sys_GetCurrentMemoryStatus( exeLaunchMemoryStats );
 
-#if 0
-    DWORD handler = (DWORD)_except_handler;
-    __asm
-    {                           // Build EXCEPTION_REGISTRATION record:
-        push    handler         // Address of handler function
-        push    FS:[0]          // Address of previous handler
-        mov     FS:[0],ESP      // Install new EXECEPTION_REGISTRATION
-    }
-#endif
-
-	win32.hInstance = hInstance;
-	idStr::Copynz( sys_cmdline, lpCmdLine, sizeof( sys_cmdline ) );
-
-	// done before Com/Sys_Init since we need this for error output
-	Sys_CreateConsole();
-
-	// no abort/retry/fail errors
-	SetErrorMode( SEM_FAILCRITICALERRORS );
-
-	for ( int i = 0; i < MAX_CRITICAL_SECTIONS; i++ ) {
-		InitializeCriticalSection( &win32.criticalSections[i] );
-	}
-
-	// make sure the timer is high precision, otherwise
-	// NT gets 18ms resolution
-	timeBeginPeriod( 1 );
+	//TODO idStr::Copynz( sys_cmdline, lpCmdLine, sizeof( sys_cmdline ) );
 
 	// get the initial time base
 	Sys_Milliseconds();
 
-#ifdef DEBUG
-	// disable the painfully slow MS heap check every 1024 allocs
-	_CrtSetDbgFlag( 0 );
-#endif
+	common->Init( argc - 1, &argv[1], NULL );
 
-//	Sys_FPU_EnableExceptions( TEST_FPU_EXCEPTIONS );
-	Sys_FPU_SetPrecision( FPU_PRECISION_DOUBLE_EXTENDED );
-
-	common->Init( 0, NULL, lpCmdLine );
-
-#if TEST_FPU_EXCEPTIONS != 0
-	common->Printf( Sys_FPU_GetState() );
-#endif
-
-	if ( win32.win_notaskkeys.GetInteger() ) {
-		DisableTaskKeys( TRUE, FALSE, /*( win32.win_notaskkeys.GetInteger() == 2 )* / FALSE );
-	}
-
-	// hide or show the early console as necessary
-	if ( win32.win_viewlog.GetInteger() ) {
-		Sys_ShowConsole( 1, true );
-	} else {
-		Sys_ShowConsole( 0, false );
-	}
-
-#ifdef SET_THREAD_AFFINITY
-	// give the main thread an affinity for the first cpu
-	SetThreadAffinityMask( GetCurrentThread(), 1 );
-#endif
-
-	::SetCursor( hcurSave );
-
-	::SetFocus( win32.hWnd );
-
-    // main game loop
+	// main game loop
 	while( 1 ) {
-
-		Win_Frame();
-
-#ifdef DEBUG
-		Sys_MemFrame();
-#endif
-
-		// set exceptions, even if some crappy syscall changes them!
-		Sys_FPU_EnableExceptions( TEST_FPU_EXCEPTIONS );
-
 		// run the game
 		common->Frame();
 	}
-	*/
 
 	// never gets here
 	return 0;

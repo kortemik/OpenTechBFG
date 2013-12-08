@@ -34,6 +34,7 @@
     <permission>access_internet</permission>
     <permission>access_pimdomain_messages</permission>
     <permission>access_shared</permission>
+    <permission>narrow_landscape_exit</permission>
     <asset path="icon.png">icon.png</asset>
     <configuration name="Device-Debug">
        <platformArchitecture>armle-v7</platformArchitecture>

@@ -871,7 +871,7 @@ static void R_CheckPortableExtensions() {
 		}
 		if ( r_debugContext.GetInteger() >= 2 ) {
 			// force everything to happen in the main thread instead of in a separate driver thread
-			glEnable( GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB );
+			qglEnable( GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB );
 		}
 		if ( r_debugContext.GetInteger() >= 3 ) {
 			// enable all the low priority messages

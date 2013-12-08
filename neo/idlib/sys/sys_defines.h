@@ -195,13 +195,14 @@ If you have questions concerning this license or the applicable additional terms
 #define ID_INLINE						__inline__
 #define ID_FORCE_INLINE					__inline__ __attribute__((always_inline))
 
-/*
+#if 0
 //Specifying "extern inline" causes compilation errors on templates, but gnu_inline supposedly does the same thing
 #define ID_INLINE_EXTERN				__attribute__((gnu_inline))
-#define ID_FORCE_INLINE_EXTERN			__attribute__((always_inline)) __attribute__((gnu_inline))
-*/
+#define ID_FORCE_INLINE_EXTERN			__attribute__((gnu_inline)) __attribute__((always_inline))
+#else
 #define ID_INLINE_EXTERN				__inline__
 #define ID_FORCE_INLINE_EXTERN			__inline__ __attribute__((always_inline))
+#endif
 
 //Identification code for SLOG2. 2004 was the date Doom 3 was released
 #define SLOG_CODE						2004

@@ -35,6 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <bps/bps.h>
 #include <bps/event.h>
 #include <bps/virtualkeyboard.h>
+#include <bps/battery.h>
 
 #include <signal.h>
 
@@ -458,6 +459,20 @@ void Sys_PumpEvents() {
 				//NAVIGATOR_CARD_PEEK_STARTED
 				//NAVIGATOR_CARD_PEEK_STOPPED
 				//NAVIGATOR_ORIENTATION_SIZE
+				}
+			} else if ( domain == battery_get_domain() ) {
+				code = bps_event_get_code( event );
+				switch( code ) {
+				case BATTERY_INFO:
+					battery_info_t* info = battery_event_get_info( event );
+
+					int time = battery_info_get_time_to_empty( info );
+					if ( time != BATTERY_TIME_NA && time < BATTERY_MIN_TO_LOW_BATTERY_WARNING ) {
+						common->Dialog().AddDialog( GDM_WARNING_LOW_BATTERY, DIALOG_ACCEPT, NULL, NULL, true );
+					} else {
+						common->Dialog().ClearDialog( GDM_WARNING_LOW_BATTERY );
+					}
+					break;
 				}
 			}
 		} else {

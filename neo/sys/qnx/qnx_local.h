@@ -32,8 +32,12 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../../renderer/OpenGL/qgl_es.h"
 
+#include <sys/slog2.h>
 #include <bps/navigator.h>
 #include <bps/screen.h>
+
+#define BATTERY_MIN_TO_LOW_BATTERY_WARNING 20
+#define SLOG_BUFFER_COUNT 1
 
 void	Sys_QueEvent( sysEventType_t type, int value, int value2, int ptrLength, void *ptr, int inputDeviceNum );
 
@@ -43,6 +47,8 @@ uint64	Sys_Microseconds();
 
 typedef struct {
 	cpuid_t						cpuid;
+
+	slog2_buffer_t				logBuffers[SLOG_BUFFER_COUNT];
 
 	bool						quitStarted;
 	navigator_window_state_t	windowState;

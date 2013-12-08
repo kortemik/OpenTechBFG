@@ -169,6 +169,7 @@ returns in megabytes
 ================
 */
 int Sys_GetVideoRam() {
+	return Sys_GetSystemRam(); // Video RAM is shared with system RAM
 	//TODO: not sure I can get this. Worse-case: hardcode as it doesn't get used for anything other then console print-out
 	/*
 	unsigned int retSize = 64;

@@ -434,6 +434,7 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t> &
 	Mem_Free( ( void* )displayList );
 
 	if ( modeList.Num() > 0 ) {
+
 		// sort with lowest resolution first
 		modeList.SortWithTemplate( idSort_VidMode() );
 
