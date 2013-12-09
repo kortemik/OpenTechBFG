@@ -79,7 +79,10 @@ Depending what is your interest with the source code, those may be a better star
 
 THANKS
 ======
-- Robert Beckebans (RobertBeckebans) for RBDOOM-3-BFG, which had an already implemented version of OpenAL audio
+- Robert Beckebans (RobertBeckebans) for RBDOOM-3-BFG:
+    Already written OpenAL implementation
+    POSIX Sys_ListFiles
+    Proof that extern inline works in C++, which otherwise was "not really supported" (so the internet says)
 
 
 LICENSE

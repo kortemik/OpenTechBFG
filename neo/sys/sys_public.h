@@ -544,7 +544,7 @@ void			Sys_ShowConsole( int visLevel, bool quitOnClose );
 // and has a function signature with 'FILE' in it, it kinda needs to be here =/
 #ifdef ID_WIN32
 typedef HANDLE idFileHandle;
-#elif defined(ID_QNX)
+#else
 typedef int idFileHandle;
 #endif
 
