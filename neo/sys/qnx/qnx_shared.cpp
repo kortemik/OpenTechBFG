@@ -235,20 +235,18 @@ void Sys_GetCurrentMemoryStatus( sysMemoryStats_t &stats ) {
 #endif
 
 	struct malloc_stats _malloc_stats;
-	mallopt(MALLOC_STATS, ( int )( &_malloc_stats ));
+	mallopt( MALLOC_STATS, ( int )( &_malloc_stats ) );
 
-	stats.totalPhysical = Sys_GetSystemRamInBytes();
+	uint64_t totalPhysical = Sys_GetSystemRamInBytes();
 
 	//XXX Is this correct and/or "complete"?
 	uint64_t total = _malloc_stats.m_allocmem + _malloc_stats.m_small_allocmem; //Get to the amount of memory allocated
 
-	stats.availPhysical = stats.totalPhysical - total;
-
-	stats.memoryLoad = ( int )( ( ( float )total / stats.totalPhysical ) * 100 );
+	stats.memoryLoad = ( int )( ( ( float )total / totalPhysical ) * 100 );
 
 	// Adjust memory amount and availability in kb
-	stats.totalPhysical /= 1024;
-	stats.availPhysical /= 1024;
+	stats.totalPhysical = totalPhysical / 1024;
+	stats.availPhysical = ( totalPhysical - total ) / 1024;
 
 	// There is no such thing as a page file on QNX
 	stats.availPageFile = 0;

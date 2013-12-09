@@ -342,19 +342,36 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t> &
 	modeList.Clear();
 
 	bool	verbose = false;
+	bool	hasContext = qnx.screenCtx != NULL;
+
+#define CLEANUP_TMP_CONTEXT() \
+	if ( !hasContext ) { \
+		screen_destroy_context( qnx.screenCtx ); \
+		qnx.screenCtx = NULL; \
+	}
+
+	if ( !hasContext ) {
+		// Temporarily create a context
+		if ( screen_create_context( &qnx.screenCtx, 0 ) != 0 ) {
+			return false;
+		}
+	}
 
 	int displayCount = 1;
 	if ( screen_get_context_property_iv( qnx.screenCtx, SCREEN_PROPERTY_DISPLAY_COUNT, &displayCount ) != 0 ) {
+		CLEANUP_TMP_CONTEXT()
 		return false;
 	}
 
 	if ( requestedDisplayNum >= displayCount ) {
+		CLEANUP_TMP_CONTEXT()
 		return false;
 	}
 
 	screen_display_t* displayList = ( screen_display_t* )Mem_Alloc( sizeof( screen_display_t ) * displayCount, TAG_TEMP );
 	if ( screen_get_context_property_pv( qnx.screenCtx, SCREEN_PROPERTY_DISPLAYS, ( void** )displayList ) != 0 ) {
 		Mem_Free( displayList );
+		CLEANUP_TMP_CONTEXT()
 		return false;
 	}
 
@@ -365,6 +382,7 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t> &
 	for ( int displayNum = requestedDisplayNum; ; displayNum++ ) {
 		if ( displayNum >= displayCount ) {
 			Mem_Free( displayList );
+			CLEANUP_TMP_CONTEXT()
 			return false;
 		}
 
@@ -432,6 +450,8 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t> &
 	}
 
 	Mem_Free( ( void* )displayList );
+
+	CLEANUP_TMP_CONTEXT()
 
 	if ( modeList.Num() > 0 ) {
 

@@ -953,11 +953,12 @@ void idCommonLocal::Init( int argc, const char * const * argv, const char *cmdli
 		// clear warning buffer
 		ClearWarnings( GAME_NAME " initialization" );
 
-		idLib::Printf( va( "Command line: %s\n", cmdline ) );
-		//::MessageBox( NULL, cmdline, "blah", MB_OK );
 		// parse command line options
 		idCmdArgs args;
 		if ( cmdline ) {
+			idLib::Printf( va( "Command line: %s\n", cmdline ) );
+			//::MessageBox( NULL, cmdline, "blah", MB_OK );
+
 			// tokenize if the OS doesn't do it for us
 			args.TokenizeString( cmdline, true );
 			argv = args.GetArgs( &argc );

@@ -1038,7 +1038,7 @@ int main( int argc, char** argv ) {
 		for ( int i = 1; i < argc; i++ ) {
 			args.AppendArg( argv[i] );
 		}
-		idStr::Copynz( sys_cmdline, args.Args( 0, -1, true ), sizeof( sys_cmdline ) );
+		idStr::Copynz( sys_cmdline, args.Args( 0, -1 ), sizeof( sys_cmdline ) );
 	}
 
 	// get the initial time base
