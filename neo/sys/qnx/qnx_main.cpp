@@ -83,34 +83,44 @@ Show the early console as an error dialog
 void Sys_Error( const char *error, ... ) {
 	va_list		argptr;
 	char		text[4096];
-    //XXX MSG        msg;
+	bps_event_t	*event = NULL;
+	int 		ret;
 
 	va_start( argptr, error );
 	vsprintf( text, error, argptr );
 	va_end( argptr);
 
-	//Win_SetErrorText( text ); //XXX Open email with error message (and stacktrace?)
-	//Sys_ShowConsole( 1, true );
+	extern idCVar com_productionMode;
+	if ( com_productionMode.GetInteger() == 0 ) {
 
-	Sys_ShutdownInput();
+		// Only way for invoke to work is if there is a screen displayed,
+		// which requires graphics to be init. and at least one swap buffers to have occured.
+		if ( R_IsInitialized() ) {
+			void GLimp_SwapBuffers();
+			GLimp_SwapBuffers();
+		}
+
+		// Invoke email card
+		EmailCrashReport( text );
+
+		// wait for the user to quit
+		while ( 1 ) {
+			if ( ( ret = bps_get_event( &event, 100 ) ) == BPS_SUCCESS && event ) {
+				if ( bps_event_get_domain( event ) == navigator_get_domain() ) {
+					switch( bps_event_get_code( event ) ) {
+					case NAVIGATOR_CHILD_CARD_CLOSED:
+					case NAVIGATOR_EXIT:
+						common->Quit();
+						break;
+					}
+				}
+			}
+		}
+	}
 
 	GLimp_Shutdown();
 
-	extern idCVar com_productionMode;
-	if ( com_productionMode.GetInteger() == 0 ) {
-		// wait for the user to quit
-		//TODO: Wait for email dialog to close, then exit
-		/*
-		while ( 1 ) {
-			if ( !GetMessage( &msg, NULL, 0, 0 ) ) {
-				common->Quit();
-			}
-			TranslateMessage( &msg );
-			DispatchMessage( &msg );
-		}*/
-	}
-
-	exit (1);
+	exit( 1 );
 }
 
 /*
@@ -179,7 +189,6 @@ Sys_Quit
 ==============
 */
 void Sys_Quit() {
-	Sys_ShutdownInput();
 	exit( 0 );
 }
 
@@ -755,27 +764,6 @@ void Sys_Init() {
 	bps_initialize();
 
 	//
-	// SLOG2 setup
-	//
-	slog2_buffer_set_config_t buffer_config;
-
-	// Setup log info
-	buffer_config.buffer_set_name = __progname;
-	buffer_config.num_buffers = SLOG_BUFFER_COUNT;
-	buffer_config.verbosity_level = SLOG2_DEBUG1;
-
-	// Setup each buffer
-	buffer_config.buffer_config[0].buffer_name = "doom3";
-	buffer_config.buffer_config[0].num_pages = 9;
-
-	// Register
-	if ( slog2_register( &buffer_config, qnx.logBuffers, 0 ) == -1 )
-		Sys_Error( "Couldn't setup SLOG2" );
-
-	// Set the default log
-	slog2_set_default_buffer( qnx.logBuffers[0] );
-
-	//
 	// Navigator and event setup
 	//
 	navigator_rotation_lock( true );
@@ -795,15 +783,17 @@ void Sys_Init() {
 
 	qnx.sys_arch.SetString( deviceinfo_details_get_device_os( devDetails ) );
 
-	deviceinfo_free_details( &devDetails );
-
 	//
 	// CPU type
 	//
 	if ( !idStr::Icmp( qnx.sys_cpustring.GetString(), "detect" ) ) {
 		idStr string;
 
-		common->Printf( "%1.0f MHz ", Sys_ClockTicksPerSecond() / 1000000.0f );
+#if BBNDK_VERSION_AT_LEAST( 10, 2, 0 )
+		common->Printf( "%d MHz ", deviceinfo_details_get_processor_core_speed( devDetails, 0 ) );
+#else
+		//common->Printf( "%1.0f MHz ", Sys_ClockTicksPerSecond() / 1000000.0f ); //Number ends up being ridiculously large ("28991029248 MHz")
+#endif
 
 		qnx.cpuid = Sys_GetCPUId();
 
@@ -926,6 +916,12 @@ void Sys_Init() {
 		qnx.cpuid = (cpuid_t) id;
 	}
 
+	if ( deviceinfo_details_is_simulator( devDetails ) ) {
+		common->Printf( "Running in Simulator\n" );
+	}
+
+	deviceinfo_free_details( &devDetails );
+
 	common->Printf( "%s\n", qnx.sys_cpustring.GetString() );
 	common->Printf( "%d MB System Memory\n", Sys_GetSystemRam() );
 	//common->Printf( "%d MB Video Memory\n", Sys_GetVideoRam() );
@@ -948,6 +944,7 @@ Sys_Shutdown
 ================
 */
 void Sys_Shutdown() {
+	Sys_ShutdownInput();
 	battery_stop_events( 0 );
 	navigator_stop_events( 0 );
 	bps_shutdown();
@@ -980,11 +977,11 @@ EmailCrashReport
   emailer originally from Raven/Quake 4
 ====================
 */
-void EmailCrashReport( const char* messageText ) {
+bool EmailCrashReport( const char* messageText ) {
 	static int lastEmailTime = 0;
 
 	if ( Sys_Milliseconds() < lastEmailTime + 10000 ) {
-		return;
+		return false;
 	}
 
 	lastEmailTime = Sys_Milliseconds();
@@ -1005,20 +1002,25 @@ void EmailCrashReport( const char* messageText ) {
 	navigator_invoke_invocation_destroy( invoke );
 	*/
 
-	/* XXX Not working, but doesn't require escaping text
+	//* XXX Not working, but doesn't require escaping text
+	idStr format = "{\"to\":[\"" EMAIL_ADDRESS "\"],\"subject\":\"DOOM 3 Fatal Error\",\"body\":\"";
+	format += messageText;
+	format += "\"}";
+
 	navigator_invoke_invocation_t *invoke = NULL;
 
 	navigator_invoke_invocation_create( &invoke );
 	navigator_invoke_invocation_set_action( invoke, "bb.action.COMPOSE" );
 	navigator_invoke_invocation_set_target( invoke, "sys.pim.uib.email.hybridcomposer" );
 	navigator_invoke_invocation_set_type( invoke, "message/rfc822" );
-	const char* data = "{\"to\":[\"" EMAIL_ADDRESS "\"],\"subject\":\"DOOM 3 Fatal Error\",\"body\":\"%s\"}"; //XXX Message needs to be set (messageText)
-	navigator_invoke_invocation_set_data( invoke, data, strlen(data) + 1 );
+	navigator_invoke_invocation_set_data( invoke, format.c_str(), format.Length() + 1 );
 
-	navigator_invoke_invocation_send( invoke );
+	bool ret = navigator_invoke_invocation_send( invoke ) == BPS_SUCCESS;
 
 	navigator_invoke_invocation_destroy( invoke );
-	*/
+	//*/
+
+	return ret;
 }
 
 /*
@@ -1028,6 +1030,26 @@ main
 */
 int main( int argc, char** argv ) {
 
+	// SLOG2 setup
+	slog2_buffer_set_config_t buffer_config;
+
+	// Setup log info
+	buffer_config.buffer_set_name = __progname;
+	buffer_config.num_buffers = SLOG_BUFFER_COUNT;
+	buffer_config.verbosity_level = SLOG2_DEBUG1;
+
+	// Setup each buffer
+	buffer_config.buffer_config[0].buffer_name = "doom3";
+	buffer_config.buffer_config[0].num_pages = 9;
+
+	// Register
+	if ( slog2_register( &buffer_config, qnx.logBuffers, 0 ) == -1 )
+		Sys_Error( "Couldn't setup SLOG2" );
+
+	// Set the default log
+	slog2_set_default_buffer( qnx.logBuffers[0] );
+
+	// setup memory
 	Sys_SetPhysicalWorkMemory( 192 << 20, 1024 << 20 );
 
 	Sys_GetCurrentMemoryStatus( appLaunchMemoryStats );
@@ -1045,7 +1067,7 @@ int main( int argc, char** argv ) {
 	Sys_Milliseconds();
 
 	// check for data, copy if it doesn't exist
-	//TODO
+	//TODO (need to check that shared file access is allowed)
 
 	// initialize system
 	if ( argc > 1 ) {

@@ -1410,6 +1410,23 @@ void QGL_Shutdown( void )
 #endif
 
 /*
+** QGL_GetSym
+*/
+void* QGL_GetSym( const char *function, bool egl ) {
+	//XXX
+	void *lib = NULL;
+	if ( egl ) {
+		lib = qnx.eglLib;
+	} else {
+		lib = qnx.openGLLib;
+	}
+	if ( lib ) {
+		return dlsym( lib, function );
+	}
+	return NULL;
+}
+
+/*
 ** QGL_Init
 **
 ** This is responsible for binding our qgl function pointers to

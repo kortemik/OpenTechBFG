@@ -273,9 +273,9 @@ void Sys_PumpEvents() {
 	int domain;
 	int code;
 
-	while( ( ret = bps_get_event(&event, 0) ) == BPS_SUCCESS ) {
+	while( ( ret = bps_get_event( &event, 0 ) ) == BPS_SUCCESS ) {
 		if ( event ) {
-			domain = bps_event_get_domain(event);
+			domain = bps_event_get_domain( event );
 
 			if ( domain == screen_get_domain() ) {
 				screen_event_t screenEvent = screen_event_get_event( event );
@@ -361,7 +361,7 @@ void Sys_PumpEvents() {
 					int key = Sys_TranslateKey( value );
 					if ( !( flags & KEY_REPEAT ) && ( key != K_NONE ) ) {
 						if ( flags & KEY_DOWN ) {
-							//XXX Is this needed or is it just a windows thing? Without separate keyboard, there is no keyboard or pause keys
+							//XXX Is this needed or is it just a Windows thing? Without separate keyboard, there is no keyboard or pause keys
 							if ( key == K_NUMLOCK ) {
 								key = K_PAUSE;
 							} else if ( key == K_PAUSE ) {

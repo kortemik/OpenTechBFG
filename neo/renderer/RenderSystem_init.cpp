@@ -460,19 +460,19 @@ static void R_CheckPortableExtensions() {
 		idLib::FatalError( badVideoCard );
 	}
 
-	if ( idStr::Icmpn( glConfig.renderer_string, "ARM", 3 ) == 0 ) {
+	if ( idStr::Icmpn( glConfig.vendor_string, "ARM", 3 ) == 0 ) {
 		glConfig.vendor = VENDOR_ARM;
-	} else if ( idStr::Icmpn( glConfig.renderer_string, "ATI ", 4 ) == 0 || idStr::Icmpn( glConfig.renderer_string, "AMD ", 4 ) == 0 ) {
+	} else if ( idStr::Icmpn( glConfig.vendor_string, "ATI ", 4 ) == 0 || idStr::Icmpn( glConfig.vendor_string, "AMD ", 4 ) == 0 ) {
 		glConfig.vendor = VENDOR_AMD;
-	} else if ( idStr::Icmpn( glConfig.renderer_string, "QNX ", 4 ) == 0 ) {
+	} else if ( idStr::Icmpn( glConfig.vendor_string, "QNX ", 4 ) == 0 ) {
 		glConfig.vendor = VENDOR_QNX;
-	} else if ( idStr::Icmpn( glConfig.renderer_string, "Intel", 5 ) == 0 ) {
+	} else if ( idStr::Icmpn( glConfig.vendor_string, "Intel", 5 ) == 0 ) {
 		glConfig.vendor = VENDOR_INTEL;
-	} else if ( idStr::Icmpn( glConfig.renderer_string, "NVIDIA", 6 ) == 0 ) {
+	} else if ( idStr::Icmpn( glConfig.vendor_string, "NVIDIA", 6 ) == 0 ) {
 		glConfig.vendor = VENDOR_NVIDIA;
-	} else if ( idStr::Icmpn( glConfig.renderer_string, "Qualcomm", 8 ) == 0 ) {
+	} else if ( idStr::Icmpn( glConfig.vendor_string, "Qualcomm", 8 ) == 0 ) {
 		glConfig.vendor = VENDOR_QC;
-	} else if ( idStr::Icmpn( glConfig.renderer_string, "Imagination ", 12 ) == 0 ) {
+	} else if ( idStr::Icmpn( glConfig.vendor_string, "Imagination ", 12 ) == 0 ) {
 		glConfig.vendor = VENDOR_IMG;
 	}
 
@@ -1155,7 +1155,7 @@ void R_InitOpenGL() {
 
 
 	float glVersion = R_ParseVersionString();
-	float glslVersion = atof( glConfig.shading_language_string );
+	float glslVersion = atof( glConfig.shading_language_string ); //XXX Need to parse better
 	idLib::Printf( "OpenGL Version: %3.1f\n", glVersion );
 	idLib::Printf( "OpenGL Vendor : %s\n", glConfig.vendor_string );
 	idLib::Printf( "OpenGL GLSL   : %3.1f\n", glslVersion );

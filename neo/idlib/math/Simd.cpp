@@ -34,6 +34,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "Simd_SSE.h"
 #include "Simd_NEON.h"
 
+#ifdef ID_QNX
+#include <sys/neutrino.h>
+#include <inttypes.h>
+#endif
+
 idSIMDProcessor	*	processor = NULL;			// pointer to SIMD processor
 idSIMDProcessor *	generic = NULL;				// pointer to generic SIMD implementation
 idSIMDProcessor *	SIMDProcessor = NULL;
@@ -75,11 +80,10 @@ void idSIMD::InitProcessor( const char *module, bool forceGeneric ) {
 				processor = generic;
 			}
 #elif defined(ID_QNX_ARM)
-			//XXX Should add support for VFP
 			if ( ( cpuid & CPUID_NEON ) ) { // Want NEON over VFP, if it's available
 				processor = new (TAG_MATH) idSIMD_NEON;
 			/*} else if ( ( cpuid & CPUID_VFP ) ) {
-				processor = new (TAG_MATH) idSIMD_NEON;*/
+				processor = new (TAG_MATH) idSIMD_VFP;*/
 			} else {
 				processor = generic;
 			}
@@ -123,8 +127,6 @@ void idSIMD::Shutdown() {
 	SIMDProcessor = NULL;
 }
 
-#ifdef ID_WIN32 //XXX Should add support for x86 BlackBerry
-
 //===============================================================
 //
 // Test code
@@ -142,11 +144,19 @@ idSIMDProcessor *p_generic;
 long baseClocks = 0;
 
 
+#ifdef ID_WIN32
 #define TIME_TYPE int
+#elif defined(ID_QNX)
+#define TIME_TYPE uint64
+#endif
 
+#ifdef ID_WIN32
 #pragma warning(disable : 4731)     // frame pointer register 'ebx' modified by inline assembly code
+#endif
 
 long saved_ebx = 0;
+
+#ifdef ID_WIN32
 
 #define StartRecordTime( start )			\
 	__asm mov saved_ebx, ebx				\
@@ -165,6 +175,16 @@ long saved_ebx = 0;
 	__asm mov ebx, saved_ebx				\
 	__asm xor eax, eax						\
 	__asm cpuid
+
+#elif defined(ID_QNX)
+
+#define StartRecordTime( start )			\
+	start = ClockCycles()
+
+#define StopRecordTime( end )				\
+	end = ClockCycles()
+
+#endif
 
 
 #define GetBest( start, end, best )			\
@@ -1231,7 +1251,10 @@ idSIMD::Test_f
 */
 void idSIMD::Test_f( const idCmdArgs &args ) {
 
+#ifdef ID_WIN32
 	SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL );
+	//XXX
+#endif
 
 	p_simd = processor;
 	p_generic = generic;
@@ -1242,6 +1265,7 @@ void idSIMD::Test_f( const idCmdArgs &args ) {
 
 		argString.Replace( " ", "" );
 
+#if defined(ID_WIN32)//XXX || defined(ID_QNX_X86)
 		if ( idStr::Icmp( argString, "SSE" ) == 0 ) {
 			if ( !( cpuid & CPUID_MMX ) || !( cpuid & CPUID_SSE ) ) {
 				common->Printf( "CPU does not support MMX & SSE\n" );
@@ -1249,7 +1273,18 @@ void idSIMD::Test_f( const idCmdArgs &args ) {
 			}
 			p_simd = new (TAG_MATH) idSIMD_SSE;
 		} else {
-			common->Printf( "invalid argument, use: MMX, 3DNow, SSE, SSE2, SSE3, AltiVec\n" );
+#elif defined(ID_QNX)
+		if ( idStr::Icmp( argString, "NEON" ) == 0 ) {
+			if ( !( cpuid & CPUID_NEON ) ) {
+				common->Printf( "CPU does not support NEON\n" );
+				return;
+			}
+			p_simd = new (TAG_MATH) idSIMD_NEON;
+		} else {
+#else
+		{
+#endif
+			common->Printf( "invalid argument, use: MMX, 3DNow, SSE, SSE2, SSE3, AltiVec, NEON, VFP\n" );
 			return;
 		}
 	}
@@ -1284,18 +1319,8 @@ void idSIMD::Test_f( const idCmdArgs &args ) {
 	p_simd = NULL;
 	p_generic = NULL;
 
+#ifdef ID_WIN32
 	SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_NORMAL );
-}
-
-#else
-
-/*
-============
-idSIMD::Test_f
-============
-*/
-void idSIMD::Test_f( const idCmdArgs &args ) {
-	//TODO
-}
-
+	//XXX
 #endif
+}

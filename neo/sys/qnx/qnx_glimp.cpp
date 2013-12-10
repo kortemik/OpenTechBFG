@@ -61,6 +61,7 @@ void GLimp_glDrawBuffer( GLenum mode ) {
 // function declaration
 //
 bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacements );
+void* QGL_GetSym( const char *function, bool egl );
 void QGL_Shutdown();
 
 /*
@@ -132,10 +133,10 @@ void GLimp_SetGamma( unsigned short red[256], unsigned short green[256], unsigne
 PrintDisplayMode
 ====================
 */
-static void PrintDisplayMode( screen_display_mode_t & mode ) {
+static void PrintDisplayMode( screen_display_mode_t & mode, bool rotate ) {
 	//common->Printf( "          display index: %i\n", mode.index );
-	common->Printf( "          width       : %i\n", mode.width );
-	common->Printf( "          height      : %i\n", mode.height );
+	common->Printf( "          width       : %i\n", ( rotate ? mode.height : mode.width ) );
+	common->Printf( "          height      : %i\n", ( rotate ? mode.width : mode.height ) );
 	common->Printf( "          refresh     : %i\n", mode.refresh );
 	common->Printf( "          interlaced  : 0x%x\n", mode.interlaced ); //XXX Can this be broken down to what interlaced mode it's in?
 	common->Printf( "          aspect_ratio: %ix%i\n", mode.aspect_ratio[0], mode.aspect_ratio[1] );
@@ -241,10 +242,13 @@ void DumpAllDisplayDevices() {
 		return;
 	}
 
+	int rotation = atoi( getenv( "ORIENTATION" ) );
+
 	screen_display_t display;
 	screen_display_mode_t * modes;
 	char buffer[1024];
 	int vals[2];
+	int nativeRes[2];
 	int64 longVal;
 	for ( int displayNum = 0; displayNum < displayCount; displayNum++ ) {
 		display = displayList[displayNum];
@@ -271,8 +275,8 @@ void DumpAllDisplayDevices() {
 		common->Printf( "      Rotation          : %i\n", vals[0] );
 		screen_get_display_property_iv( display, SCREEN_PROPERTY_DPI, vals );
 		common->Printf( "      DPI               : %i\n", vals[0] );
-		screen_get_display_property_iv( display, SCREEN_PROPERTY_NATIVE_RESOLUTION, vals );
-		common->Printf( "      Native Resolution : %ix%i\n", vals[0], vals[1] );
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_NATIVE_RESOLUTION, nativeRes );
+		common->Printf( "      Native Resolution : %ix%i\n", nativeRes[0], nativeRes[1] );
 		screen_get_display_property_iv( display, SCREEN_PROPERTY_PHYSICAL_SIZE, vals );
 		common->Printf( "      Physical Size     : %ix%i\n", vals[0], vals[1] );
 		screen_get_display_property_iv( display, SCREEN_PROPERTY_SIZE, vals );
@@ -306,13 +310,33 @@ void DumpAllDisplayDevices() {
 				if ( displayMode.refresh < 30 ) {
 					continue;
 				}
-				if ( displayMode.height < 720 ) {
+
+				bool rotate = false;
+				int width = displayMode.width;
+				int height = displayMode.height;
+				if ( displayNum == 0 ) {
+					// May have to rotate display based on device orientation
+					if ( ( rotation == 0 ) || ( rotation == 180 ) ) {
+						rotate = ( ( displayMode.width > displayMode.height ) && ( nativeRes[0] < nativeRes[1] ) ) ||
+								( ( displayMode.width < displayMode.height ) && ( nativeRes[0] > nativeRes[1] ) );
+					} else if ( ( rotation == 90 ) || ( rotation == 270 ) ) {
+						rotate = ( ( displayMode.width > displayMode.height ) && ( nativeRes[0] > nativeRes[1] ) ) ||
+								( ( displayMode.width < displayMode.height ) && ( nativeRes[0] < nativeRes[1] ) );
+					}
+				}
+				if ( rotate ) {
+					int tmp = width;
+					width = height;
+					height = tmp;
+				}
+
+				if ( height < 720 ) {
 					continue;
 				}
 
 				common->Printf( "          -------------------\n" );
 				common->Printf( "          modeNum     : %i\n", mode );
-				PrintDisplayMode( displayMode );
+				PrintDisplayMode( displayMode, rotate );
 			}
 		}
 		Mem_Free( ( void* )modes );
@@ -339,15 +363,21 @@ R_GetModeListForDisplay
 ====================
 */
 bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t> & modeList ) {
+#define CLEANUP_TMP_CONTEXT() \
+	if ( !hasContext ) { \
+		screen_destroy_context( qnx.screenCtx ); \
+		qnx.screenCtx = NULL; \
+	}
+
 	modeList.Clear();
 
 	bool	verbose = false;
 	bool	hasContext = qnx.screenCtx != NULL;
 
-#define CLEANUP_TMP_CONTEXT() \
-	if ( !hasContext ) { \
-		screen_destroy_context( qnx.screenCtx ); \
-		qnx.screenCtx = NULL; \
+	int rotation = atoi( getenv( "ORIENTATION" ) );
+	if ( requestedDisplayNum == 0 &&
+			!( rotation == 0 || rotation == 90 || rotation == 180 || rotation == 270 ) ) {
+		return false;
 	}
 
 	if ( !hasContext ) {
@@ -378,6 +408,7 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t> &
 	screen_display_t display;
 	char buffer[1024];
 	int vals[2];
+	int nativeRes[2];
 	screen_display_mode_t * modes;
 	for ( int displayNum = requestedDisplayNum; ; displayNum++ ) {
 		if ( displayNum >= displayCount ) {
@@ -392,6 +423,8 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t> &
 		if ( screen_get_display_property_iv( display, SCREEN_PROPERTY_ATTACHED, vals ) != 0 || !vals[0] ) {
 			continue;
 		}
+
+		screen_get_display_property_iv( display, SCREEN_PROPERTY_NATIVE_RESOLUTION, nativeRes );
 
 		if ( verbose ) {
 			common->Printf( "display device: %i\n", displayNum );
@@ -409,8 +442,7 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t> &
 			common->Printf( "      Rotation          : %i\n", vals[0] );
 			screen_get_display_property_iv( display, SCREEN_PROPERTY_DPI, vals );
 			common->Printf( "      DPI               : %i\n", vals[0] );
-			screen_get_display_property_iv( display, SCREEN_PROPERTY_NATIVE_RESOLUTION, vals );
-			common->Printf( "      Native Resolution : %ix%i\n", vals[0], vals[1] );
+			common->Printf( "      Native Resolution : %ix%i\n", nativeRes[0], nativeRes[1] );
 			screen_get_display_property_iv( display, SCREEN_PROPERTY_PHYSICAL_SIZE, vals );
 			common->Printf( "      Physical Size     : %ix%i\n", vals[0], vals[1] );
 		}
@@ -422,22 +454,42 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t> &
 				screen_display_mode_t & displayMode = modes[mode];
 
 				// The internal display lists it's refresh rate at 59...
-				if ( displayMode.refresh != 59 || displayMode.refresh != 60 || displayMode.refresh != 120 ) {
+				if ( !( displayMode.refresh == 59 || displayMode.refresh == 60 || displayMode.refresh == 120 ) ) {
 					continue;
 				}
-				if ( displayMode.height < 720 ) {
+
+				bool rotate = false;
+				int width = displayMode.width;
+				int height = displayMode.height;
+				if ( displayNum == 0 ) {
+					// May have to rotate display based on device orientation
+					if ( ( rotation == 0 ) || ( rotation == 180 ) ) {
+						rotate = ( ( displayMode.width > displayMode.height ) && ( nativeRes[0] < nativeRes[1] ) ) ||
+								( ( displayMode.width < displayMode.height ) && ( nativeRes[0] > nativeRes[1] ) );
+					} else if ( ( rotation == 90 ) || ( rotation == 270 ) ) {
+						rotate = ( ( displayMode.width > displayMode.height ) && ( nativeRes[0] > nativeRes[1] ) ) ||
+								( ( displayMode.width < displayMode.height ) && ( nativeRes[0] < nativeRes[1] ) );
+					}
+				}
+				if ( rotate ) {
+					int tmp = width;
+					width = height;
+					height = tmp;
+				}
+
+				if ( height < 720 ) {
 					continue;
 				}
 
 				if ( verbose ) {
 					common->Printf( "          -------------------\n" );
 					common->Printf( "          modeNum     : %i\n", mode );
-					PrintDisplayMode( displayMode );
+					PrintDisplayMode( displayMode, rotate );
 				}
+
 				vidMode_t mode;
-				//XXX Is rotation swapping needed for width/height
-				mode.width = displayMode.width;
-				mode.height = displayMode.height;
+				mode.width = width;
+				mode.height = height;
 				mode.displayHz = displayMode.refresh;
 				modeList.AddUnique( mode );
 			}
@@ -462,6 +514,8 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t> &
 	}
 
 	return false;
+
+#undef CLEANUP_TMP_CONTEXT
 }
 
 /*
@@ -487,14 +541,8 @@ void R_UpdateGLESVersion() {
 EGL_CheckExtension
 =================
 */
-bool EGL_CheckExtension( char *name ) {
-	if ( !strstr( glConfig.egl_extensions_string, name ) ) {
-		common->Printf( "X..%s not found\n", name );
-		return false;
-	}
-
-	common->Printf( "...using %s\n", name );
-	return true;
+bool EGL_CheckExtension( const char *name ) {
+	return strstr( glConfig.egl_extensions_string, name ) != NULL;
 }
 
 /*
@@ -579,6 +627,12 @@ bool QNXGLimp_CreateWindow( int x, int y, int width, int height, int fullScreen 
 	const int size[2] = {width, height};
 	if ( screen_set_window_property_iv( qnx.screenWin, SCREEN_PROPERTY_BUFFER_SIZE, size ) != 0 ) {
 		common->Printf( "Could not set window size\n" );
+		return false;
+	}
+
+	int rotation = atoi( getenv( "ORIENTATION" ) );
+	if ( screen_set_window_property_iv( qnx.screenWin, SCREEN_PROPERTY_ROTATION, &rotation ) != 0 ) {
+		common->Printf( "Could not set window rotation\n" );
 		return false;
 	}
 
@@ -762,6 +816,8 @@ when it returns to the ref.
 
 If there is any failure, the renderer will revert back to safe
 parameters and try again.
+
+We assume params is based on device rotation.
 ===================
 */
 bool GLimp_Init( glimpParms_t parms ) {
@@ -774,8 +830,7 @@ bool GLimp_Init( glimpParms_t parms ) {
 
 	cmdSystem->AddCommand( "testSwapBuffers", GLimp_TestSwapBuffers, CMD_FL_SYSTEM, "Times swapbuffer options" );
 
-	common->Printf( "Initializing OpenGL subsystem with multisamples:%i stereo:%i\n",
-			parms.multiSamples, parms.stereo );
+	common->Printf( "Initializing OpenGL subsystem with multisamples:%i stereo:%i\n", parms.multiSamples, parms.stereo );
 
 	// this will load the dll and set all our qgl* function pointers,
 	// but doesn't create a window
@@ -820,7 +875,7 @@ bool GLimp_Init( glimpParms_t parms ) {
 	qeglGetConfigAttrib( qnx.eglDisplay, qnx.eglConfig, EGL_DEPTH_SIZE, &glConfig.depthBits );
 	qeglGetConfigAttrib( qnx.eglDisplay, qnx.eglConfig, EGL_STENCIL_SIZE, &glConfig.stencilBits );
 
-	//XXX Is rotation swapping needed for width/height and physicalScreenWidth?
+	// We won't swap width and height as the params are expected to be based on rotation
 	glConfig.isFullscreen = parms.fullScreen;
 	glConfig.isStereoPixelFormat = parms.stereo;
 	glConfig.nativeScreenWidth = parms.width;
@@ -835,7 +890,12 @@ bool GLimp_Init( glimpParms_t parms ) {
 	if ( screen_get_window_property_pv( qnx.screenWin, SCREEN_PROPERTY_DISPLAY, ( void** )&display ) == 0 ) {
 		int size[2];
 		if ( screen_get_display_property_iv( display, SCREEN_PROPERTY_PHYSICAL_SIZE, size ) == 0 ) {
-			glConfig.physicalScreenWidthInCentimeters = size[0] * 0.1f; //MM to CM
+			int index = 0;
+			if ( ( ( parms.width > parms.height ) && ( size[0] < size[1] ) ) ||
+					( ( parms.width < parms.height ) && ( size[0] > size[1] ) ) ) {
+				index = 1;
+			}
+			glConfig.physicalScreenWidthInCentimeters = size[index] * 0.1f; //MM to CM
 		}
 	}
 
@@ -872,7 +932,6 @@ bool GLimp_SetScreenParms( glimpParms_t parms ) {
 		common->Printf( "Could not set window size\n" );
 		return false;
 	}
-	//XXX Is rotation swapping needed for width/height?
 	glConfig.nativeScreenWidth = parms.width;
 	glConfig.nativeScreenHeight = parms.height;
 
@@ -968,7 +1027,7 @@ void GLimp_Shutdown() {
 	if ( qnx.renderThread ) {
 		common->Printf( "...closing smp thread\n" );
 		Sys_DestroyThread( qnx.renderThread );
-		qnx.renderThread = NULL;
+		qnx.renderThread = ( uintptr_t )NULL;
 	}
 
 	if ( qnx.renderCommandsEvent ) {
@@ -1183,6 +1242,9 @@ GLExtension_t GLimp_ExtensionPointer( const char *name ) {
 
 	proc = (GLExtension_t)qeglGetProcAddress( name );
 
+	if ( !proc && !EGL_CheckExtension( "EGL_KHR_get_all_proc_addresses" ) ) {
+		proc = (GLExtension_t)QGL_GetSym( name, ( name != NULL && name[0] == 'e' ) );
+	}
 	if ( !proc ) {
 		common->Printf( "Couldn't find proc address for: %s\n", name );
 	}

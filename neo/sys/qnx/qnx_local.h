@@ -45,6 +45,8 @@ cpuid_t	Sys_GetCPUId();
 
 uint64	Sys_Microseconds();
 
+bool	EmailCrashReport( const char* messageText );
+
 typedef struct {
 	cpuid_t						cpuid;
 
