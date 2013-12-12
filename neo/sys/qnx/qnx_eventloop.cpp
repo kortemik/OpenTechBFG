@@ -379,8 +379,22 @@ void Sys_PumpEvents() {
 					break;
 				}
 
-				//TODO: SCREEN_EVENT_DEVICE for connect/disconnect
-				//TODO: SCREEN_EVENT_GAMEPAD/SCREEN_EVENT_JOYSTICK for values
+				case SCREEN_EVENT_DEVICE: {
+					screen_device_t device;
+					int attached;
+					int type;
+
+					screen_get_event_property_pv( screenEvent, SCREEN_PROPERTY_DEVICE, (void**)&device );
+					screen_get_event_property_iv( screenEvent, SCREEN_PROPERTY_ATTACHED, &attached );
+					if ( attached ) {
+						screen_get_device_property_iv( device, SCREEN_PROPERTY_TYPE, &type );
+						if ( type == SCREEN_EVENT_GAMEPAD || type == SCREEN_EVENT_JOYSTICK ) {
+							break;
+						}
+					}
+					qnx.joystick.UpdateDevice( attached, device );
+					break;
+				}
 				}
 			} else if ( domain == navigator_get_domain() ) {
 				code = bps_event_get_code( event );

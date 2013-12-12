@@ -31,6 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 #define __QNX_LOCAL_H__
 
 #include "../../renderer/OpenGL/qgl_es.h"
+#include "qnx_input.h"
 
 #include <sys/slog2.h>
 #include <bps/navigator.h>
@@ -56,6 +57,7 @@ typedef struct {
 	navigator_window_state_t	windowState;
 	int							mouseWheelPosition;
 	int							mouseButtonsPressed;
+	idJoystickQnx				joystick;
 
 	void*						eglLib;
 	void*						openGLLib;
