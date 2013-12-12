@@ -105,7 +105,7 @@ void Sys_Error( const char *error, ... ) {
 
 		// wait for the user to quit
 		while ( 1 ) {
-			if ( ( ret = bps_get_event( &event, 100 ) ) == BPS_SUCCESS && event ) {
+			if ( ( ret = bps_get_event( &event, 1 ) ) == BPS_SUCCESS && event ) {
 				if ( bps_event_get_domain( event ) == navigator_get_domain() ) {
 					switch( bps_event_get_code( event ) ) {
 					case NAVIGATOR_CHILD_CARD_CLOSED:
@@ -988,24 +988,9 @@ bool EmailCrashReport( const char* messageText ) {
 
 #define EMAIL_ADDRESS "account@domain.com"
 
-	/* XXX Works, but requires app to stay running
-	navigator_invoke_invocation_t *invoke = NULL;
-
-	navigator_invoke_invocation_create( &invoke );
-	navigator_invoke_invocation_set_action( invoke, "bb.action.OPEN" );
-	navigator_invoke_invocation_set_target( invoke, "sys.pim.uib.email.hybridcomposer" );
-	//XXX Message and "to" needs to be set and escaped (messageText)
-	navigator_invoke_invocation_set_uri( invoke, "mailto:" EMAIL_ADDRESS "?subject=DOOM%203%20Fatal%20Error&body=Stuff%20For%20You!" );
-
-	navigator_invoke_invocation_send( invoke );
-
-	navigator_invoke_invocation_destroy( invoke );
-	*/
-
-	//* XXX Not working, but doesn't require escaping text
-	idStr format = "{\"to\":[\"" EMAIL_ADDRESS "\"],\"subject\":\"DOOM 3 Fatal Error\",\"body\":\"";
+	idStr format = "data:json:{\"to\":\"" EMAIL_ADDRESS "\",\"subject\":\"DOOM 3 Fatal Error\",\"body\":\"";
 	format += messageText;
-	format += "\"}";
+	format += "\"}\n";
 
 	navigator_invoke_invocation_t *invoke = NULL;
 
@@ -1018,7 +1003,6 @@ bool EmailCrashReport( const char* messageText ) {
 	bool ret = navigator_invoke_invocation_send( invoke ) == BPS_SUCCESS;
 
 	navigator_invoke_invocation_destroy( invoke );
-	//*/
 
 	return ret;
 }

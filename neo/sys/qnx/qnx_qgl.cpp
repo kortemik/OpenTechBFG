@@ -41,6 +41,73 @@ If you have questions concerning this license or the applicable additional terms
 #include "qnx_local.h"
 #include "../../renderer/tr_local.h"
 
+// -----------------------------------
+// Links
+//
+// Store a direct link to a GLES or EGL function due to the
+// possibility that the function will be accessed through
+// GLimp_ExtensionPointer and later QGL_GetSym because
+// eglGetProcAddress does not support, nor is required,
+// to return non-extension functions.
+//
+// Implemented as seen below to facilitate NOT direct linking
+// which could break due to ID_HARDLINK or "extension" functions
+// that are built in to GLES but were written as extension functions
+// because desktop OpenGL doesn't have them otherwise.
+// -----------------------------------
+
+// what is efficiency?...
+
+typedef struct {
+	bool		eglLink;
+	float		glVersion;
+	const char	*name;
+	void		*link;
+} glSymLink_t;
+
+#define GL_LINK_COUNT 282
+static glSymLink_t glLinks[GL_LINK_COUNT];
+static int glSymCount = 0;
+
+void glLinkSet( const char *name, void *link, bool isEgl, float version ) {
+	// attempt to find the link
+	for ( int i = 0; i < glSymCount; i++ ) {
+		if ( glLinks[i].name && strcmp( glLinks[i].name, name ) == 0 ) {
+			glLinks[i].eglLink = isEgl;
+			glLinks[i].glVersion = version;
+			glLinks[i].name = name;
+			glLinks[i].link = link;
+			return;
+		}
+	}
+	// add the link if it doesn't exist
+	for ( int i = 0; i < GL_LINK_COUNT; i++ ) {
+		if ( glLinks[i].link == NULL ) {
+			glLinks[i].eglLink = isEgl;
+			glLinks[i].glVersion = version;
+			glLinks[i].name = name;
+			glLinks[i].link = link;
+			glSymCount++;
+			return;
+		}
+	}
+	assert( 0 ); // should never reach here
+}
+
+void *glLinkGet( const char *name, bool isEgl, float maxGLVersion ) {
+	for ( int i = 0; i < glSymCount; i++ ) {
+		if ( glLinks[i].name && glLinks[i].eglLink == isEgl &&
+				( isEgl || glLinks[i].glVersion <= maxGLVersion ) && strcmp( glLinks[i].name, name ) == 0 ) {
+			return glLinks[i].link;
+		}
+	}
+	return NULL;
+}
+
+// -----------------------------------
+// Definitions
+// -----------------------------------
+
 void ( APIENTRY * qeglDebugEnableLoggingFunc )(EGLBoolean logging);
 
 #ifndef ID_GL_HARDLINK
@@ -1081,6 +1148,40 @@ glEnumName_t	glEnumNames[] = {
 
 #endif
 
+#ifdef ID_GL_HARDLINK
+	#define SET_SYM( a, egl ) glLinkSet( #a, ( void* )a, egl, glVersion )
+	#define SYM_LINK( a )
+	#define ESYM_LINK( a )
+	#define SYM_DIR_SET( a, v )
+#else
+	#define SET_SYM( a, egl ) glLinkSet( #a, ( void* )q##a, egl, glVersion )
+	#if 0 //#ifdef _DEBUG
+		#define SYM_LINK( a ) q##a = ( q#a )dlsym( qnx.openGLLib, #a )
+		#define ESYM_LINK( a ) q##a = ( q#a )dlsym( qnx.eglLib, #a )
+	#else
+		#define SYM_LINK( a ) q##a = a
+		#define ESYM_LINK( a ) SYM_LINK( a )
+	#endif
+	#define SYM_DIR_SET( a, v ) q##a = v
+#endif
+
+#define GLSYM( a ) \
+	SYM_LINK( a ); \
+	SET_SYM( a, false )
+#define GLSYMS( a ) SET_SYM( a, false )
+#define GLDIRECTSYMS( a ) glLinkSet( #a, ( void* )a, false, glVersion )
+#define EGLSYM( a ) \
+	ESYM_LINK( a ); \
+	SET_SYM( a, true )
+
+#define GLNULL( a ) \
+	SYM_DIR_SET( a, NULL ); \
+	glLinkSet( #a, NULL, false, glVersion )
+#define EGLNULL( a ) \
+	SYM_DIR_SET( a, NULL ); \
+	glLinkSet( #a, NULL, true, glVersion )
+#define GLDIRECTNULL( a ) glLinkSet( #a, NULL, false, glVersion )
+
 /*
 ** QGL_Shutdown
 **
@@ -1106,324 +1207,304 @@ void QGL_Shutdown( void )
 	qnx.openGLLib = NULL;
 	qnx.eglLib = NULL;
 
-	qglReadBuffer							= NULL;
-	qglDrawBuffer							= NULL;
+	float glVersion = 0.0f;
 
-#ifndef ID_GL_HARDLINK
+	GLNULL( glReadBuffer );
+	GLNULL( glDrawBuffer );
 
-	qglActiveTexture						= NULL;
-	//qglAttachShader							= NULL;
-	//qglBindAttribLocation					= NULL;
-	qglBindBuffer							= NULL;
-	qglBindFramebuffer						= NULL;
-	qglBindRenderbuffer						= NULL;
-	qglBindTexture							= NULL;
-	qglBlendColor							= NULL;
-	qglBlendEquation						= NULL;
-	qglBlendEquationSeparate				= NULL;
-	qglBlendFunc							= NULL;
-	qglBlendFuncSeparate					= NULL;
-	qglBufferData							= NULL;
-	qglBufferSubData						= NULL;
-	qglCheckFramebufferStatus				= NULL;
-	qglClear								= NULL;
-	qglClearColor							= NULL;
-	qglClearDepth							= NULL;
-	qglClearStencil							= NULL;
-	qglColorMask							= NULL;
-	//qglCompileShader						= NULL;
-	qglCompressedTexImage2D					= NULL;
-	qglCompressedTexSubImage2D				= NULL;
-	qglCopyTexImage2D						= NULL;
-	qglCopyTexSubImage2D					= NULL;
-	//qglCreateProgram						= NULL;
-	//qglCreateShader							= NULL;
-	qglCullFace								= NULL;
-	qglDeleteBuffers						= NULL;
-	qglDeleteFramebuffers					= NULL;
-	//qglDeleteProgram						= NULL;
-	qglDeleteRenderbuffers					= NULL;
-	//qglDeleteShader							= NULL;
-	qglDeleteTextures						= NULL;
-	qglDepthFunc							= NULL;
-	qglDepthMask							= NULL;
-	qglDepthRange							= NULL;
-	//qglDetachShader							= NULL;
-	qglDisable								= NULL;
-	qglDisableVertexAttribArray				= NULL;
-	qglDrawArrays							= NULL;
-	qglDrawElements							= NULL;
-	qglEnable								= NULL;
-	qglEnableVertexAttribArray				= NULL;
-	qglFinish								= NULL;
-	qglFlush								= NULL;
-	qglFramebufferRenderbuffer				= NULL;
-	qglFramebufferTexture2D					= NULL;
-	qglFrontFace							= NULL;
-	qglGenBuffers							= NULL;
-	qglGenerateMipmap						= NULL;
-	qglGenFramebuffers						= NULL;
-	qglGenRenderbuffers						= NULL;
-	qglGenTextures							= NULL;
-	qglGetActiveAttrib						= NULL;
-	qglGetActiveUniform						= NULL;
-	qglGetAttachedShaders					= NULL;
-	qglGetAttribLocation					= NULL;
-	qglGetBooleanv							= NULL;
-	qglGetBufferParameteriv					= NULL;
-	qglGetError								= NULL;
-	qglGetFloatv							= NULL;
-	qglGetFramebufferAttachmentParameteriv	= NULL;
-	qglGetIntegerv							= NULL;
-	//qglGetProgramiv							= NULL;
-	//qglGetProgramInfoLog					= NULL;
-	qglGetRenderbufferParameteriv			= NULL;
-	//qglGetShaderiv							= NULL;
-	//qglGetShaderInfoLog						= NULL;
-	qglGetShaderPrecisionFormat				= NULL;
-	qglGetShaderSource						= NULL;
-	qglGetString							= NULL;
-	qglGetTexParameterfv					= NULL;
-	qglGetTexParameteriv					= NULL;
-	qglGetUniformfv							= NULL;
-	qglGetUniformiv							= NULL;
-	//qglGetUniformLocation					= NULL;
-	qglGetVertexAttribfv					= NULL;
-	qglGetVertexAttribiv					= NULL;
-	qglGetVertexAttribPointerv				= NULL;
-	qglHint									= NULL;
-	qglIsBuffer								= NULL;
-	qglIsEnabled							= NULL;
-	qglIsFramebuffer						= NULL;
-	qglIsProgram							= NULL;
-	qglIsRenderbuffer						= NULL;
-	qglIsShader								= NULL;
-	qglIsTexture							= NULL;
-	qglLineWidth							= NULL;
-	//qglLinkProgram							= NULL;
-	qglPixelStorei							= NULL;
-	qglPolygonOffset						= NULL;
-	qglReadPixels							= NULL;
-	qglReleaseShaderCompiler				= NULL;
-	qglRenderbufferStorage					= NULL;
-	qglSampleCoverage						= NULL;
-	qglScissor								= NULL;
-	qglShaderBinary							= NULL;
-	//qglShaderSource							= NULL;
-	qglStencilFunc							= NULL;
-	//qglStencilFuncSeparate					= NULL;
-	qglStencilMask							= NULL;
-	qglStencilMaskSeparate					= NULL;
-	qglStencilOp							= NULL;
-	//qglStencilOpSeparate					= NULL;
-	qglTexImage2D							= NULL;
-	qglTexParameterf						= NULL;
-	qglTexParameterfv						= NULL;
-	qglTexParameteri						= NULL;
-	qglTexParameteriv						= NULL;
-	qglTexSubImage2D						= NULL;
-	qglUniform1f							= NULL;
-	qglUniform1fv							= NULL;
-	//qglUniform1i							= NULL;
-	qglUniform1iv							= NULL;
-	qglUniform2f							= NULL;
-	qglUniform2fv							= NULL;
-	qglUniform2i							= NULL;
-	qglUniform2iv							= NULL;
-	qglUniform3f							= NULL;
-	qglUniform3fv							= NULL;
-	qglUniform3i							= NULL;
-	qglUniform3iv							= NULL;
-	qglUniform4f							= NULL;
-	//qglUniform4fv							= NULL;
-	qglUniform4i							= NULL;
-	qglUniform4iv							= NULL;
-	qglUniformMatrix2fv						= NULL;
-	qglUniformMatrix3fv						= NULL;
-	qglUniformMatrix4fv						= NULL;
-	//qglUseProgram							= NULL;
-	qglValidateProgram						= NULL;
-	qglVertexAttrib1f						= NULL;
-	qglVertexAttrib1fv						= NULL;
-	qglVertexAttrib2f						= NULL;
-	qglVertexAttrib2fv						= NULL;
-	qglVertexAttrib3f						= NULL;
-	qglVertexAttrib3fv						= NULL;
-	qglVertexAttrib4f						= NULL;
-	qglVertexAttrib4fv						= NULL;
-	qglVertexAttribPointer					= NULL;
-	qglViewport								= NULL;
+	GLNULL( glActiveTexture );
+	GLDIRECTNULL( glAttachShader );
+	GLDIRECTNULL( glBindAttribLocation );
+	GLNULL( glBindBuffer );
+	GLNULL( glBindFramebuffer );
+	GLNULL( glBindRenderbuffer );
+	GLNULL( glBindTexture );
+	GLNULL( glBlendColor );
+	GLNULL( glBlendEquation );
+	GLNULL( glBlendEquationSeparate );
+	GLNULL( glBlendFunc );
+	GLNULL( glBlendFuncSeparate );
+	GLNULL( glBufferData );
+	GLNULL( glBufferSubData );
+	GLNULL( glCheckFramebufferStatus );
+	GLNULL( glClear );
+	GLNULL( glClearColor );
+	GLNULL( glClearDepth );
+	GLNULL( glClearStencil );
+	GLNULL( glColorMask );
+	GLDIRECTNULL( glCompileShader );
+	GLNULL( glCompressedTexImage2D );
+	GLNULL( glCompressedTexSubImage2D );
+	GLNULL( glCopyTexImage2D );
+	GLNULL( glCopyTexSubImage2D );
+	GLDIRECTNULL( glCreateProgram );
+	GLDIRECTNULL( glCreateShader );
+	GLNULL( glCullFace );
+	GLNULL( glDeleteBuffers );
+	GLNULL( glDeleteFramebuffers );
+	GLDIRECTNULL( glDeleteProgram );
+	GLNULL( glDeleteRenderbuffers );
+	GLDIRECTNULL( glDeleteShader );
+	GLNULL( glDeleteTextures );
+	GLNULL( glDepthFunc );
+	GLNULL( glDepthMask );
+	GLNULL( glDepthRange );
+	GLDIRECTNULL( glDetachShader );
+	GLNULL( glDisable );
+	GLNULL( glDisableVertexAttribArray );
+	GLNULL( glDrawArrays );
+	GLNULL( glDrawElements );
+	GLNULL( glEnable );
+	GLNULL( glEnableVertexAttribArray );
+	GLNULL( glFinish );
+	GLNULL( glFlush );
+	GLNULL( glFramebufferRenderbuffer );
+	GLNULL( glFramebufferTexture2D );
+	GLNULL( glFrontFace );
+	GLNULL( glGenBuffers );
+	GLNULL( glGenerateMipmap );
+	GLNULL( glGenFramebuffers );
+	GLNULL( glGenRenderbuffers );
+	GLNULL( glGenTextures );
+	GLNULL( glGetActiveAttrib );
+	GLNULL( glGetActiveUniform );
+	GLNULL( glGetAttachedShaders );
+	GLNULL( glGetAttribLocation );
+	GLNULL( glGetBooleanv );
+	GLNULL( glGetBufferParameteriv );
+	GLNULL( glGetError );
+	GLNULL( glGetFloatv );
+	GLNULL( glGetFramebufferAttachmentParameteriv );
+	GLNULL( glGetIntegerv );
+	GLDIRECTNULL( glGetProgramiv );
+	GLDIRECTNULL( glGetProgramInfoLog );
+	GLNULL( glGetRenderbufferParameteriv );
+	GLDIRECTNULL( glGetShaderiv );
+	GLDIRECTNULL( glGetShaderInfoLog );
+	GLNULL( glGetShaderPrecisionFormat );
+	GLNULL( glGetShaderSource );
+	GLNULL( glGetString );
+	GLNULL( glGetTexParameterfv );
+	GLNULL( glGetTexParameteriv );
+	GLNULL( glGetUniformfv );
+	GLNULL( glGetUniformiv );
+	GLDIRECTNULL( glGetUniformLocation );
+	GLNULL( glGetVertexAttribfv );
+	GLNULL( glGetVertexAttribiv );
+	GLNULL( glGetVertexAttribPointerv );
+	GLNULL( glHint );
+	GLNULL( glIsBuffer );
+	GLNULL( glIsEnabled );
+	GLNULL( glIsFramebuffer );
+	GLNULL( glIsProgram );
+	GLNULL( glIsRenderbuffer );
+	GLNULL( glIsShader );
+	GLNULL( glIsTexture );
+	GLNULL( glLineWidth );
+	GLDIRECTNULL( glLinkProgram );
+	GLNULL( glPixelStorei );
+	GLNULL( glPolygonOffset );
+	GLNULL( glReadPixels );
+	GLNULL( glReleaseShaderCompiler );
+	GLNULL( glRenderbufferStorage );
+	GLNULL( glSampleCoverage );
+	GLNULL( glScissor );
+	GLNULL( glShaderBinary );
+	GLDIRECTNULL( glShaderSource );
+	GLNULL( glStencilFunc );
+	GLDIRECTNULL( glStencilFuncSeparate );
+	GLNULL( glStencilMask );
+	GLNULL( glStencilMaskSeparate );
+	GLNULL( glStencilOp );
+	GLDIRECTNULL( glStencilOpSeparate );
+	GLNULL( glTexImage2D );
+	GLNULL( glTexParameterf );
+	GLNULL( glTexParameterfv );
+	GLNULL( glTexParameteri );
+	GLNULL( glTexParameteriv );
+	GLNULL( glTexSubImage2D );
+	GLNULL( glUniform1f );
+	GLNULL( glUniform1fv );
+	GLDIRECTNULL( glUniform1i );
+	GLNULL( glUniform1iv );
+	GLNULL( glUniform2f );
+	GLNULL( glUniform2fv );
+	GLNULL( glUniform2i );
+	GLNULL( glUniform2iv );
+	GLNULL( glUniform3f );
+	GLNULL( glUniform3fv );
+	GLNULL( glUniform3i );
+	GLNULL( glUniform3iv );
+	GLNULL( glUniform4f );
+	GLDIRECTNULL( glUniform4fv );
+	GLNULL( glUniform4i );
+	GLNULL( glUniform4iv );
+	GLNULL( glUniformMatrix2fv );
+	GLNULL( glUniformMatrix3fv );
+	GLNULL( glUniformMatrix4fv );
+	GLDIRECTNULL( glUseProgram );
+	GLNULL( glValidateProgram );
+	GLNULL( glVertexAttrib1f );
+	GLNULL( glVertexAttrib1fv );
+	GLNULL( glVertexAttrib2f );
+	GLNULL( glVertexAttrib2fv );
+	GLNULL( glVertexAttrib3f );
+	GLNULL( glVertexAttrib3fv );
+	GLNULL( glVertexAttrib4f );
+	GLNULL( glVertexAttrib4fv );
+	GLNULL( glVertexAttribPointer );
+	GLNULL( glViewport );
 
 #ifdef GL_ES_VERSION_3_0
 
-	//qglReadBuffer							= NULL;
-	qglDrawRangeElements					= NULL;
-	qglTexImage3D							= NULL;
-	qglTexSubImage3D						= NULL;
-	qglCopyTexSubImage3D					= NULL;
-	qglCompressedTexImage3D					= NULL;
-	qglCompressedTexSubImage3D				= NULL;
-	qglGenQueries							= NULL;
-	qglDeleteQueries						= NULL;
-	qglIsQuery								= NULL;
-	qglBeginQuery							= NULL;
-	qglEndQuery								= NULL;
-	qglGetQueryiv							= NULL;
-	qglGetQueryObjectuiv					= NULL;
-	qglUnmapBuffer							= NULL;
-	qglGetBufferPointerv					= NULL;
-	qglDrawBuffers							= NULL;
-	qglUniformMatrix2x3fv					= NULL;
-	qglUniformMatrix3x2fv					= NULL;
-	qglUniformMatrix2x4fv					= NULL;
-	qglUniformMatrix4x2fv					= NULL;
-	qglUniformMatrix3x4fv					= NULL;
-	qglUniformMatrix4x3fv					= NULL;
-	qglBlitFramebuffer						= NULL;
-	qglRenderbufferStorageMultisample		= NULL;
-	qglFramebufferTextureLayer				= NULL;
-	//qglMapBufferRange						= NULL;
-	qglFlushMappedBufferRange				= NULL;
-	//qglBindVertexArray						= NULL;
-	//qglDeleteVertexArrays					= NULL;
-	//qglGenVertexArrays						= NULL;
-	qglIsVertexArray						= NULL;
-	qglGetIntegeri_v						= NULL;
-	qglBeginTransformFeedback				= NULL;
-	qglEndTransformFeedback					= NULL;
-	//qglBindBufferRange						= NULL;
-	qglBindBufferBase						= NULL;
-	qglTransformFeedbackVaryings			= NULL;
-	qglGetTransformFeedbackVarying			= NULL;
-	qglVertexAttribIPointer					= NULL;
-	qglGetVertexAttribIiv					= NULL;
-	qglGetVertexAttribIuiv					= NULL;
-	qglVertexAttribI4i						= NULL;
-	qglVertexAttribI4ui						= NULL;
-	qglVertexAttribI4iv						= NULL;
-	qglVertexAttribI4uiv					= NULL;
-	qglGetUniformuiv						= NULL;
-	qglGetFragDataLocation					= NULL;
-	qglUniform1ui							= NULL;
-	qglUniform2ui							= NULL;
-	qglUniform3ui							= NULL;
-	qglUniform4ui							= NULL;
-	qglUniform1uiv							= NULL;
-	qglUniform2uiv							= NULL;
-	qglUniform3uiv							= NULL;
-	qglUniform4uiv							= NULL;
-	qglClearBufferiv						= NULL;
-	qglClearBufferuiv						= NULL;
-	qglClearBufferfv						= NULL;
-	qglClearBufferfi						= NULL;
-	//qglGetStringi							= NULL;
-	qglCopyBufferSubData					= NULL;
-	qglGetUniformIndices					= NULL;
-	qglGetActiveUniformsiv					= NULL;
-	//qglGetUniformBlockIndex					= NULL;
-	qglGetActiveUniformBlockiv				= NULL;
-	qglGetActiveUniformBlockName			= NULL;
-	//qglUniformBlockBinding					= NULL;
-	qglDrawArraysInstanced					= NULL;
-	qglDrawElementsInstanced				= NULL;
-	//qglFenceSync							= NULL;
-	//qglIsSync								= NULL;
-	//qglDeleteSync							= NULL;
-	//qglClientWaitSync						= NULL;
-	qglWaitSync								= NULL;
-	qglGetInteger64v						= NULL;
-	qglGetSynciv							= NULL;
-	qglGetInteger64i_v						= NULL;
-	qglGetBufferParameteri64v				= NULL;
-	qglGenSamplers							= NULL;
-	qglDeleteSamplers						= NULL;
-	qglIsSampler							= NULL;
-	qglBindSampler							= NULL;
-	qglSamplerParameteri					= NULL;
-	qglSamplerParameteriv					= NULL;
-	qglSamplerParameterf					= NULL;
-	qglSamplerParameterfv					= NULL;
-	qglGetSamplerParameteriv				= NULL;
-	qglGetSamplerParameterfv				= NULL;
-	qglVertexAttribDivisor					= NULL;
-	qglBindTransformFeedback				= NULL;
-	qglDeleteTransformFeedbacks				= NULL;
-	qglGenTransformFeedbacks				= NULL;
-	qglIsTransformFeedback					= NULL;
-	qglPauseTransformFeedback				= NULL;
-	qglResumeTransformFeedback				= NULL;
-	qglGetProgramBinary						= NULL;
-	qglProgramBinary						= NULL;
-	//qglProgramParameteri					= NULL;
-	qglInvalidateFramebuffer				= NULL;
-	qglInvalidateSubFramebuffer				= NULL;
-	qglTexStorage2D							= NULL;
-	qglTexStorage3D							= NULL;
-	qglGetInternalformativ					= NULL;
+	//GLDIRECTNULL( glReadBuffer );
+	GLNULL( glDrawRangeElements );
+	GLNULL( glTexImage3D );
+	GLNULL( glTexSubImage3D );
+	GLNULL( glCopyTexSubImage3D );
+	GLNULL( glCompressedTexImage3D );
+	GLNULL( glCompressedTexSubImage3D );
+	GLNULL( glGenQueries );
+	GLNULL( glDeleteQueries );
+	GLNULL( glIsQuery );
+	GLNULL( glBeginQuery );
+	GLNULL( glEndQuery );
+	GLNULL( glGetQueryiv );
+	GLNULL( glGetQueryObjectuiv );
+	GLNULL( glUnmapBuffer );
+	GLNULL( glGetBufferPointerv );
+	GLNULL( glDrawBuffers );
+	GLNULL( glUniformMatrix2x3fv );
+	GLNULL( glUniformMatrix3x2fv );
+	GLNULL( glUniformMatrix2x4fv );
+	GLNULL( glUniformMatrix4x2fv );
+	GLNULL( glUniformMatrix3x4fv );
+	GLNULL( glUniformMatrix4x3fv );
+	GLNULL( glBlitFramebuffer );
+	GLNULL( glRenderbufferStorageMultisample );
+	GLNULL( glFramebufferTextureLayer );
+	GLDIRECTNULL( glMapBufferRange );
+	GLNULL( glFlushMappedBufferRange );
+	GLDIRECTNULL( glBindVertexArray );
+	GLDIRECTNULL( glDeleteVertexArrays );
+	GLDIRECTNULL( glGenVertexArrays );
+	GLNULL( glIsVertexArray );
+	GLNULL( glGetIntegeri_v );
+	GLNULL( glBeginTransformFeedback );
+	GLNULL( glEndTransformFeedback );
+	GLDIRECTNULL( glBindBufferRange );
+	GLNULL( glBindBufferBase );
+	GLNULL( glTransformFeedbackVaryings );
+	GLNULL( glGetTransformFeedbackVarying );
+	GLNULL( glVertexAttribIPointer );
+	GLNULL( glGetVertexAttribIiv );
+	GLNULL( glGetVertexAttribIuiv );
+	GLNULL( glVertexAttribI4i );
+	GLNULL( glVertexAttribI4ui );
+	GLNULL( glVertexAttribI4iv );
+	GLNULL( glVertexAttribI4uiv );
+	GLNULL( glGetUniformuiv );
+	GLNULL( glGetFragDataLocation );
+	GLNULL( glUniform1ui );
+	GLNULL( glUniform2ui );
+	GLNULL( glUniform3ui );
+	GLNULL( glUniform4ui );
+	GLNULL( glUniform1uiv );
+	GLNULL( glUniform2uiv );
+	GLNULL( glUniform3uiv );
+	GLNULL( glUniform4uiv );
+	GLNULL( glClearBufferiv );
+	GLNULL( glClearBufferuiv );
+	GLNULL( glClearBufferfv );
+	GLNULL( glClearBufferfi );
+	GLDIRECTNULL( glGetStringi );
+	GLNULL( glCopyBufferSubData );
+	GLNULL( glGetUniformIndices );
+	GLNULL( glGetActiveUniformsiv );
+	GLDIRECTNULL( glGetUniformBlockIndex );
+	GLNULL( glGetActiveUniformBlockiv );
+	GLNULL( glGetActiveUniformBlockName );
+	GLDIRECTNULL( glUniformBlockBinding );
+	GLNULL( glDrawArraysInstanced );
+	GLNULL( glDrawElementsInstanced );
+	GLDIRECTNULL( glFenceSync );
+	GLDIRECTNULL( glIsSync );
+	GLDIRECTNULL( glDeleteSync );
+	GLDIRECTNULL( glClientWaitSync );
+	GLNULL( glWaitSync );
+	GLNULL( glGetInteger64v );
+	GLNULL( glGetSynciv );
+	GLNULL( glGetInteger64i_v );
+	GLNULL( glGetBufferParameteri64v );
+	GLNULL( glGenSamplers );
+	GLNULL( glDeleteSamplers );
+	GLNULL( glIsSampler );
+	GLNULL( glBindSampler );
+	GLNULL( glSamplerParameteri );
+	GLNULL( glSamplerParameteriv );
+	GLNULL( glSamplerParameterf );
+	GLNULL( glSamplerParameterfv );
+	GLNULL( glGetSamplerParameteriv );
+	GLNULL( glGetSamplerParameterfv );
+	GLNULL( glVertexAttribDivisor );
+	GLNULL( glBindTransformFeedback );
+	GLNULL( glDeleteTransformFeedbacks );
+	GLNULL( glGenTransformFeedbacks );
+	GLNULL( glIsTransformFeedback );
+	GLNULL( glPauseTransformFeedback );
+	GLNULL( glResumeTransformFeedback );
+	GLNULL( glGetProgramBinary );
+	GLNULL( glProgramBinary );
+	GLDIRECTNULL( glProgramParameteri );
+	GLNULL( glInvalidateFramebuffer );
+	GLNULL( glInvalidateSubFramebuffer );
+	GLNULL( glTexStorage2D );
+	GLNULL( glTexStorage3D );
+	GLNULL( glGetInternalformativ );
 
 #endif
 
-	qeglGetError							= NULL;
-	qeglGetDisplay							= NULL;
-	qeglInitialize							= NULL;
-	qeglTerminate							= NULL;
-	qeglQueryString							= NULL;
-	qeglGetConfigs							= NULL;
-	qeglChooseConfig						= NULL;
-	qeglGetConfigAttrib						= NULL;
-	qeglCreateWindowSurface					= NULL;
-	qeglCreatePbufferSurface				= NULL;
-	qeglCreatePixmapSurface					= NULL;
-	qeglDestroySurface						= NULL;
-	qeglQuerySurface						= NULL;
-	qeglBindAPI								= NULL;
-	qeglQueryAPI							= NULL;
-	qeglWaitClient							= NULL;
-	qeglReleaseThread						= NULL;
-	qeglCreatePbufferFromClientBuffer		= NULL;
-	qeglSurfaceAttrib						= NULL;
-	qeglBindTexImage						= NULL;
-	qeglReleaseTexImage						= NULL;
-	qeglSwapInterval						= NULL;
-	qeglCreateContext						= NULL;
-	qeglDestroyContext						= NULL;
-	qeglMakeCurrent							= NULL;
-	qeglGetCurrentContext					= NULL;
-	qeglGetCurrentSurface					= NULL;
-	qeglGetCurrentDisplay					= NULL;
-	qeglQueryContext						= NULL;
-	qeglWaitGL								= NULL;
-	qeglWaitNative							= NULL;
-	qeglSwapBuffers							= NULL;
-	qeglCopyBuffers							= NULL;
-	qeglGetProcAddress						= NULL;
-
-#endif
+	EGLNULL( eglGetError );
+	EGLNULL( eglGetDisplay );
+	EGLNULL( eglInitialize );
+	EGLNULL( eglTerminate );
+	EGLNULL( eglQueryString );
+	EGLNULL( eglGetConfigs );
+	EGLNULL( eglChooseConfig );
+	EGLNULL( eglGetConfigAttrib );
+	EGLNULL( eglCreateWindowSurface );
+	EGLNULL( eglCreatePbufferSurface );
+	EGLNULL( eglCreatePixmapSurface );
+	EGLNULL( eglDestroySurface );
+	EGLNULL( eglQuerySurface );
+	EGLNULL( eglBindAPI );
+	EGLNULL( eglQueryAPI );
+	EGLNULL( eglWaitClient );
+	EGLNULL( eglReleaseThread );
+	EGLNULL( eglCreatePbufferFromClientBuffer );
+	EGLNULL( eglSurfaceAttrib );
+	EGLNULL( eglBindTexImage );
+	EGLNULL( eglReleaseTexImage );
+	EGLNULL( eglSwapInterval );
+	EGLNULL( eglCreateContext );
+	EGLNULL( eglDestroyContext );
+	EGLNULL( eglMakeCurrent );
+	EGLNULL( eglGetCurrentContext );
+	EGLNULL( eglGetCurrentSurface );
+	EGLNULL( eglGetCurrentDisplay );
+	EGLNULL( eglQueryContext );
+	EGLNULL( eglWaitGL );
+	EGLNULL( eglWaitNative );
+	EGLNULL( eglSwapBuffers );
+	EGLNULL( eglCopyBuffers );
+	EGLNULL( eglGetProcAddress );
 }
-
-#if 0 //#ifdef _DEBUG
-#define GLSYM( a ) q##a = ( q#a )dlsym( qnx.openGLLib, #a )
-#define EGLSYM( a ) q##a = ( q#a )dlsym( qnx.eglLib, #a )
-#else
-#define GLSYM( a ) q##a = a
-#define EGLSYM( a ) GLSYM(a)
-#endif
 
 /*
 ** QGL_GetSym
 */
 void* QGL_GetSym( const char *function, bool egl ) {
-	//XXX
-	void *lib = NULL;
-	if ( egl ) {
-		lib = qnx.eglLib;
-	} else {
-		lib = qnx.openGLLib;
-	}
-	if ( lib ) {
-		return dlsym( lib, function );
-	}
-	return NULL;
+	return glLinkGet( function, egl, glConfig.glVersion );
 }
 
 /*
@@ -1464,14 +1545,16 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 	}
 	common->Printf( "succeeded\n" );
 
-	qglReadBuffer = replacements.glReadBufferImpl;
-	qglDrawBuffer = replacements.glDrawBufferImpl;
+	float glVersion = 2.0f;
 
-#ifndef ID_GL_HARDLINK
+	qglReadBuffer = replacements.glReadBufferImpl;
+	GLSYMS( glReadBuffer );
+	qglDrawBuffer = replacements.glDrawBufferImpl;
+	GLSYMS( glDrawBuffer );
 
 	GLSYM( glActiveTexture );
-	//GLSYM( glAttachShader );
-	//GLSYM( glBindAttribLocation );
+	GLDIRECTSYMS( glAttachShader );
+	GLDIRECTSYMS( glBindAttribLocation );
 	GLSYM( glBindBuffer );
 	GLSYM( glBindFramebuffer );
 	GLSYM( glBindRenderbuffer );
@@ -1494,22 +1577,23 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 #else
 	qglClearDepth = glClearDepthf;
 #endif
+	GLSYMS( glClearDepth );
 #endif
 	GLSYM( glClearStencil );
 	GLSYM( glColorMask );
-	//GLSYM( glCompileShader );
+	GLDIRECTSYMS( glCompileShader );
 	GLSYM( glCompressedTexImage2D );
 	GLSYM( glCompressedTexSubImage2D );
 	GLSYM( glCopyTexImage2D );
 	GLSYM( glCopyTexSubImage2D );
-	//GLSYM( glCreateProgram );
-	//GLSYM( glCreateShader );
+	GLDIRECTSYMS( glCreateProgram );
+	GLDIRECTSYMS( glCreateShader );
 	GLSYM( glCullFace );
 	GLSYM( glDeleteBuffers );
 	GLSYM( glDeleteFramebuffers );
-	//GLSYM( glDeleteProgram );
+	GLDIRECTSYMS( glDeleteProgram );
 	GLSYM( glDeleteRenderbuffers );
-	//GLSYM( glDeleteShader );
+	GLDIRECTSYMS( glDeleteShader );
 	GLSYM( glDeleteTextures );
 	GLSYM( glDepthFunc );
 	GLSYM( glDepthMask );
@@ -1521,8 +1605,9 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 #else
 	qglDepthRange = glDepthRangef;
 #endif
+	GLSYMS( glDepthRange );
 #endif
-	//GLSYM( glDetachShader );
+	GLDIRECTSYMS( glDetachShader );
 	GLSYM( glDisable );
 	GLSYM( glDisableVertexAttribArray );
 	GLSYM( glDrawArrays );
@@ -1549,11 +1634,11 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 	GLSYM( glGetFloatv );
 	GLSYM( glGetFramebufferAttachmentParameteriv );
 	GLSYM( glGetIntegerv );
-	//GLSYM( glGetProgramiv );
-	//GLSYM( glGetProgramInfoLog );
+	GLDIRECTSYMS( glGetProgramiv );
+	GLDIRECTSYMS( glGetProgramInfoLog );
 	GLSYM( glGetRenderbufferParameteriv );
-	//GLSYM( glGetShaderiv );
-	//GLSYM( glGetShaderInfoLog );
+	GLDIRECTSYMS( glGetShaderiv );
+	GLDIRECTSYMS( glGetShaderInfoLog );
 	GLSYM( glGetShaderPrecisionFormat );
 	GLSYM( glGetShaderSource );
 	GLSYM( glGetString );
@@ -1561,7 +1646,7 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 	GLSYM( glGetTexParameteriv );
 	GLSYM( glGetUniformfv );
 	GLSYM( glGetUniformiv );
-	//GLSYM( glGetUniformLocation );
+	GLDIRECTSYMS( glGetUniformLocation );
 	GLSYM( glGetVertexAttribfv );
 	GLSYM( glGetVertexAttribiv );
 	GLSYM( glGetVertexAttribPointerv );
@@ -1574,7 +1659,7 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 	GLSYM( glIsShader );
 	GLSYM( glIsTexture );
 	GLSYM( glLineWidth );
-	//GLSYM( glLinkProgram );
+	GLDIRECTSYMS( glLinkProgram );
 	GLSYM( glPixelStorei );
 	GLSYM( glPolygonOffset );
 	GLSYM( glReadPixels );
@@ -1583,13 +1668,13 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 	GLSYM( glSampleCoverage );
 	GLSYM( glScissor );
 	GLSYM( glShaderBinary );
-	//GLSYM( glShaderSource );
+	GLDIRECTSYMS( glShaderSource );
 	GLSYM( glStencilFunc );
-	//GLSYM( glStencilFuncSeparate );
+	GLDIRECTSYMS( glStencilFuncSeparate );
 	GLSYM( glStencilMask );
 	GLSYM( glStencilMaskSeparate );
 	GLSYM( glStencilOp );
-	//GLSYM( glStencilOpSeparate );
+	GLDIRECTSYMS( glStencilOpSeparate );
 	GLSYM( glTexImage2D );
 	GLSYM( glTexParameterf );
 	GLSYM( glTexParameterfv );
@@ -1598,7 +1683,7 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 	GLSYM( glTexSubImage2D );
 	GLSYM( glUniform1f );
 	GLSYM( glUniform1fv );
-	//GLSYM( glUniform1i );
+	GLDIRECTSYMS( glUniform1i );
 	GLSYM( glUniform1iv );
 	GLSYM( glUniform2f );
 	GLSYM( glUniform2fv );
@@ -1609,13 +1694,13 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 	GLSYM( glUniform3i );
 	GLSYM( glUniform3iv );
 	GLSYM( glUniform4f );
-	//GLSYM( glUniform4fv );
+	GLDIRECTSYMS( glUniform4fv );
 	GLSYM( glUniform4i );
 	GLSYM( glUniform4iv );
 	GLSYM( glUniformMatrix2fv );
 	GLSYM( glUniformMatrix3fv );
 	GLSYM( glUniformMatrix4fv );
-	//GLSYM( glUseProgram );
+	GLDIRECTSYMS( glUseProgram );
 	GLSYM( glValidateProgram );
 	GLSYM( glVertexAttrib1f );
 	GLSYM( glVertexAttrib1fv );
@@ -1630,7 +1715,9 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 
 #ifdef GL_ES_VERSION_3_0
 
-	//GLSYM( glReadBuffer );
+	glVersion = 3.0f;
+
+	//GLDIRECTSYMS( glReadBuffer );
 	GLSYM( glDrawRangeElements );
 	GLSYM( glTexImage3D );
 	GLSYM( glTexSubImage3D );
@@ -1656,16 +1743,16 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 	GLSYM( glBlitFramebuffer );
 	GLSYM( glRenderbufferStorageMultisample );
 	GLSYM( glFramebufferTextureLayer );
-	//GLSYM( glMapBufferRange );
+	GLDIRECTSYMS( glMapBufferRange );
 	GLSYM( glFlushMappedBufferRange );
-	//GLSYM( glBindVertexArray );
-	//GLSYM( glDeleteVertexArrays );
-	//GLSYM( glGenVertexArrays );
+	GLDIRECTSYMS( glBindVertexArray );
+	GLDIRECTSYMS( glDeleteVertexArrays );
+	GLDIRECTSYMS( glGenVertexArrays );
 	GLSYM( glIsVertexArray );
 	GLSYM( glGetIntegeri_v );
 	GLSYM( glBeginTransformFeedback );
 	GLSYM( glEndTransformFeedback );
-	//GLSYM( glBindBufferRange );
+	GLDIRECTSYMS( glBindBufferRange );
 	GLSYM( glBindBufferBase );
 	GLSYM( glTransformFeedbackVaryings );
 	GLSYM( glGetTransformFeedbackVarying );
@@ -1690,20 +1777,20 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 	GLSYM( glClearBufferuiv );
 	GLSYM( glClearBufferfv );
 	GLSYM( glClearBufferfi );
-	//GLSYM( glGetStringi );
+	GLDIRECTSYMS( glGetStringi );
 	GLSYM( glCopyBufferSubData );
 	GLSYM( glGetUniformIndices );
 	GLSYM( glGetActiveUniformsiv );
-	//GLSYM( glGetUniformBlockIndex );
+	GLDIRECTSYMS( glGetUniformBlockIndex );
 	GLSYM( glGetActiveUniformBlockiv );
 	GLSYM( glGetActiveUniformBlockName );
-	//GLSYM( glUniformBlockBinding );
+	GLDIRECTSYMS( glUniformBlockBinding );
 	GLSYM( glDrawArraysInstanced );
 	GLSYM( glDrawElementsInstanced );
-	//GLSYM( glFenceSync );
-	//GLSYM( glIsSync );
-	//GLSYM( glDeleteSync );
-	//GLSYM( glClientWaitSync );
+	GLDIRECTSYMS( glFenceSync );
+	GLDIRECTSYMS( glIsSync );
+	GLDIRECTSYMS( glDeleteSync );
+	GLDIRECTSYMS( glClientWaitSync );
 	GLSYM( glWaitSync );
 	GLSYM( glGetInteger64v );
 	GLSYM( glGetSynciv );
@@ -1728,7 +1815,7 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 	GLSYM( glResumeTransformFeedback );
 	GLSYM( glGetProgramBinary );
 	GLSYM( glProgramBinary );
-	//GLSYM( glProgramParameteri );
+	GLDIRECTSYMS( glProgramParameteri );
 	GLSYM( glInvalidateFramebuffer );
 	GLSYM( glInvalidateSubFramebuffer );
 	GLSYM( glTexStorage2D );
@@ -1736,6 +1823,8 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 	GLSYM( glGetInternalformativ );
 
 #endif
+
+	glVersion = 0.0f;
 
 	EGLSYM( eglGetError );
 	EGLSYM( eglGetDisplay );
@@ -1771,8 +1860,6 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 	EGLSYM( eglSwapBuffers );
 	EGLSYM( eglCopyBuffers );
 	EGLSYM( eglGetProcAddress );
-
-#endif
 
 	return true;
 }
