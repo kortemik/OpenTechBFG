@@ -518,6 +518,8 @@ void idFileSystemLocal::CreateOSPath( const char *OSPath ) {
 	idStrStatic< MAX_OSPATH > path( OSPath );
 #ifdef ID_WIN32
 	path.SlashesToBackSlashes();
+#else
+	path.BackSlashesToSlashes();
 #endif
 	for( ofs = &path[ 1 ]; *ofs ; ofs++ ) {
 		if ( *ofs == PATHSEPARATOR_CHAR ) {

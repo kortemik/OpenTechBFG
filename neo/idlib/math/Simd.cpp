@@ -79,12 +79,18 @@ void idSIMD::InitProcessor( const char *module, bool forceGeneric ) {
 			} else {
 				processor = generic;
 			}
-#elif defined(ID_QNX_ARM)
+#elif defined(ID_QNX_ARM_NEON)
 			if ( ( cpuid & CPUID_NEON ) ) { // Want NEON over VFP, if it's available
 				processor = new (TAG_MATH) idSIMD_NEON;
 			/*} else if ( ( cpuid & CPUID_VFP ) ) {
 				processor = new (TAG_MATH) idSIMD_VFP;*/
 			} else {
+				processor = generic;
+			}
+#elif defined(ID_QNX_ARM)
+			/*if ( ( cpuid & CPUID_VFP ) ) {
+				processor = new (TAG_MATH) idSIMD_VFP;
+			} else*/ {
 				processor = generic;
 			}
 #else
@@ -1273,7 +1279,15 @@ void idSIMD::Test_f( const idCmdArgs &args ) {
 			}
 			p_simd = new (TAG_MATH) idSIMD_SSE;
 		} else {
-#elif defined(ID_QNX)
+#elif defined(ID_QNX_ARM)
+		/*if ( idStr::Icmp( argString, "VFP" ) == 0 ) {
+			if ( !( cpuid & CPUID_VFP ) ) {
+				common->Printf( "CPU does not support VFP\n" );
+				return;
+			}
+			p_simd = new (TAG_MATH) idSIMD_VFP;
+		} else*/
+#ifdef ID_QNX_ARM_NEON
 		if ( idStr::Icmp( argString, "NEON" ) == 0 ) {
 			if ( !( cpuid & CPUID_NEON ) ) {
 				common->Printf( "CPU does not support NEON\n" );
@@ -1281,6 +1295,9 @@ void idSIMD::Test_f( const idCmdArgs &args ) {
 			}
 			p_simd = new (TAG_MATH) idSIMD_NEON;
 		} else {
+#else
+		{
+#endif
 #else
 		{
 #endif

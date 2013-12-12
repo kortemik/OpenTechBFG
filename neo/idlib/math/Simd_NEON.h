@@ -33,7 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 /*
 ===============================================================================
 
-	SSE implementation of idSIMDProcessor
+	NEON implementation of idSIMDProcessor
 
 ===============================================================================
 */

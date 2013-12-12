@@ -434,9 +434,12 @@ void Sys_PumpEvents() {
 					break;
 				}
 
-				//TODO
-				//NAVIGATOR_ORIENTATION_CHECK
-				//NAVIGATOR_ORIENTATION
+				/* We don't do rotation (it's locked), so we can ignore this. But FYI...
+				   Orientation is a bunch of handshakes.
+				   - First the app get's asked if it wants to rotate (NAVIGATOR_ORIENTATION_CHECK)
+				   - If the app wants to rotate, then it will be told what size it will be after rotate (NAVIGATOR_ORIENTATION_SIZE).
+				   - Once the OS confirms that it's ready to rotate, it tells the app to handle rotation (NAVIGATOR_ORIENTATION).
+				   - Once rotation is complete, the OS tells the app it's done (NAVIGATOR_ORIENTATION_DONE) */
 
 				case NAVIGATOR_BACK:
 					// Acts like pressing ~ to open in-game console //XXX This should be disabled if key-bindings is in use
@@ -445,7 +448,6 @@ void Sys_PumpEvents() {
 					break;
 
 				//TODO
-				//NAVIGATOR_ORIENTATION_DONE (similar to WM_SIZING)
 				//NAVIGATOR_INVOKE_QUERY_RESULT
 				//NAVIGATOR_INVOKE_TARGET_RESULT
 				//NAVIGATOR_INVOKE_VIEWER_RESULT
@@ -458,7 +460,6 @@ void Sys_PumpEvents() {
 				//NAVIGATOR_WINDOW_COVER_EXIT
 				//NAVIGATOR_CARD_PEEK_STARTED
 				//NAVIGATOR_CARD_PEEK_STOPPED
-				//NAVIGATOR_ORIENTATION_SIZE
 				}
 			} else if ( domain == battery_get_domain() ) {
 				code = bps_event_get_code( event );

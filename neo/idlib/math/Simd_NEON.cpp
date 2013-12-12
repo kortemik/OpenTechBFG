@@ -32,7 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "Simd_Generic.h"
 #include "Simd_NEON.h"
 
-#ifdef ID_QNX_ARM_NEON_INTRIN
+#ifdef ID_QNX_ARM_NEON
 
 //===============================================================
 //                                                        M

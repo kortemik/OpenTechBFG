@@ -448,6 +448,24 @@ static float R_ParseVersionString() {
 	return version;
 }
 
+static float R_ParseGLSLVersionString() {
+	float version = atof( glConfig.shading_language_string );
+#ifdef GL_ES_VERSION_2_0
+	// Probably a better way to do this... (XXX RegEx?)
+	if ( version == 0.0f ) {
+		idStr ver = glConfig.shading_language_string;
+
+		// Version may start "OpenGL ES"
+		if ( ver.Icmpn( "OpenGL ES GLSL ES ", 18 ) == 0 ) {
+			ver = ver.Mid( 18, ver.Length() - 18 );
+		}
+
+		version = atof( ver.c_str() );
+	}
+#endif
+	return version;
+}
+
 /*
 ==================
 R_CheckPortableExtensions
@@ -1155,7 +1173,7 @@ void R_InitOpenGL() {
 
 
 	float glVersion = R_ParseVersionString();
-	float glslVersion = atof( glConfig.shading_language_string ); //XXX Need to parse better
+	float glslVersion = R_ParseGLSLVersionString();
 	idLib::Printf( "OpenGL Version: %3.1f\n", glVersion );
 	idLib::Printf( "OpenGL Vendor : %s\n", glConfig.vendor_string );
 	idLib::Printf( "OpenGL GLSL   : %3.1f\n", glslVersion );
