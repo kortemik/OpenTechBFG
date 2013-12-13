@@ -32,6 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../../renderer/OpenGL/qgl_es.h"
 #include "qnx_input.h"
+#include "qnx_keys.h"
 
 #include <sys/slog2.h>
 #include <bps/navigator.h>
@@ -47,6 +48,15 @@ cpuid_t	Sys_GetCPUId();
 uint64	Sys_Microseconds();
 
 bool	EmailCrashReport( const char* messageText );
+
+// localization
+#define ID_LANG_CODE_ENGLISH	"en"
+#define ID_LANG_CODE_FRENCH		"fr"
+#define ID_LANG_CODE_ITALIAN	"it"
+#define ID_LANG_CODE_GERMAN		"de"
+#define ID_LANG_CODE_SPANISH	"es"
+#define ID_LANG_CODE_JAPANESE	"jp"
+const char * Sys_LangCodes( int idx );
 
 typedef struct {
 	cpuid_t						cpuid;

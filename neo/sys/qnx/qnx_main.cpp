@@ -986,11 +986,9 @@ bool EmailCrashReport( const char* messageText ) {
 
 	lastEmailTime = Sys_Milliseconds();
 
-#define EMAIL_ADDRESS "account@domain.com"
-
-	idStr format = "data:json:{\"to\":\"" EMAIL_ADDRESS "\",\"subject\":\"DOOM 3 Fatal Error\",\"body\":\"";
-	format += messageText;
-	format += "\"}\n";
+	idStr format;
+	format.Format( "data:json:{\"to\":\"%s\",\"subject\":\"%s\",\"body\":\"%s%s%s\"}\n",
+			SUPPORT_EMAIL_ADDRESS, SUPPORT_EMAIL_SUBJECT, SUPPORT_EMAIL_BODY_PRE, messageText, SUPPORT_EMAIL_BODY_POST );
 
 	navigator_invoke_invocation_t *invoke = NULL;
 

@@ -1142,7 +1142,6 @@ void R_InitOpenGL() {
 
 	R_SetNewMode( true );
 
-
 	// input and sound systems need to be tied to the new window
 	Sys_InitInput();
 

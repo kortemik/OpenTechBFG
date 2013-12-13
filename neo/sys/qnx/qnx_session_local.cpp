@@ -165,6 +165,25 @@ public:
 
 /*
 ========================
+Sys_LangCodes
+
+Made to match the order of Sys_Lang
+
+This may not be the best place for this, but it's only needed for Scoreloop which is managed here
+========================
+*/
+const char * sysLanguageCodes[] = {
+	ID_LANG_CODE_ENGLISH, ID_LANG_CODE_FRENCH, ID_LANG_CODE_ITALIAN, ID_LANG_CODE_GERMAN, ID_LANG_CODE_SPANISH, ID_LANG_CODE_JAPANESE, NULL
+};
+const char * Sys_LangCodes( int idx ) {
+	if ( idx >= 0 && idx < Sys_NumLangs() ) {
+		return sysLanguageCodes[ idx ];
+	}
+	return "";
+}
+
+/*
+========================
 idSessionLocalQnx::idSessionLocalQnx
 ========================
 */

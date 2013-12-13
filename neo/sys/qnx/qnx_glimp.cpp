@@ -130,6 +130,21 @@ void GLimp_SetGamma( unsigned short red[256], unsigned short green[256], unsigne
 
 /*
 ====================
+PrintDisplayModeFlags
+====================
+*/
+static void PrintDisplayModeFlags( unsigned int flags ) {
+	idStr flagString;
+	if ( flags != SCREEN_MODE_PREFERRED ) {
+		flagString.Format("0x%X", flags);
+	} else {
+		flagString = "Preferred";
+	}
+	common->Printf( "          flags       : %s\n", flagString.c_str() );
+}
+
+/*
+====================
 PrintDisplayMode
 ====================
 */
@@ -140,7 +155,7 @@ static void PrintDisplayMode( screen_display_mode_t & mode, bool rotate ) {
 	common->Printf( "          refresh     : %i\n", mode.refresh );
 	common->Printf( "          interlaced  : 0x%x\n", mode.interlaced ); //XXX Can this be broken down to what interlaced mode it's in?
 	common->Printf( "          aspect_ratio: %ix%i\n", mode.aspect_ratio[0], mode.aspect_ratio[1] );
-	common->Printf( "          flags       : 0x%x\n", mode.flags ); //XXX Can this be broken down to what the flags are?
+	PrintDisplayModeFlags( mode.flags );
 }
 
 /*
