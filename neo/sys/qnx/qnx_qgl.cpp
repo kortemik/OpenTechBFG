@@ -69,7 +69,7 @@ typedef struct {
 static glSymLink_t glLinks[GL_LINK_COUNT];
 static int glSymCount = 0;
 
-void glLinkSet( const char *name, void *link, bool isEgl, float version ) {
+static void glLinkSet( const char *name, void *link, bool isEgl, float version ) {
 	// attempt to find the link
 	for ( int i = 0; i < glSymCount; i++ ) {
 		if ( glLinks[i].name && strcmp( glLinks[i].name, name ) == 0 ) {
@@ -94,7 +94,7 @@ void glLinkSet( const char *name, void *link, bool isEgl, float version ) {
 	assert( 0 ); // should never reach here
 }
 
-void *glLinkGet( const char *name, bool isEgl, float maxGLVersion ) {
+static void *glLinkGet( const char *name, bool isEgl, float maxGLVersion ) {
 	for ( int i = 0; i < glSymCount; i++ ) {
 		if ( glLinks[i].name && glLinks[i].eglLink == isEgl &&
 				( isEgl || glLinks[i].glVersion <= maxGLVersion ) && strcmp( glLinks[i].name, name ) == 0 ) {
@@ -1504,6 +1504,9 @@ void QGL_Shutdown( void )
 ** QGL_GetSym
 */
 void* QGL_GetSym( const char *function, bool egl ) {
+	if ( function == NULL ) {
+		return NULL;
+	}
 	return glLinkGet( function, egl, glConfig.glVersion );
 }
 

@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ static ID_INLINE void SetFragmentParm( renderParm_t rp, const float * value ) {
 RB_SetMVP
 ================
 */
-void RB_SetMVP( const idRenderMatrix & mvp ) { 
+void RB_SetMVP( const idRenderMatrix & mvp ) {
 	SetVertexParms( RENDERPARM_MVPMATRIX_X, mvp[0], 4 );
 }
 
@@ -86,7 +86,7 @@ void RB_SetMVP( const idRenderMatrix & mvp ) {
 RB_SetMVPWithStereoOffset
 ================
 */
-static void RB_SetMVPWithStereoOffset( const idRenderMatrix & mvp, const float stereoOffset ) { 
+static void RB_SetMVPWithStereoOffset( const idRenderMatrix & mvp, const float stereoOffset ) {
 	idRenderMatrix offset = mvp;
 	offset[0][3] += stereoOffset;
 
@@ -207,13 +207,13 @@ void RB_DrawElementsWithCounters( const drawSurf_t *surf ) {
 
 		backEnd.glState.vertexLayout = LAYOUT_DRAW_VERT;
 	}
-	
-	qglDrawElementsBaseVertex( GL_TRIANGLES, 
+
+	qglDrawElementsBaseVertex( GL_TRIANGLES,
 							  r_singleTriangle.GetBool() ? 3 : surf->numIndexes,
 							  GL_INDEX_TYPE,
 							  (triIndex_t *)indexOffset,
 							  vertOffset / sizeof ( idDrawVert ) );
-							  
+
 
 }
 
@@ -258,7 +258,7 @@ static void RB_GetShaderTextureMatrix( const float *shaderRegisters, const textu
 RB_LoadShaderTextureMatrix
 ======================
 */
-static void RB_LoadShaderTextureMatrix( const float *shaderRegisters, const textureStage_t *texture ) {	
+static void RB_LoadShaderTextureMatrix( const float *shaderRegisters, const textureStage_t *texture ) {
 	float texS[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
 	float texT[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
 
@@ -269,7 +269,7 @@ static void RB_LoadShaderTextureMatrix( const float *shaderRegisters, const text
 		texS[1] = matrix[1*4+0];
 		texS[2] = matrix[2*4+0];
 		texS[3] = matrix[3*4+0];
-	
+
 		texT[0] = matrix[0*4+1];
 		texT[1] = matrix[1*4+1];
 		texT[2] = matrix[2*4+1];
@@ -280,7 +280,7 @@ static void RB_LoadShaderTextureMatrix( const float *shaderRegisters, const text
 		RENDERLOG_PRINTF( "Texture Matrix S : %4.3f, %4.3f, %4.3f, %4.3f\n", texS[0], texS[1], texS[2], texS[3] );
 		RENDERLOG_PRINTF( "Texture Matrix T : %4.3f, %4.3f, %4.3f, %4.3f\n", texT[0], texT[1], texT[2], texT[3] );
 		renderLog.Outdent();
-	} 
+	}
 
 	SetVertexParm( RENDERPARM_TEXTUREMATRIX_S, texS );
 	SetVertexParm( RENDERPARM_TEXTUREMATRIX_T, texT );
@@ -357,7 +357,7 @@ static void RB_BindVariableStageImage( const textureStage_t *texture, const floa
 			cin.imageCb->Bind();
 		} else {
 			globalImages->blackImage->Bind();
-			// because the shaders may have already been set - we need to make sure we are not using a bink shader which would 
+			// because the shaders may have already been set - we need to make sure we are not using a bink shader which would
 			// display incorrectly.  We may want to get rid of RB_BindVariableStageImage and inline the code so that the
 			// SWF GUI case is handled better, too
 			renderProgManager.BindShader_TextureVertexColor();
@@ -499,7 +499,7 @@ static void RB_PrepareStageTexturing( const shaderStage_t * pStage,  const drawS
 		plane[1] = mat[1*4+3];
 		plane[2] = mat[2*4+3];
 		plane[3] = mat[3*4+3];
-		SetVertexParm( RENDERPARM_TEXGEN_0_Q, plane );	
+		SetVertexParm( RENDERPARM_TEXGEN_0_Q, plane );
 		RENDERLOG_PRINTF( "TEXGEN_Q = %4.3f, %4.3f, %4.3f, %4.3f\n",  plane[0], plane[1], plane[2], plane[3] );
 
 		renderLog.Outdent();
@@ -578,7 +578,7 @@ static void RB_FillDepthBufferGeneric( const drawSurf_t * const * drawSurfs, int
 
 		// if all stages of a material have been conditioned off, don't do anything
 		int stage = 0;
-		for ( ; stage < shader->GetNumStages(); stage++ ) {		
+		for ( ; stage < shader->GetNumStages(); stage++ ) {
 			const shaderStage_t * pStage = shader->GetStage( stage );
 			// check the stage enable condition
 			if ( regs[ pStage->conditionRegister ] != 0 ) {
@@ -632,7 +632,7 @@ static void RB_FillDepthBufferGeneric( const drawSurf_t * const * drawSurfs, int
 			bool didDraw = false;
 
 			// perforated surfaces may have multiple alpha tested stages
-			for ( stage = 0; stage < shader->GetNumStages(); stage++ ) {		
+			for ( stage = 0; stage < shader->GetNumStages(); stage++ ) {
 				const shaderStage_t *pStage = shader->GetStage(stage);
 
 				if ( !pStage->hasAlphaTest ) {
@@ -1017,7 +1017,7 @@ static void RB_RenderInteractions( const drawSurf_t *surfList, const viewLight_t
 
 	// change the scissor if needed, it will be constant across all the surfaces lit by the light
 	if ( !backEnd.currentScissor.Equals( vLight->scissorRect ) && r_useScissor.GetBool() ) {
-		GL_Scissor( backEnd.viewDef->viewport.x1 + vLight->scissorRect.x1, 
+		GL_Scissor( backEnd.viewDef->viewport.x1 + vLight->scissorRect.x1,
 					backEnd.viewDef->viewport.y1 + vLight->scissorRect.y1,
 					vLight->scissorRect.x2 + 1 - vLight->scissorRect.x1,
 					vLight->scissorRect.y2 + 1 - vLight->scissorRect.y1 );
@@ -1217,7 +1217,7 @@ static void RB_RenderInteractions( const drawSurf_t *surfList, const viewLight_t
 				renderLog.CloseBlock();
 				continue;
 			}
-			
+
 			renderLog.OpenBlock( surf->material->GetName() );
 
 			inter.bumpImage = NULL;
@@ -1363,7 +1363,7 @@ static void RB_StencilShadowPass( const drawSurf_t *drawSurfs, const viewLight_t
 	// the actual stencil func will be set in the draw code, but we need to make sure it isn't
 	// disabled here, and that the value will get reset for the interactions without looking
 	// like a no-change-required
-	GL_State( glState | GLS_STENCIL_OP_FAIL_KEEP | GLS_STENCIL_OP_ZFAIL_KEEP | GLS_STENCIL_OP_PASS_INCR | 
+	GL_State( glState | GLS_STENCIL_OP_FAIL_KEEP | GLS_STENCIL_OP_ZFAIL_KEEP | GLS_STENCIL_OP_PASS_INCR |
 		GLS_STENCIL_MAKE_REF( STENCIL_SHADOW_TEST_VALUE ) | GLS_STENCIL_MAKE_MASK( STENCIL_SHADOW_MASK_VALUE ) | GLS_POLYGON_OFFSET );
 
 	// Two Sided Stencil reduces two draw calls to one for slightly faster shadows
@@ -1593,7 +1593,7 @@ static void RB_StencilShadowPass( const drawSurf_t *drawSurfs, const viewLight_t
 RB_StencilSelectLight
 
 Deform the zeroOneCubeModel to exactly cover the light volume. Render the deformed cube model to the stencil buffer in
-such a way that only fragments that are directly visible and contained within the volume will be written creating a 
+such a way that only fragments that are directly visible and contained within the volume will be written creating a
 mask to be used by the following stencil shadow and draw interaction passes.
 ==================
 */
@@ -1602,7 +1602,7 @@ static void RB_StencilSelectLight( const viewLight_t * vLight ) {
 
 	// enable the light scissor
 	if ( !backEnd.currentScissor.Equals( vLight->scissorRect ) && r_useScissor.GetBool() ) {
-		GL_Scissor( backEnd.viewDef->viewport.x1 + vLight->scissorRect.x1, 
+		GL_Scissor( backEnd.viewDef->viewport.x1 + vLight->scissorRect.x1,
 					backEnd.viewDef->viewport.y1 + vLight->scissorRect.y1,
 					vLight->scissorRect.x2 + 1 - vLight->scissorRect.x1,
 					vLight->scissorRect.y2 + 1 - vLight->scissorRect.y1 );
@@ -1814,7 +1814,7 @@ If we are rendering Guis, the drawSurf_t::sort value is a depth offset that can
 be multiplied by guiEye for polarity and screenSeparation for scale.
 =====================
 */
-static int RB_DrawShaderPasses( const drawSurf_t * const * const drawSurfs, const int numDrawSurfs, 
+static int RB_DrawShaderPasses( const drawSurf_t * const * const drawSurfs, const int numDrawSurfs,
 									const float guiStereoScreenOffset, const int stereoEye ) {
 	// only obey skipAmbient if we are rendering a view
 	if ( backEnd.viewDef->viewEntitys && r_skipAmbient.GetBool() ) {
@@ -1864,7 +1864,7 @@ static int RB_DrawShaderPasses( const drawSurf_t * const * const drawSurfs, cons
 			break;
 		}
 
-		// if we are rendering a 3D view and the surface's eye index doesn't match 
+		// if we are rendering a 3D view and the surface's eye index doesn't match
 		// the current view's eye index then we skip the surface
 		// if the stereoEye value of a surface is 0 then we need to draw it for both eyes.
 		const int shaderStereoEye = shader->GetStereoEye();
@@ -1875,7 +1875,7 @@ static int RB_DrawShaderPasses( const drawSurf_t * const * const drawSurfs, cons
 
 		renderLog.OpenBlock( shader->GetName() );
 
-		// determine the stereoDepth offset 
+		// determine the stereoDepth offset
 		// guiStereoScreenOffset will always be zero for 3D views, so the !=
 		// check will never force an update due to the current sort value.
 		const float thisGuiStereoOffset = guiStereoScreenOffset * surf->sort;
@@ -1911,7 +1911,7 @@ static int RB_DrawShaderPasses( const drawSurf_t * const * const drawSurfs, cons
 
 		// change the scissor if needed
 		if ( !backEnd.currentScissor.Equals( surf->scissorRect ) && r_useScissor.GetBool() ) {
-			GL_Scissor( backEnd.viewDef->viewport.x1 + surf->scissorRect.x1, 
+			GL_Scissor( backEnd.viewDef->viewport.x1 + surf->scissorRect.x1,
 						backEnd.viewDef->viewport.y1 + surf->scissorRect.y1,
 						surf->scissorRect.x2 + 1 - surf->scissorRect.x1,
 						surf->scissorRect.y2 + 1 - surf->scissorRect.y1 );
@@ -1936,7 +1936,7 @@ static int RB_DrawShaderPasses( const drawSurf_t * const * const drawSurfs, cons
 			surfGLState = GLS_POLYGON_OFFSET;
 		}
 
-		for ( int stage = 0; stage < shader->GetNumStages(); stage++ ) {		
+		for ( int stage = 0; stage < shader->GetNumStages(); stage++ ) {
 			const shaderStage_t *pStage = shader->GetStage(stage);
 
 			// check the enable condition
@@ -1973,7 +1973,7 @@ static int RB_DrawShaderPasses( const drawSurf_t * const * const drawSurfs, cons
 				renderLog.OpenBlock( "New Shader Stage" );
 
 				GL_State( stageGLState );
-			
+
 				renderProgManager.BindShader( newStage->glslProgram, newStage->glslProgram );
 
 				for ( int j = 0; j < newStage->numVertexParms; j++ ) {
@@ -2039,7 +2039,7 @@ static int RB_DrawShaderPasses( const drawSurf_t * const * const drawSurfs, cons
 			color[3] = regs[ pStage->color.registers[3] ];
 
 			// skip the entire stage if an add would be black
-			if ( ( stageGLState & ( GLS_SRCBLEND_BITS | GLS_DSTBLEND_BITS ) ) == ( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE ) 
+			if ( ( stageGLState & ( GLS_SRCBLEND_BITS | GLS_DSTBLEND_BITS ) ) == ( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE )
 				&& color[0] <= 0 && color[1] <= 0 && color[2] <= 0 ) {
 				continue;
 			}
@@ -2092,7 +2092,7 @@ static int RB_DrawShaderPasses( const drawSurf_t * const * const drawSurfs, cons
 					renderProgManager.BindShader_TextureVertexColor();
 				}
 			}
-		
+
 			RB_SetVertexColorParms( svc );
 
 			// bind the texture
@@ -2106,7 +2106,7 @@ static int RB_DrawShaderPasses( const drawSurf_t * const * const drawSurfs, cons
 
 			// set the state
 			GL_State( stageGLState );
-		
+
 			RB_PrepareStageTexturing( pStage, surf );
 
 			// draw it
@@ -2419,7 +2419,7 @@ RB_FogAllLights
 ==================
 */
 static void RB_FogAllLights() {
-	if ( r_skipFogLights.GetBool() || r_showOverDraw.GetInteger() != 0 
+	if ( r_skipFogLights.GetBool() || r_showOverDraw.GetInteger() != 0
 		 || backEnd.viewDef->isXraySubview /* don't fog in xray mode*/ ) {
 		return;
 	}
@@ -2841,7 +2841,7 @@ void RB_PostProcess( const void * data ) {
 
 	// only do the post process step if resolution scaling is enabled. Prevents the unnecessary copying of the framebuffer and
 	// corresponding full screen quad pass.
-	if ( rs_enable.GetInteger() == 0 ) { 
+	if ( rs_enable.GetInteger() == 0 ) {
 		return;
 	}
 

@@ -33,6 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "qnx_local.h"
 #include <screen/screen.h>
 
+idCVar qnx_skipPointerPolling( "qnx_skipMousePolling", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "1 = poll, but don't make mouse system events, 2 = don't poll mouse" );
+
 /*
 ===========
 Sys_ShutdownInput
@@ -63,11 +65,14 @@ void Sys_InitInput() {
 	common->Printf ("------------------------------------\n");
 }
 
-//XXX Can query screen context for devices (which can then be used for polling)
-
 //=====================================================================================
 //	Keyboard Input Handling
 //=====================================================================================
+
+static struct pollKeys_s {
+	int		ch;
+	bool	state;
+} pollKeys[KEYBOARD_KEYS];
 
 /*
 ===========
@@ -75,8 +80,18 @@ Sys_PollKeyboardInputEvents
 ===========
 */
 int Sys_PollKeyboardInputEvents() {
-	//TODO
-	return 0;
+	int numEvents = 0;
+
+	for ( int i = 0; i < KEYBOARD_KEYS; i++ ) {
+		if ( qnx.polledKeys[i] != qnx.polledKeysOld[i] ) {
+			pollKeys[numEvents].ch = i;
+			pollKeys[numEvents].state = qnx.polledKeys[i];
+			numEvents++;
+		}
+	}
+	memcpy( qnx.polledKeysOld, qnx.polledKeys, sizeof( qnx.polledKeys ) );
+
+	return numEvents;
 }
 
 /*
@@ -85,8 +100,9 @@ Sys_ReturnKeyboardInputEvent
 ===========
 */
 int Sys_ReturnKeyboardInputEvent( const int n, int &ch, bool &state ) {
-	//TODO
-	return 0;
+	ch = pollKeys[n].ch;
+	state = pollKeys[n].state;
+	return ch;
 }
 
 /*
@@ -95,7 +111,6 @@ Sys_EndKeyboardInputEvents
 ===========
 */
 void Sys_EndKeyboardInputEvents() {
-	//TODO
 }
 
 //=====================================================================================
@@ -108,8 +123,122 @@ Sys_PollMouseInputEvents
 ===========
 */
 int Sys_PollMouseInputEvents( int mouseEvents[MAX_MOUSE_EVENTS][2] ) {
-	//TODO
-	return 0;
+	int numEvents = 0;
+
+	int pollingType = qnx_skipPointerPolling.GetInteger();
+	if ( pollingType == 2 ) {
+		return numEvents;
+	}
+
+	if ( qnx.polledMouseButtonsPressed != qnx.polledMouseButtonsPressedOld ) {
+		// Left mouse
+		mouseEvents[numEvents][0] = M_INVALID;
+		mouseEvents[numEvents][1] = 0;
+
+		if ( qnx.polledMouseButtonsPressed & SCREEN_LEFT_MOUSE_BUTTON ) {
+			if ( !( qnx.polledMouseButtonsPressed & SCREEN_LEFT_MOUSE_BUTTON ) ) {
+				mouseEvents[numEvents][0] = M_ACTION1;
+				mouseEvents[numEvents][1] = true;
+				numEvents++;
+				if ( pollingType != 1 ) {
+					Sys_QueEvent( SE_KEY, K_MOUSE1, true, 0, NULL, 0 );
+				}
+			}
+		} else if ( qnx.polledMouseButtonsPressed & SCREEN_LEFT_MOUSE_BUTTON ) {
+			mouseEvents[numEvents][0] = M_ACTION1;
+			mouseEvents[numEvents][1] = false;
+			numEvents++;
+			if ( pollingType != 1 ) {
+				Sys_QueEvent( SE_KEY, K_MOUSE1, false, 0, NULL, 0 );
+			}
+		}
+
+		// Right mouse
+		mouseEvents[numEvents][0] = M_INVALID;
+		mouseEvents[numEvents][1] = 0;
+
+		if ( qnx.polledMouseButtonsPressed & SCREEN_RIGHT_MOUSE_BUTTON ) {
+			if ( !( qnx.polledMouseButtonsPressed & SCREEN_RIGHT_MOUSE_BUTTON ) ) {
+				mouseEvents[numEvents][0] = M_ACTION2;
+				mouseEvents[numEvents][1] = true;
+				numEvents++;
+				if ( pollingType != 1 ) {
+					Sys_QueEvent( SE_KEY, K_MOUSE2, true, 0, NULL, 0 );
+				}
+			}
+		} else if ( qnx.polledMouseButtonsPressed & SCREEN_RIGHT_MOUSE_BUTTON ) {
+			mouseEvents[numEvents][0] = M_ACTION2;
+			mouseEvents[numEvents][1] = false;
+			numEvents++;
+			if ( pollingType != 1 ) {
+				Sys_QueEvent( SE_KEY, K_MOUSE2, false, 0, NULL, 0 );
+			}
+		}
+
+		// Right mouse
+		mouseEvents[numEvents][0] = M_INVALID;
+		mouseEvents[numEvents][1] = 0;
+
+		if ( qnx.polledMouseButtonsPressed & SCREEN_MIDDLE_MOUSE_BUTTON ) {
+			if ( !( qnx.polledMouseButtonsPressed & SCREEN_MIDDLE_MOUSE_BUTTON ) ) {
+				mouseEvents[numEvents][0] = M_ACTION3;
+				mouseEvents[numEvents][1] = true;
+				numEvents++;
+				if ( pollingType != 1 ) {
+					Sys_QueEvent( SE_KEY, K_MOUSE3, true, 0, NULL, 0 );
+				}
+			}
+		} else if ( qnx.polledMouseButtonsPressed & SCREEN_MIDDLE_MOUSE_BUTTON ) {
+			mouseEvents[numEvents][0] = M_ACTION3;
+			mouseEvents[numEvents][1] = false;
+			numEvents++;
+			if ( pollingType != 1 ) {
+				Sys_QueEvent( SE_KEY, K_MOUSE3, false, 0, NULL, 0 );
+			}
+		}
+
+		qnx.polledMouseButtonsPressedOld = qnx.polledMouseButtonsPressed;
+	}
+
+	if ( qnx.polledMouseX != qnx.polledMouseXOld ) {
+		const int rel = qnx.polledMouseXOld - qnx.polledMouseX;
+		mouseEvents[numEvents][0] = M_DELTAX;
+		mouseEvents[numEvents][1] = rel;
+		numEvents++;
+		if ( pollingType != 1 ) {
+			Sys_QueEvent( SE_MOUSE, rel, 0, 0, NULL, 0 );
+		}
+		qnx.polledMouseXOld = qnx.polledMouseX;
+	}
+
+	if ( qnx.polledMouseY != qnx.polledMouseYOld ) {
+		const int rel = qnx.polledMouseYOld - qnx.polledMouseY;
+		mouseEvents[numEvents][0] = M_DELTAY;
+		mouseEvents[numEvents][1] = rel;
+		numEvents++;
+		if ( pollingType != 1 ) {
+			Sys_QueEvent( SE_MOUSE, 0, rel, 0, NULL, 0 );
+		}
+		qnx.polledMouseYOld = qnx.polledMouseY;
+	}
+
+	if ( qnx.polledMouseWheelPosition != qnx.polledMouseWheelPositionOld ) {
+		const int value = ( qnx.polledMouseWheelPositionOld - qnx.polledMouseWheelPosition ) / WHEEL_DELTA;
+		mouseEvents[numEvents][0] = M_DELTAZ;
+		mouseEvents[numEvents][1] = value;
+		numEvents++;
+		if ( pollingType != 1 ) {
+			const int key = value < 0 ? K_MWHEELDOWN : K_MWHEELUP;
+			const int iterations = abs( value );
+			for ( int i = 0; i < iterations; i++ ) {
+				Sys_QueEvent( SE_KEY, key, true, 0, NULL, 0 );
+				Sys_QueEvent( SE_KEY, key, false, 0, NULL, 0 );
+			}
+		}
+		qnx.polledMouseWheelPositionOld = qnx.polledMouseWheelPosition;
+	}
+
+	return numEvents;
 }
 
 /*
@@ -118,7 +247,6 @@ Sys_GrabMouseCursor
 ===========
 */
 void Sys_GrabMouseCursor( bool grabIt ) {
-	//TODO
 }
 
 //=====================================================================================
@@ -184,6 +312,10 @@ bool idJoystickQnx::Init() {
 	// Reset handles
 	for ( int i = 0 ; i < MAX_JOYSTICKS ; i++ ) {
 		controllers[i].handle = NULL;
+	}
+
+	if ( qnx.screenCtx == NULL ) {
+		return false;
 	}
 
 	int deviceCount;
@@ -294,6 +426,8 @@ void idJoystickQnx::PostInputEvent( int inputDeviceNum, int event, int value, in
 			joyAxis[inputDeviceNum][axis] = percent;
 			Sys_QueEvent( SE_JOYSTICK, axis, percent, 0, NULL, inputDeviceNum );
 		}
+		// UsercmdGen uses this value but it needs to be scaled to -32768 - 32767, of which it is currently -256 - 255. Multiple by 128 to scale
+		value *= 128;
 	}
 
 	// These events are used for actual game input

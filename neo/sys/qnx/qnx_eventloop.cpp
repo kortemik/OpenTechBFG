@@ -265,8 +265,6 @@ int Sys_TranslateKeyToUnicode( int key ) {
 Sys_PumpEvents
 =============
 */
-#define WHEEL_DELTA 120
-
 void Sys_PumpEvents() {
 	bps_event_t* event = NULL;
 	int ret;
@@ -281,20 +279,21 @@ void Sys_PumpEvents() {
 				screen_event_t screenEvent = screen_event_get_event( event );
 				screen_get_event_property_iv( screenEvent, SCREEN_PROPERTY_TYPE, &code );
 				switch ( code ) {
-				case SCREEN_EVENT_POINTER: {
-					int buttons;
-					int wheel;
-					int position[2];
+				//TODO
+				//SCREEN_EVENT_MTOUCH_TOUCH
+				//SCREEN_EVENT_MTOUCH_MOVE
+				//SCREEN_EVENT_MTOUCH_RELEASE
 
+				case SCREEN_EVENT_POINTER: {
 					bool move = true;
 					bool left_move = false;
 
-					screen_get_event_property_iv(screenEvent, SCREEN_PROPERTY_BUTTONS, &buttons);
-					screen_get_event_property_iv(screenEvent, SCREEN_PROPERTY_SOURCE_POSITION, position);
-					screen_get_event_property_iv(screenEvent, SCREEN_PROPERTY_MOUSE_WHEEL, &wheel);
+					screen_get_event_property_iv(screenEvent, SCREEN_PROPERTY_BUTTONS, &qnx.polledMouseButtonsPressed);
+					screen_get_event_property_iv(screenEvent, SCREEN_PROPERTY_SOURCE_POSITION, &qnx.polledMouseX);
+					screen_get_event_property_iv(screenEvent, SCREEN_PROPERTY_MOUSE_WHEEL, &qnx.polledMouseWheelPosition);
 
 					// Left mouse button
-					if ( buttons & SCREEN_LEFT_MOUSE_BUTTON ) {
+					if ( qnx.polledMouseButtonsPressed & SCREEN_LEFT_MOUSE_BUTTON ) {
 						if ( qnx.mouseButtonsPressed & SCREEN_LEFT_MOUSE_BUTTON ) {
 							left_move = true;
 						} else {
@@ -309,7 +308,7 @@ void Sys_PumpEvents() {
 					}
 
 					// Right mouse button
-					if ( buttons & SCREEN_RIGHT_MOUSE_BUTTON ) {
+					if ( qnx.polledMouseButtonsPressed & SCREEN_RIGHT_MOUSE_BUTTON ) {
 						if ( !( qnx.mouseButtonsPressed & SCREEN_RIGHT_MOUSE_BUTTON ) ) {
 							move = false;
 							qnx.mouseButtonsPressed |= SCREEN_RIGHT_MOUSE_BUTTON;
@@ -322,7 +321,7 @@ void Sys_PumpEvents() {
 					}
 
 					// Middle mouse button
-					if ( buttons & SCREEN_MIDDLE_MOUSE_BUTTON ) {
+					if ( qnx.polledMouseButtonsPressed & SCREEN_MIDDLE_MOUSE_BUTTON ) {
 						if ( !( qnx.mouseButtonsPressed & SCREEN_MIDDLE_MOUSE_BUTTON ) ) {
 							move = false;
 							qnx.mouseButtonsPressed |= SCREEN_MIDDLE_MOUSE_BUTTON;
@@ -336,12 +335,12 @@ void Sys_PumpEvents() {
 
 					// Mouse position
 					if ( left_move || move ) {
-						Sys_QueEvent( SE_MOUSE_ABSOLUTE, position[0], position[1], 0, NULL, 0 );
+						Sys_QueEvent( SE_MOUSE_ABSOLUTE, qnx.polledMouseX, qnx.polledMouseY, 0, NULL, 0 );
 					}
 
 					// Mouse wheel
-					int delta = ( qnx.mouseWheelPosition - wheel ) / WHEEL_DELTA;
-					qnx.mouseWheelPosition -= wheel;
+					int delta = ( qnx.mouseWheelPosition - qnx.polledMouseWheelPosition ) / WHEEL_DELTA;
+					qnx.mouseWheelPosition -= qnx.polledMouseWheelPosition;
 					int key = delta < 0 ? K_MWHEELDOWN : K_MWHEELUP;
 					delta = abs( delta );
 					while( delta-- > 0 ) {
@@ -360,6 +359,7 @@ void Sys_PumpEvents() {
 
 					int key = Sys_TranslateKey( value );
 					if ( !( flags & KEY_REPEAT ) && ( key != K_NONE ) ) {
+						qnx.polledKeys[key] = flags & KEY_DOWN;
 						if ( flags & KEY_DOWN ) {
 							//XXX Is this needed or is it just a Windows thing? Without separate keyboard, there is no keyboard or pause keys
 							if ( key == K_NUMLOCK ) {
@@ -388,7 +388,7 @@ void Sys_PumpEvents() {
 					screen_get_event_property_iv( screenEvent, SCREEN_PROPERTY_ATTACHED, &attached );
 					if ( attached ) {
 						screen_get_device_property_iv( device, SCREEN_PROPERTY_TYPE, &type );
-						if ( type == SCREEN_EVENT_GAMEPAD || type == SCREEN_EVENT_JOYSTICK ) {
+						if ( !( type == SCREEN_EVENT_GAMEPAD || type == SCREEN_EVENT_JOYSTICK ) ) {
 							break;
 						}
 					}

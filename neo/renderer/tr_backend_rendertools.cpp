@@ -2719,6 +2719,7 @@ RB_RenderDebugTools
 =================
 */
 void RB_RenderDebugTools( drawSurf_t **drawSurfs, int numDrawSurfs ) {
+#ifdef ID_WIN32 //TODO
 	// don't do much if this was a 2D rendering
 	if ( !backEnd.viewDef->viewEntitys ) {
 		RB_TestImage();
@@ -2769,6 +2770,7 @@ void RB_RenderDebugTools( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 	RB_ShowTrace( drawSurfs, numDrawSurfs );
 
 	renderLog.CloseMainBlock();
+#endif
 }
 
 /*

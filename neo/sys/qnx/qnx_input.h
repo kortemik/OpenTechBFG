@@ -31,6 +31,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <screen/screen.h>
 
+#define WHEEL_DELTA 120
+#define KEYBOARD_KEYS K_JOY1
+
 static const int MAX_JOYSTICKS = 4;
 
 /*
