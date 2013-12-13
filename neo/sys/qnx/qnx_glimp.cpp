@@ -547,6 +547,39 @@ bool EGL_CheckExtension( const char *name ) {
 
 /*
 ===================
+QNXGLimp_DowngradeScreenUsage
+===================
+*/
+bool QNXGLimp_DowngradeScreenUsage() {
+	int screenUsage;
+	if ( screen_get_window_property_iv( qnx.screenWin, SCREEN_PROPERTY_USAGE, &screenUsage ) != 0 ) {
+		return false;
+	}
+	if ( screenUsage & SCREEN_USAGE_OPENGL_ES2 ) {
+		// already GLES 2.0
+		return true;
+	}
+#if defined(GL_ES_VERSION_3_0) && BBNDK_VERSION_AT_LEAST(10, 2, 0)
+	if ( !( screenUsage & SCREEN_USAGE_OPENGL_ES3 ) ) {
+		// not GLES 3.0?
+		return false;
+	}
+	if ( screen_destroy_window_buffers( qnx.screenWin ) != 0 ) {
+		return false;
+	}
+	// switch to GLES 2.0 usage and recreate buffers
+	screenUsage &= ~SCREEN_USAGE_OPENGL_ES3;
+	screenUsage |= SCREEN_USAGE_OPENGL_ES2;
+	screen_set_window_property_iv( qnx.screenWin, SCREEN_PROPERTY_USAGE, &screenUsage );
+	if ( screen_create_window_buffers( qnx.screenWin, 2 ) != 0 ) {
+		return false;
+	}
+#endif
+	return true;
+}
+
+/*
+===================
 QNXGLimp_CreateWindow
 ===================
 */
@@ -735,6 +768,8 @@ QNXGLimp_CreateEGLSurface
 bool QNXGLimp_CreateEGLSurface( EGLNativeWindowType window, const int multisamples, bool createContextAvaliable ) {
 	common->Printf( "Initializing OpenGL driver\n" );
 
+	bool resetEGLVersion = false;
+
 	EGLint eglContextAttrs[] =
 	{
 		EGL_CONTEXT_CLIENT_VERSION,		0,
@@ -782,9 +817,15 @@ bool QNXGLimp_CreateEGLSurface( EGLNativeWindowType window, const int multisampl
 				return false;
 			}
 			eglContextAttrs[1] = 2; // Switch to OpenGL ES 2.0
+			resetEGLVersion = true;
 			continue;
 		}
 		break;
+	}
+
+	if ( resetEGLVersion && !QNXGLimp_DowngradeScreenUsage() ) {
+		common->Printf( "...^3EGL context version mismatch with screen usage, could not change screen usage^0\n");
+		return false;
 	}
 
 	qnx.eglSurface = qeglCreateWindowSurface( qnx.eglDisplay, qnx.eglConfig, window, NULL );
@@ -918,8 +959,16 @@ bool GLimp_SetScreenParms( glimpParms_t parms ) {
 		return false;
 	}
 
-	//XXX If x,y,width, height have changed then change window properties
-	//XXX Need to destroy and recreate EGL surface if size/position are changing if window position and size change (reset interval too)
+	// Destroy old surface, change params, then recreate surface
+	if ( qeglMakeCurrent( qnx.eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT ) != EGL_TRUE ) {
+		common->Printf( "Could not disable screen\n");
+		return false;
+	}
+
+	if ( qeglDestroySurface( qnx.eglDisplay, qnx.eglSurface ) != EGL_TRUE ) {
+		common->Printf( "Could not destroy EGL surface\n");
+		return false;
+	}
 
 	const int position[2] = {parms.x, parms.y};
 	if ( screen_set_window_property_iv( qnx.screenWin, SCREEN_PROPERTY_POSITION, position ) != 0 ) {
@@ -932,11 +981,22 @@ bool GLimp_SetScreenParms( glimpParms_t parms ) {
 		common->Printf( "Could not set window size\n" );
 		return false;
 	}
+
+	qnx.eglSurface = qeglCreateWindowSurface( qnx.eglDisplay, qnx.eglConfig, qnx.screenWin, NULL );
+	if ( qnx.eglSurface == EGL_NO_SURFACE ) {
+		common->Printf( "Could not recreate EGL window surface\n");
+		return false;
+	}
+
+	if ( qeglMakeCurrent( qnx.eglDisplay, qnx.eglSurface, qnx.eglSurface, qnx.eglContext ) != EGL_TRUE ) {
+		common->Printf( "Could not make screen current\n");
+		return false;
+	}
+
 	glConfig.nativeScreenWidth = parms.width;
 	glConfig.nativeScreenHeight = parms.height;
 
 	r_swapInterval.SetModified();
-	//XXX END changing window properties
 
 	// Get displays
 	int displayCount = 1;

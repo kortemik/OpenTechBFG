@@ -461,7 +461,7 @@ void Sys_PumpEvents() {
 					Sys_QueEvent( SE_KEY, K_GRAVE, false, 0, NULL, 0 );
 					break;
 
-				//TODO
+				//TODO: is this needed? Probably keyboard state...
 				//NAVIGATOR_INVOKE_QUERY_RESULT
 				//NAVIGATOR_INVOKE_TARGET_RESULT
 				//NAVIGATOR_INVOKE_VIEWER_RESULT

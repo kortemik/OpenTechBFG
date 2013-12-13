@@ -4,6 +4,10 @@ build
 Device-Debug
 Debug
 Release
+blackberry/resources
+blackberry/asmtest
+blackberry/texgenpack
+blackberry/GLES2_Doom_Test
 
 # File types
 *.user
