@@ -312,6 +312,14 @@ PFNGLGETDEBUGMESSAGELOGARBPROC			qglGetDebugMessageLogARB;
 
 PFNGLGETSTRINGIPROC						qglGetStringi;
 
+#ifdef GL_ES_VERSION_2_0
+// GL_QCOM_driver_control
+PFNGLGETDRIVERCONTROLSQCOMPROC			qglGetDriverControlsQCOM;
+PFNGLGETDRIVERCONTROLSTRINGQCOMPROC		qglGetDriverControlStringQCOM;
+PFNGLENABLEDRIVERCONTROLQCOMPROC		qglEnableDriverControlQCOM;
+PFNGLDISABLEDRIVERCONTROLQCOMPROC		qglDisableDriverControlQCOM;
+#endif
+
 /*
 ========================
 glBindMultiTextureEXT
@@ -525,12 +533,57 @@ static void R_CheckPortableExtensions() {
 		qglGetCompressedTexImageARB = (PFNGLGETCOMPRESSEDTEXIMAGEARBPROC)GLimp_ExtensionPointer( "glGetCompressedTexImageARB" );
 	}
 #else
-	// The functions exist, but the supported compressions may not
-	glConfig.textureCompressionAvailable = R_CheckExtension( "GL_EXT_texture_compression_s3tc" ) || ( R_CheckExtension( "GL_EXT_texture_compression_dxt1" ) && R_CheckExtension( "GL_ANGLE_texture_compression_dxt5" ) );
+	// The functions exist, but the supported compressions may not... this is why GLES 3.0 is good since it has a required compression format
+	glConfig.textureCompressionDXT1Available = R_CheckExtension( "GL_EXT_texture_compression_s3tc" ) || R_CheckExtension( "GL_EXT_texture_compression_dxt1" );
+	glConfig.textureCompressionDXT5Available = R_CheckExtension( "GL_EXT_texture_compression_s3tc" ) || R_CheckExtension( "GL_ANGLE_texture_compression_dxt5" );
+	glConfig.textureCompressionETC1Available = ( glConfig.glVersion >= 3.0 ||  R_CheckExtension( "GL_OES_compressed_ETC1_RGB8_texture" ) );
+	glConfig.textureCompressionETC2Available = ( glConfig.glVersion >= 3.0 );
+	glConfig.textureCompressionASTCAvailable = R_CheckExtension( "GL_OES_texture_compression_astc" ) || R_CheckExtension( "GL_KHR_texture_compression_astc_ldr" );
+	glConfig.textureCompressionPVRAvailable = R_CheckExtension( "GL_IMG_texture_compression_pvrtc" );
+	glConfig.textureCompressionPVR2Available = R_CheckExtension( "GL_IMG_texture_compression_pvrtc2" );
+	glConfig.textureCompressionAvailable = ( glConfig.textureCompressionDXT1Available && glConfig.textureCompressionDXT5Available ) ||
+			glConfig.textureCompressionETC1Available || glConfig.textureCompressionETC2Available;
+	// ETC1 support does not have alpha, but a workaround exists (http://malideveloper.arm.com/develop-for-mali/sample-code/etcv1-texture-compression-and-alpha-channels/)
+
 	qglCompressedTexImage2DARB = (PFNGLCOMPRESSEDTEXIMAGE2DARBPROC)GLimp_ExtensionPointer( "glCompressedTexImage2D" );
 	qglCompressedTexSubImage2DARB = (PFNGLCOMPRESSEDTEXSUBIMAGE2DARBPROC)GLimp_ExtensionPointer( "glCompressedTexSubImage2D" );
 	qglGetCompressedTexImageARB = (PFNGLGETCOMPRESSEDTEXIMAGEARBPROC)GLimp_ExtensionPointer( "glGetCompressedTexImage" ); //Not used
-	//TODO: figure out/replace texture compression. Everything supports ETC1, GLES 3.0 supports ETC2. If DXT isn't supported, use those (or ASTC)
+
+	// If we have access to the driver control, we may have access to turning on texture compression for all textures,
+	// so we then just load everything and let the driver compress it
+	glConfig.qcomDriverControlAvailable = R_CheckExtension( "GL_QCOM_driver_control" );
+	glConfig.qcomTextureCompressAvailable = false; // As a precaution
+	glConfig.qcomTextureCompressAvailable = -1;
+	if ( glConfig.qcomDriverControlAvailable ) {
+		qglGetDriverControlsQCOM = (PFNGLGETDRIVERCONTROLSQCOMPROC)GLimp_ExtensionPointer( "glGetDriverControlsQCOM" );
+		qglGetDriverControlStringQCOM = (PFNGLGETDRIVERCONTROLSTRINGQCOMPROC)GLimp_ExtensionPointer( "glGetDriverControlStringQCOM" );
+		qglEnableDriverControlQCOM = (PFNGLENABLEDRIVERCONTROLQCOMPROC)GLimp_ExtensionPointer( "glEnableDriverControlQCOM" );
+		qglDisableDriverControlQCOM = (PFNGLDISABLEDRIVERCONTROLQCOMPROC)GLimp_ExtensionPointer( "glDisableDriverControlQCOM" );
+
+		// Check if texture compression support is available in the driver
+		int driverControlCount;
+		qglGetDriverControlsQCOM( &driverControlCount, 0, NULL );
+		if ( driverControlCount > 0 ) {
+			uint *controls = new (TAG_TEMP) uint[driverControlCount];
+			qglGetDriverControlsQCOM( NULL, driverControlCount, controls );
+
+#define DRIVER_STRING_LEN 512
+			char driverString[DRIVER_STRING_LEN];
+
+			for ( int i = 0; i < driverControlCount; i++ ) {
+				qglGetDriverControlStringQCOM( controls[i], DRIVER_STRING_LEN - 1, NULL, driverString );
+
+				if ( idStr::Icmpn( driverString, "AUTO_TEX_COMPRESSION ", 21 ) == 0 ) {
+					glConfig.qcomTextureCompressAvailable = ( int )controls[i];
+					break;
+				}
+			}
+#undef DRIVER_STRING_LEN
+
+			delete[] controls;
+		}
+	}
+	glConfig.textureCompressionFakeAvailable = glConfig.qcomTextureCompressAvailable >= 0;
 #endif
 
 	// GL_EXT_texture_filter_anisotropic
@@ -904,8 +957,12 @@ static void R_CheckPortableExtensions() {
 	if ( !glConfig.multitextureAvailable ) {
 		idLib::Error( "GL_ARB_multitexture not available" );
 	}
+#ifndef GL_ES_VERSION_2_0
 	// GL_ARB_texture_compression + GL_EXT_texture_compression_s3tc
 	if ( !glConfig.textureCompressionAvailable ) {
+#else
+	if ( !glConfig.textureCompressionAvailable && !glConfig.textureCompressionFakeAvailable ) {
+#endif
 		idLib::Error( "GL_ARB_texture_compression or GL_EXT_texture_compression_s3tc not available" );
 	}
 	// GL_ARB_vertex_buffer_object
@@ -986,6 +1043,21 @@ void R_CheckGLESVariableReplacements() {
 
 	// Max multisamples
 	//TODO: glConfig.maxMultisamples
+}
+
+/*
+=============================
+R_SetupTextureCompression
+=============================
+*/
+void R_SetupTextureCompression() {
+	if ( !glConfig.textureCompressionAvailable && glConfig.textureCompressionFakeAvailable ) {
+		// The unfortunate case that an actual texture compression is unavailable, but the driver supports compressing all textures
+		if ( glConfig.qcomDriverControlAvailable && glConfig.qcomTextureCompressAvailable >= 0 ) {
+			qglEnableDriverControlQCOM( ( uint )glConfig.qcomTextureCompressAvailable );
+			common->Printf( "Using QCOM driver texture compression in place of real texture compression\n" );
+		}
+	}
 }
 
 #endif
@@ -1194,6 +1266,8 @@ void R_InitOpenGL() {
 
 #ifdef GL_ES_VERSION_2_0
 	R_CheckGLESVariableReplacements();
+
+	R_SetupTextureCompression();
 
 	R_UpdateGLESVersion();
 #endif

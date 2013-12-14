@@ -119,6 +119,18 @@ struct glconfig_t {
 	bool				multitextureAvailable;
 	bool				directStateAccess;
 	bool				textureCompressionAvailable;
+#ifdef GL_ES_VERSION_3_0
+	bool				textureCompressionFakeAvailable;
+	bool				textureCompressionDXT1Available;
+	bool				textureCompressionDXT5Available;
+	bool				textureCompressionETC1Available;
+	bool				textureCompressionETC2Available;
+	bool				textureCompressionASTCAvailable;
+	bool				textureCompressionPVRAvailable;
+	bool				textureCompressionPVR2Available;
+	bool				qcomDriverControlAvailable;
+	int					qcomTextureCompressAvailable;
+#endif
 	bool				anisotropicFilterAvailable;
 	bool				textureLODBiasAvailable;
 	bool				textureLODBiasShaderOnlyAvailable;

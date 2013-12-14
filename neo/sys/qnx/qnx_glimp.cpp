@@ -35,7 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../../renderer/tr_local.h"
 #include <EGL/eglext.h>
 
-idCVar r_useGLES3( "r_useGLES3", "0", CVAR_INTEGER, "0 = OpenGL ES 3.0 if available, 1 = OpenGL ES 2.0, 2 = OpenGL 3.0", 0, 2 );
+idCVar r_useGLES3( "r_useGLES3", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "0 = OpenGL ES 3.0 if available, 1 = OpenGL ES 2.0, 2 = OpenGL 3.0", 0, 2 );
 
 /*
 ========================
@@ -744,7 +744,7 @@ bool QNXGLimp_CreateEGLConfig( int multisamples, bool gles3bit ) {
 		EGL_DEPTH_SIZE,         24,
 		EGL_STENCIL_SIZE,       8,
 		EGL_SURFACE_TYPE,       EGL_WINDOW_BIT,
-#ifdef EGL_OPENGL_ES3_BIT_KHR
+#ifdef EGL_KHR_create_context
 		EGL_RENDERABLE_TYPE,    ( gles3bit ? EGL_OPENGL_ES3_BIT_KHR : EGL_OPENGL_ES2_BIT ),
 #else
 		EGL_RENDERABLE_TYPE,    EGL_OPENGL_ES2_BIT,
@@ -780,15 +780,16 @@ bool QNXGLimp_CreateEGLConfig( int multisamples, bool gles3bit ) {
 QNXGLimp_CreateEGLSurface
 ===================
 */
-bool QNXGLimp_CreateEGLSurface( EGLNativeWindowType window, const int multisamples, bool createContextAvaliable ) {
+bool QNXGLimp_CreateEGLSurface( EGLNativeWindowType window, const int multisamples, bool createContextAvaliable, bool contextPriorityAvaliable ) {
 	common->Printf( "Initializing OpenGL driver\n" );
 
 	bool resetEGLVersion = false;
 
 	EGLint eglContextAttrs[] =
 	{
-		EGL_CONTEXT_CLIENT_VERSION,		0,
-		EGL_NONE,						EGL_NONE,
+		EGL_CONTEXT_CLIENT_VERSION,	0,
+		EGL_NONE,					EGL_NONE, // EGL_CONTEXT_FLAGS_KHR,				EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR
+		EGL_NONE,					EGL_NONE, // EGL_CONTEXT_PRIORITY_LEVEL_IMG,	EGL_CONTEXT_PRIORITY_HIGH_IMG
 		EGL_NONE
 	};
 #ifdef GL_ES_VERSION_3_0
@@ -804,10 +805,20 @@ bool QNXGLimp_CreateEGLSurface( EGLNativeWindowType window, const int multisampl
 	}
 #endif
 
-#if defined( EGL_CONTEXT_FLAGS_KHR ) && defined( EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR )
+	// Additional attrib. if supported
+	int additionalAttribIndex = 2;
+#ifdef EGL_KHR_create_context
 	if ( r_debugContext.GetBool() && createContextAvaliable ) {
-		eglContextAttrs[2] = EGL_CONTEXT_FLAGS_KHR;
-		eglContextAttrs[3] = EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR;
+		eglContextAttrs[additionalAttribIndex + 0] = EGL_CONTEXT_FLAGS_KHR;
+		eglContextAttrs[additionalAttribIndex + 1] = EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR;
+		additionalAttribIndex += 2;
+	}
+#endif
+#ifdef EGL_IMG_context_priority
+	if ( contextPriorityAvaliable ) {
+		eglContextAttrs[additionalAttribIndex + 0] = EGL_CONTEXT_PRIORITY_LEVEL_IMG;
+		eglContextAttrs[additionalAttribIndex + 1] = EGL_CONTEXT_PRIORITY_HIGH_IMG;
+		additionalAttribIndex += 2;
 	}
 #endif
 
@@ -918,14 +929,15 @@ bool GLimp_Init( glimpParms_t parms ) {
 		return false;
 	}
 
-	if ( !QNXGLimp_CreateEGLSurface( qnx.screenWin, parms.multiSamples, EGL_CheckExtension( "EGL_KHR_create_context" ) ) ) {
+	if ( !QNXGLimp_CreateEGLSurface( qnx.screenWin, parms.multiSamples,
+			EGL_CheckExtension( "EGL_KHR_create_context" ), EGL_CheckExtension( "EGL_IMG_context_priority" ) ) ) {
 		GLimp_Shutdown();
 		return false;
 	}
 
-	r_swapInterval.SetModified();	// force a set next frame
+	r_swapInterval.SetModified();				// force a set next frame
 	glConfig.swapControlTearAvailable = false;
-	glConfig.stereoPixelFormatAvailable = true;
+	glConfig.stereoPixelFormatAvailable = true;	// It's all emulated by glimp, so yes we can support this
 
 	qeglGetConfigAttrib( qnx.eglDisplay, qnx.eglConfig, EGL_BUFFER_SIZE, &glConfig.colorBits );
 	qeglGetConfigAttrib( qnx.eglDisplay, qnx.eglConfig, EGL_DEPTH_SIZE, &glConfig.depthBits );
