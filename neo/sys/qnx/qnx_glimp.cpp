@@ -890,6 +890,11 @@ We assume params is based on device rotation.
 bool GLimp_Init( glimpParms_t parms ) {
 	const char	*driverName;
 
+	// Check if already init
+	if ( qnx.screenCtx != NULL ) {
+		return false;
+	}
+
 	// Some early checks to make sure supported params exist
 	if ( parms.x != 0 || parms.y != 0 || parms.fullScreen <= 0 ) {
 		return false;
