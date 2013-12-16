@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,7 +35,9 @@ Contains the DxtEncoder implementation for SSE2.
 #include "DXTCodec_local.h"
 #include "DXTCodec.h"
 
-#if defined( ID_WIN_X86_SSE2_INTRIN ) || ( ( defined( ID_WIN_X86_ASM ) || defined( ID_MAC_X86_ASM ) ) )
+//TODO: QNX ASM implementation should be made portable. Name mangling variables to access them inline isn't portable.
+
+#if defined( ID_WIN_X86_SSE2_INTRIN ) || ( ( defined( ID_WIN_X86_ASM ) || defined( ID_MAC_X86_ASM ) ) ) || defined( ID_QNX_X86_SSE2_INTRIN ) || defined( ID_QNX_X86_SSE2_ASM )
 
 //#define TEST_COMPRESSION
 #ifdef TEST_COMPRESSION
@@ -56,7 +59,11 @@ Contains the DxtEncoder implementation for SSE2.
 typedef uint16	word;
 typedef uint32	dword;
 
+#ifdef ID_QNX_X86_SSE2_ASM
+ALIGN16( static __m128i SIMD_SSE2_zero ) = { 0LL, 0LL };
+#else
 ALIGN16( static __m128i SIMD_SSE2_zero ) = { 0, 0, 0, 0 };
+#endif
 ALIGN16( static dword SIMD_SSE2_dword_byte_mask[4] ) = { 0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF };
 ALIGN16( static dword SIMD_SSE2_dword_word_mask[4] ) = { 0x0000FFFF, 0x0000FFFF, 0x0000FFFF, 0x0000FFFF };
 ALIGN16( static dword SIMD_SSE2_dword_red_mask[4] )   = { 0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF };
@@ -159,7 +166,20 @@ ID_INLINE void idDxtEncoder::ExtractBlock_SSE2( const byte * inPtr, int width, b
 		movdqa		xmm3, xmmword ptr [esi+eax*2]		// + 12 * width
 		movdqa		xmmword ptr [edi+48], xmm3
 	}
-#elif defined ( ID_WIN_X86_SSE2_INTRIN )
+#elif defined ( ID_QNX_X86_SSE2_ASM )
+	__asm__ __volatile__(
+			"shl	$2, %[width]\n"
+			"movdqa	(%[in]), %%xmm0\n"
+			"movdqa	%%xmm0,  0(%[color])\n"
+			"movdqa	(%[in],%[width]), %%xmm1\n"			// + 4 * width
+			"movdqa	%%xmm1, 16(%[color])\n"
+			"movdqa	(%[in],%[width],2), %%xmm2\n"		// + 8 * width
+			"mov	%[width], %[in]\n"
+			"movdqa	%%xmm2, 32(%[color])\n"
+			"movdqa	(%[in],%[width],2), %%xmm3\n"		// + 12 * width
+			"movdqa	%%xmm3, 48(%[color])\n"
+			:: [in] "r" (inPtr), [color] "r" (colorBlock), [width] "r" (width) : "xmm0", "xmm1", "xmm2", "xmm3");
+#elif defined ( ID_WIN_X86_SSE2_INTRIN ) || defined ( ID_QNX_X86_SSE2_INTRIN )
 	*((__m128i *)(&colorBlock[ 0])) = _mm_load_si128( (__m128i *)( inPtr + width * 4 * 0 ) );
 	*((__m128i *)(&colorBlock[16])) = _mm_load_si128( (__m128i *)( inPtr + width * 4 * 1 ) );
 	*((__m128i *)(&colorBlock[32])) = _mm_load_si128( (__m128i *)( inPtr + width * 4 * 2 ) );
@@ -205,7 +225,29 @@ ID_INLINE void idDxtEncoder::GetMinMaxBBox_SSE2( const byte * colorBlock, byte *
 		movd		dword ptr [esi], xmm0
 		movd		dword ptr [edi], xmm1
 	}
-#elif defined ( ID_WIN_X86_SSE2_INTRIN )
+#elif defined ( ID_QNX_X86_SSE2_ASM )
+	__asm__ __volatile__(
+			"movdqa		 0(%[color]), %%xmm0\n"
+			"movdqa		 0(%[color]), %%xmm1\n"
+			"pminub		16(%[color]), %%xmm0\n"
+			"pmaxub		16(%[color]), %%xmm1\n"
+			"pminub		32(%[color]), %%xmm0\n"
+			"pmaxub		32(%[color]), %%xmm1\n"
+			"pminub		48(%[color]), %%xmm0\n"
+			"pmaxub		48(%[color]), %%xmm1\n"
+			"pshufd		%[shuf2323], %%xmm0, %%xmm3\n"
+			"pshufd		%[shuf2323], %%xmm1, %%xmm4\n"
+			"pminub		%%xmm3, %%xmm0\n"
+			"pmaxub		%%xmm4, %%xmm1\n"
+			"pshuflw	%[shuf2323], %%xmm0, %%xmm6\n"
+			"pshuflw	%[shuf2323], %%xmm1, %%xmm7\n"
+			"pminub		%%xmm6, %%xmm0\n"
+			"pmaxub		%%xmm7, %%xmm1\n"
+			"movd		%%xmm0, (%[min])\n"
+			"movd		%%xmm1, (%[max])\n"
+			:: [color] "r" (colorBlock), [min] "r" (minColor), [max] "r" (maxColor), [shuf2323] "i" R_SHUFFLE_D( 2, 3, 2, 3 )
+			: "xmm0", "xmm1", "xmm3", "xmm4", "xmm6", "xmm7");
+#elif defined ( ID_WIN_X86_SSE2_INTRIN ) || defined ( ID_QNX_X86_SSE2_INTRIN )
 	__m128i block0 = *((__m128i *)(&colorBlock[ 0]));
 	__m128i block1 = *((__m128i *)(&colorBlock[16]));
 	__m128i block2 = *((__m128i *)(&colorBlock[32]));
@@ -262,7 +304,23 @@ ID_INLINE void idDxtEncoder::InsetColorsBBox_SSE2( byte * minColor, byte * maxCo
 		movd		dword ptr [esi], xmm0
 		movd		dword ptr [edi], xmm1
 	}
-#elif defined ( ID_WIN_X86_SSE2_INTRIN )
+#elif defined ( ID_QNX_X86_SSE2_ASM )
+	__asm__ __volatile__(
+			"movd		(%[min]), %%xmm0\n"
+			"movd		(%[max]), %%xmm1\n"
+			"punpcklbw	_ZL16SIMD_SSE2_byte_0, %%xmm0\n"
+			"punpcklbw	_ZL16SIMD_SSE2_byte_0, %%xmm1\n"
+			"movdqa		%%xmm1, %%xmm2\n"
+			"psubw		%%xmm0, %%xmm2\n"
+			"pmulhw		_ZL25SIMD_SSE2_word_insetShift, %%xmm2\n"
+			"paddw		%%xmm2, %%xmm0\n"
+			"psubw		%%xmm2, %%xmm1\n"
+			"packuswb	%%xmm0, %%xmm0\n"
+			"packuswb	%%xmm1, %%xmm1\n"
+			"movd		%%xmm0, (%[min])\n"
+			"movd		%%xmm1, (%[max])\n"
+			:: [min] "r" (minColor), [max] "r" (maxColor) : "xmm0", "xmm1", "xmm2");
+#elif defined ( ID_WIN_X86_SSE2_INTRIN ) || defined ( ID_QNX_X86_SSE2_INTRIN )
 	__m128i min = _mm_cvtsi32_si128( *(int *)minColor );
 	__m128i max = _mm_cvtsi32_si128( *(int *)maxColor );
 
@@ -297,13 +355,15 @@ return: 4 byte color index block
 ========================
 */
 void idDxtEncoder::EmitColorIndices_SSE2( const byte * colorBlock, const byte * minColor_, const byte * maxColor_ ) {
+#if ( defined( ID_WIN_X86_ASM ) || defined( ID_MAC_X86_ASM ) ) || defined ( ID_QNX_X86_SSE2_ASM )
+	byte *outPtr = outData;
+
 #if ( defined( ID_WIN_X86_ASM ) || defined( ID_MAC_X86_ASM ) )
 	ALIGN16( byte color0[16] );
 	ALIGN16( byte color1[16] );
 	ALIGN16( byte color2[16] );
 	ALIGN16( byte color3[16] );
 	ALIGN16( byte result[16] );
-	byte *outPtr = outData;
 
 	__asm {
 		mov			esi, maxColor_
@@ -453,9 +513,160 @@ void idDxtEncoder::EmitColorIndices_SSE2( const byte * colorBlock, const byte * 
 		por			xmm7, xmm6
 		movd		dword ptr [esi], xmm7
 	}
+#else
+	ALIGN16( byte data[16 * 5] ); // 5 separate arrays end up using too many registers for inline ASM, so consolidate them.
+
+	__asm__ __volatile__(
+			"pxor		%%xmm7, %%xmm7\n"
+			"movdqa		%%xmm7, 64(%[data])\n"
+
+			"movd		(%[maxColor]), %%xmm0\n"
+			"pand		_ZL24SIMD_SSE2_byte_colorMask, %%xmm0\n"
+			"punpcklbw	%%xmm7, %%xmm0\n"
+			"pshuflw	%[shuf0323], %%xmm0, %%xmm4\n"
+			"pshuflw	%[shuf3133], %%xmm0, %%xmm5\n"
+			"psrlw		$5, %%xmm4\n"
+			"psrlw		$6, %%xmm5\n"
+			"por		%%xmm4, %%xmm0\n"
+			"por		%%xmm5, %%xmm0\n"
+
+			"movd		(%[minColor]), %%xmm1\n"
+			"pand		_ZL24SIMD_SSE2_byte_colorMask, %%xmm1\n"
+			"punpcklbw	%%xmm7, %%xmm1\n"
+			"pshuflw	%[shuf0323], %%xmm1, %%xmm4\n"
+			"pshuflw	%[shuf3133], %%xmm1, %%xmm5\n"
+			"psrlw		$5, %%xmm4\n"
+			"psrlw		$6, %%xmm5\n"
+			"por		%%xmm4, %%xmm1\n"
+			"por		%%xmm5, %%xmm1\n"
+
+			"movdqa		%%xmm0, %%xmm2\n"
+			"packuswb	%%xmm7, %%xmm2\n"
+			"pshufd		%[shuf0101], %%xmm2, %%xmm2\n"
+			"movdqa		%%xmm2, (%[data])\n"
+
+			"movdqa		%%xmm0, %%xmm6\n"
+			"paddw		%%xmm0, %%xmm6\n"
+			"paddw		%%xmm1, %%xmm6\n"
+			"pmulhw		_ZL23SIMD_SSE2_word_div_by_3, %%xmm6\n"	// * ( ( 1 << 16 ) / 3 + 1 ) ) >> 16
+			"packuswb	%%xmm7, %%xmm6\n"
+			"pshufd		%[shuf0101], %%xmm6, %%xmm6\n"
+			"movdqa		%%xmm6, 32(%[data])\n"
+
+			"movdqa		%%xmm1, %%xmm3\n"
+			"packuswb	%%xmm7, %%xmm3\n"
+			"pshufd		%[shuf0101], %%xmm3, %%xmm3\n"
+			"movdqa		%%xmm3, 16(%[data])\n"
+
+			"paddw		%%xmm1, %%xmm1\n"
+			"paddw		%%xmm1, %%xmm0\n"
+			"pmulhw		_ZL23SIMD_SSE2_word_div_by_3, %%xmm0\n"	// * ( ( 1 << 16 ) / 3 + 1 ) ) >> 16
+			"packuswb	%%xmm7, %%xmm0\n"
+			"pshufd		%[shuf0101], %%xmm0, %%xmm0\n"
+			"movdqa		%%xmm0, 48(%[data])\n"
+
+			"mov		$32, %%eax\n"
+
+		"loop1_EmitColorIndices_SSE2:\n"	// iterates 2 times
+			"movq		0(%[colorBlock],%%eax), %%xmm3\n"
+			"pshufd		%[shuf0213], %%xmm3, %%xmm3\n"			// punpckldq	xmm4, SIMD_SSE2_dword_0
+			"movq		8(%[colorBlock],%%eax), %%xmm5\n"
+			"pshufd		%[shuf0213], %%xmm5, %%xmm5\n"			// punpckldq	xmm5, SIMD_SSE2_dword_0
+
+			"movdqa		%%xmm3, %%xmm0\n"
+			"movdqa		%%xmm5, %%xmm6\n"
+			"psadbw		(%[data]), %%xmm0\n"
+			"psadbw		(%[data]), %%xmm6\n"
+			"packssdw	%%xmm6, %%xmm0\n"
+			"movdqa		%%xmm3, %%xmm1\n"
+			"movdqa		%%xmm5, %%xmm6\n"
+			"psadbw		16(%[data]), %%xmm1\n"
+			"psadbw		16(%[data]), %%xmm6\n"
+			"packssdw	%%xmm6, %%xmm1\n"
+			"movdqa		%%xmm3, %%xmm2\n"
+			"movdqa		%%xmm5, %%xmm6\n"
+			"psadbw		32(%[data]), %%xmm2\n"
+			"psadbw		32(%[data]), %%xmm6\n"
+			"packssdw	%%xmm6, %%xmm2\n"
+			"psadbw		48(%[data]), %%xmm3\n"
+			"psadbw		48(%[data]), %%xmm5\n"
+			"packssdw	%%xmm5, %%xmm3\n"
+
+			"movq		16(%[colorBlock],%%eax), %%xmm4\n"
+			"pshufd		%[shuf0213], %%xmm4, %%xmm4\n"
+			"movq		24(%[colorBlock],%%eax), %%xmm5\n"
+			"pshufd		%[shuf0213], %%xmm5, %%xmm5\n"
+
+			"movdqa		%%xmm4, %%xmm6\n"
+			"movdqa		%%xmm5, %%xmm7\n"
+			"psadbw		(%[data]), %%xmm6\n"
+			"psadbw		(%[data]), %%xmm7\n"
+			"packssdw	%%xmm7, %%xmm6\n"
+			"packssdw	%%xmm6, %%xmm0\n"						// d1
+			"movdqa		%%xmm4, %%xmm6\n"
+			"movdqa		%%xmm5, %%xmm7\n"
+			"psadbw		16(%[data]), %%xmm6\n"
+			"psadbw		16(%[data]), %%xmm7\n"
+			"packssdw	%%xmm7, %%xmm6\n"
+			"packssdw	%%xmm6, %%xmm1\n"						// d1
+			"movdqa		%%xmm4, %%xmm6\n"
+			"movdqa		%%xmm5, %%xmm7\n"
+			"psadbw		32(%[data]), %%xmm6\n"
+			"psadbw		32(%[data]), %%xmm7\n"
+			"packssdw	%%xmm7, %%xmm6\n"
+			"packssdw	%%xmm6, %%xmm2\n"						// d2
+			"psadbw		48(%[data]), %%xmm4\n"
+			"psadbw		48(%[data]), %%xmm5\n"
+			"packssdw	%%xmm5, %%xmm4\n"
+			"packssdw	%%xmm4, %%xmm3\n"						// d3
+
+			"movdqa		64(%[data]), %%xmm7\n"
+			"pslld		$16, %%xmm7\n"
+
+			"movdqa		%%xmm0, %%xmm4\n"
+			"movdqa		%%xmm1, %%xmm5\n"
+			"pcmpgtw	%%xmm3, %%xmm0\n"						// b0
+			"pcmpgtw	%%xmm2, %%xmm1\n"						// b1
+			"pcmpgtw	%%xmm2, %%xmm4\n"						// b2
+			"pcmpgtw	%%xmm3, %%xmm5\n"						// b3
+			"pcmpgtw	%%xmm3, %%xmm2\n"						// b4
+			"pand		%%xmm1, %%xmm4\n"						// x0
+			"pand		%%xmm0, %%xmm5\n"						// x1
+			"pand		%%xmm0, %%xmm2\n"						// x2
+			"por		%%xmm5, %%xmm4\n"
+			"pand		_ZL16SIMD_SSE2_word_1, %%xmm2\n"
+			"pand		_ZL16SIMD_SSE2_word_2, %%xmm4\n"
+			"por		%%xmm4, %%xmm2\n"
+
+			"pshufd		%[shuf2301], %%xmm2, %%xmm5\n"
+			"punpcklwd	_ZL16SIMD_SSE2_word_0, %%xmm2\n"
+			"punpcklwd	_ZL16SIMD_SSE2_word_0, %%xmm5\n"
+			"pslld		$8, %%xmm5\n"
+			"por		%%xmm5, %%xmm7\n"
+			"por		%%xmm2, %%xmm7\n"
+			"movdqa		%%xmm7, 64(%[data])\n"
+
+			"sub		$32, %%eax\n"
+			"jge		loop1_EmitColorIndices_SSE2\n"
+
+			"pshufd		%[shuf1230], %%xmm7, %%xmm4\n"
+			"pshufd		%[shuf2301], %%xmm7, %%xmm5\n"
+			"pshufd		%[shuf3012], %%xmm7, %%xmm6\n"
+			"pslld		$2, %%xmm4\n"
+			"pslld		$4, %%xmm5\n"
+			"pslld		$6, %%xmm6\n"
+			"por		%%xmm4, %%xmm7\n"
+			"por		%%xmm5, %%xmm7\n"
+			"por		%%xmm6, %%xmm7\n"
+			"movd		%%xmm7, (%[outPtr])\n"
+			:: [colorBlock] "r" (colorBlock), [minColor] "r" (minColor_), [maxColor] "r" (maxColor_), [outPtr] "r" (outPtr), [data] "r" (data),
+			[shuf0101] "i" R_SHUFFLE_D( 0, 1, 0, 1 ), [shuf0213] "i" R_SHUFFLE_D( 0, 2, 1, 3 ), [shuf0323] "i" R_SHUFFLE_D( 0, 3, 2, 3 ), [shuf3133] "i" R_SHUFFLE_D( 3, 1, 3, 3 ),
+			[shuf2301] "i" R_SHUFFLE_D( 2, 3, 0, 1 ), [shuf1230] "i" R_SHUFFLE_D( 1, 2, 3, 0 ), [shuf3012] "i" R_SHUFFLE_D( 3, 0, 1, 2 )
+			: "eax", "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
+#endif
 
 	outData += 4;
-#elif defined ( ID_WIN_X86_SSE2_INTRIN )
+#elif defined ( ID_WIN_X86_SSE2_INTRIN ) || defined ( ID_QNX_X86_SSE2_INTRIN )
 	__m128c zero = SIMD_SSE2_zero;
 	__m128c result = SIMD_SSE2_zero;
 	__m128c color0, color1, color2, color3;
@@ -605,13 +816,15 @@ return: 4 byte color index block
 ========================
 */
 void idDxtEncoder::EmitColorAlphaIndices_SSE2( const byte *colorBlock, const byte *minColor_, const byte *maxColor_ ) {
+#if ( defined( ID_WIN_X86_ASM ) || defined( ID_MAC_X86_ASM ) ) || defined ( ID_QNX_X86_SSE2_ASM )
+	byte *outPtr = outData;
+
 #if ( defined( ID_WIN_X86_ASM ) || defined( ID_MAC_X86_ASM ) )
 	ALIGN16( byte color0[16] );
 	ALIGN16( byte color1[16] );
 	ALIGN16( byte color2[16] );
 	ALIGN16( byte color3[16] );
 	ALIGN16( byte result[16] );
-	byte *outPtr = outData;
 
 	__asm {
 		mov			esi, maxColor_
@@ -758,9 +971,157 @@ void idDxtEncoder::EmitColorAlphaIndices_SSE2( const byte *colorBlock, const byt
 		por			xmm7, xmm6
 		movd		dword ptr [esi], xmm7
 	}
+#else
+	ALIGN16( byte data[16 * 5] ); // 5 separate arrays end up using too many registers for inline ASM, so consolidate them.
+
+	__asm__ __volatile__(
+			"pxor		%%xmm7, %%xmm7\n"
+			"movdqa		%%xmm7, 64(%[data])\n"
+
+			"movd		(%[maxColor]), %%xmm0\n"
+			"pand		_ZL24SIMD_SSE2_byte_colorMask, %%xmm0\n"
+			"punpcklbw	%%xmm7, %%xmm0\n"
+			"pshuflw	%[shuf0323], %%xmm0, %%xmm4\n"
+			"pshuflw	%[shuf3133], %%xmm0, %%xmm5\n"
+			"psrlw		$5, %%xmm4\n"
+			"psrlw		$6, %%xmm5\n"
+			"por		%%xmm4, %%xmm0\n"
+			"por		%%xmm5, %%xmm0\n"
+
+			"movd		(%[minColor]), %%xmm1\n"
+			"pand		_ZL24SIMD_SSE2_byte_colorMask, %%xmm1\n"
+			"punpcklbw	%%xmm7, %%xmm1\n"
+			"pshuflw	%[shuf0323], %%xmm1, %%xmm4\n"
+			"pshuflw	%[shuf3133], %%xmm1, %%xmm5\n"
+			"psrlw		$5, %%xmm4\n"
+			"psrlw		$6, %%xmm5\n"
+			"por		%%xmm4, %%xmm1\n"
+			"por		%%xmm5, %%xmm1\n"
+
+			"movdqa		%%xmm0, %%xmm2\n"
+			"packuswb	%%xmm7, %%xmm2\n"
+			"pshufd		%[shuf0101], %%xmm2, %%xmm2\n"
+			"movdqa		%%xmm2, (%[data])\n"
+
+			"movdqa		%%xmm0, %%xmm6\n"
+			"paddw		%%xmm1, %%xmm6\n"
+			"psrlw		$1, %%xmm6\n"
+			"packuswb	%%xmm7, %%xmm6\n"
+			"pshufd		%[shuf0101], %%xmm6, %%xmm6\n"
+			"movdqa		%%xmm6, 32(%[data])\n"
+
+			"movdqa		%%xmm1, %%xmm3\n"
+			"packuswb	%%xmm7, %%xmm3\n"
+			"pshufd		%[shuf0101], %%xmm3, %%xmm3\n"
+			"movdqa		%%xmm3, 16(%[data])\n"
+
+			"movdqa		%%xmm7, 48(%[data])\n"
+
+			"mov		$32, %%eax\n"
+
+		"loop1_EmitColorAlphaIndices_SSE2:\n"	// iterates 2 times
+			"movq		0(%[colorBlock],%%eax), %%xmm3\n"
+			"pshufd		%[shuf0213], %%xmm3, %%xmm3\n"
+			"movq		8(%[colorBlock],%%eax), %%xmm5\n"
+			"pshufd		%[shuf0213], %%xmm5, %%xmm5\n"
+
+			"movdqa		%%xmm3, %%xmm0\n"
+			"movdqa		%%xmm5, %%xmm6\n"
+			"psadbw		(%[data]), %%xmm0\n"
+			"psadbw		(%[data]), %%xmm6\n"
+			"packssdw	%%xmm6, %%xmm0\n"
+			"movdqa		%%xmm3, %%xmm1\n"
+			"movdqa		%%xmm5, %%xmm6\n"
+			"psadbw		16(%[data]), %%xmm1\n"
+			"psadbw		16(%[data]), %%xmm6\n"
+			"packssdw	%%xmm6, %%xmm1\n"
+			"movdqa		%%xmm3, %%xmm2\n"
+			"movdqa		%%xmm5, %%xmm6\n"
+			"psadbw		32(%[data]), %%xmm2\n"
+			"psadbw		32(%[data]), %%xmm6\n"
+			"packssdw	%%xmm6, %%xmm2\n"
+
+			"shufps		%[shuf0202], %%xmm5, %%xmm3\n"
+			"psrld		$24, %%xmm3\n"
+			"packssdw	%%xmm3, %%xmm3\n"
+
+			"movq		16(%[colorBlock],%%eax), %%xmm4\n"
+			"pshufd		%[shuf0213], %%xmm4, %%xmm4\n"
+			"movq		24(%[colorBlock],%%eax), %%xmm5\n"
+			"pshufd		%[shuf0213], %%xmm5, %%xmm5\n"
+
+			"movdqa		%%xmm4, %%xmm6\n"
+			"movdqa		%%xmm5, %%xmm7\n"
+			"psadbw		(%[data]), %%xmm6\n"
+			"psadbw		(%[data]), %%xmm7\n"
+			"packssdw	%%xmm7, %%xmm6\n"
+			"packssdw	%%xmm6, %%xmm0\n"					// d1
+			"movdqa		%%xmm4, %%xmm6\n"
+			"movdqa		%%xmm5, %%xmm7\n"
+			"psadbw		16(%[data]), %%xmm6\n"
+			"psadbw		16(%[data]), %%xmm7\n"
+			"packssdw	%%xmm7, %%xmm6\n"
+			"packssdw	%%xmm6, %%xmm1\n"					// d1
+			"movdqa		%%xmm4, %%xmm6\n"
+			"movdqa		%%xmm5, %%xmm7\n"
+			"psadbw		32(%[data]), %%xmm6\n"
+			"psadbw		32(%[data]), %%xmm7\n"
+			"packssdw	%%xmm7, %%xmm6\n"
+			"packssdw	%%xmm6, %%xmm2\n"					// d2
+
+			"shufps		%[shuf0202], %%xmm5, %%xmm4\n"
+			"psrld		$24, %%xmm4\n"
+			"packssdw	%%xmm4, %%xmm4\n"
+
+			"punpcklqdq	%%xmm4, %%xmm3\n"					// c3
+
+			"movdqa		64(%[data]), %%xmm7\n"
+			"pslld		$16, %%xmm7\n"
+
+			"movdqa		%%xmm2, %%xmm4\n"
+			"pcmpgtw	%%xmm0, %%xmm2\n"					// b0
+			"pcmpgtw	%%xmm1, %%xmm4\n"					// b1
+			"pcmpgtw	%%xmm0, %%xmm1\n"					// b2
+			"pmaxsw		_ZL18SIMD_SSE2_word_127, %%xmm3\n"	// b3
+			"pcmpeqw	_ZL18SIMD_SSE2_word_127, %%xmm3\n"
+
+			"pand		%%xmm4, %%xmm2\n"
+			"por		%%xmm3, %%xmm2\n"					// b0 & b1 | b3
+			"pxor		%%xmm4, %%xmm1\n"
+			"por		%%xmm3, %%xmm1\n"					// b2 ^ b1 | b3
+			"pand		_ZL16SIMD_SSE2_word_2, %%xmm2\n"
+			"pand		_ZL16SIMD_SSE2_word_1, %%xmm1\n"
+			"por		%%xmm1, %%xmm2\n"
+
+			"pshufd		%[shuf2301], %%xmm2, %%xmm5\n"
+			"punpcklwd	_ZL16SIMD_SSE2_word_0, %%xmm2\n"
+			"punpcklwd	_ZL16SIMD_SSE2_word_0, %%xmm5\n"
+			"pslld		$8, %%xmm5\n"
+			"por		%%xmm5, %%xmm7\n"
+			"por		%%xmm2, %%xmm7\n"
+			"movdqa		%%xmm7, 64(%[data])\n"
+
+			"sub		$32, %%eax\n"
+			"jge		loop1_EmitColorAlphaIndices_SSE2\n"
+
+			"pshufd		%[shuf1230], %%xmm7, %%xmm4\n"
+			"pshufd		%[shuf2301], %%xmm7, %%xmm5\n"
+			"pshufd		%[shuf3012], %%xmm7, %%xmm6\n"
+			"pslld		$2, %%xmm4\n"
+			"pslld		$4, %%xmm5\n"
+			"pslld		$6, %%xmm6\n"
+			"por		%%xmm4, %%xmm7\n"
+			"por		%%xmm5, %%xmm7\n"
+			"por		%%xmm6, %%xmm7\n"
+			"movd		%%xmm7, (%[outPtr])\n"
+			:: [colorBlock] "r" (colorBlock), [minColor] "r" (minColor_), [maxColor] "r" (maxColor_), [outPtr] "r" (outPtr), [data] "r" (data),
+			[shuf0101] "i" R_SHUFFLE_D( 0, 1, 0, 1 ), [shuf0213] "i" R_SHUFFLE_D( 0, 2, 1, 3 ), [shuf0323] "i" R_SHUFFLE_D( 0, 3, 2, 3 ), [shuf3133] "i" R_SHUFFLE_D( 3, 1, 3, 3 ),
+			[shuf0202] "i" R_SHUFFLE_D( 0, 2, 0, 2 ), [shuf2301] "i" R_SHUFFLE_D( 2, 3, 0, 1 ), [shuf1230] "i" R_SHUFFLE_D( 1, 2, 3, 0 ), [shuf3012] "i" R_SHUFFLE_D( 3, 0, 1, 2 )
+			: "eax", "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
+#endif
 
 	outData += 4;
-#elif defined ( ID_WIN_X86_SSE2_INTRIN )
+#elif defined ( ID_WIN_X86_SSE2_INTRIN ) || defined ( ID_QNX_X86_SSE2_INTRIN )
 	__m128c zero = SIMD_SSE2_zero;
 	__m128c result = SIMD_SSE2_zero;
 	__m128c color0, color1, color2;
@@ -867,11 +1228,11 @@ void idDxtEncoder::EmitColorAlphaIndices_SSE2( const byte *colorBlock, const byt
 		temp3 = _mm_max_epi16( temp3, (const __m128i &)SIMD_SSE2_word_127 );	// b3
 		temp3 = _mm_cmpeq_epi16( temp3, (const __m128i &)SIMD_SSE2_word_127 );
 
-		temp2 = _mm_and_si128( temp2, temp4 );			
+		temp2 = _mm_and_si128( temp2, temp4 );
 		temp2 = _mm_or_si128( temp2, temp3 );							// b0 & b1 | b3
 		temp1 = _mm_xor_si128( temp1, temp4 );
 		temp1 = _mm_or_si128( temp1, temp3 );							// b2 ^ b1 | b3
-		temp2 = _mm_and_si128( temp2, (const __m128i &)SIMD_SSE2_word_2 );		
+		temp2 = _mm_and_si128( temp2, (const __m128i &)SIMD_SSE2_word_2 );
 		temp1 = _mm_and_si128( temp1, (const __m128i &)SIMD_SSE2_word_1 );
 		temp2 = _mm_or_si128( temp2, temp1 );
 
@@ -913,13 +1274,15 @@ return: 4 byte color index block
 ========================
 */
 void idDxtEncoder::EmitCoCgIndices_SSE2( const byte *colorBlock, const byte *minColor_, const byte *maxColor_ ) {
+#if ( defined( ID_WIN_X86_ASM ) || defined( ID_MAC_X86_ASM ) ) || defined ( ID_QNX_X86_SSE2_ASM )
+	byte *outPtr = outData;
+
 #if ( defined( ID_WIN_X86_ASM ) || defined( ID_MAC_X86_ASM ) )
 	ALIGN16( byte color0[16] );
 	ALIGN16( byte color1[16] );
 	ALIGN16( byte color2[16] );
 	ALIGN16( byte color3[16] );
 	ALIGN16( byte result[16] );
-	byte *outPtr = outData;
 
 	__asm {
 		mov			esi, maxColor_
@@ -1051,9 +1414,142 @@ void idDxtEncoder::EmitCoCgIndices_SSE2( const byte *colorBlock, const byte *min
 		por			xmm7, xmm6
 		movd		dword ptr [esi], xmm7
 	}
+#else
+	ALIGN16( byte data[16 * 5] ); // 5 separate arrays end up using too many registers for inline ASM, so consolidate them.
+
+	__asm__ __volatile__(
+			"pxor		%%xmm7, %%xmm7\n"
+			"movdqa		%%xmm7, 64(%[data])\n"
+
+			"movd		(%[maxColor]), %%xmm0\n"
+			"pand		_ZL25SIMD_SSE2_byte_colorMask2, %%xmm0\n"
+			"pshufd		%[shuf0101], %%xmm0, %%xmm0\n"
+			"movdqa		%%xmm0, (%[data])\n"
+
+			"movd		(%[minColor]), %%xmm1\n"
+			"pand		_ZL25SIMD_SSE2_byte_colorMask2, %%xmm1\n"
+			"pshufd		%[shuf0101], %%xmm1, %%xmm1\n"
+			"movdqa		%%xmm1, 16(%[data])\n"
+
+			"punpcklbw	%%xmm7, %%xmm0\n"
+			"punpcklbw	%%xmm7, %%xmm1\n"
+
+			"movdqa		%%xmm1, %%xmm6\n"
+			"paddw		%%xmm0, %%xmm1\n"
+			"paddw		%%xmm1, %%xmm0\n"
+			"pmulhw		_ZL23SIMD_SSE2_word_div_by_3, %%xmm0\n"	// * ( ( 1 << 16 ) / 3 + 1 ) ) >> 16
+			"packuswb	%%xmm7, %%xmm0\n"
+			"pshufd		%[shuf0101], %%xmm0, %%xmm0\n"
+			"movdqa		%%xmm0, 32(%[data])\n"
+
+			"paddw		%%xmm6, %%xmm1\n"
+			"pmulhw		_ZL23SIMD_SSE2_word_div_by_3, %%xmm1\n"	// * ( ( 1 << 16 ) / 3 + 1 ) ) >> 16
+			"packuswb	%%xmm7, %%xmm1\n"
+			"pshufd		%[shuf0101], %%xmm1, %%xmm1\n"
+			"movdqa		%%xmm1, 48(%[data])\n"
+
+			"mov		$32, %%eax\n"
+
+		"loop1_EmitCoCgIndices_SSE2:\n"		// iterates 2 times
+			"movq		0(%[colorBlock],%%eax), %%xmm3\n"
+			"pshufd		%[shuf0213], %%xmm3, %%xmm3\n"			// punpckldq	xmm4, SIMD_SSE2_dword_0
+			"movq		8(%[colorBlock],%%eax), %%xmm5\n"
+			"pshufd		%[shuf0213], %%xmm5, %%xmm5\n"			// punpckldq	xmm5, SIMD_SSE2_dword_0
+
+			"movdqa		%%xmm3, %%xmm0\n"
+			"movdqa		%%xmm5, %%xmm6\n"
+			"psadbw		(%[data]), %%xmm0\n"
+			"psadbw		(%[data]), %%xmm6\n"
+			"packssdw	%%xmm6, %%xmm0\n"
+			"movdqa		%%xmm3, %%xmm1\n"
+			"movdqa		%%xmm5, %%xmm6\n"
+			"psadbw		16(%[data]), %%xmm1\n"
+			"psadbw		16(%[data]), %%xmm6\n"
+			"packssdw	%%xmm6, %%xmm1\n"
+			"movdqa		%%xmm3, %%xmm2\n"
+			"movdqa		%%xmm5, %%xmm6\n"
+			"psadbw		32(%[data]), %%xmm2\n"
+			"psadbw		32(%[data]), %%xmm6\n"
+			"packssdw	%%xmm6, %%xmm2\n"
+			"psadbw		48(%[data]), %%xmm3\n"
+			"psadbw		48(%[data]), %%xmm5\n"
+			"packssdw	%%xmm5, %%xmm3\n"
+
+			"movq		16(%[colorBlock],%%eax), %%xmm4\n"
+			"pshufd		%[shuf0213], %%xmm4, %%xmm4\n"
+			"movq		24(%[colorBlock],%%eax), %%xmm5\n"
+			"pshufd		%[shuf0213], %%xmm5, %%xmm5\n"
+
+			"movdqa		%%xmm4, %%xmm6\n"
+			"movdqa		%%xmm5, %%xmm7\n"
+			"psadbw		(%[data]), %%xmm6\n"
+			"psadbw		(%[data]), %%xmm7\n"
+			"packssdw	%%xmm7, %%xmm6\n"
+			"packssdw	%%xmm6, %%xmm0\n"						// d1
+			"movdqa		%%xmm4, %%xmm6\n"
+			"movdqa		%%xmm5, %%xmm7\n"
+			"psadbw		16(%[data]), %%xmm6\n"
+			"psadbw		16(%[data]), %%xmm7\n"
+			"packssdw	%%xmm7, %%xmm6\n"
+			"packssdw	%%xmm6, %%xmm1\n"						// d1
+			"movdqa		%%xmm4, %%xmm6\n"
+			"movdqa		%%xmm5, %%xmm7\n"
+			"psadbw		32(%[data]), %%xmm6\n"
+			"psadbw		32(%[data]), %%xmm7\n"
+			"packssdw	%%xmm7, %%xmm6\n"
+			"packssdw	%%xmm6, %%xmm2\n"						// d2
+			"psadbw		48(%[data]), %%xmm4\n"
+			"psadbw		48(%[data]), %%xmm5\n"
+			"packssdw	%%xmm5, %%xmm4\n"
+			"packssdw	%%xmm4, %%xmm3\n"						// d3
+
+			"movdqa		64(%[data]), %%xmm7\n"
+			"pslld		$16, %%xmm7\n"
+
+			"movdqa		%%xmm0, %%xmm4\n"
+			"movdqa		%%xmm1, %%xmm5\n"
+			"pcmpgtw	%%xmm3, %%xmm0\n"						// b0
+			"pcmpgtw	%%xmm2, %%xmm1\n"						// b1
+			"pcmpgtw	%%xmm2, %%xmm4\n"						// b2
+			"pcmpgtw	%%xmm3, %%xmm5\n"						// b3
+			"pcmpgtw	%%xmm3, %%xmm2\n"						// b4
+			"pand		%%xmm1, %%xmm4\n"						// x0
+			"pand		%%xmm0, %%xmm5\n"						// x1
+			"pand		%%xmm0, %%xmm2\n"						// x2
+			"por		%%xmm5, %%xmm4\n"
+			"pand		_ZL16SIMD_SSE2_word_1, %%xmm2\n"
+			"pand		_ZL16SIMD_SSE2_word_2, %%xmm4\n"
+			"por		%%xmm4, %%xmm2\n"
+
+			"pshufd		%[shuf2301], %%xmm2, %%xmm5\n"
+			"punpcklwd	_ZL16SIMD_SSE2_word_0, %%xmm2\n"
+			"punpcklwd	_ZL16SIMD_SSE2_word_0, %%xmm5\n"
+			"pslld		$8, %%xmm5\n"
+			"por		%%xmm5, %%xmm7\n"
+			"por		%%xmm2, %%xmm7\n"
+			"movdqa		%%xmm7, 64(%[data])\n"
+
+			"sub		$32, %%eax\n"
+			"jge		loop1_EmitCoCgIndices_SSE2\n"
+
+			"pshufd		%[shuf1230], %%xmm7, %%xmm4\n"
+			"pshufd		%[shuf2301], %%xmm7, %%xmm5\n"
+			"pshufd		%[shuf3012], %%xmm7, %%xmm6\n"
+			"pslld		$2, %%xmm4\n"
+			"pslld		$4, %%xmm5\n"
+			"pslld		$6, %%xmm6\n"
+			"por		%%xmm4, %%xmm7\n"
+			"por		%%xmm5, %%xmm7\n"
+			"por		%%xmm6, %%xmm7\n"
+			"movd		%%xmm7, (%[outPtr])\n"
+			:: [colorBlock] "r" (colorBlock), [minColor] "r" (minColor_), [maxColor] "r" (maxColor_), [outPtr] "r" (outPtr), [data] "r" (data),
+			[shuf0101] "i" R_SHUFFLE_D( 0, 1, 0, 1 ), [shuf0213] "i" R_SHUFFLE_D( 0, 2, 1, 3 ), [shuf2301] "i" R_SHUFFLE_D( 2, 3, 0, 1 ), [shuf1230] "i" R_SHUFFLE_D( 1, 2, 3, 0 ),
+			[shuf3012] "i" R_SHUFFLE_D( 3, 0, 1, 2 )
+			: "eax", "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
+#endif
 
 	outData += 4;
-#elif defined ( ID_WIN_X86_SSE2_INTRIN )
+#elif defined ( ID_WIN_X86_SSE2_INTRIN ) || defined ( ID_QNX_X86_SSE2_INTRIN )
 	__m128c zero = SIMD_SSE2_zero;
 	__m128c result = SIMD_SSE2_zero;
 	__m128c color0, color1, color2, color3;
@@ -1188,11 +1684,12 @@ paramO:	maxAlpha	- Max alpha found
 ========================
 */
 void idDxtEncoder::EmitAlphaIndices_SSE2( const byte *block, const int minAlpha_, const int maxAlpha_ ) {
-#if ( defined( ID_WIN_X86_ASM ) || defined( ID_MAC_X86_ASM ) )
+#if ( defined( ID_WIN_X86_ASM ) || defined( ID_MAC_X86_ASM ) ) || defined ( ID_QNX_X86_SSE2_ASM )
 	assert( maxAlpha_ >= minAlpha_ );
 
 	byte *outPtr = outData;
 
+#if ( defined( ID_WIN_X86_ASM ) || defined( ID_MAC_X86_ASM ) )
 	__asm {
 		mov			esi, block
 		movdqa		xmm0, xmmword ptr [esi+	0]
@@ -1323,9 +1820,142 @@ void idDxtEncoder::EmitAlphaIndices_SSE2( const byte *block, const int minAlpha_
 		pshufd		xmm1, xmm0, R_SHUFFLE_D( 2, 3, 0, 1 )
 		movd		[esi+3], xmm1
 	}
+#else
+	__asm__ __volatile__(
+			"movdqa		 0(%[block]), %%xmm0\n"
+			"movdqa		16(%[block]), %%xmm5\n"
+			"movdqa		32(%[block]), %%xmm6\n"
+			"movdqa		48(%[block]), %%xmm4\n"
+
+			"psrld		$24, %%xmm0\n"
+			"psrld		$24, %%xmm5\n"
+			"psrld		$24, %%xmm6\n"
+			"psrld		$24, %%xmm4\n"
+
+			"packuswb	%%xmm5, %%xmm0\n"
+			"packuswb	%%xmm4, %%xmm6\n"
+
+			//---------------------
+
+			// ab0 = (  7 * maxAlpha +  7 * minAlpha + ALPHA_RANGE ) / 14
+			// ab3 = (  9 * maxAlpha +  5 * minAlpha + ALPHA_RANGE ) / 14
+			// ab2 = ( 11 * maxAlpha +  3 * minAlpha + ALPHA_RANGE ) / 14
+			// ab1 = ( 13 * maxAlpha +  1 * minAlpha + ALPHA_RANGE ) / 14
+
+			// ab4 = (  7 * maxAlpha +  7 * minAlpha + ALPHA_RANGE ) / 14
+			// ab5 = (  5 * maxAlpha +  9 * minAlpha + ALPHA_RANGE ) / 14
+			// ab6 = (  3 * maxAlpha + 11 * minAlpha + ALPHA_RANGE ) / 14
+			// ab7 = (  1 * maxAlpha + 13 * minAlpha + ALPHA_RANGE ) / 14
+
+			"movd		%[maxAlpha], %%xmm5\n"
+			"pshuflw	%[shuf0000], %%xmm5, %%xmm5\n"
+			"pshufd		%[shuf0000], %%xmm5, %%xmm5\n"
+			"movdqa		%%xmm5, %%xmm7\n"
+
+			"movd		%[minAlpha], %%xmm2\n"
+			"pshuflw	%[shuf0000], %%xmm2, %%xmm2\n"
+			"pshufd		%[shuf0000], %%xmm2, %%xmm2\n"
+			"movdqa		%%xmm2, %%xmm3\n"
+
+			"pmullw		_ZL30SIMD_SSE2_word_scale_7_9_11_13, %%xmm5\n"
+			"pmullw		_ZL28SIMD_SSE2_word_scale_7_5_3_1, %%xmm7\n"
+			"pmullw		_ZL28SIMD_SSE2_word_scale_7_5_3_1, %%xmm2\n"
+			"pmullw		_ZL30SIMD_SSE2_word_scale_7_9_11_13, %%xmm3\n"
+
+			"paddw		%%xmm2, %%xmm5\n"
+			"paddw		%%xmm3, %%xmm7\n"
+
+			"paddw		_ZL16SIMD_SSE2_word_7, %%xmm5\n"
+			"paddw		_ZL16SIMD_SSE2_word_7, %%xmm7\n"
+
+			"pmulhw		_ZL24SIMD_SSE2_word_div_by_14, %%xmm5\n"		// * ( ( 1 << 16 ) / 14	+ 1	) )	>> 16
+			"pmulhw		_ZL24SIMD_SSE2_word_div_by_14, %%xmm7\n"		// * ( ( 1 << 16 ) / 14	+ 1	) )	>> 16
+
+			"pshufd		%[shuf3333], %%xmm5, %%xmm1\n"
+			"pshufd		%[shuf2222], %%xmm5, %%xmm2\n"
+			"pshufd		%[shuf1111], %%xmm5, %%xmm3\n"
+			"packuswb	%%xmm1, %%xmm1\n"								// ab1
+			"packuswb	%%xmm2, %%xmm2\n"								// ab2
+			"packuswb	%%xmm3, %%xmm3\n"								// ab3
+
+			"packuswb	%%xmm6, %%xmm0\n"								// alpha block
+
+			"pshufd		%[shuf0000], %%xmm7, %%xmm4\n"
+			"pshufd		%[shuf1111], %%xmm7, %%xmm5\n"
+			"pshufd		%[shuf2222], %%xmm7, %%xmm6\n"
+			"pshufd		%[shuf3333], %%xmm7, %%xmm7\n"
+			"packuswb	%%xmm4, %%xmm4\n"								// ab4
+			"packuswb	%%xmm5, %%xmm5\n"								// ab5
+			"packuswb	%%xmm6, %%xmm6\n"								// ab6
+			"packuswb	%%xmm7, %%xmm7\n"								// ab7
+
+			"pmaxub		%%xmm0, %%xmm1\n"
+			"pmaxub		%%xmm0, %%xmm2\n"
+			"pmaxub		%%xmm0, %%xmm3\n"
+			"pcmpeqb	%%xmm0, %%xmm1\n"
+			"pcmpeqb	%%xmm0, %%xmm2\n"
+			"pcmpeqb	%%xmm0, %%xmm3\n"
+			"pmaxub		%%xmm0, %%xmm4\n"
+			"pmaxub		%%xmm0, %%xmm5\n"
+			"pmaxub		%%xmm0, %%xmm6\n"
+			"pmaxub		%%xmm0, %%xmm7\n"
+			"pcmpeqb	%%xmm0, %%xmm4\n"
+			"pcmpeqb	%%xmm0, %%xmm5\n"
+			"pcmpeqb	%%xmm0, %%xmm6\n"
+			"pcmpeqb	%%xmm0, %%xmm7\n"
+			"movdqa		_ZL16SIMD_SSE2_byte_8, %%xmm0\n"
+			"paddsb		%%xmm1, %%xmm0\n"
+			"paddsb		%%xmm3, %%xmm2\n"
+			"paddsb		%%xmm5, %%xmm4\n"
+			"paddsb		%%xmm7, %%xmm6\n"
+			"paddsb		%%xmm2, %%xmm0\n"
+			"paddsb		%%xmm6, %%xmm4\n"
+			"paddsb		%%xmm4, %%xmm0\n"
+			"pand		_ZL16SIMD_SSE2_byte_7, %%xmm0\n"
+			"movdqa		_ZL16SIMD_SSE2_byte_2, %%xmm1\n"
+			"pcmpgtb	%%xmm0, %%xmm1\n"
+			"pand		_ZL16SIMD_SSE2_byte_1, %%xmm1\n"
+			"pxor		%%xmm1, %%xmm0\n"
+			"movdqa		%%xmm0, %%xmm1\n"
+			"movdqa		%%xmm0, %%xmm2\n"
+			"movdqa		%%xmm0, %%xmm3\n"
+			"movdqa		%%xmm0, %%xmm4\n"
+			"movdqa		%%xmm0, %%xmm5\n"
+			"movdqa		%%xmm0, %%xmm6\n"
+			"movdqa		%%xmm0, %%xmm7\n"
+			"psrlq		$( 8- 3), %%xmm1\n"
+			"psrlq		$(16- 6), %%xmm2\n"
+			"psrlq		$(24- 9), %%xmm3\n"
+			"psrlq		$(32-12), %%xmm4\n"
+			"psrlq		$(40-15), %%xmm5\n"
+			"psrlq		$(48-18), %%xmm6\n"
+			"psrlq		$(56-21), %%xmm7\n"
+			"pand		_ZL31SIMD_SSE2_dword_alpha_bit_mask0, %%xmm0\n"
+			"pand		_ZL31SIMD_SSE2_dword_alpha_bit_mask1, %%xmm1\n"
+			"pand		_ZL31SIMD_SSE2_dword_alpha_bit_mask2, %%xmm2\n"
+			"pand		_ZL31SIMD_SSE2_dword_alpha_bit_mask3, %%xmm3\n"
+			"pand		_ZL31SIMD_SSE2_dword_alpha_bit_mask4, %%xmm4\n"
+			"pand		_ZL31SIMD_SSE2_dword_alpha_bit_mask5, %%xmm5\n"
+			"pand		_ZL31SIMD_SSE2_dword_alpha_bit_mask6, %%xmm6\n"
+			"pand		_ZL31SIMD_SSE2_dword_alpha_bit_mask7, %%xmm7\n"
+			"por		%%xmm1, %%xmm0\n"
+			"por		%%xmm3, %%xmm2\n"
+			"por		%%xmm5, %%xmm4\n"
+			"por		%%xmm7, %%xmm6\n"
+			"por		%%xmm2, %%xmm0\n"
+			"por		%%xmm6, %%xmm4\n"
+			"por		%%xmm4, %%xmm0\n"
+			"movd		%%xmm0, 0(%[outPtr])\n"
+			"pshufd		%[shuf2301], %%xmm0, %%xmm1\n"
+			"movd		%%xmm1, 3(%[outPtr])\n"
+			:: [block] "r" (block), [minAlpha] "r" (minAlpha_), [maxAlpha] "r" (maxAlpha_), [outPtr] "r" (outPtr),
+			[shuf0000] "i" R_SHUFFLE_D( 0, 0, 0, 0 ), [shuf1111] "i" R_SHUFFLE_D( 1, 1, 1, 1 ), [shuf2222] "i" R_SHUFFLE_D( 2, 2, 2, 2 ), [shuf3333] "i" R_SHUFFLE_D( 3, 3, 3, 3 ),
+			[shuf2301] "i" R_SHUFFLE_D( 2, 3, 0, 1 )
+			: "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
+#endif
 
 	outData += 6;
-#elif defined ( ID_WIN_X86_SSE2_INTRIN )
+#elif defined ( ID_WIN_X86_SSE2_INTRIN ) || defined ( ID_QNX_X86_SSE2_INTRIN )
 	__m128i block0 = *((__m128i *)(&block[ 0]));
 	__m128i block1 = *((__m128i *)(&block[16]));
 	__m128i block2 = *((__m128i *)(&block[32]));
@@ -1462,11 +2092,12 @@ idDxtEncoder::EmitAlphaIndices_SSE2
 ========================
 */
 void idDxtEncoder::EmitAlphaIndices_SSE2( const byte *block, const int channelBitOffset, const int minAlpha_, const int maxAlpha_ ) {
-#if ( defined( ID_WIN_X86_ASM ) || defined( ID_MAC_X86_ASM ) )
+#if ( defined( ID_WIN_X86_ASM ) || defined( ID_MAC_X86_ASM ) ) || defined ( ID_QNX_X86_SSE2_ASM )
 	assert( maxAlpha_ >= minAlpha_ );
 
 	byte *outPtr = outData;
 
+#if ( defined( ID_WIN_X86_ASM ) || defined( ID_MAC_X86_ASM ) )
 	__asm {
 		movd		xmm7, channelBitOffset
 
@@ -1604,9 +2235,149 @@ void idDxtEncoder::EmitAlphaIndices_SSE2( const byte *block, const int channelBi
 		pshufd		xmm1, xmm0, R_SHUFFLE_D( 2, 3, 0, 1 )
 		movd		[esi+3], xmm1
 	}
+#else
+	__asm__ __volatile__(
+			"movd		%[channelBitOffset], %%xmm7\n"
+
+			"movdqa		 0(%[block]), %%xmm0\n"
+			"movdqa		16(%[block]), %%xmm5\n"
+			"movdqa		32(%[block]), %%xmm6\n"
+			"movdqa		48(%[block]), %%xmm4\n"
+
+			"psrld		%%xmm7, %%xmm0\n"
+			"psrld		%%xmm7, %%xmm5\n"
+			"psrld		%%xmm7, %%xmm6\n"
+			"psrld		%%xmm7, %%xmm4\n"
+
+			"pand		_ZL25SIMD_SSE2_dword_byte_mask, %%xmm0\n"
+			"pand		_ZL25SIMD_SSE2_dword_byte_mask, %%xmm5\n"
+			"pand		_ZL25SIMD_SSE2_dword_byte_mask, %%xmm6\n"
+			"pand		_ZL25SIMD_SSE2_dword_byte_mask, %%xmm4\n"
+
+			"packuswb	%%xmm5, %%xmm0\n"
+			"packuswb	%%xmm4, %%xmm6\n"
+
+			//---------------------
+
+			// ab0 = (  7 * maxAlpha +  7 * minAlpha + ALPHA_RANGE ) / 14
+			// ab3 = (  9 * maxAlpha +  5 * minAlpha + ALPHA_RANGE ) / 14
+			// ab2 = ( 11 * maxAlpha +  3 * minAlpha + ALPHA_RANGE ) / 14
+			// ab1 = ( 13 * maxAlpha +  1 * minAlpha + ALPHA_RANGE ) / 14
+
+			// ab4 = (  7 * maxAlpha +  7 * minAlpha + ALPHA_RANGE ) / 14
+			// ab5 = (  5 * maxAlpha +  9 * minAlpha + ALPHA_RANGE ) / 14
+			// ab6 = (  3 * maxAlpha + 11 * minAlpha + ALPHA_RANGE ) / 14
+			// ab7 = (  1 * maxAlpha + 13 * minAlpha + ALPHA_RANGE ) / 14
+
+			"movd		%[maxAlpha], %%xmm5\n"
+			"pshuflw	%[shuf0000], %%xmm5, %%xmm5\n"
+			"pshufd		%[shuf0000], %%xmm5, %%xmm5\n"
+			"movdqa		%%xmm5, %%xmm7\n"
+
+			"movd		%[minAlpha], %%xmm2\n"
+			"pshuflw	%[shuf0000], %%xmm2, %%xmm2\n"
+			"pshufd		%[shuf0000], %%xmm2, %%xmm2\n"
+			"movdqa		%%xmm2, %%xmm3\n"
+
+			"pmullw		_ZL30SIMD_SSE2_word_scale_7_9_11_13, %%xmm5\n"
+			"pmullw		_ZL28SIMD_SSE2_word_scale_7_5_3_1, %%xmm7\n"
+			"pmullw		_ZL28SIMD_SSE2_word_scale_7_5_3_1, %%xmm2\n"
+			"pmullw		_ZL30SIMD_SSE2_word_scale_7_9_11_13, %%xmm3\n"
+
+			"paddw		%%xmm2, %%xmm5\n"
+			"paddw		%%xmm3, %%xmm7\n"
+
+			"paddw		_ZL16SIMD_SSE2_word_7, %%xmm5\n"
+			"paddw		_ZL16SIMD_SSE2_word_7, %%xmm7\n"
+
+			"pmulhw		_ZL24SIMD_SSE2_word_div_by_14, %%xmm5\n"		// * ( ( 1 << 16 ) / 14	+ 1	) )	>> 16
+			"pmulhw		_ZL24SIMD_SSE2_word_div_by_14, %%xmm7\n"		// * ( ( 1 << 16 ) / 14	+ 1	) )	>> 16
+
+			"pshufd		%[shuf3333], %%xmm5, %%xmm1\n"
+			"pshufd		%[shuf2222], %%xmm5, %%xmm2\n"
+			"pshufd		%[shuf1111], %%xmm5, %%xmm3\n"
+			"packuswb	%%xmm1, %%xmm1\n"								// ab1
+			"packuswb	%%xmm2, %%xmm2\n"								// ab2
+			"packuswb	%%xmm3, %%xmm3\n"								// ab3
+
+			"packuswb	%%xmm6, %%xmm0\n"								// alpha block
+
+			"pshufd		%[shuf0000], %%xmm7, %%xmm4\n"
+			"pshufd		%[shuf1111], %%xmm7, %%xmm5\n"
+			"pshufd		%[shuf2222], %%xmm7, %%xmm6\n"
+			"pshufd		%[shuf3333], %%xmm7, %%xmm7\n"
+			"packuswb	%%xmm4, %%xmm4\n"								// ab4
+			"packuswb	%%xmm5, %%xmm5\n"								// ab5
+			"packuswb	%%xmm6, %%xmm6\n"								// ab6
+			"packuswb	%%xmm7, %%xmm7\n"								// ab7
+
+			"pmaxub		%%xmm0, %%xmm1\n"
+			"pmaxub		%%xmm0, %%xmm2\n"
+			"pmaxub		%%xmm0, %%xmm3\n"
+			"pcmpeqb	%%xmm0, %%xmm1\n"
+			"pcmpeqb	%%xmm0, %%xmm2\n"
+			"pcmpeqb	%%xmm0, %%xmm3\n"
+			"pmaxub		%%xmm0, %%xmm4\n"
+			"pmaxub		%%xmm0, %%xmm5\n"
+			"pmaxub		%%xmm0, %%xmm6\n"
+			"pmaxub		%%xmm0, %%xmm7\n"
+			"pcmpeqb	%%xmm0, %%xmm4\n"
+			"pcmpeqb	%%xmm0, %%xmm5\n"
+			"pcmpeqb	%%xmm0, %%xmm6\n"
+			"pcmpeqb	%%xmm0, %%xmm7\n"
+			"movdqa		_ZL16SIMD_SSE2_byte_8, %%xmm0\n"
+			"paddsb		%%xmm1, %%xmm0\n"
+			"paddsb		%%xmm3, %%xmm2\n"
+			"paddsb		%%xmm5, %%xmm4\n"
+			"paddsb		%%xmm7, %%xmm6\n"
+			"paddsb		%%xmm2, %%xmm0\n"
+			"paddsb		%%xmm6, %%xmm4\n"
+			"paddsb		%%xmm4, %%xmm0\n"
+			"pand		_ZL16SIMD_SSE2_byte_7, %%xmm0\n"
+			"movdqa		_ZL16SIMD_SSE2_byte_2, %%xmm1\n"
+			"pcmpgtb	%%xmm0, %%xmm1\n"
+			"pand		_ZL16SIMD_SSE2_byte_1, %%xmm1\n"
+			"pxor		%%xmm1, %%xmm0\n"
+			"movdqa		%%xmm0, %%xmm1\n"
+			"movdqa		%%xmm0, %%xmm2\n"
+			"movdqa		%%xmm0, %%xmm3\n"
+			"movdqa		%%xmm0, %%xmm4\n"
+			"movdqa		%%xmm0, %%xmm5\n"
+			"movdqa		%%xmm0, %%xmm6\n"
+			"movdqa		%%xmm0, %%xmm7\n"
+			"psrlq		$( 8- 3), %%xmm1\n"
+			"psrlq		$(16- 6), %%xmm2\n"
+			"psrlq		$(24- 9), %%xmm3\n"
+			"psrlq		$(32-12), %%xmm4\n"
+			"psrlq		$(40-15), %%xmm5\n"
+			"psrlq		$(48-18), %%xmm6\n"
+			"psrlq		$(56-21), %%xmm7\n"
+			"pand		_ZL31SIMD_SSE2_dword_alpha_bit_mask0, %%xmm0\n"
+			"pand		_ZL31SIMD_SSE2_dword_alpha_bit_mask1, %%xmm1\n"
+			"pand		_ZL31SIMD_SSE2_dword_alpha_bit_mask2, %%xmm2\n"
+			"pand		_ZL31SIMD_SSE2_dword_alpha_bit_mask3, %%xmm3\n"
+			"pand		_ZL31SIMD_SSE2_dword_alpha_bit_mask4, %%xmm4\n"
+			"pand		_ZL31SIMD_SSE2_dword_alpha_bit_mask5, %%xmm5\n"
+			"pand		_ZL31SIMD_SSE2_dword_alpha_bit_mask6, %%xmm6\n"
+			"pand		_ZL31SIMD_SSE2_dword_alpha_bit_mask7, %%xmm7\n"
+			"por		%%xmm1, %%xmm0\n"
+			"por		%%xmm3, %%xmm2\n"
+			"por		%%xmm5, %%xmm4\n"
+			"por		%%xmm7, %%xmm6\n"
+			"por		%%xmm2, %%xmm0\n"
+			"por		%%xmm6, %%xmm4\n"
+			"por		%%xmm4, %%xmm0\n"
+			"movd		%%xmm0, 0(%[outPtr])\n"
+			"pshufd		%[shuf2301], %%xmm0, %%xmm1\n"
+			"movd		%%xmm1, 3(%[outPtr])\n"
+			:: [block] "r" (block), [channelBitOffset] "r" (channelBitOffset), [minAlpha] "r" (minAlpha_), [maxAlpha] "r" (maxAlpha_), [outPtr] "r" (outPtr),
+			[shuf0000] "i" R_SHUFFLE_D( 0, 0, 0, 0 ), [shuf1111] "i" R_SHUFFLE_D( 1, 1, 1, 1 ), [shuf2222] "i" R_SHUFFLE_D( 2, 2, 2, 2 ), [shuf3333] "i" R_SHUFFLE_D( 3, 3, 3, 3 ),
+			[shuf2301] "i" R_SHUFFLE_D( 2, 3, 0, 1 )
+			: "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
+#endif
 
 	outData += 6;
-#elif defined ( ID_WIN_X86_SSE2_INTRIN )
+#elif defined ( ID_WIN_X86_SSE2_INTRIN ) || defined ( ID_QNX_X86_SSE2_INTRIN )
 	__m128i block0 = *((__m128i *)(&block[ 0]));
 	__m128i block1 = *((__m128i *)(&block[16]));
 	__m128i block2 = *((__m128i *)(&block[32]));
@@ -2028,7 +2799,106 @@ ID_INLINE void idDxtEncoder::ScaleYCoCg_SSE2( byte *colorBlock, byte *minColor, 
 		movdqa		xmmword ptr [esi+ 8*4], xmm2
 		movdqa		xmmword ptr [esi+12*4], xmm3
 	}
-#elif defined ( ID_WIN_X86_SSE2_INTRIN )
+#elif defined ( ID_QNX_X86_SSE2_ASM )
+	__asm__ __volatile__(
+			"movd		(%[minColor]), %%xmm0\n"
+			"movd		(%[maxColor]), %%xmm1\n"
+
+			"punpcklbw	_ZL16SIMD_SSE2_byte_0, %%xmm0\n"
+			"punpcklbw	_ZL16SIMD_SSE2_byte_0, %%xmm1\n"
+
+			"movdqa		_ZL25SIMD_SSE2_word_center_128, %%xmm6\n"
+			"movdqa		_ZL25SIMD_SSE2_word_center_128, %%xmm7\n"
+
+			"psubw		%%xmm0, %%xmm6\n"
+			"psubw		%%xmm1, %%xmm7\n"
+
+			"psubw		_ZL25SIMD_SSE2_word_center_128, %%xmm0\n"
+			"psubw		_ZL25SIMD_SSE2_word_center_128, %%xmm1\n"
+
+			"pmaxsw		%%xmm0, %%xmm6\n"
+			"pmaxsw		%%xmm1, %%xmm7\n"
+
+			"pmaxsw		%%xmm7, %%xmm6\n"
+			"pshuflw	%[shuf1010], %%xmm6, %%xmm7\n"
+			"pmaxsw		%%xmm7, %%xmm6\n"
+			"pshufd		%[shuf0000], %%xmm6, %%xmm6\n"
+
+			"movdqa		%%xmm6, %%xmm7\n"
+			"pcmpgtw	_ZL17SIMD_SSE2_word_63, %%xmm6\n"			// mask0
+			"pcmpgtw	_ZL17SIMD_SSE2_word_31, %%xmm7\n"			// mask1
+
+			"pandn		_ZL16SIMD_SSE2_byte_2, %%xmm7\n"
+			"por		_ZL16SIMD_SSE2_byte_1, %%xmm7\n"
+			"pandn		%%xmm7, %%xmm6\n"
+			"movdqa		%%xmm6, %%xmm3\n"
+			"movdqa		%%xmm6, %%xmm7\n"
+			"pxor		_ZL18SIMD_SSE2_byte_not, %%xmm7\n"
+			"por		_ZL26SIMD_SSE2_byte_scale_mask0, %%xmm7\n"	// 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00
+			"paddw		_ZL16SIMD_SSE2_byte_1, %%xmm6\n"
+			"pand		_ZL26SIMD_SSE2_byte_scale_mask1, %%xmm6\n"	// 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0xFF
+			"por		_ZL26SIMD_SSE2_byte_scale_mask2, %%xmm6\n"	// 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00
+
+			"movd		(%[minColor]), %%xmm4\n"
+			"movd		(%[maxColor]), %%xmm5\n"
+
+			"pand		_ZL26SIMD_SSE2_byte_scale_mask3, %%xmm4\n"	// 0x00, 0x00, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0xFF
+			"pand		_ZL26SIMD_SSE2_byte_scale_mask3, %%xmm5\n"
+
+			"pslld		$3, %%xmm3\n"
+			"pand		_ZL26SIMD_SSE2_byte_scale_mask4, %%xmm3\n"	// 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00
+
+			"por		%%xmm3, %%xmm4\n"
+			"por		%%xmm3, %%xmm5\n"
+
+			"paddb		_ZL26SIMD_SSE2_byte_minus_128_0, %%xmm4\n"
+			"paddb		_ZL26SIMD_SSE2_byte_minus_128_0, %%xmm5\n"
+
+			"pmullw		%%xmm6, %%xmm4\n"
+			"pmullw		%%xmm6, %%xmm5\n"
+
+			"pand		%%xmm7, %%xmm4\n"
+			"pand		%%xmm7, %%xmm5\n"
+
+			"psubb		_ZL26SIMD_SSE2_byte_minus_128_0, %%xmm4\n"
+			"psubb		_ZL26SIMD_SSE2_byte_minus_128_0, %%xmm5\n"
+
+			"movd		%%xmm4, (%[minColor])\n"
+			"movd		%%xmm5, (%[maxColor])\n"
+
+			"movdqa		 0(%[colorBlock]), %%xmm0\n"
+			"movdqa		16(%[colorBlock]), %%xmm1\n"
+			"movdqa		32(%[colorBlock]), %%xmm2\n"
+			"movdqa		48(%[colorBlock]), %%xmm3\n"
+
+			"paddb		_ZL26SIMD_SSE2_byte_minus_128_0, %%xmm0\n"
+			"paddb		_ZL26SIMD_SSE2_byte_minus_128_0, %%xmm1\n"
+			"paddb		_ZL26SIMD_SSE2_byte_minus_128_0, %%xmm2\n"
+			"paddb		_ZL26SIMD_SSE2_byte_minus_128_0, %%xmm3\n"
+
+			"pmullw		%%xmm6, %%xmm0\n"
+			"pmullw		%%xmm6, %%xmm1\n"
+			"pmullw		%%xmm6, %%xmm2\n"
+			"pmullw		%%xmm6, %%xmm3\n"
+
+			"pand		%%xmm7, %%xmm0\n"
+			"pand		%%xmm7, %%xmm1\n"
+			"pand		%%xmm7, %%xmm2\n"
+			"pand		%%xmm7, %%xmm3\n"
+
+			"psubb		_ZL26SIMD_SSE2_byte_minus_128_0, %%xmm0\n"
+			"psubb		_ZL26SIMD_SSE2_byte_minus_128_0, %%xmm1\n"
+			"psubb		_ZL26SIMD_SSE2_byte_minus_128_0, %%xmm2\n"
+			"psubb		_ZL26SIMD_SSE2_byte_minus_128_0, %%xmm3\n"
+
+			"movdqa		%%xmm0,  0(%[colorBlock])\n"
+			"movdqa		%%xmm1, 16(%[colorBlock])\n"
+			"movdqa		%%xmm2, 32(%[colorBlock])\n"
+			"movdqa		%%xmm3, 48(%[colorBlock])\n"
+			:: [colorBlock] "r" (colorBlock), [minColor] "r" (minColor), [maxColor] "r" (maxColor),
+			[shuf0000] "i" R_SHUFFLE_D( 0, 0, 0, 0 ), [shuf1010] "i" R_SHUFFLE_D( 1, 0, 1, 0 )
+			: "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
+#elif defined ( ID_WIN_X86_SSE2_INTRIN ) || defined ( ID_QNX_X86_SSE2_INTRIN )
 	__m128i block0 = *((__m128i *)(&colorBlock[ 0]));
 	__m128i block1 = *((__m128i *)(&colorBlock[16]));
 	__m128i block2 = *((__m128i *)(&colorBlock[32]));
@@ -2160,7 +3030,38 @@ ID_INLINE void idDxtEncoder::InsetYCoCgBBox_SSE2( byte *minColor, byte *maxColor
 		movd		dword ptr [esi], xmm0
 		movd		dword ptr [edi], xmm1
 	}
-#elif defined ( ID_WIN_X86_SSE2_INTRIN )
+#elif defined ( ID_QNX_X86_SSE2_ASM )
+	__asm__ __volatile__(
+			"movd		(%[min]), %%xmm0\n"
+			"movd		(%[max]), %%xmm1\n"
+			"punpcklbw	_ZL16SIMD_SSE2_byte_0, %%xmm0\n"
+			"punpcklbw	_ZL16SIMD_SSE2_byte_0, %%xmm1\n"
+			"movdqa		%%xmm1, %%xmm2\n"
+			"psubw		%%xmm0, %%xmm2\n"
+			"psubw		_ZL30SIMD_SSE2_word_insetYCoCgRound, %%xmm2\n"
+			"pand		_ZL29SIMD_SSE2_word_insetYCoCgMask, %%xmm2\n"
+			"pmullw		_ZL32SIMD_SSE2_word_insetYCoCgShiftUp, %%xmm0\n"
+			"pmullw		_ZL32SIMD_SSE2_word_insetYCoCgShiftUp, %%xmm1\n"
+			"paddw		%%xmm2, %%xmm0\n"
+			"psubw		%%xmm2, %%xmm1\n"
+			"pmulhw		_ZL34SIMD_SSE2_word_insetYCoCgShiftDown, %%xmm0\n"
+			"pmulhw		_ZL34SIMD_SSE2_word_insetYCoCgShiftDown, %%xmm1\n"
+			"pmaxsw		_ZL16SIMD_SSE2_word_0, %%xmm0\n"
+			"pmaxsw		_ZL16SIMD_SSE2_word_0, %%xmm1\n"
+			"pand		_ZL34SIMD_SSE2_word_insetYCoCgQuantMask, %%xmm0\n"
+			"pand		_ZL34SIMD_SSE2_word_insetYCoCgQuantMask, %%xmm1\n"
+			"movdqa		%%xmm0, %%xmm2\n"
+			"movdqa		%%xmm1, %%xmm3\n"
+			"pmulhw		_ZL28SIMD_SSE2_word_insetYCoCgRep, %%xmm2\n"
+			"pmulhw		_ZL28SIMD_SSE2_word_insetYCoCgRep, %%xmm3\n"
+			"por		%%xmm2, %%xmm0\n"
+			"por		%%xmm3, %%xmm1\n"
+			"packuswb	%%xmm0, %%xmm0\n"
+			"packuswb	%%xmm1, %%xmm1\n"
+			"movd		%%xmm0, (%[min])\n"
+			"movd		%%xmm1, (%[max])\n"
+			:: [min] "r" (minColor), [max] "r" (maxColor) : "xmm0", "xmm1", "xmm2", "xmm3");
+#elif defined ( ID_WIN_X86_SSE2_INTRIN ) || defined ( ID_QNX_X86_SSE2_INTRIN )
 	__m128c temp0, temp1, temp2, temp3, temp4, temp5, temp6, temp7;
 
 	temp0 = _mm_cvtsi32_si128( *(int *)minColor );
@@ -2280,7 +3181,78 @@ ID_INLINE void idDxtEncoder::SelectYCoCgDiagonal_SSE2( const byte *colorBlock, b
 		movd		dword ptr [edx], xmm6
 		movd		dword ptr [ecx], xmm7
 	}
-#elif defined ( ID_WIN_X86_SSE2_INTRIN )
+#elif defined ( ID_QNX_X86_SSE2_ASM )
+	__asm__ __volatile__(
+			"movdqa		 0(%[colorBlock]), %%xmm0\n"
+			"movdqa		16(%[colorBlock]), %%xmm1\n"
+			"movdqa		32(%[colorBlock]), %%xmm2\n"
+			"movdqa		48(%[colorBlock]), %%xmm3\n"
+
+			"pand		_ZL25SIMD_SSE2_dword_word_mask, %%xmm0\n"
+			"pand		_ZL25SIMD_SSE2_dword_word_mask, %%xmm1\n"
+			"pand		_ZL25SIMD_SSE2_dword_word_mask, %%xmm2\n"
+			"pand		_ZL25SIMD_SSE2_dword_word_mask, %%xmm3\n"
+
+			"pslldq		$2, %%xmm1\n"
+			"pslldq		$2, %%xmm3\n"
+			"por		%%xmm1, %%xmm0\n"
+			"por		%%xmm3, %%xmm2\n"
+
+			"movd		(%[minColor]), %%xmm1\n"						// minColor
+			"movd		(%[maxColor]), %%xmm3\n"						// maxColor
+
+			"movdqa		%%xmm1, %%xmm6\n"
+			"movdqa		%%xmm3, %%xmm7\n"
+
+			"pavgb		%%xmm3, %%xmm1\n"
+			"pshuflw	%[shuf0000], %%xmm1, %%xmm1\n"
+			"pshufd		%[shuf0000], %%xmm1, %%xmm1\n"
+			"movdqa		%%xmm1, %%xmm3\n"
+
+			"pmaxub		%%xmm0, %%xmm1\n"
+			"pmaxub		%%xmm2, %%xmm3\n"
+			"pcmpeqb	%%xmm0, %%xmm1\n"
+			"pcmpeqb	%%xmm2, %%xmm3\n"
+
+			"movdqa		%%xmm1, %%xmm0\n"
+			"movdqa		%%xmm3, %%xmm2\n"
+			"psrldq		$1, %%xmm0\n"
+			"psrldq		$1, %%xmm2\n"
+
+			"pxor		%%xmm1, %%xmm0\n"
+			"pxor		%%xmm3, %%xmm2\n"
+			"pand		_ZL16SIMD_SSE2_word_1, %%xmm0\n"
+			"pand		_ZL16SIMD_SSE2_word_1, %%xmm2\n"
+
+			"paddw		%%xmm2, %%xmm0\n"
+			"psadbw		_ZL16SIMD_SSE2_byte_0, %%xmm0\n"
+			"pshufd		%[shuf2301], %%xmm0, %%xmm1\n"
+
+#ifdef NVIDIA_7X_HARDWARE_BUG_FIX
+			"paddw		%%xmm0, %%xmm1\n"								// side
+			"pcmpgtw	_ZL16SIMD_SSE2_word_8, %%xmm1\n"				// mask = -( side > 8 )
+			"pand		_ZL27SIMD_SSE2_byte_diagonalMask, %%xmm1\n"
+			"movdqa		%%xmm6, %%xmm0\n"
+			"pcmpeqb	%%xmm7, %%xmm0\n"								// mask &= -( minColor[0] != maxColor[0] )
+			"pslldq		$1, %%xmm0\n"
+			"pandn		%%xmm1, %%xmm0\n"
+#else
+			"paddw		%%xmm1, %%xmm0\n"								// side
+			"pcmpgtw	_ZL16SIMD_SSE2_word_8, %%xmm0\n"				// mask = -( side > 8 )
+			"pand		_ZL27SIMD_SSE2_byte_diagonalMask, %%xmm0\n"
+#endif
+
+			"pxor		%%xmm7, %%xmm6\n"
+			"pand		%%xmm6, %%xmm0\n"
+			"pxor		%%xmm0, %%xmm7\n"
+			"pxor		%%xmm7, %%xmm6\n"
+
+			"movd		%%xmm6, (%[minColor])\n"
+			"movd		%%xmm7, (%[maxColor])\n"
+			:: [colorBlock] "r" (colorBlock), [minColor] "r" (minColor), [maxColor] "r" (maxColor),
+			[shuf0000] "i" R_SHUFFLE_D( 0, 0, 0, 0 ), [shuf2301] "i" R_SHUFFLE_D( 2, 3, 0, 1 )
+			: "xmm0", "xmm1", "xmm2", "xmm3", "xmm6", "xmm7");
+#elif defined ( ID_WIN_X86_SSE2_INTRIN ) || defined ( ID_QNX_X86_SSE2_INTRIN )
 	__m128i block0 = *((__m128i *)(&colorBlock[ 0]));
 	__m128i block1 = *((__m128i *)(&colorBlock[16]));
 	__m128i block2 = *((__m128i *)(&colorBlock[32]));
@@ -2415,16 +3387,17 @@ void idDxtEncoder::CompressYCoCgDXT5Fast_SSE2( const byte *inBuf, byte *outBuf, 
 idDxtEncoder::EmitGreenIndices_SSE2
 
 params:	block		- 16-normal block for which to find normal Y indices
-paramO:	minGreen	- Minimal normal Y found 
+paramO:	minGreen	- Minimal normal Y found
 paramO:	maxGreen	- Maximal normal Y found
 ========================
 */
 void idDxtEncoder::EmitGreenIndices_SSE2( const byte *block, const int channelBitOffset, const int minGreen, const int maxGreen ) {
-#if ( defined( ID_WIN_X86_ASM ) || defined( ID_MAC_X86_ASM ) )
+#if ( defined( ID_WIN_X86_ASM ) || defined( ID_MAC_X86_ASM ) ) || defined ( ID_QNX_X86_SSE2_ASM )
 	assert( maxGreen >= minGreen );
 
 	byte *outPtr = outData;
 
+#if ( defined( ID_WIN_X86_ASM ) || defined( ID_MAC_X86_ASM ) )
 	__asm {
 		movd		xmm7, channelBitOffset
 
@@ -2524,9 +3497,110 @@ void idDxtEncoder::EmitGreenIndices_SSE2( const byte *block, const int channelBi
 		pshuflw		xmm7, xmm7, R_SHUFFLE_D( 0, 2, 1, 3 )
 		movd		[esi], xmm7
 	}
+#else
+	__asm__ __volatile__(
+			"movd		%[channelBitOffset], %%xmm7\n"
+
+			"movdqa		0(%[block]), %%xmm0\n"
+			"movdqa		16(%[block]), %%xmm5\n"
+			"movdqa		32(%[block]), %%xmm6\n"
+			"movdqa		48(%[block]), %%xmm4\n"
+
+			"psrld		%%xmm7, %%xmm0\n"
+			"psrld		%%xmm7, %%xmm5\n"
+			"psrld		%%xmm7, %%xmm6\n"
+			"psrld		%%xmm7, %%xmm4\n"
+
+			"pand		_ZL25SIMD_SSE2_dword_byte_mask, %%xmm0\n"
+			"pand		_ZL25SIMD_SSE2_dword_byte_mask, %%xmm5\n"
+			"pand		_ZL25SIMD_SSE2_dword_byte_mask, %%xmm6\n"
+			"pand		_ZL25SIMD_SSE2_dword_byte_mask, %%xmm4\n"
+
+			"packuswb	%%xmm5, %%xmm0\n"
+			"packuswb	%%xmm4, %%xmm6\n"
+
+			//---------------------
+
+			"movd		%[maxGreen], %%xmm2\n"
+			"pshuflw	%[shuf0000], %%xmm2, %%xmm2\n"
+
+			"movd		%[minGreen], %%xmm3\n"
+			"pshuflw	%[shuf0000], %%xmm3, %%xmm3\n"
+
+			"pmullw		_ZL26SIMD_SSE2_word_scale_5_3_1, %%xmm2\n"
+			"pmullw		_ZL26SIMD_SSE2_word_scale_1_3_5, %%xmm3\n"
+			"paddw		_ZL16SIMD_SSE2_word_3, %%xmm2\n"
+			"paddw		%%xmm2, %%xmm3\n"
+			"pmulhw		_ZL23SIMD_SSE2_word_div_by_6, %%xmm3\n"
+
+			"pshuflw	%[shuf0000], %%xmm3, %%xmm1\n"
+			"pshuflw	%[shuf1111], %%xmm3, %%xmm2\n"
+			"pshuflw	%[shuf2222], %%xmm3, %%xmm3\n"
+
+			"pshufd		%[shuf0000], %%xmm1, %%xmm1\n"
+			"pshufd		%[shuf0000], %%xmm2, %%xmm2\n"
+			"pshufd		%[shuf0000], %%xmm3, %%xmm3\n"
+
+			"packuswb	%%xmm1, %%xmm1\n"
+			"packuswb	%%xmm2, %%xmm2\n"
+			"packuswb	%%xmm3, %%xmm3\n"
+
+			"packuswb	%%xmm6, %%xmm0\n"
+
+			"pmaxub		%%xmm0, %%xmm1\n"
+			"pmaxub		%%xmm0, %%xmm2\n"
+			"pmaxub		%%xmm0, %%xmm3\n"
+			"pcmpeqb	%%xmm0, %%xmm1\n"
+			"pcmpeqb	%%xmm0, %%xmm2\n"
+			"pcmpeqb	%%xmm0, %%xmm3\n"
+			"movdqa		_ZL16SIMD_SSE2_byte_4, %%xmm0\n"
+			"paddsb		%%xmm1, %%xmm0\n"
+			"paddsb		%%xmm3, %%xmm2\n"
+			"paddsb		%%xmm2, %%xmm0\n"
+			"pand		_ZL16SIMD_SSE2_byte_3, %%xmm0\n"
+			"movdqa		_ZL16SIMD_SSE2_byte_2, %%xmm4\n"
+			"pcmpgtb	%%xmm0, %%xmm4\n"
+			"pand		_ZL16SIMD_SSE2_byte_1, %%xmm4\n"
+			"pxor		%%xmm4, %%xmm0\n"
+			"movdqa		%%xmm0, %%xmm4\n"
+			"movdqa		%%xmm0, %%xmm5\n"
+			"movdqa		%%xmm0, %%xmm6\n"
+			"movdqa		%%xmm0, %%xmm7\n"
+			"psrlq		$( 8-2), %%xmm4\n"
+			"psrlq		$(16-4), %%xmm5\n"
+			"psrlq		$(24-6), %%xmm6\n"
+			"psrlq		$(32-8), %%xmm7\n"
+			"pand		_ZL31SIMD_SSE2_dword_color_bit_mask1, %%xmm4\n"
+			"pand		_ZL31SIMD_SSE2_dword_color_bit_mask2, %%xmm5\n"
+			"pand		_ZL31SIMD_SSE2_dword_color_bit_mask3, %%xmm6\n"
+			"pand		_ZL31SIMD_SSE2_dword_color_bit_mask4, %%xmm7\n"
+			"por		%%xmm4, %%xmm5\n"
+			"por		%%xmm6, %%xmm7\n"
+			"por		%%xmm5, %%xmm7\n"
+			"movdqa		%%xmm0, %%xmm4\n"
+			"movdqa		%%xmm0, %%xmm5\n"
+			"movdqa		%%xmm0, %%xmm6\n"
+			"psrlq		$(40-10), %%xmm4\n"
+			"psrlq		$(48-12), %%xmm5\n"
+			"psrlq		$(56-14), %%xmm6\n"
+			"pand		_ZL31SIMD_SSE2_dword_color_bit_mask0, %%xmm0\n"
+			"pand		_ZL31SIMD_SSE2_dword_color_bit_mask5, %%xmm4\n"
+			"pand		_ZL31SIMD_SSE2_dword_color_bit_mask6, %%xmm5\n"
+			"pand		_ZL31SIMD_SSE2_dword_color_bit_mask7, %%xmm6\n"
+			"por		%%xmm5, %%xmm4\n"
+			"por		%%xmm6, %%xmm0\n"
+			"por		%%xmm4, %%xmm7\n"
+			"por		%%xmm0, %%xmm7\n"
+			"pshufd		%[shuf0213], %%xmm7, %%xmm7\n"
+			"pshuflw	%[shuf0213], %%xmm7, %%xmm7\n"
+			"movd		%%xmm7, (%[outPtr])\n"
+			:: [outPtr] "r" (outPtr), [block] "r" (block), [channelBitOffset] "r" (channelBitOffset), [minGreen] "r" (minGreen), [maxGreen] "r" (maxGreen),
+			[shuf0000] "i" R_SHUFFLE_D( 0, 0, 0, 0 ), [shuf1111] "i" R_SHUFFLE_D( 1, 1, 1, 1 ), [shuf2222] "i" R_SHUFFLE_D( 2, 2, 2, 2 ), [shuf0213] "i" R_SHUFFLE_D( 0, 2, 1, 3 )
+			: "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
+#endif
 
 	outData += 4;
-#elif defined ( ID_WIN_X86_SSE2_INTRIN )
+#elif defined ( ID_WIN_X86_SSE2_INTRIN ) || defined ( ID_QNX_X86_SSE2_INTRIN )
 	__m128i block0 = *((__m128i *)(&block[ 0]));
 	__m128i block1 = *((__m128i *)(&block[16]));
 	__m128i block2 = *((__m128i *)(&block[32]));
@@ -2673,7 +3747,44 @@ void idDxtEncoder::InsetNormalsBBoxDXT5_SSE2( byte *minNormal, byte *maxNormal )
         movd        dword ptr [esi], xmm0
         movd        dword ptr [edi], xmm1
     }
-#elif defined ( ID_WIN_X86_SSE2_INTRIN )
+#elif defined ( ID_QNX_X86_SSE2_ASM )
+	__asm__ __volatile__(
+			"movd		(%[min]), %%xmm0\n"										// xmm0 = minNormal
+			"movd		(%[max]), %%xmm1\n"										// xmm1 = maxNormal
+			"punpcklbw	_ZL16SIMD_SSE2_byte_0, %%xmm0\n"
+			"punpcklbw	_ZL16SIMD_SSE2_byte_0, %%xmm1\n"
+			"movdqa		%%xmm1, %%xmm2\n"
+			"psubw		%%xmm0, %%xmm2\n"
+			"psubw		_ZL35SIMD_SSE2_word_insetNormalDXT5Round, %%xmm2\n"
+			"pand		_ZL34SIMD_SSE2_word_insetNormalDXT5Mask, %%xmm2\n"		// xmm2 = inset (1 & 3)
+
+			"pmullw		_ZL37SIMD_SSE2_word_insetNormalDXT5ShiftUp, %%xmm0\n"
+			"pmullw		_ZL37SIMD_SSE2_word_insetNormalDXT5ShiftUp, %%xmm1\n"
+			"paddw		%%xmm2, %%xmm0\n"
+			"psubw		%%xmm2, %%xmm1\n"
+			"pmulhw		_ZL39SIMD_SSE2_word_insetNormalDXT5ShiftDown, %%xmm0\n"	// xmm0 = mini
+			"pmulhw		_ZL39SIMD_SSE2_word_insetNormalDXT5ShiftDown, %%xmm1\n"	// xmm1 = maxi
+
+			// mini and maxi must be >= 0 and <= 255
+			"pmaxsw		_ZL16SIMD_SSE2_word_0, %%xmm0\n"
+			"pmaxsw		_ZL16SIMD_SSE2_word_0, %%xmm1\n"
+			"pminsw		_ZL18SIMD_SSE2_word_255, %%xmm0\n"
+			"pminsw		_ZL18SIMD_SSE2_word_255, %%xmm1\n"
+
+			"movdqa		%%xmm0, %%xmm2\n"
+			"movdqa		%%xmm1, %%xmm3\n"
+			"pand		_ZL39SIMD_SSE2_word_insetNormalDXT5QuantMask, %%xmm0\n"
+			"pand		_ZL39SIMD_SSE2_word_insetNormalDXT5QuantMask, %%xmm1\n"
+			"pmulhw		_ZL33SIMD_SSE2_word_insetNormalDXT5Rep, %%xmm2\n"
+			"pmulhw		_ZL33SIMD_SSE2_word_insetNormalDXT5Rep, %%xmm3\n"
+			"por		%%xmm2, %%xmm0\n"
+			"por		%%xmm3, %%xmm1\n"
+			"packuswb	%%xmm0, %%xmm0\n"
+			"packuswb	%%xmm1, %%xmm1\n"
+			"movd		%%xmm0, (%[min])\n"
+			"movd		%%xmm1, (%[max])\n"
+			:: [min] "r" (minNormal), [max] "r" (maxNormal) : "xmm0", "xmm1", "xmm2", "xmm3");
+#elif defined ( ID_WIN_X86_SSE2_INTRIN ) || defined ( ID_QNX_X86_SSE2_INTRIN )
 	__m128i temp0, temp1, temp2, temp3;
 
 	temp0 = _mm_cvtsi32_si128( *(int *)minNormal );

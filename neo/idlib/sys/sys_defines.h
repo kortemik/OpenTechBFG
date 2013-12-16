@@ -83,23 +83,35 @@ If you have questions concerning this license or the applicable additional terms
 		#ifdef __ARM_NEON__
 			#define ID_QNX_ARM_NEON
 			#define ID_QNX_ARM_NEON_ASM
-			#ifndef NO_NEON_INTRIN
+			#if defined(NO_INTRIN) || defined(NO_NEON_INTRIN)
 				#define ID_QNX_ARM_NEON_INTRIN
 			#endif
 		#endif
 	#else
 		#define ID_QNX_X86_ASM
 		#ifdef __MMX__
-			#define ID_QNX_X86_MMX_INTRIN
+			#define ID_QNX_X86_MMX_ASM
+			#if defined(NO_INTRIN) || defined(NO_MMX_INTRIN)
+				#define ID_QNX_X86_MMX_INTRIN
+			#endif
 		#endif
 		#ifdef __SSE__
-			#define ID_QNX_X86_SSE_INTRIN
+			#define ID_QNX_X86_SSE_ASM
+			#if defined(NO_INTRIN) || defined(NO_SSE_INTRIN)
+				#define ID_QNX_X86_SSE_INTRIN
+			#endif
 		#endif
 		#ifdef __SSE2__
-			#define ID_QNX_X86_SSE2_INTRIN
+			#define ID_QNX_X86_SSE2_ASM
+			#if defined(NO_INTRIN) || defined(NO_SSE2_INTRIN)
+				#define ID_QNX_X86_SSE2_INTRIN
+			#endif
 		#endif
 		#ifdef __SSE3__
-			#define ID_QNX_X86_SSE3_INTRIN
+			#define ID_QNX_X86_SSE3_ASM
+			#if defined(NO_INTRIN) || defined(NO_SSE3_INTRIN)
+				#define ID_QNX_X86_SSE3_INTRIN
+			#endif
 		#endif
 	#endif
 

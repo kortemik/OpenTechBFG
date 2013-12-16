@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -52,7 +53,7 @@ idDxtEncoder::NV4XHardwareBugFix
 ========================
 */
 void idDxtEncoder::NV4XHardwareBugFix( byte *minColor, byte *maxColor ) const {
-#ifdef ID_WIN_X86_ASM
+#if defined( ID_WIN_X86_ASM ) || defined( ID_QNX_X86_ASM )
 	int minq = ( ( minColor[0] << 16 ) | ( minColor[1] << 8 ) | minColor[2] ) & 0x00F8FCF8;
 	int maxq = ( ( maxColor[0] << 16 ) | ( maxColor[1] << 8 ) | maxColor[2] ) & 0x00F8FCF8;
 	int mask = -( minq > maxq ) & 0x00FFFFFF;
@@ -318,7 +319,7 @@ void SwapColors( byte *c1, byte *c2 ) {
 ========================
 idDxtEncoder::GetMinMaxColorsMaxDist
 
-Finds the two RGB colors in a 4x4 block furthest apart. Also finds the two alpha values 
+Finds the two RGB colors in a 4x4 block furthest apart. Also finds the two alpha values
 furthest apart.
 
 params: colorBlock	- 4*4 input tile, 4 bytes per pixel
@@ -355,7 +356,7 @@ void idDxtEncoder::GetMinMaxColorsMaxDist( const byte *colorBlock, byte *minColo
 ========================
 idDxtEncoder::GetMinMaxColorsLuminance
 
-Finds the two RGB colors in a 4x4 block furthest apart based on luminance. Also finds the two 
+Finds the two RGB colors in a 4x4 block furthest apart based on luminance. Also finds the two
 alpha values furthest apart.
 
 params: colorBlock	- 4*4 input tile, 4 bytes per pixel
@@ -609,7 +610,7 @@ int idDxtEncoder::GetSquareNormalYError( const byte *colorBlock, const unsigned 
 ========================
 idDxtEncoder::GetMinMaxColorsHQ
 
-Uses an exhaustive search to find the two RGB colors that produce the least error when used to 
+Uses an exhaustive search to find the two RGB colors that produce the least error when used to
 compress the 4x4 block. Also finds the minimum and maximum alpha values.
 
 params:	colorBlock	- 4*4 input tile, 4 bytes per pixel
@@ -702,7 +703,7 @@ int idDxtEncoder::GetMinMaxColorsHQ( const byte *colorBlock, byte *minColor, byt
 								continue;
 							}
 
-							minColor565 = (unsigned short)( ( i0 << 11 ) | ( i1 << 5 ) | ( i2 << 0 ) ); 
+							minColor565 = (unsigned short)( ( i0 << 11 ) | ( i1 << 5 ) | ( i2 << 0 ) );
 							maxColor565 = (unsigned short)( ( j0 << 11 ) | ( j1 << 5 ) | ( j2 << 0 ) );
 
 							if ( !noBlack ) {
@@ -784,7 +785,7 @@ int idDxtEncoder::GetSquareCTX1Error( const byte *colorBlock, const byte *color0
 ========================
 idDxtEncoder::GetMinMaxCTX1HQ
 
-Uses an exhaustive search to find the two RGB colors that produce the least error when used to 
+Uses an exhaustive search to find the two RGB colors that produce the least error when used to
 compress the 4x4 block. Also finds the minimum and maximum alpha values.
 
 params:	colorBlock	- 4*4 input tile, 4 bytes per pixel
@@ -876,7 +877,7 @@ int idDxtEncoder::GetMinMaxCTX1HQ( const byte *colorBlock, byte *minColor, byte 
 ========================
 idDxtEncoder::GetMinMaxNormalYHQ
 
-Uses an exhaustive search to find the two RGB colors that produce the least error when used to 
+Uses an exhaustive search to find the two RGB colors that produce the least error when used to
 compress the 4x4 block. Also finds the minimum and maximum alpha values.
 
 params:	colorBlock	- 4*4 input tile, 4 bytes per pixel
@@ -958,7 +959,7 @@ int idDxtEncoder::GetMinMaxNormalYHQ( const byte *colorBlock, byte *minColor, by
 	return bestError;
 }
 
-#if defined( ID_WIN_X86_ASM )
+#if defined( ID_WIN_X86_ASM ) || defined( ID_QNX_X86_SSE2_ASM )
 ALIGN16( static float SIMD_SSE2_float_scale[4] ) = { 2.0f / 255.0f, 2.0f / 255.0f, 2.0f / 255.0f, 2.0f / 255.0f };
 ALIGN16( static float SIMD_SSE2_float_descale[4] ) = { 255.0f / 2.0f, 255.0f / 2.0f, 255.0f / 2.0f, 255.0f / 2.0f };
 ALIGN16( static float SIMD_SSE2_float_zero[4] ) = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -1017,6 +1018,46 @@ int NormalDistanceDXT1( const int *vector, const int *normalized ) {
 		paddd		xmm0, xmm1
 		movd		result, xmm0
 	}
+	return result;
+#elif defined( ID_QNX_X86_SSE2_ASM )
+	int result;
+	__asm__ __volatile__(
+			"cvtdq2ps	(%[vector]), %%xmm0\n"
+			"mulps		_ZL21SIMD_SSE2_float_scale, %%xmm0\n"
+			"subps		_ZL19SIMD_SSE2_float_one, %%xmm0\n"
+			"pand		_ZL30SIMD_SSE2_dword_maskFirstThree, %%xmm0\n"
+			"movaps		%%xmm0, %%xmm1\n"
+			"mulps		%%xmm1, %%xmm1\n"
+			"pshufd		%[shuf2301], %%xmm1, %%xmm2\n"
+			"addps		%%xmm1, %%xmm2\n"
+			"pshufd		%[shuf1010], %%xmm2, %%xmm1\n"
+			"addps		%%xmm1, %%xmm2\n"
+
+			"rsqrtps	%%xmm2, %%xmm1\n"
+			"mulps		%%xmm1, %%xmm2\n"
+			"mulps		%%xmm1, %%xmm2\n"
+			"subps		_ZL16SIMD_SP_rsqrt_c0, %%xmm2\n"
+			"mulps		_ZL16SIMD_SP_rsqrt_c1, %%xmm1\n"
+			"mulps		%%xmm1, %%xmm2\n"
+
+			"mulps		%%xmm2, %%xmm0\n"
+			"addps		_ZL19SIMD_SSE2_float_one, %%xmm0\n"
+			"mulps		_ZL23SIMD_SSE2_float_descale, %%xmm0\n"
+			"addps		_ZL20SIMD_SSE2_float_half, %%xmm0\n"
+			"maxps		_ZL20SIMD_SSE2_float_zero, %%xmm0\n"
+			"minps		_ZL19SIMD_SSE2_float_255, %%xmm0\n"
+			"cvttps2dq	%%xmm0, %%xmm0\n"
+			"psubd		(%[normalized]), %%xmm0\n"
+			"pand		_ZL25SIMD_SSE2_dword_maskWords, %%xmm0\n"
+			"pmullw		%%xmm0, %%xmm0\n"
+			"pshufd		%[shuf2301], %%xmm0, %%xmm1\n"
+			"paddd		%%xmm1, %%xmm0\n"
+			"pshufd		%[shuf1010], %%xmm0, %%xmm1\n"
+			"paddd		%%xmm1, %%xmm0\n"
+			"movd		%%xmm0, (%[result])\n"
+			: [result] "=r" (result)
+			: [vector] "r" (vector), [normalized] "r" (normalized), [shuf2301] "i" R_SHUFFLE_PS( 2, 3, 0, 1 ), [shuf1010] "i" R_SHUFFLE_PS( 1, 0, 1, 0 )
+			: "xmm0", "xmm1", "xmm2");
 	return result;
 #else
 	float floatNormal[3];
@@ -1093,6 +1134,57 @@ int NormalDistanceDXT5( const int *vector, const int *normalized ) {
 		paddd		xmm0, xmm1
 		movd		result, xmm0
 	}
+	return result;
+#elif defined( ID_QNX_X86_SSE2_ASM )
+	int result;
+	__asm__ __volatile__(
+#if 0	// object-space
+			"pshufd		%[shuf0132], (%[vector]), %%xmm0\n"
+#else
+			"pshufd		%[shuf1230], (%[vector]), %%xmm0\n"
+#endif
+			"cvtdq2ps	%%xmm0, %%xmm0\n"
+			"mulps		_ZL21SIMD_SSE2_float_scale, %%xmm0\n"
+			"subps		_ZL19SIMD_SSE2_float_one, %%xmm0\n"
+			"pand		_ZL30SIMD_SSE2_dword_maskFirstThree, %%xmm0\n"
+			"movaps		%%xmm0, %%xmm1\n"
+			"mulps		%%xmm1, %%xmm1\n"
+			"pshufd		%[shuf2301], %%xmm1, %%xmm2\n"
+			"addps		%%xmm1, %%xmm2\n"
+			"pshufd		%[shuf1010], %%xmm2, %%xmm1\n"
+			"addps		%%xmm1, %%xmm2\n"
+
+			"rsqrtps	%%xmm2, %%xmm1\n"
+			"mulps		%%xmm1, %%xmm2\n"
+			"mulps		%%xmm1, %%xmm2\n"
+			"subps		_ZL16SIMD_SP_rsqrt_c0, %%xmm2\n"
+			"mulps		_ZL16SIMD_SP_rsqrt_c1, %%xmm1\n"
+			"mulps		%%xmm1, %%xmm2\n"
+
+			"mulps		%%xmm2, %%xmm0\n"
+			"addps		_ZL19SIMD_SSE2_float_one, %%xmm0\n"
+			"mulps		_ZL23SIMD_SSE2_float_descale, %%xmm0\n"
+			"addps		_ZL20SIMD_SSE2_float_half, %%xmm0\n"
+			"maxps		_ZL20SIMD_SSE2_float_zero, %%xmm0\n"
+			"minps		_ZL19SIMD_SSE2_float_255, %%xmm0\n"
+			"cvttps2dq	%%xmm0, %%xmm0\n"
+#if 0	// object-space
+			"pshufd		%[shuf0132], (%[normalized]), %%xmm3\n"
+#else
+			"pshufd		%[shuf1230], (%[normalized]), %%xmm3\n"
+#endif
+			"psubd		%%xmm3, %%xmm0\n"
+			"pand		_ZL25SIMD_SSE2_dword_maskWords, %%xmm0\n"
+			"pmullw		%%xmm0, %%xmm0\n"
+			"pshufd		%[shuf2301], %%xmm0, %%xmm1\n"
+			"paddd		%%xmm1, %%xmm0\n"
+			"pshufd		%[shuf1010], %%xmm0, %%xmm1\n"
+			"paddd		%%xmm1, %%xmm0\n"
+			"movd		%%xmm0, %[result]\n"
+			: [result] "=r" (result)
+			: [vector] "r" (vector), [normalized] "r" (normalized),
+			 [shuf2301] "i" R_SHUFFLE_PS( 2, 3, 0, 1 ), [shuf1010] "i" R_SHUFFLE_PS( 1, 0, 1, 0 ), [shuf1230] "i" R_SHUFFLE_PS( 1, 2, 3, 0 ), [shuf0132] "i" R_SHUFFLE_PS( 0, 1, 3, 2 )
+			: "xmm0", "xmm1", "xmm2", "xmm3");
 	return result;
 #else
 #if 0	// object-space
@@ -1194,7 +1286,7 @@ int idDxtEncoder::GetSquareNormalsDXT1Error( const int *colorBlock, const unsign
 ========================
 idDxtEncoder::GetMinMaxNormalsDXT1HQ
 
-Uses an exhaustive search to find the two RGB colors that produce the least error when used to 
+Uses an exhaustive search to find the two RGB colors that produce the least error when used to
 compress the 4x4 block. Also finds the minimum and maximum alpha values.
 
 params:	colorBlock	- 4*4 input tile, 4 bytes per pixel
@@ -1423,7 +1515,7 @@ int idDxtEncoder::GetSquareNormalsDXT5Error( const int *normalBlock, const byte 
 ========================
 idDxtEncoder::GetMinMaxNormalsDXT5HQ
 
-Uses an exhaustive search to find the two RGB colors that produce the least error when used to 
+Uses an exhaustive search to find the two RGB colors that produce the least error when used to
 compress the 4x4 block. Also finds the minimum and maximum alpha values.
 
 params:	colorBlock	- 4*4 input tile, 4 bytes per pixel
@@ -1561,7 +1653,7 @@ int idDxtEncoder::GetMinMaxNormalsDXT5HQ( const byte *colorBlock, byte *minColor
 ========================
 idDxtEncoder::GetMinMaxNormalsDXT5HQFast
 
-Uses an exhaustive search to find the two RGB colors that produce the least error when used to 
+Uses an exhaustive search to find the two RGB colors that produce the least error when used to
 compress the 4x4 block. Also finds the minimum and maximum alpha values.
 
 params:	colorBlock	- 4*4 input tile, 4 bytes per pixel
@@ -4496,7 +4588,7 @@ void idDxtEncoder::EncodeNormalRGBIndices( byte *outBuf, const byte min, const b
 
 	unsigned short maskedMax5 = (max & C565_5_MASK) >> 3;
 	unsigned short maskedMin5 = (min & C565_5_MASK) >> 3;
-	
+
 	unsigned short smax = (maskedMax5 << 11) | (maskedMax << 3) | maskedMax5;
 	unsigned short smin = (maskedMin5 << 11) | (maskedMin << 3) | maskedMin5;
 

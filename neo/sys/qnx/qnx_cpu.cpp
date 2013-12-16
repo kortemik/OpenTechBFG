@@ -280,20 +280,21 @@ cpuid_t Sys_GetCPUId() {
 
 	// check CPU manufacturer
 	switch( ( cpuType & 0xFF000000 ) >> 24 ) {
-		case 'A':	//ARM
-		case 'D':	//Digital Equipment Corporation
-		case 'M':	//Motorola/Freescale
-		case 'V':	//Marvell
-		case 'i':	//Intel
-			flags = CPUID_GENERIC; //Nothing is really unsupported...
-			break;
-		case 'Q':	//Qualcomm
-			flags = CPUID_QC;
-			break;
-		case 'T':	//Texas Instruments
-			flags = CPUID_TI;
-			break;
-		}
+	default:
+	case 'A':	//ARM
+	case 'D':	//Digital Equipment Corporation
+	case 'M':	//Motorola/Freescale
+	case 'V':	//Marvell
+	case 'i':	//Intel
+		flags = CPUID_GENERIC; //Nothing is really unsupported...
+		break;
+	case 'Q':	//Qualcomm
+		flags = CPUID_QC;
+		break;
+	case 'T':	//Texas Instruments
+		flags = CPUID_TI;
+		break;
+	}
 
 	// check for VFP support
 	if ( ( cpuFlags & CPU_FLAG_FPU ) != 0 ) {
@@ -465,7 +466,8 @@ static bitFlag_t statusWordFlags[] = {
 static char *strideControlField[] = {
 	"Stride of 1",
 	"Invalid Stride",
-	"Stride of 2"
+	"Stride of 2",
+	"Invalid Stride"
 };
 #endif
 
@@ -731,8 +733,8 @@ void Sys_FPU_EnableExceptions( int exceptions ) {
 	}
 
 	//No way to simply set, we have to toggle flags on and off
-	//XXX Mising >> fp_exception_mask( _FP_EXC_ALL, 0 ); //Disable all exception mask flags
-	//XXX Mising >> fp_exception_mask( flags, 1 ); //Set exception flags
+	//XXX Missing >> fp_exception_mask( _FP_EXC_ALL, 0 ); //Disable all exception mask flags
+	//XXX Missing >> fp_exception_mask( flags, 1 ); //Set exception flags
 }
 
 /*
@@ -754,7 +756,7 @@ void Sys_FPU_SetPrecision( int precision ) {
 		val = _FP_PREC_DOUBLE_EXTENDED;
 		break;
 	}
-	//XXX Mising >> fp_precision( val );
+	//XXX Missing >> fp_precision( val );
 }
 
 /*
@@ -780,7 +782,7 @@ void Sys_FPU_SetRounding( int rounding ) {
 		val = _FP_ROUND_ZERO;
 		break;
 	}
-	//XXX Mising >> fp_rounding( val );
+	//XXX Missing >> fp_rounding( val );
 }
 
 /*

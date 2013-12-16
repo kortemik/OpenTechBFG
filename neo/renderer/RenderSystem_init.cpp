@@ -546,6 +546,12 @@ static void R_CheckPortableExtensions() {
 	qglCompressedTexSubImage2DARB = (PFNGLCOMPRESSEDTEXSUBIMAGE2DARBPROC)GLimp_ExtensionPointer( "glCompressedTexSubImage2D" );
 	qglGetCompressedTexImageARB = NULL; //Not used
 
+#if defined(_DEBUG) && defined(ID_QNX_ARM_NEON)
+	if ( glConfig.textureCompressionDXTAvailable ) {
+		common->Printf( S_COLOR_YELLOW "--Message for Developer-- : DXT is supported but DXTEncoder has not been optimized for ARM NEON\n" S_COLOR_DEFAULT );
+	}
+#endif
+
 	// If we have access to the driver control, we may have access to turning on texture compression for all textures,
 	// so we then just load everything and let the driver compress it
 	glConfig.qcomDriverControlAvailable = R_CheckExtension( "GL_QCOM_driver_control" );
