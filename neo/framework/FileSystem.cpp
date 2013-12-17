@@ -2615,6 +2615,19 @@ void idFileSystemLocal::Startup() {
 		SetupGameDirectories( fs_game.GetString() );
 	}
 
+	// additional search paths
+	idStrList paths;
+	Sys_AdditionalSearchPaths( paths );
+	for ( int i = 0; i < paths.Num(); i++ ) {
+		idStr & path = paths[i];
+		if ( path.Length() &&
+				path.Icmp( BASE_GAMEDIR ) &&
+				path.Icmp( fs_game_base.GetString() ) &&
+				path.Icmp( fs_game.GetString() ) ) {
+			SetupGameDirectories( path.c_str() );
+		}
+	}
+
 	// add our commands
 	cmdSystem->AddCommand( "dir", Dir_f, CMD_FL_SYSTEM, "lists a folder", idCmdSystem::ArgCompletion_FileName );
 	cmdSystem->AddCommand( "dirtree", DirTree_f, CMD_FL_SYSTEM, "lists a folder with subfolders" );

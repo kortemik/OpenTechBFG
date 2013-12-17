@@ -46,6 +46,10 @@ If you have questions concerning this license or the applicable additional terms
 #include <bps/navigator_invoke.h>
 #include <bps/deviceinfo.h>
 #include <bps/battery.h>
+#if BBNDK_VERSION_AT_LEAST(10, 2, 0)
+#include <bps/removablemedia.h>
+#endif
+
 #include <clipboard/clipboard.h>
 
 #include <sys/slog2.h>
@@ -355,11 +359,32 @@ Sys_DefaultBasePath
 ==============
 */
 const char *Sys_DefaultBasePath() {
-	static char basePath[ PATH_MAX ];
-	memset( basePath, 0, PATH_MAX );
+	static char basePath[ PATH_MAX ] = { 0 };
+	if ( basePath[0] == '\0' ) {
+		memset( basePath, 0, PATH_MAX );
 
-	strcpy( basePath, Sys_Cwd() );
-	strcat( basePath, "/shared/misc/doom3bfg" ); //XXX possibly change to "/cache"
+#if BBNDK_VERSION_AT_LEAST(10, 2, 0)
+		removablemedia_info_t *infoMain;
+		removablemedia_info_t *info;
+		if ( removablemedia_get_info( &infoMain ) == BPS_SUCCESS ) {
+			info = infoMain;
+			while ( info ) {
+				if ( removablemedia_info_get_presence( info ) == REMOVABLEMEDIA_PRESENCE_INSERTED &&
+						!removablemedia_info_is_read_only( info ) && !removablemedia_info_is_write_protected( info ) ) {
+					strcpy( basePath, removablemedia_info_get_mount_path( info ) );
+					strcat( basePath, "/appdata/doom3bfg" );
+					break;
+				}
+				info = removablemedia_info_get_next( info );
+			}
+			removablemedia_free_info( &infoMain );
+		}
+#endif
+		if( basePath[0] == '\0' ) {
+			strcpy( basePath, getenv( "PERIMETER_HOME" ) );
+			strcat( basePath, "/removable/sdcard/appdata/doom3bfg" );
+		}
+	}
 
 	return basePath;
 }
@@ -381,6 +406,29 @@ const char *Sys_DefaultSavePath() {
 
 /*
 ==============
+Sys_AdditionalSearchPaths
+==============
+*/
+void Sys_AdditionalSearchPaths( idStrList & paths ) {
+
+	// Shared storage
+	idStr str = Sys_Cwd();
+	str += "/shared/appdata/doom3bfg";
+	paths.AddUnique( str );
+
+	// App assets
+	str = Sys_Cwd();
+	str += "/app/native/assets";
+	paths.AddUnique( str );
+
+	// Not temp/not backed-up cache (**UNTESTED**)
+	str = Sys_Cwd();
+	str += "/cache";
+	paths.AddUnique( str );
+}
+
+/*
+==============
 Sys_EXEPath
 ==============
 */
@@ -390,7 +438,9 @@ const char *Sys_EXEPath() {
 		int fd = open( "/proc/self/exefile", O_RDONLY );
 		int pos = read( fd, exe, MAX_OSPATH - 1 );
 		close( fd );
-		exe[pos] = '\0';
+		if ( pos > 0 ) {
+			exe[pos] = '\0';
+		}
 	}
 	return exe;
 }

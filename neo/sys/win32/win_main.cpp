@@ -3,6 +3,7 @@
 
 Doom 3 BFG Edition GPL Source Code
 Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 2013 Vincent Simonetti
 
 This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
 
@@ -548,6 +549,14 @@ const char *Sys_DefaultSavePath() {
 	strcat( savePath, SAVE_PATH );
 
 	return savePath;
+}
+
+/*
+==============
+Sys_AdditionalSearchPaths
+==============
+*/
+void Sys_AdditionalSearchPaths( idStrList& paths ) {
 }
 
 /*
