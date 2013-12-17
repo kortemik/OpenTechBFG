@@ -1057,7 +1057,7 @@ int NormalDistanceDXT1( const int *vector, const int *normalized ) {
 			"movd		%%xmm0, (%[result])\n"
 			: [result] "=r" (result)
 			: [vector] "r" (vector), [normalized] "r" (normalized), [shuf2301] "i" R_SHUFFLE_PS( 2, 3, 0, 1 ), [shuf1010] "i" R_SHUFFLE_PS( 1, 0, 1, 0 )
-			: "xmm0", "xmm1", "xmm2");
+			: "xmm0", "xmm1", "xmm2", "memory");
 	return result;
 #else
 	float floatNormal[3];
@@ -1184,7 +1184,7 @@ int NormalDistanceDXT5( const int *vector, const int *normalized ) {
 			: [result] "=r" (result)
 			: [vector] "r" (vector), [normalized] "r" (normalized),
 			 [shuf2301] "i" R_SHUFFLE_PS( 2, 3, 0, 1 ), [shuf1010] "i" R_SHUFFLE_PS( 1, 0, 1, 0 ), [shuf1230] "i" R_SHUFFLE_PS( 1, 2, 3, 0 ), [shuf0132] "i" R_SHUFFLE_PS( 0, 1, 3, 2 )
-			: "xmm0", "xmm1", "xmm2", "xmm3");
+			: "xmm0", "xmm1", "xmm2", "xmm3", "memory");
 	return result;
 #else
 #if 0	// object-space

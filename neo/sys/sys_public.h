@@ -471,6 +471,9 @@ void			Sys_FPU_SetFTZ( bool enable );
 // sets Denormals-Are-Zero mode (only available when CPUID_DAZ is set)
 void			Sys_FPU_SetDAZ( bool enable );
 
+// set VFP vector length and offset (only available when CPUID_VFP is set and CPU is ARM architecture)
+void			Sys_FPU_VFP_SetLEN_STRIDE( int length, int stride );
+
 // returns amount of system ram
 int				Sys_GetSystemRam();
 
@@ -709,6 +712,7 @@ public:
 	virtual bool			FPU_StackIsEmpty() = 0;
 	virtual void			FPU_SetFTZ( bool enable ) = 0;
 	virtual void			FPU_SetDAZ( bool enable ) = 0;
+	virtual void			FPU_VFP_SetLEN_STRIDE( int length, int stride ) = 0;
 
 	virtual void			FPU_EnableExceptions( int exceptions ) = 0;
 

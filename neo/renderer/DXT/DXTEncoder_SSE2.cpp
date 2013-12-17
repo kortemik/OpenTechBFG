@@ -178,7 +178,7 @@ ID_INLINE void idDxtEncoder::ExtractBlock_SSE2( const byte * inPtr, int width, b
 			"movdqa	%%xmm2, 32(%[color])\n"
 			"movdqa	(%[in],%[width],2), %%xmm3\n"		// + 12 * width
 			"movdqa	%%xmm3, 48(%[color])\n"
-			:: [in] "r" (inPtr), [color] "r" (colorBlock), [width] "r" (width) : "xmm0", "xmm1", "xmm2", "xmm3");
+			:: [in] "r" (inPtr), [color] "r" (colorBlock), [width] "r" (width) : "xmm0", "xmm1", "xmm2", "xmm3", "memory");
 #elif defined ( ID_WIN_X86_SSE2_INTRIN ) || defined ( ID_QNX_X86_SSE2_INTRIN )
 	*((__m128i *)(&colorBlock[ 0])) = _mm_load_si128( (__m128i *)( inPtr + width * 4 * 0 ) );
 	*((__m128i *)(&colorBlock[16])) = _mm_load_si128( (__m128i *)( inPtr + width * 4 * 1 ) );
@@ -246,7 +246,7 @@ ID_INLINE void idDxtEncoder::GetMinMaxBBox_SSE2( const byte * colorBlock, byte *
 			"movd		%%xmm0, (%[min])\n"
 			"movd		%%xmm1, (%[max])\n"
 			:: [color] "r" (colorBlock), [min] "r" (minColor), [max] "r" (maxColor), [shuf2323] "i" R_SHUFFLE_D( 2, 3, 2, 3 )
-			: "xmm0", "xmm1", "xmm3", "xmm4", "xmm6", "xmm7");
+			: "xmm0", "xmm1", "xmm3", "xmm4", "xmm6", "xmm7", "memory");
 #elif defined ( ID_WIN_X86_SSE2_INTRIN ) || defined ( ID_QNX_X86_SSE2_INTRIN )
 	__m128i block0 = *((__m128i *)(&colorBlock[ 0]));
 	__m128i block1 = *((__m128i *)(&colorBlock[16]));
@@ -319,7 +319,7 @@ ID_INLINE void idDxtEncoder::InsetColorsBBox_SSE2( byte * minColor, byte * maxCo
 			"packuswb	%%xmm1, %%xmm1\n"
 			"movd		%%xmm0, (%[min])\n"
 			"movd		%%xmm1, (%[max])\n"
-			:: [min] "r" (minColor), [max] "r" (maxColor) : "xmm0", "xmm1", "xmm2");
+			:: [min] "r" (minColor), [max] "r" (maxColor) : "xmm0", "xmm1", "xmm2", "memory");
 #elif defined ( ID_WIN_X86_SSE2_INTRIN ) || defined ( ID_QNX_X86_SSE2_INTRIN )
 	__m128i min = _mm_cvtsi32_si128( *(int *)minColor );
 	__m128i max = _mm_cvtsi32_si128( *(int *)maxColor );
@@ -662,7 +662,7 @@ void idDxtEncoder::EmitColorIndices_SSE2( const byte * colorBlock, const byte * 
 			:: [colorBlock] "r" (colorBlock), [minColor] "r" (minColor_), [maxColor] "r" (maxColor_), [outPtr] "r" (outPtr), [data] "r" (data),
 			[shuf0101] "i" R_SHUFFLE_D( 0, 1, 0, 1 ), [shuf0213] "i" R_SHUFFLE_D( 0, 2, 1, 3 ), [shuf0323] "i" R_SHUFFLE_D( 0, 3, 2, 3 ), [shuf3133] "i" R_SHUFFLE_D( 3, 1, 3, 3 ),
 			[shuf2301] "i" R_SHUFFLE_D( 2, 3, 0, 1 ), [shuf1230] "i" R_SHUFFLE_D( 1, 2, 3, 0 ), [shuf3012] "i" R_SHUFFLE_D( 3, 0, 1, 2 )
-			: "eax", "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
+			: "eax", "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "memory", "cc");
 #endif
 
 	outData += 4;
@@ -1117,7 +1117,7 @@ void idDxtEncoder::EmitColorAlphaIndices_SSE2( const byte *colorBlock, const byt
 			:: [colorBlock] "r" (colorBlock), [minColor] "r" (minColor_), [maxColor] "r" (maxColor_), [outPtr] "r" (outPtr), [data] "r" (data),
 			[shuf0101] "i" R_SHUFFLE_D( 0, 1, 0, 1 ), [shuf0213] "i" R_SHUFFLE_D( 0, 2, 1, 3 ), [shuf0323] "i" R_SHUFFLE_D( 0, 3, 2, 3 ), [shuf3133] "i" R_SHUFFLE_D( 3, 1, 3, 3 ),
 			[shuf0202] "i" R_SHUFFLE_D( 0, 2, 0, 2 ), [shuf2301] "i" R_SHUFFLE_D( 2, 3, 0, 1 ), [shuf1230] "i" R_SHUFFLE_D( 1, 2, 3, 0 ), [shuf3012] "i" R_SHUFFLE_D( 3, 0, 1, 2 )
-			: "eax", "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
+			: "eax", "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "memory", "cc");
 #endif
 
 	outData += 4;
@@ -1545,7 +1545,7 @@ void idDxtEncoder::EmitCoCgIndices_SSE2( const byte *colorBlock, const byte *min
 			:: [colorBlock] "r" (colorBlock), [minColor] "r" (minColor_), [maxColor] "r" (maxColor_), [outPtr] "r" (outPtr), [data] "r" (data),
 			[shuf0101] "i" R_SHUFFLE_D( 0, 1, 0, 1 ), [shuf0213] "i" R_SHUFFLE_D( 0, 2, 1, 3 ), [shuf2301] "i" R_SHUFFLE_D( 2, 3, 0, 1 ), [shuf1230] "i" R_SHUFFLE_D( 1, 2, 3, 0 ),
 			[shuf3012] "i" R_SHUFFLE_D( 3, 0, 1, 2 )
-			: "eax", "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
+			: "eax", "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "memory", "cc");
 #endif
 
 	outData += 4;
@@ -1951,7 +1951,7 @@ void idDxtEncoder::EmitAlphaIndices_SSE2( const byte *block, const int minAlpha_
 			:: [block] "r" (block), [minAlpha] "r" (minAlpha_), [maxAlpha] "r" (maxAlpha_), [outPtr] "r" (outPtr),
 			[shuf0000] "i" R_SHUFFLE_D( 0, 0, 0, 0 ), [shuf1111] "i" R_SHUFFLE_D( 1, 1, 1, 1 ), [shuf2222] "i" R_SHUFFLE_D( 2, 2, 2, 2 ), [shuf3333] "i" R_SHUFFLE_D( 3, 3, 3, 3 ),
 			[shuf2301] "i" R_SHUFFLE_D( 2, 3, 0, 1 )
-			: "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
+			: "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "memory");
 #endif
 
 	outData += 6;
@@ -2373,7 +2373,7 @@ void idDxtEncoder::EmitAlphaIndices_SSE2( const byte *block, const int channelBi
 			:: [block] "r" (block), [channelBitOffset] "r" (channelBitOffset), [minAlpha] "r" (minAlpha_), [maxAlpha] "r" (maxAlpha_), [outPtr] "r" (outPtr),
 			[shuf0000] "i" R_SHUFFLE_D( 0, 0, 0, 0 ), [shuf1111] "i" R_SHUFFLE_D( 1, 1, 1, 1 ), [shuf2222] "i" R_SHUFFLE_D( 2, 2, 2, 2 ), [shuf3333] "i" R_SHUFFLE_D( 3, 3, 3, 3 ),
 			[shuf2301] "i" R_SHUFFLE_D( 2, 3, 0, 1 )
-			: "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
+			: "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "memory");
 #endif
 
 	outData += 6;
@@ -2897,7 +2897,7 @@ ID_INLINE void idDxtEncoder::ScaleYCoCg_SSE2( byte *colorBlock, byte *minColor, 
 			"movdqa		%%xmm3, 48(%[colorBlock])\n"
 			:: [colorBlock] "r" (colorBlock), [minColor] "r" (minColor), [maxColor] "r" (maxColor),
 			[shuf0000] "i" R_SHUFFLE_D( 0, 0, 0, 0 ), [shuf1010] "i" R_SHUFFLE_D( 1, 0, 1, 0 )
-			: "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
+			: "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "memory");
 #elif defined ( ID_WIN_X86_SSE2_INTRIN ) || defined ( ID_QNX_X86_SSE2_INTRIN )
 	__m128i block0 = *((__m128i *)(&colorBlock[ 0]));
 	__m128i block1 = *((__m128i *)(&colorBlock[16]));
@@ -3060,7 +3060,7 @@ ID_INLINE void idDxtEncoder::InsetYCoCgBBox_SSE2( byte *minColor, byte *maxColor
 			"packuswb	%%xmm1, %%xmm1\n"
 			"movd		%%xmm0, (%[min])\n"
 			"movd		%%xmm1, (%[max])\n"
-			:: [min] "r" (minColor), [max] "r" (maxColor) : "xmm0", "xmm1", "xmm2", "xmm3");
+			:: [min] "r" (minColor), [max] "r" (maxColor) : "xmm0", "xmm1", "xmm2", "xmm3", "memory");
 #elif defined ( ID_WIN_X86_SSE2_INTRIN ) || defined ( ID_QNX_X86_SSE2_INTRIN )
 	__m128c temp0, temp1, temp2, temp3, temp4, temp5, temp6, temp7;
 
@@ -3251,7 +3251,7 @@ ID_INLINE void idDxtEncoder::SelectYCoCgDiagonal_SSE2( const byte *colorBlock, b
 			"movd		%%xmm7, (%[maxColor])\n"
 			:: [colorBlock] "r" (colorBlock), [minColor] "r" (minColor), [maxColor] "r" (maxColor),
 			[shuf0000] "i" R_SHUFFLE_D( 0, 0, 0, 0 ), [shuf2301] "i" R_SHUFFLE_D( 2, 3, 0, 1 )
-			: "xmm0", "xmm1", "xmm2", "xmm3", "xmm6", "xmm7");
+			: "xmm0", "xmm1", "xmm2", "xmm3", "xmm6", "xmm7", "memory");
 #elif defined ( ID_WIN_X86_SSE2_INTRIN ) || defined ( ID_QNX_X86_SSE2_INTRIN )
 	__m128i block0 = *((__m128i *)(&colorBlock[ 0]));
 	__m128i block1 = *((__m128i *)(&colorBlock[16]));
@@ -3596,7 +3596,7 @@ void idDxtEncoder::EmitGreenIndices_SSE2( const byte *block, const int channelBi
 			"movd		%%xmm7, (%[outPtr])\n"
 			:: [outPtr] "r" (outPtr), [block] "r" (block), [channelBitOffset] "r" (channelBitOffset), [minGreen] "r" (minGreen), [maxGreen] "r" (maxGreen),
 			[shuf0000] "i" R_SHUFFLE_D( 0, 0, 0, 0 ), [shuf1111] "i" R_SHUFFLE_D( 1, 1, 1, 1 ), [shuf2222] "i" R_SHUFFLE_D( 2, 2, 2, 2 ), [shuf0213] "i" R_SHUFFLE_D( 0, 2, 1, 3 )
-			: "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
+			: "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "memory");
 #endif
 
 	outData += 4;
@@ -3783,7 +3783,7 @@ void idDxtEncoder::InsetNormalsBBoxDXT5_SSE2( byte *minNormal, byte *maxNormal )
 			"packuswb	%%xmm1, %%xmm1\n"
 			"movd		%%xmm0, (%[min])\n"
 			"movd		%%xmm1, (%[max])\n"
-			:: [min] "r" (minNormal), [max] "r" (maxNormal) : "xmm0", "xmm1", "xmm2", "xmm3");
+			:: [min] "r" (minNormal), [max] "r" (maxNormal) : "xmm0", "xmm1", "xmm2", "xmm3", "memory");
 #elif defined ( ID_WIN_X86_SSE2_INTRIN ) || defined ( ID_QNX_X86_SSE2_INTRIN )
 	__m128i temp0, temp1, temp2, temp3;
 

@@ -1005,6 +1005,14 @@ bool EmailCrashReport( const char* messageText ) {
 	return ret;
 }
 
+#define TEST_FPU_EXCEPTIONS	/*	FPU_EXCEPTION_INVALID_OPERATION |		*/	\
+							/*	FPU_EXCEPTION_DENORMALIZED_OPERAND |	*/	\
+							/*	FPU_EXCEPTION_DIVIDE_BY_ZERO |			*/	\
+							/*	FPU_EXCEPTION_NUMERIC_OVERFLOW |		*/	\
+							/*	FPU_EXCEPTION_NUMERIC_UNDERFLOW |		*/	\
+							/*	FPU_EXCEPTION_INEXACT_RESULT |			*/	\
+								0
+
 /*
 ==================
 main
@@ -1048,6 +1056,9 @@ int main( int argc, char** argv ) {
 	// get the initial time base
 	Sys_Milliseconds();
 
+//	Sys_FPU_EnableExceptions( TEST_FPU_EXCEPTIONS );
+//	Sys_FPU_SetPrecision( FPU_PRECISION_DOUBLE_EXTENDED ); // ARM doesn't support this precision
+
 	// check for data, copy if it doesn't exist
 	//TODO (need to check that shared file access is allowed)
 
@@ -1058,8 +1069,15 @@ int main( int argc, char** argv ) {
 		common->Init( 0, NULL, NULL );
 	}
 
+#if TEST_FPU_EXCEPTIONS != 0
+	common->Printf( Sys_FPU_GetState() );
+#endif
+
 	// main game loop
 	while( 1 ) {
+		// set exceptions, even if some crappy syscall changes them!
+		// Sys_FPU_EnableExceptions( TEST_FPU_EXCEPTIONS );
+
 		// run the game
 		common->Frame();
 	}

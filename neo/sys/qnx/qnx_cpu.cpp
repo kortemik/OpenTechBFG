@@ -163,7 +163,7 @@ IsDAZEnabled
 ================
 */
 static bool IsDAZEnabled() {
-	unsigned char FXSaveArea[512] __attribute__((__aligned__(16)));
+	ALIGN16( unsigned char FXSaveArea[512] );
 	unsigned char *FXArea = FXSaveArea;
 	unsigned int mask = 0;
 
@@ -579,6 +579,202 @@ void Sys_FPU_ClearStack() {
 #endif
 }
 
+//XXX Unsure if there is a ARM version of BB10 this actually works in
+#if defined(ID_QNX_ARM) && !BBNDK_VERSION_AT_LEAST(10, 3, 0)
+
+/*
+===============
+fp_precision
+===============
+*/
+int fp_precision( int newprecision ) {
+	// NEON precision is determined by the particular opcode used, not by a status register
+	return _FP_PREC_DOUBLE;
+}
+
+/*
+===============
+fp_rounding
+===============
+*/
+int fp_rounding( int newrounding ) {
+	int ret;
+#ifdef ID_QNX_ARM_NEON_ASM
+	//NEON: VMRS, VMSR
+	//VFP:  FMRX, FMXR
+	__asm__("VMRS	r0, FPSCR\n"
+			"AND	r1, r0, #(~(3<<22))\n"
+			"LSR	r0, r0, #22\n"
+			"ANDS	%[ret], r0, #3\n"
+
+			// Convert result to _FP_ROUND_*
+			"BEQ	ret_fp_rounding_0\n"
+			"ADD	%[ret], #1\n"
+			"CMP	%[ret], #4\n"
+			"IT		EQ\n"
+			"MOVEQ	%[ret], #1\n"
+
+			// Convert input to ARM rounding
+		"ret_fp_rounding_0:\n"
+			"CMP	%[newrounding], #0\n"
+			"BLT	ret_fp_rounding\n"
+
+			"BEQ	new_fp_rounding_0\n"	// _FP_ROUND_NEAREST -> RN
+			"AND	%[newrounding], %[newrounding], #3\n"
+			"SUBS	%[newrounding], #1\n"
+			"IT		EQ\n"
+			"MOVEQ	%[newrounding], #3\n"	// _FP_ROUND_ZERO -> RZ
+											// _FP_ROUND_POSITIVE -> RP, _FP_ROUND_NEGATIVE -> RM
+
+		"new_fp_rounding_0:\n"
+			"LSL	r0, %[newrounding], #22\n"
+			"ORR	r1, r1, r0\n"
+			"VMSR	FPSCR, r1\n"
+		"ret_fp_rounding:\n"
+			: [ret] "=r" (ret) : [newrounding] "r" (newrounding) : "r0", "r1", "cc");
+#else
+#error Must compile with -mfpu=neon
+#endif
+	return ret;
+}
+
+/*
+===============
+fp_exception_mask
+===============
+*/
+int fp_exception_mask( int new_mask, int set ) {
+	// While the ASM is correct, the function does not work as exception trap bits are not set-able in user-mode (at least on QC chips)
+
+	int ret;
+#ifdef __ARM_NEON__
+	//NEON: VMRS, VMSR
+	//VFP:  FMRX, FMXR
+	__asm__("VMRS	r0, FPSCR\n"
+			"AND	r1, r0, #(~(31<<8))\n"
+			"LSR	r0, r0, #8\n"
+			"AND	r2, r0, #31\n"
+
+			// Convert result to _FP_EXC_*
+			"BIC	%[ret], %[ret], %[ret]\n"
+
+			"ANDS	r0, r2, #(1<<0)\n"
+			"IT		NE\n"
+			"ORRNE	%[ret], %[ret], %[IXE]\n"
+
+			"ANDS	r0, r2, #(1<<1)\n"
+			"IT		NE\n"
+			"ORRNE	%[ret], %[ret], %[DZE]\n"
+
+			"ANDS	r0, r2, #(1<<2)\n"
+			"IT		NE\n"
+			"ORRNE	%[ret], %[ret], %[OFE]\n"
+
+			"ANDS	r0, r2, #(1<<3)\n"
+			"IT		NE\n"
+			"ORRNE	%[ret], %[ret], %[UFE]\n"
+
+			"ANDS	r0, r2, #(1<<4)\n"
+			"IT		NE\n"
+			"ORRNE	%[ret], %[ret], %[IOE]\n"
+
+			"CMP	%[new_mask], #0\n"
+			"BLT	ret_fp_exception_mask\n"
+
+			// Convert input to ARM exception flags
+			"BIC	r2, r2, r2\n"
+
+			"ANDS	r0, %[new_mask], %[IXE]\n"
+			"IT		NE\n"
+			"ORRNE	r2, r2, #(1<<0)\n"
+
+			"ANDS	r0, %[new_mask], %[DZE]\n"
+			"IT		NE\n"
+			"ORRNE	r2, r2, #(1<<1)\n"
+
+			"ANDS	r0, %[new_mask], %[OFE]\n"
+			"IT		NE\n"
+			"ORRNE	r2, r2, #(1<<2)\n"
+
+			"ANDS	r0, %[new_mask], %[UFE]\n"
+			"IT		NE\n"
+			"ORRNE	r2, r2, #(1<<3)\n"
+
+			"ANDS	r0, %[new_mask], %[IOE]\n"
+			"IT		NE\n"
+			"ORRNE	r2, r2, #(1<<4)\n"
+
+			// ARM doesn't have a denormal flag, so ignore _FP_EXC_DENORMAL
+
+			"LSL	r0, r2, #8\n"
+			"CMP	%[set], #0\n"
+			"ITE	EQ\n"
+			"BICEQ	r1, r1, r0\n"			// Disable bits
+			"ORRNE	r1, r1, r0\n"			// Enable bits
+			"VMSR	FPSCR, r1\n"
+		"ret_fp_exception_mask:\n"
+			: [ret] "=&r" (ret)
+			: [new_mask] "r" (new_mask), [set] "r" (set),
+			  [IXE] "I" (_FP_EXC_INEXACT), [DZE] "I" (_FP_EXC_DIVZERO), [OFE] "I" (_FP_EXC_OVERFLOW), [UFE] "I" (_FP_EXC_UNDERFLOW), [IOE] "I" (_FP_EXC_INVALID)
+			: "r0", "r1", "r2", "cc");
+#else
+#error Must compile with -mfpu=neon
+#endif
+	return ret;
+}
+
+/*
+===============
+fp_exception_value
+===============
+*/
+int fp_exception_value( int mask ) {
+	int ret;
+#ifdef __ARM_NEON__
+	//NEON: VMRS, VMSR
+	//VFP:  FMRX, FMXR
+	__asm__("VMRS	r0, FPSCR\n"
+			"AND	r1, r0, #31\n"
+
+			// Convert result to _FP_EXC_*
+			"BIC	%[ret], %[ret], %[ret]\n"
+
+			"ANDS	r0, r1, #(1<<0)\n"
+			"IT		NE\n"
+			"ORRNE	%[ret], %[ret], %[IXE]\n"
+
+			"ANDS	r0, r1, #(1<<1)\n"
+			"IT		NE\n"
+			"ORRNE	%[ret], %[ret], %[DZE]\n"
+
+			"ANDS	r0, r1, #(1<<2)\n"
+			"IT		NE\n"
+			"ORRNE	%[ret], %[ret], %[OFE]\n"
+
+			"ANDS	r0, r1, #(1<<3)\n"
+			"IT		NE\n"
+			"ORRNE	%[ret], %[ret], %[UFE]\n"
+
+			"ANDS	r0, r1, #(1<<4)\n"
+			"IT		NE\n"
+			"ORRNE	%[ret], %[ret], %[IOE]\n"
+
+			"AND	%[ret], %[ret], %[mask]\n"
+
+			: [ret] "=&r" (ret)
+			: [mask] "r" (mask),
+			  [IXE] "I" (_FP_EXC_INEXACT), [DZE] "I" (_FP_EXC_DIVZERO), [OFE] "I" (_FP_EXC_OVERFLOW), [UFE] "I" (_FP_EXC_UNDERFLOW), [IOE] "I" (_FP_EXC_INVALID)
+			: "r0", "r1", "cc");
+#else
+#error Must compile with -mfpu=neon
+#endif
+	return ret;
+}
+
+// fp_exception_value was an extra function that isn't used. fp_setenv doesn't need to be implemented for this
+
+#endif
+
 /*
 ===============
 Sys_FPU_GetState
@@ -678,8 +874,7 @@ const char *Sys_FPU_GetState() {
 #error Must compile with -mfpu=neon
 #endif
 
-	//XXX Missing fp_precision... int prec = fp_precision( -1 );
-	int prec = _FP_PREC_FLOAT;
+	int prec = fp_precision( -1 );
 #else
 #error Unknown CPU architecture
 #endif
@@ -733,8 +928,8 @@ void Sys_FPU_EnableExceptions( int exceptions ) {
 	}
 
 	//No way to simply set, we have to toggle flags on and off
-	//XXX Missing >> fp_exception_mask( _FP_EXC_ALL, 0 ); //Disable all exception mask flags
-	//XXX Missing >> fp_exception_mask( flags, 1 ); //Set exception flags
+	fp_exception_mask( _FP_EXC_ALL, 0 ); //Disable all exception mask flags
+	fp_exception_mask( flags, 1 ); //Set exception flags
 }
 
 /*
@@ -756,7 +951,7 @@ void Sys_FPU_SetPrecision( int precision ) {
 		val = _FP_PREC_DOUBLE_EXTENDED;
 		break;
 	}
-	//XXX Missing >> fp_precision( val );
+	fp_precision( val );
 }
 
 /*
@@ -782,7 +977,7 @@ void Sys_FPU_SetRounding( int rounding ) {
 		val = _FP_ROUND_ZERO;
 		break;
 	}
-	//XXX Missing >> fp_rounding( val );
+	fp_rounding( val );
 }
 
 /*
