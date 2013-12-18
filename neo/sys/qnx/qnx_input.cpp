@@ -253,6 +253,36 @@ void Sys_GrabMouseCursor( bool grabIt ) {
 //	Joystick Input Handling
 //=====================================================================================
 
+// SteelSeries FREE event workaround
+#define SSF_VID 0x1038
+#define SSF_DID 0x1412
+#define SSF_WORKAROUND
+#ifdef SSF_WORKAROUND
+static int ssf_polling = 0;
+#define SSF_POLLING_COUNT ( ( MAX_JOYSTICKS * 60 ) * 5 ) // Once every 5 seconds, just to prevent constant device polling
+#endif
+
+static struct {
+	int vid;
+	int did;
+	const char *vendor;
+	const char *name;
+	bool hasAnalogTriggers;
+} knownJoysticks[] = {
+	// VID		 DID	 Vendor			 Name			 Analog Triggers?
+	{ 0x057E,	0x0306,	"Nintendo",		"Wii Remote",			false },
+	{ 0x20D6,	0x0DAD,	"MOGA",			"Pro",					true },
+	//{ 0x20D6,	?,		"MOGA",			"Hero Power",			true },
+	//{ 0x20D6,	?,		"MOGA",			"Pro Power",			true },
+	{ SSF_VID,	SSF_DID,"SteelSeries",	"FREE",					false },
+	//{ ?,		?,		"Gametel",		"Controller",			false },
+	//{ ?,		?,		"Logitech",		"F310",					true },
+	//{ ?,		?,		"Logitech",		"F710",					true },
+	//{ ?,		?,		"Microsoft",	"Xbox 360 Controller",	true },
+	//{ ?,		?,		"Razer",		"Sabertooth",			true },
+	{ 0,		0,		NULL,			NULL,					false }
+};
+
 /*
 ===========
 Sys_SetRumble
@@ -350,6 +380,7 @@ void idJoystickQnx::UpdateDevice( bool attached, screen_device_t device ) {
 		if ( attached && controllers[i].handle == NULL ) {
 			// attach controller
 			controllers[i].handle = device;
+			controllers[i].infoIndex = -1;
 
 			screen_get_device_property_cv( device, SCREEN_PROPERTY_ID_STRING, sizeof( controllers[i].id ), controllers[i].id );
 			screen_get_device_property_iv( device, SCREEN_PROPERTY_BUTTON_COUNT, &controllers[i].buttonCount );
@@ -364,13 +395,74 @@ void idJoystickQnx::UpdateDevice( bool attached, screen_device_t device ) {
 			}
 
 			memcpy( &controllers[i].pButtonBits, &controllers[i].buttonBits, sizeof( int ) * 7 );
+
+			// Try to determine controller
+			int vendorId = -1;
+			int productId = -1;
+			char* token = strtok( controllers[i].id, "-" );
+			token = strtok( NULL, "-" );
+			if ( token ) {
+				vendorId = strtol( token, NULL, 16 );
+			} else {
+				// Won't be able to match anything, so just exit now
+				common->Printf( "Couldn't parse gamepad/joystick ID: %s\n", controllers[i].id );
+				break;
+			}
+
+			token = strtok( NULL, "-" );
+			if ( token ) {
+				productId = strtol( token, NULL, 16 );
+			}
+
+			for ( int k = 0; ; k++ ) {
+				if ( !knownJoysticks[k].vendor ) {
+					break;
+				}
+
+				if ( knownJoysticks[k].vid == vendorId && knownJoysticks[k].did == productId ) {
+					controllers[i].infoIndex = k;
+					break;
+				}
+			}
+
+			if ( controllers[i].infoIndex == -1 ) {
+				common->Printf( "Unknown gamepad/joystick ID: %s\n", controllers[i].id );
+			}
 			break;
-		} else if ( !attached && controllers[i].handle == device ) {
-			// disconnect controller
-			memset( &controllers[i], 0, sizeof( controllerState_t ) );
+		} else if ( controllers[i].handle == device ) {
+			if ( !attached ) {
+				// disconnect controller
+				memset( &controllers[i], 0, sizeof( controllerState_t ) );
+			}
 			break;
 		}
 	}
+}
+
+/*
+========================
+idJoystickQnx::IsKnownDevice
+========================
+*/
+int idJoystickQnx::IsKnownDevice( int inputDeviceNum ) {
+	if ( inputDeviceNum >= 0 && inputDeviceNum < MAX_JOYSTICKS && controllers[inputDeviceNum].handle != NULL ) {
+		return controllers[inputDeviceNum].infoIndex;
+	}
+	return -1;
+}
+
+/*
+========================
+idJoystickQnx::IsKnownDevice
+========================
+*/
+int idJoystickQnx::HasTriggers( int inputDeviceNum ) {
+	if ( inputDeviceNum >= 0 && inputDeviceNum < MAX_JOYSTICKS && controllers[inputDeviceNum].handle != NULL ) {
+		if ( controllers[inputDeviceNum].infoIndex >= 0 ) { // Only want known devices to be returned with triggers
+			return knownJoysticks[ controllers[inputDeviceNum].infoIndex ].hasAnalogTriggers;
+		}
+	}
+	return -1;
 }
 
 /*
@@ -452,6 +544,31 @@ int idJoystickQnx::PollInputEvents( int inputDeviceNum ) {
 
 	controllerState_t *cs = &controllers[ inputDeviceNum ];
 
+#ifdef SSF_WORKAROUND
+	// Still room for more controllers, check if any controllers (particularly the SteelSeries FREE one) has been connected
+	if ( ssf_polling++ > SSF_POLLING_COUNT ) {
+		int deviceCount;
+		screen_get_context_property_iv( qnx.screenCtx, SCREEN_PROPERTY_DEVICE_COUNT, &deviceCount );
+
+		screen_device_t* devices = new (TAG_TEMP) screen_device_t[deviceCount];
+
+		screen_get_context_property_pv( qnx.screenCtx, SCREEN_PROPERTY_DEVICES, (void**)devices );
+
+		for ( int i = 0; i < deviceCount; i++ ) {
+			int type = 0;
+			screen_get_device_property_iv( devices[i], SCREEN_PROPERTY_TYPE, &type );
+
+			if ( type == SCREEN_EVENT_GAMEPAD || type == SCREEN_EVENT_JOYSTICK ) {
+				UpdateDevice( true, devices[i] );
+			}
+		}
+
+		delete[] devices;
+
+		ssf_polling = 0;
+	}
+#endif
+
 	if ( cs->handle == NULL ) {
 		return numEvents;
 	}
@@ -459,7 +576,21 @@ int idJoystickQnx::PollInputEvents( int inputDeviceNum ) {
 	// get current and prior state
 	int currentState[7]; //buttonBits, analog0(x, y, trig), analog1(x, y, trig)
 	int priorState[7];
-	screen_get_device_property_iv( cs->handle, SCREEN_PROPERTY_BUTTONS, &cs->buttonBits );
+	int ret = screen_get_device_property_iv( cs->handle, SCREEN_PROPERTY_BUTTONS, &cs->buttonBits );
+
+#ifdef SSF_WORKAROUND
+	if ( ret != 0 ) {
+		// The SteelSeries FREE controller does not produce connected/disconnected events. In the case of disconnection,
+		// polling functions should fail. So if buttons could not be polled, and it's a SteelSeries FREE controller,
+		// it may have been disconnected, so disconnect it.
+		if ( cs->infoIndex >= 0 &&
+				knownJoysticks[cs->infoIndex].vid == SSF_VID && knownJoysticks[cs->infoIndex].did == SSF_DID ) {
+			UpdateDevice( false, cs->handle );
+			return numEvents;
+		}
+	}
+#endif
+
 	if ( cs->analogCount > 0 ) {
 		screen_get_device_property_iv( cs->handle, SCREEN_PROPERTY_ANALOG0, cs->analog0 );
 	}
@@ -471,7 +602,7 @@ int idJoystickQnx::PollInputEvents( int inputDeviceNum ) {
 	memcpy( &cs->pButtonBits, &cs->buttonBits, sizeof( currentState ) );
 
 	if ( session->IsSystemUIShowing() ) {
-		// memset currentState so the current input does not get latched if the UI is showing
+		// memset currentState so the current input does not get latched if the UI is showing (XXX may just be a Windows thing, which is where this code is from)
 		memset( &currentState, 0, sizeof( currentState ) );
 	}
 

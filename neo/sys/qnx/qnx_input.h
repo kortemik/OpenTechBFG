@@ -50,6 +50,7 @@ struct controllerState_t {
 	int				analogCount;
 	int				buttonCount;
 	char			id[64];
+	int				infoIndex;
 
 	// current state
 	int				buttonBits;
@@ -74,6 +75,10 @@ public:
 	virtual void	EndInputEvents() {}
 
 	virtual void	UpdateDevice( bool attached, screen_device_t device );
+
+	// 0 < error, 0 = false, 0 > true
+	virtual int	IsKnownDevice( int inputDeviceNum );
+	virtual int	HasTriggers( int inputDeviceNum );
 
 protected:
 	void 			PushButton( int inputDeviceNum, int key, bool value );

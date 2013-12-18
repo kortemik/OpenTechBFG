@@ -413,7 +413,7 @@ void Sys_AdditionalSearchPaths( idStrList & paths ) {
 
 	// Shared storage
 	idStr str = Sys_Cwd();
-	str += "/shared/appdata/doom3bfg";
+	str += "/shared/misc/appdata/doom3bfg";
 	paths.AddUnique( str );
 
 	// App assets
