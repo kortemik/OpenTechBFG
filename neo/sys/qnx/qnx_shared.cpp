@@ -264,7 +264,10 @@ Sys_LockMemory
 ================
 */
 bool Sys_LockMemory( void *ptr, int bytes ) {
-	return ( mlock( ptr, (size_t)bytes ) == 0 );
+	if ( qnx.canLockMem ) {
+		return ( mlock( ptr, (size_t)bytes ) == 0 );
+	}
+	return false;
 }
 
 /*
@@ -273,7 +276,10 @@ Sys_UnlockMemory
 ================
 */
 bool Sys_UnlockMemory( void *ptr, int bytes ) {
-	return ( munlock( ptr, (size_t)bytes ) == 0 );
+	if ( qnx.canLockMem ) {
+		return ( munlock( ptr, (size_t)bytes ) == 0 );
+	}
+	return false;
 }
 
 /*

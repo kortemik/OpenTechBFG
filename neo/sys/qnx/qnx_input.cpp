@@ -253,15 +253,6 @@ void Sys_GrabMouseCursor( bool grabIt ) {
 //	Joystick Input Handling
 //=====================================================================================
 
-// SteelSeries FREE event workaround
-#define SSF_VID 0x1038
-#define SSF_DID 0x1412
-#define SSF_WORKAROUND
-#ifdef SSF_WORKAROUND
-static int ssf_polling = 0;
-#define SSF_POLLING_COUNT ( ( MAX_JOYSTICKS * 60 ) * 5 ) // Once every 5 seconds, just to prevent constant device polling
-#endif
-
 static struct {
 	int vid;
 	int did;
@@ -274,7 +265,7 @@ static struct {
 	{ 0x20D6,	0x0DAD,	"MOGA",			"Pro",					true },
 	//{ 0x20D6,	?,		"MOGA",			"Hero Power",			true },
 	//{ 0x20D6,	?,		"MOGA",			"Pro Power",			true },
-	{ SSF_VID,	SSF_DID,"SteelSeries",	"FREE",					false },
+	{ 0x1038,	0x1412,"SteelSeries",	"FREE",					false },
 	//{ ?,		?,		"Gametel",		"Controller",			false },
 	//{ ?,		?,		"Logitech",		"F310",					true },
 	//{ ?,		?,		"Logitech",		"F710",					true },
@@ -544,31 +535,6 @@ int idJoystickQnx::PollInputEvents( int inputDeviceNum ) {
 
 	controllerState_t *cs = &controllers[ inputDeviceNum ];
 
-#ifdef SSF_WORKAROUND
-	// Still room for more controllers, check if any controllers (particularly the SteelSeries FREE one) has been connected
-	if ( ssf_polling++ > SSF_POLLING_COUNT ) {
-		int deviceCount;
-		screen_get_context_property_iv( qnx.screenCtx, SCREEN_PROPERTY_DEVICE_COUNT, &deviceCount );
-
-		screen_device_t* devices = new (TAG_TEMP) screen_device_t[deviceCount];
-
-		screen_get_context_property_pv( qnx.screenCtx, SCREEN_PROPERTY_DEVICES, (void**)devices );
-
-		for ( int i = 0; i < deviceCount; i++ ) {
-			int type = 0;
-			screen_get_device_property_iv( devices[i], SCREEN_PROPERTY_TYPE, &type );
-
-			if ( type == SCREEN_EVENT_GAMEPAD || type == SCREEN_EVENT_JOYSTICK ) {
-				UpdateDevice( true, devices[i] );
-			}
-		}
-
-		delete[] devices;
-
-		ssf_polling = 0;
-	}
-#endif
-
 	if ( cs->handle == NULL ) {
 		return numEvents;
 	}
@@ -576,21 +542,7 @@ int idJoystickQnx::PollInputEvents( int inputDeviceNum ) {
 	// get current and prior state
 	int currentState[7]; //buttonBits, analog0(x, y, trig), analog1(x, y, trig)
 	int priorState[7];
-	int ret = screen_get_device_property_iv( cs->handle, SCREEN_PROPERTY_BUTTONS, &cs->buttonBits );
-
-#ifdef SSF_WORKAROUND
-	if ( ret != 0 ) {
-		// The SteelSeries FREE controller does not produce connected/disconnected events. In the case of disconnection,
-		// polling functions should fail. So if buttons could not be polled, and it's a SteelSeries FREE controller,
-		// it may have been disconnected, so disconnect it.
-		if ( cs->infoIndex >= 0 &&
-				knownJoysticks[cs->infoIndex].vid == SSF_VID && knownJoysticks[cs->infoIndex].did == SSF_DID ) {
-			UpdateDevice( false, cs->handle );
-			return numEvents;
-		}
-	}
-#endif
-
+	screen_get_device_property_iv( cs->handle, SCREEN_PROPERTY_BUTTONS, &cs->buttonBits );
 	if ( cs->analogCount > 0 ) {
 		screen_get_device_property_iv( cs->handle, SCREEN_PROPERTY_ANALOG0, cs->analog0 );
 	}

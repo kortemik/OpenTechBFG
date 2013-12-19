@@ -66,6 +66,8 @@ typedef struct {
 	// System state vars
 	bool						quitStarted;
 	navigator_window_state_t	windowState;
+	bool						canSpawn;
+	bool						canLockMem;
 
 	// Input vars
 	int							mouseWheelPosition;

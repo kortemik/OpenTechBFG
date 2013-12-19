@@ -42,7 +42,7 @@ enum sysFolder_t {
 // returns FOLDER_YES if the specified path is a folder
 sysFolder_t		Sys_IsFolder( const char *path );
 
-// get system specific search paths
+// get system specific search paths for data, in reverse order of lower priority to higher priority
 void			Sys_AdditionalSearchPaths( idList<class idStr> & paths );
 
 // use fs_debug to verbose Sys_ListFiles

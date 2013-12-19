@@ -39,8 +39,10 @@ If you have questions concerning this license or the applicable additional terms
 #include <dlfcn.h>
 #include <dirent.h>
 #include <fnmatch.h>
+#include <spawn.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/procmgr.h>
 
 #include <bps/bps.h>
 #include <bps/navigator_invoke.h>
@@ -410,21 +412,20 @@ Sys_AdditionalSearchPaths
 ==============
 */
 void Sys_AdditionalSearchPaths( idStrList & paths ) {
-
 	// Shared storage
 	idStr str = Sys_Cwd();
 	str += "/shared/misc/appdata/doom3bfg";
-	paths.AddUnique( str );
+	paths.Append( str );
 
 	// App assets
 	str = Sys_Cwd();
 	str += "/app/native/assets";
-	paths.AddUnique( str );
+	paths.Append( str );
 
 	// Not temp/not backed-up cache (**UNTESTED**)
 	str = Sys_Cwd();
 	str += "/cache";
-	paths.AddUnique( str );
+	paths.Append( str );
 }
 
 /*
@@ -589,7 +590,12 @@ Other waitMsec values will allow the workFn to be called at those intervals.
 bool Sys_Exec(	const char * appPath, const char * workingPath, const char * args,
 	execProcessWorkFunction_t workFn, execOutputFunction_t outputFn, const int waitMS,
 	unsigned int & exitCode ) {
-	/* TODO
+
+	if ( !qnx.canSpawn ) {
+		return false;
+	}
+
+	/* TODO: Look at "spawn". posix_spawn would be better, but spawn lets us change stdin/stdout/stderr and has a lot more control
 		exitCode = 0;
 		SECURITY_ATTRIBUTES secAttr;
 		secAttr.nLength = sizeof( SECURITY_ATTRIBUTES );
@@ -823,6 +829,12 @@ void Sys_Init() {
 	battery_request_events( 0 );
 
 	cmdSystem->AddCommand( "in_restart", Sys_In_Restart_f, CMD_FL_SYSTEM, "restarts the input system" );
+
+	//
+	// process permissions setup
+	//
+	qnx.canSpawn	= procmgr_ability( 0, PROCMGR_ADN_NONROOT | PROCMGR_AOP_ALLOW | PROCMGR_AID_SPAWN,		PROCMGR_AID_EOL );
+	qnx.canLockMem	= procmgr_ability( 0, PROCMGR_ADN_NONROOT | PROCMGR_AOP_ALLOW | PROCMGR_AID_MEM_LOCK,	PROCMGR_AID_EOL );
 
 	//
 	// QNX version

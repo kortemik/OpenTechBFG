@@ -2624,7 +2624,7 @@ void idFileSystemLocal::Startup() {
 				path.Icmp( BASE_GAMEDIR ) &&
 				path.Icmp( fs_game_base.GetString() ) &&
 				path.Icmp( fs_game.GetString() ) ) {
-			SetupGameDirectories( path.c_str() );
+			AddGameDirectory( path.c_str(), BASE_GAMEDIR );
 		}
 	}
 
