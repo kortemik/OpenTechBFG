@@ -2602,19 +2602,6 @@ void idFileSystemLocal::Startup() {
 
 	SetupGameDirectories( BASE_GAMEDIR );
 
-	// fs_game_base override
-	if ( fs_game_base.GetString()[0] &&
-		 idStr::Icmp( fs_game_base.GetString(), BASE_GAMEDIR ) ) {
-		SetupGameDirectories( fs_game_base.GetString() );
-	}
-
-	// fs_game override
-	if ( fs_game.GetString()[0] &&
-		 idStr::Icmp( fs_game.GetString(), BASE_GAMEDIR ) &&
-		 idStr::Icmp( fs_game.GetString(), fs_game_base.GetString() ) ) {
-		SetupGameDirectories( fs_game.GetString() );
-	}
-
 	// additional search paths
 	idStrList paths;
 	Sys_AdditionalSearchPaths( paths );
@@ -2626,6 +2613,19 @@ void idFileSystemLocal::Startup() {
 				path.Icmp( fs_game.GetString() ) ) {
 			AddGameDirectory( path.c_str(), BASE_GAMEDIR );
 		}
+	}
+
+	// fs_game_base override
+	if ( fs_game_base.GetString()[0] &&
+		 idStr::Icmp( fs_game_base.GetString(), BASE_GAMEDIR ) ) {
+		SetupGameDirectories( fs_game_base.GetString() );
+	}
+
+	// fs_game override
+	if ( fs_game.GetString()[0] &&
+		 idStr::Icmp( fs_game.GetString(), BASE_GAMEDIR ) &&
+		 idStr::Icmp( fs_game.GetString(), fs_game_base.GetString() ) ) {
+		SetupGameDirectories( fs_game.GetString() );
 	}
 
 	// add our commands

@@ -43,7 +43,7 @@
 								<option id="com.qnx.qcc.option.compiler.qccoptions.145142291" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
 								</option>
-								<option id="com.qnx.qcc.option.compiler.ccoptions.717561133" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions"/>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.717561133" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList"/>
 								<option id="com.qnx.qcc.option.compiler.cppoptions.466530091" name="Preprocessor Options (-Wp,)" superClass="com.qnx.qcc.option.compiler.cppoptions"/>
 								<inputType id="com.qnx.qcc.inputType.compiler.843230115" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>

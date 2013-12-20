@@ -35,6 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <sys/mman.h>
 #include <sys/statvfs.h>
 #include <sys/syspage.h>
+#include <sys/resource.h>
 #include <malloc.h>
 
 /*
@@ -245,16 +246,23 @@ void Sys_GetCurrentMemoryStatus( sysMemoryStats_t &stats ) {
 	stats.memoryLoad = ( int )( ( ( float )total / totalPhysical ) * 100 );
 
 	// Adjust memory amount and availability in kb
-	stats.totalPhysical = totalPhysical / 1024;
-	stats.availPhysical = ( totalPhysical - total ) / 1024;
+	stats.totalPhysical = totalPhysical >> 10;
+	stats.availPhysical = ( totalPhysical - total ) >> 10;
 
 	// There is no such thing as a page file on QNX
 	stats.availPageFile = 0;
 	stats.totalPageFile = 0;
 
-	// Virtual memory (mostly limited by physics memory)
-	stats.totalVirtual = stats.totalPhysical;
-	stats.availVirtual = stats.availPhysical;
+	// Virtual memory
+	struct rlimit64 limit;
+	if ( getrlimit64( RLIMIT_VMEM, &limit ) == 0 ) {
+		// Limits can be very big, reduce it to fit int
+		stats.totalVirtual = __min( limit.rlim_cur >> 10, INT_MAX );
+		stats.availVirtual = __min( ( limit.rlim_cur - total ) >> 10, INT_MAX );
+	} else {
+		stats.totalVirtual = stats.totalPhysical;
+		stats.availVirtual = stats.availPhysical;
+	}
 	stats.availExtendedVirtual = 0;
 }
 
@@ -276,10 +284,7 @@ Sys_UnlockMemory
 ================
 */
 bool Sys_UnlockMemory( void *ptr, int bytes ) {
-	if ( qnx.canLockMem ) {
-		return ( munlock( ptr, (size_t)bytes ) == 0 );
-	}
-	return false;
+	return ( munlock( ptr, (size_t)bytes ) == 0 );
 }
 
 /*
@@ -288,7 +293,12 @@ Sys_SetPhysicalWorkMemory
 ================
 */
 void Sys_SetPhysicalWorkMemory( int minBytes, int maxBytes ) {
-	// Not really a possibility on QNX
+	// Cannot set min process size, but can set max
+	struct rlimit64 limit;
+	if ( getrlimit64( RLIMIT_DATA, &limit ) == 0 ) {
+		limit.rlim_cur = __min( maxBytes, limit.rlim_max );
+		setrlimit64( RLIMIT_DATA, &limit );
+	}
 }
 
 

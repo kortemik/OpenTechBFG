@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 #include "../../idlib/precompiled.h"
 
+//#define IMPLEMENT_SPAWN //XXX Compile errors with spawn.h header
+
 #include <errno.h>
 #include <float.h>
 #include <fcntl.h>
@@ -39,10 +41,10 @@ If you have questions concerning this license or the applicable additional terms
 #include <dlfcn.h>
 #include <dirent.h>
 #include <fnmatch.h>
+#ifdef IMPLEMENT_SPAWN
 #include <spawn.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/procmgr.h>
+#endif
+#include <signal.h>
 
 #include <bps/bps.h>
 #include <bps/navigator_invoke.h>
@@ -54,7 +56,11 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <clipboard/clipboard.h>
 
+#include <sys/procmgr.h>
 #include <sys/slog2.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include "../sys_local.h"
 #include "qnx_local.h"
@@ -591,153 +597,154 @@ bool Sys_Exec(	const char * appPath, const char * workingPath, const char * args
 	execProcessWorkFunction_t workFn, execOutputFunction_t outputFn, const int waitMS,
 	unsigned int & exitCode ) {
 
+	exitCode = 0;
+
+#ifndef IMPLEMENT_SPAWN
+	return false;
+#else
+	/*
 	if ( !qnx.canSpawn ) {
 		return false;
 	}
+	*/
 
-	/* TODO: Look at "spawn". posix_spawn would be better, but spawn lets us change stdin/stdout/stderr and has a lot more control
-		exitCode = 0;
-		SECURITY_ATTRIBUTES secAttr;
-		secAttr.nLength = sizeof( SECURITY_ATTRIBUTES );
-		secAttr.bInheritHandle = TRUE;
-		secAttr.lpSecurityDescriptor = NULL;
+	const char* cwd = Sys_Cwd();
+	if ( chdir( workingPath ) != 0 ) {
+		return false;
+	}
 
-		HANDLE hStdOutRead;
-		HANDLE hStdOutWrite;
-		CreatePipe( &hStdOutRead, &hStdOutWrite, &secAttr, 0 );
-		SetHandleInformation( hStdOutRead, HANDLE_FLAG_INHERIT, 0 );
+	int stdOutPipe[2];
+	pipe( stdOutPipe );
 
-		HANDLE hStdInRead;
-		HANDLE hStdInWrite;
-		CreatePipe( &hStdInRead, &hStdInWrite, &secAttr, 0 );
-		SetHandleInformation( hStdInWrite, HANDLE_FLAG_INHERIT, 0 );
+	int stdInPipe[2];
+	pipe( stdInPipe );
+	close( stdInPipe[1] );
 
-		STARTUPINFO si;
-		memset( &si, 0, sizeof( si ) );
-		si.cb = sizeof( si );
-		si.hStdError = hStdOutWrite;
-		si.hStdOutput = hStdOutWrite;
-		si.hStdInput = hStdInRead;
-		si.wShowWindow = FALSE;
-		si.dwFlags |= STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
+	if ( outputFn != NULL ) {
+		outputFn( va( "^2Executing Process: ^7%s\n^2working path: ^7%s\n^2args: ^7%s\n", appPath, workingPath, args ) );
+	} else {
+		outputFn = ExecOutputFn;
+	}
 
-		PROCESS_INFORMATION pi;
-		memset ( &pi, 0, sizeof( pi ) );
+	// Get arguments if they exist
+	char ** argv = NULL;
+	if ( args ) {
+		int argc;
+		idCmdArgs cmdArgs( args, true );
+		const char * const * argvTmp = cmdArgs.GetArgs( &argc );
 
+		// Copy over app path
+		argv = ( char ** )Mem_Alloc( sizeof( char ** ) * ( argc + 2 ), TAG_TEMP );
+		memcpy( &argv[1], argvTmp, sizeof( char ** ) * argc );
+		argv[0] = ( char * )appPath;
+		argv[argc + 1] = NULL;
+	}
+
+	// Setup and spawn process
+	posix_spawnattr_t spawnAtt;
+	uint32_t spawnFlags;
+	posix_spawnattr_init( &spawnAtt );
+	posix_spawnattr_getxflags( &spawnAtt, &spawnFlags );
+	spawnFlags |= POSIX_SPAWN_SEARCH_PATH;
+	posix_spawnattr_getxflags( &spawnAtt, &spawnFlags );
+
+	// Evaluated first to last
+	posix_spawn_file_actions_t spawnFile;
+	posix_spawn_file_actions_init( &spawnFile );
+	posix_spawn_file_actions_addclose( &spawnFile, stdOutPipe[0] );
+	posix_spawn_file_actions_adddup2( &spawnFile, stdInPipe[0], 0 );	//stdin
+	posix_spawn_file_actions_adddup2( &spawnFile, stdOutPipe[1], 1 );	//stdout
+	posix_spawn_file_actions_adddup2( &spawnFile, stdOutPipe[1], 2 );	//stderr
+	posix_spawn_file_actions_addclose( &spawnFile, stdInPipe[0] );
+	posix_spawn_file_actions_addclose( &spawnFile, stdOutPipe[1] );
+	//XXX Should FileSystem files be closed?
+
+	pid_t pid;
+	int ret = posix_spawnp( &pid, appPath, &spawnFile, &spawnAtt, argv, NULL );
+
+	// Reset back to original CWD
+	chdir( cwd );
+
+	posix_spawn_file_actions_destroy( &spawnFile );
+	posix_spawnattr_destroy( &spawnAtt );
+
+	if ( ret != EOK ) {
+		char buf[1024];
+		const char* errMsg = strerror( ret );
+
+		sprintf( buf, "%d: %s", ret, errMsg );
 		if ( outputFn != NULL ) {
-			outputFn( va( "^2Executing Process: ^7%s\n^2working path: ^7%s\n^2args: ^7%s\n", appPath, workingPath, args ) );
-		} else {
-			outputFn = ExecOutputFn;
+			outputFn( buf );
 		}
 
-		// we duplicate args here so we can concatenate the exe name and args into a single command line
-		const char * imageName = appPath;
-		char * cmdLine = NULL;
-		{
-			// if we have any args, we need to copy them to a new buffer because CreateProcess modifies
-			// the command line buffer.
-			if ( args != NULL ) {
-				if ( appPath != NULL ) {
-					int len = idStr::Length( args ) + idStr::Length( appPath ) + 1 /* for space * / + 1 /* for NULL terminator * / + 2 /* app quotes * /;
-					cmdLine = (char*)Mem_Alloc( len, TAG_TEMP );
-					// note that we're putting quotes around the appPath here because when AAS2.exe gets an app path with spaces
-					// in the path "w:/zion/build/win32/Debug with Inlines/AAS2.exe" it gets more than one arg for the app name,
-					// which it most certainly should not, so I am assuming this is a side effect of using CreateProcess.
-					idStr::snPrintf( cmdLine, len, "\"%s\" %s", appPath, args );
-				} else {
-					int len = idStr::Length( args ) + 1;
-					cmdLine = (char*)Mem_Alloc( len, TAG_TEMP );
-					idStr::Copynz( cmdLine, args, len );
-				}
-				// the image name should always be NULL if we have command line arguments because it is already
-				// prefixed to the command line.
-				imageName = NULL;
-			}
+		close( stdOutPipe[0] );
+		close( stdOutPipe[1] );
+		close( stdInPipe[0] );
+
+		if ( argv ) {
+			Mem_Free( ( void* )argv );
 		}
-
-		BOOL result = CreateProcess( imageName, (LPSTR)cmdLine, NULL, NULL, TRUE, 0, NULL, workingPath, &si, &pi );
-
-		if ( result == FALSE ) {
-			TCHAR szBuf[1024];
-			LPVOID lpMsgBuf;
-			DWORD dw = GetLastError();
-
-			FormatMessage(
-				FORMAT_MESSAGE_ALLOCATE_BUFFER |
-				FORMAT_MESSAGE_FROM_SYSTEM,
-				NULL,
-				dw,
-				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-				(LPTSTR) &lpMsgBuf,
-				0, NULL );
-
-			wsprintf( szBuf, "%d: %s", dw, lpMsgBuf );
-			if ( outputFn != NULL ) {
-				outputFn( szBuf );
-			}
-			LocalFree( lpMsgBuf );
-			if ( cmdLine != NULL ) {
-				Mem_Free( cmdLine );
-			}
-			return false;
-		} else if ( waitMS >= 0 ) {	// if waitMS == -1, don't wait for process to exit
-			DWORD ec = 0;
-			DWORD wait = 0;
-			char buffer[ 4096 ];
-			for ( ; ; ) {
-				wait = WaitForSingleObject( pi.hProcess, waitMS );
-				GetExitCodeProcess( pi.hProcess, &ec );
-
-				DWORD bytesRead = 0;
-				DWORD bytesAvail = 0;
-				DWORD bytesLeft = 0;
-				BOOL ok = PeekNamedPipe( hStdOutRead, NULL, 0, NULL, &bytesAvail, &bytesLeft );
-				if ( ok && bytesAvail != 0 ) {
-					ok = ReadFile( hStdOutRead, buffer, sizeof( buffer ) - 3, &bytesRead, NULL );
-					if ( ok && bytesRead > 0 ) {
-						buffer[ bytesRead ] = '\0';
-						if ( outputFn != NULL ) {
-							int length = 0;
-							for ( int i = 0; buffer[i] != '\0'; i++ ) {
-								if ( buffer[i] != '\r' ) {
-									buffer[length++] = buffer[i];
-								}
-							}
-							buffer[length++] = '\0';
-							outputFn( buffer );
-						}
-					}
-				}
-
-				if ( ec != STILL_ACTIVE ) {
-					exitCode = ec;
-					break;
-				}
-
-				if ( workFn != NULL ) {
-					if ( !workFn() ) {
-						TerminateProcess( pi.hProcess, 0 );
+		return false;
+	} else if ( waitMS >= 0 ) {	// if waitMS == -1, don't wait for process to exit
+		int statVal;
+		char buffer[ 4096 ];
+		for ( ; ; ) {
+			if ( waitMS == idSysSignal::WAIT_INFINITE ) {
+				waitpid( pid, &statVal, 0 );
+			} else {
+				// Sleep for a period of time while periodically checking for process exit
+				int end = Sys_Milliseconds() + waitMS;
+				int time;
+				while ( 1 ) {
+					waitpid( pid, &statVal, WNOHANG );
+					time = Sys_Milliseconds();
+					if ( time >= end || WIFEXITED( statVal ) ) {
 						break;
 					}
+					// Only sleep for a short period of time
+					time = end - time;
+					usleep( __min( 100, __max( time, 0 ) ) * 1000 );
+				}
+			}
+
+			int bytesRead = read( stdOutPipe[0], buffer, sizeof( buffer ) - 3 );
+			if ( bytesRead > 0 ) {
+				buffer[ bytesRead ] = '\0';
+				if ( outputFn != NULL ) {
+					int length = 0;
+					for ( int i = 0; buffer[i] != '\0'; i++ ) {
+						if ( buffer[i] != '\r' ) {
+							buffer[length++] = buffer[i];
+						}
+					}
+					buffer[length++] = '\0';
+					outputFn( buffer );
+				}
+			}
+
+			if ( WIFEXITED( statVal ) ) {
+				exitCode = WEXITSTATUS( statVal );
+				break;
+			}
+
+			if ( workFn != NULL ) {
+				if ( !workFn() ) {
+					kill( pid, SIGKILL );
+					break;
 				}
 			}
 		}
+	}
 
-		// this assumes that windows duplicates the command line string into the created process's
-		// environment space.
-		if ( cmdLine != NULL ) {
-			Mem_Free( cmdLine );
-		}
+	if ( argv ) {
+		Mem_Free( ( void* )argv );
+	}
 
-		CloseHandle( pi.hProcess );
-		CloseHandle( pi.hThread );
-		CloseHandle( hStdOutRead );
-		CloseHandle( hStdOutWrite );
-		CloseHandle( hStdInRead );
-		CloseHandle( hStdInWrite );
-		return true;
-	*/
-	return false;
+	close( stdOutPipe[0] );
+	close( stdOutPipe[1] );
+	close( stdInPipe[0] );
+	return true;
+#endif
 }
 
 /*
