@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -70,9 +71,9 @@ typedef void (*argCompletion_t)( const idCmdArgs &args, void(*callback)( const c
 
 /*
 ================================================
-idCommandLink is a convenient way to get a function registered as a 
-ConsoleCommand without having to add an explicit call to idCmdSystem->AddCommand() in a startup 
-function somewhere. Simply declare a static variable with the parameters and it will get 
+idCommandLink is a convenient way to get a function registered as a
+ConsoleCommand without having to add an explicit call to idCmdSystem->AddCommand() in a startup
+function somewhere. Simply declare a static variable with the parameters and it will get
 executed before main(). For example:
 
 static idCommandLink sys_dumpMemory( "sys_dumpMemory", Sys_DumpMemory_f, "Walks the heap and reports stats" );
@@ -112,12 +113,14 @@ created using the CONSOLE_COMMAND_SHIP macro.
 #if defined ( ID_RETAIL ) && !defined( ID_RETAIL_INTERNAL )
 #define CONSOLE_COMMAND_SHIP			CONSOLE_COMMAND_COMPILE
 #define CONSOLE_COMMAND					CONSOLE_COMMAND_NO_COMPILE
+#ifdef ID_WIN32
 // We need to disable this warning to get commands that were made friends
 // of classes to compile as inline.
 // warning C4211: nonstandard extension used : redefined extern to static
 #pragma warning( disable : 4211 )
 // warning C4505: 'xxx' : unreferenced local function has been removed
 #pragma warning( disable : 4505 )
+#endif
 #else
 #define CONSOLE_COMMAND_SHIP			CONSOLE_COMMAND_COMPILE
 #define CONSOLE_COMMAND					CONSOLE_COMMAND_COMPILE

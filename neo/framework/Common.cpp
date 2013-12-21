@@ -1009,7 +1009,7 @@ void idCommonLocal::Init( int argc, const char * const * argv, const char *cmdli
 		const char * defaultLang = Sys_DefaultLanguage();
 		com_isJapaneseSKU = ( idStr::Icmp( defaultLang, ID_LANG_JAPANESE ) == 0 );
 
-		// Allow the system to set a default lanugage
+		// Allow the system to set a default language
 		Sys_SetLanguageFromSystem();
 
 		// Pre-allocate our 20 MB save buffer here on time, instead of on-demand for each save....

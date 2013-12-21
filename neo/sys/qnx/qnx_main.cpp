@@ -583,6 +583,7 @@ void Sys_SetClipboardData( const char *string ) {
 	set_clipboard_data( "text/plain", strlen( string ) + 1, string );
 }
 
+#ifdef IMPLEMENT_SPAWN
 /*
 ========================
 ExecOutputFn
@@ -591,6 +592,7 @@ ExecOutputFn
 static void ExecOutputFn( const char * text ) {
 	idLib::Printf( text );
 }
+#endif
 
 
 /*
@@ -1101,6 +1103,7 @@ bool TestPermission( const char* permission ) {
 		return success;
 	} else if ( idStr::Cmp( permission, "access_pimdomain_messages" ) == 0 ) {
 		//TODO
+		return true;
 	}
 	return false;
 }

@@ -595,6 +595,22 @@ bool QNXGLimp_DowngradeScreenUsage() {
 
 /*
 ===================
+QNXGLimp_WindowGroup
+===================
+*/
+const char *QNXGLimp_WindowGroup()
+{
+    static char windowGroup[64] = { 0 };
+
+    if ( !windowGroup[0] ) {
+    	idStr::snPrintf( windowGroup, sizeof( windowGroup ), "doom_window_group_%d", getpid() );
+    }
+
+    return windowGroup;
+}
+
+/*
+===================
 QNXGLimp_CreateWindow
 ===================
 */
@@ -621,6 +637,11 @@ bool QNXGLimp_CreateWindow( int x, int y, int width, int height, int fullScreen 
 
 	if ( screen_create_window( &qnx.screenWin, qnx.screenCtx ) != 0 ) {
 		common->Printf( "Could not create screen window\n" );
+		return false;
+	}
+
+	if ( screen_create_window_group( qnx.screenWin, QNXGLimp_WindowGroup() ) != 0 ) {
+		common->Printf( "Could not create window group\n" );
 		return false;
 	}
 
