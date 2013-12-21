@@ -105,12 +105,18 @@ void Sys_Error( const char *error, ... ) {
 	extern idCVar com_productionMode;
 	if ( com_productionMode.GetInteger() == 0 ) {
 
-		// Only way for invoke to work is if there is a screen displayed,
-		// which requires graphics to be init. and at least one swap buffers to have occured.
-		if ( R_IsInitialized() ) {
-			void GLimp_SwapBuffers();
-			GLimp_SwapBuffers();
+		if ( !R_IsInitialized() ) {
+			qnx.errorGraphics = true;
+
+			// Graphics wasn't init, at least set it up
+			void R_SetNewMode( const bool fullInit );
+			R_SetNewMode( true );
 		}
+
+		// Only way for invoke to work is if there is a screen displayed,
+		// which requires graphics to be init. and at least one swap buffers to have occurred.
+		void GLimp_SwapBuffers();
+		GLimp_SwapBuffers();
 
 		// Invoke email card
 		EmailCrashReport( text );
@@ -201,6 +207,9 @@ Sys_Quit
 ==============
 */
 void Sys_Quit() {
+	if ( qnx.errorGraphics ) {
+		GLimp_Shutdown();
+	}
 	exit( 0 );
 }
 
@@ -1074,6 +1083,28 @@ bool EmailCrashReport( const char* messageText ) {
 	return ret;
 }
 
+/*
+====================
+TestPermission
+====================
+*/
+bool TestPermission( const char* permission ) {
+	if ( idStr::Cmp( permission, "access_shared" ) == 0 ) {
+		idStr str = Sys_Cwd();
+		str += "/shared/misc/testofdoom.txt";
+		int file = open( str.c_str(), O_CREAT, S_IRWXU );
+		bool success = file >= 0;
+		if ( file >= 0 ) {
+			close( file );
+			remove( str.c_str() );
+		}
+		return success;
+	} else if ( idStr::Cmp( permission, "access_pimdomain_messages" ) == 0 ) {
+		//TODO
+	}
+	return false;
+}
+
 #define TEST_FPU_EXCEPTIONS	/*	FPU_EXCEPTION_INVALID_OPERATION |		*/	\
 							/*	FPU_EXCEPTION_DENORMALIZED_OPERAND |	*/	\
 							/*	FPU_EXCEPTION_DIVIDE_BY_ZERO |			*/	\
@@ -1128,8 +1159,22 @@ int main( int argc, char** argv ) {
 //	Sys_FPU_EnableExceptions( TEST_FPU_EXCEPTIONS );
 //	Sys_FPU_SetPrecision( FPU_PRECISION_DOUBLE_EXTENDED ); // ARM doesn't support this precision
 
-	// check for data, copy if it doesn't exist
-	//TODO (need to check that shared file access is allowed)
+	// test permissions
+	qnx.permSharedFile = TestPermission( "access_shared" );
+	qnx.permEmail = TestPermission( "access_pimdomain_messages" );
+
+	if ( qnx.permSharedFile ) {
+		// check for data, copy if it doesn't exist
+		//TODO
+	} else {
+		// No shared access... this will error (need to setup cvar system for printf to work)
+
+		//cmdSystem->Init();
+		cvarSystem->Init();
+		common->Printf( "No access to shared files, %s will error and crash.\n", GAME_NAME );
+		cvarSystem->Shutdown();
+		//cmdSystem->Shutdown();
+	}
 
 	// initialize system
 	if ( argc > 1 ) {

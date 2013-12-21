@@ -65,7 +65,10 @@ typedef struct {
 
 	// System state vars
 	bool						quitStarted;
+	bool						errorGraphics;
 	navigator_window_state_t	windowState;
+	bool						permSharedFile;
+	bool						permEmail;
 	bool						canSpawn;
 	bool						canLockMem;
 
