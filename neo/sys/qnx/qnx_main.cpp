@@ -53,6 +53,7 @@ If you have questions concerning this license or the applicable additional terms
 #if BBNDK_VERSION_AT_LEAST(10, 2, 0)
 #include <bps/removablemedia.h>
 #endif
+#include <bps/locale.h>
 
 #include <clipboard/clipboard.h>
 
@@ -611,10 +612,12 @@ bool Sys_Exec(	const char * appPath, const char * workingPath, const char * args
 	exitCode = 0;
 
 #ifndef IMPLEMENT_SPAWN
+	common->Warning( "Sys_Exec not implemented\n" );
 	return false;
 #else
 	/*
 	if ( !qnx.canSpawn ) {
+		common->Warning( "Sys_Exec not supported by process manager\n" );
 		return false;
 	}
 	*/
@@ -668,7 +671,6 @@ bool Sys_Exec(	const char * appPath, const char * workingPath, const char * args
 	posix_spawn_file_actions_adddup2( &spawnFile, stdOutPipe[1], 2 );	//stderr
 	posix_spawn_file_actions_addclose( &spawnFile, stdInPipe[0] );
 	posix_spawn_file_actions_addclose( &spawnFile, stdOutPipe[1] );
-	//XXX Should FileSystem files be closed?
 
 	pid_t pid;
 	int ret = posix_spawnp( &pid, appPath, &spawnFile, &spawnAtt, argv, NULL );
@@ -851,8 +853,9 @@ void Sys_Init() {
 	//
 	// process permissions setup
 	//
-	qnx.canSpawn	= procmgr_ability( 0, PROCMGR_ADN_NONROOT | PROCMGR_AOP_ALLOW | PROCMGR_AID_SPAWN,		PROCMGR_AID_EOL );
-	qnx.canLockMem	= procmgr_ability( 0, PROCMGR_ADN_NONROOT | PROCMGR_AOP_ALLOW | PROCMGR_AID_MEM_LOCK,	PROCMGR_AID_EOL );
+	qnx.canSpawn	= procmgr_ability( 0, PROCMGR_ADN_NONROOT | PROCMGR_AOP_ALLOW | PROCMGR_AID_SPAWN,			PROCMGR_AID_EOL );
+	qnx.canNewApp	= procmgr_ability( 0, PROCMGR_ADN_NONROOT | PROCMGR_AOP_ALLOW | PROCMGR_AID_CHILD_NEWAPP,	PROCMGR_AID_EOL );
+	qnx.canLockMem	= procmgr_ability( 0, PROCMGR_ADN_NONROOT | PROCMGR_AOP_ALLOW | PROCMGR_AID_MEM_LOCK,		PROCMGR_AID_EOL );
 
 	//
 	// QNX version
@@ -1245,25 +1248,71 @@ idSysLocal::StartProcess
 ==================
 */
 void idSysLocal::StartProcess( const char *exePath, bool doexit ) {
-	/* TODO
-	TCHAR				szPathOrig[_MAX_PATH];
-	STARTUPINFO			si;
-	PROCESS_INFORMATION	pi;
 
-	ZeroMemory( &si, sizeof(si) );
-	si.cb = sizeof(si);
-
-	strncpy( szPathOrig, exePath, _MAX_PATH );
-
-	if( !CreateProcess( NULL, szPathOrig, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi ) ) {
-        common->Error( "Could not start process: '%s' ", szPathOrig );
-	    return;
+	idCmdArgs args( exePath, true );
+	if ( args.Argc() < 1 ) {
+		// No args
+		return;
 	}
 
-	if ( doexit ) {
-		cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "quit\n" );
+	bool success = false;
+
+	// Try invocation
+	navigator_invoke_invocation_t *invoke = NULL;
+	const char* target = args.Argv( 0 );
+
+	navigator_invoke_invocation_create( &invoke );
+	navigator_invoke_invocation_set_action( invoke, "bb.action.OPEN" );
+	success = navigator_invoke_invocation_set_target( invoke, target ) == BPS_SUCCESS;
+	if ( success ) {
+		if ( args.Argc() > 1 ) {
+			const char *data = args.Args( 1 );
+			navigator_invoke_invocation_set_data( invoke, data, strlen( data ) + 1 );
+		}
+
+		success = navigator_invoke_invocation_send( invoke ) == BPS_SUCCESS;
 	}
-	*/
+
+	navigator_invoke_invocation_destroy( invoke );
+
+#ifdef IMPLEMENT_SPAWN
+	// Try spawn if supported and if invoke failed
+	if ( !success /*&& qnx.canSpawn*/ && qnx.canNewApp ) {
+		char ** argv = NULL;
+		if ( args.Argc() > 1 ) {
+			int argc;
+			const char * const * argvTmp = args.GetArgs( &argc );
+
+			// Copy over app path
+			argv = ( char ** )Mem_Alloc( sizeof( char ** ) * ( argc + 1 ), TAG_TEMP );
+			memcpy( argv, argvTmp, sizeof( char ** ) * argc );
+			argv[argc + 1] = NULL;
+		}
+
+		posix_spawnattr_t spawnAtt;
+		uint32_t spawnFlags;
+		posix_spawnattr_init( &spawnAtt );
+		posix_spawnattr_getxflags( &spawnAtt, &spawnFlags );
+		spawnFlags |= POSIX_SPAWN_SEARCH_PATH | POSIX_SPAWN_NEWAPP;
+		posix_spawnattr_getxflags( &spawnAtt, &spawnFlags );
+
+		success = posix_spawnp( NULL, target, NULL, &spawnAtt, argv, NULL ) == EOK;
+
+		posix_spawnattr_destroy( &spawnAtt );
+
+		if ( argv ) {
+			Mem_Free( ( void* )argv );
+		}
+	}
+#endif
+
+	if ( success ) {
+		if ( doexit ) {
+			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "quit\n" );
+		}
+	} else {
+		common->Error( "Could not start process: '%s' ", exePath );
+	}
 }
 
 /*
@@ -1272,6 +1321,7 @@ Sys_SetFatalError
 ==================
 */
 void Sys_SetFatalError( const char *error ) {
+	slog2c( NULL, SLOG_CODE, SLOG2_CRITICAL, error );
 }
 
 /*
@@ -1281,5 +1331,23 @@ Sys_SetLanguageFromSystem
 */
 extern idCVar sys_lang;
 void Sys_SetLanguageFromSystem() {
-	sys_lang.SetString( Sys_DefaultLanguage() );
+	sys_lang.ClearModified();
+
+	char* language;
+	char* country;
+	if ( locale_get( &language, &country ) == BPS_SUCCESS ) {
+		int count = Sys_NumLangs();
+		for ( int i = 0; i < count; i++ ) {
+			if ( idStr::Icmp( language, Sys_LangCodes( i ) ) == 0 ) {
+				sys_lang.SetString( Sys_Lang( i ) );
+				break;
+			}
+		}
+
+		bps_free( language );
+		bps_free( country );
+	}
+	if ( !sys_lang.IsModified() ) {
+		sys_lang.SetString( Sys_DefaultLanguage() );
+	}
 }

@@ -600,7 +600,7 @@ QNXGLimp_WindowGroup
 */
 const char *QNXGLimp_WindowGroup()
 {
-    static char windowGroup[64] = { 0 };
+    static char windowGroup[32] = { 0 };
 
     if ( !windowGroup[0] ) {
     	idStr::snPrintf( windowGroup, sizeof( windowGroup ), "doom_window_group_%d", getpid() );

@@ -55,8 +55,8 @@ static const int		MAX_OSPATH					= 256;
 
 // modes for OpenFileByMode
 typedef enum {
-	FS_READ			= 0,
-	FS_WRITE		= 1,
+	FS_READ		= 0,
+	FS_WRITE	= 1,
 	FS_APPEND	= 2
 } fsMode_t;
 

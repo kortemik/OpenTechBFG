@@ -70,6 +70,7 @@ typedef struct {
 	bool						permSharedFile;
 	bool						permEmail;
 	bool						canSpawn;
+	bool						canNewApp;
 	bool						canLockMem;
 
 	// Input vars

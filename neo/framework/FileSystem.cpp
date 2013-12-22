@@ -462,6 +462,7 @@ idFileHandle idFileSystemLocal::OpenOSFile( const char *fileName, fsMode_t mode 
 	if ( fp == -1 ) {
 		return (idFileHandle)NULL;
 	}
+	fcntl( fp, F_SETFD, FD_CLOEXEC );
 #endif
 	return fp;
 }
