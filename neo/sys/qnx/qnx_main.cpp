@@ -847,6 +847,9 @@ void Sys_Init() {
 	if ( navigator_request_events( 0 ) != BPS_SUCCESS )
 		Sys_Error( "Couldn't request navigator events" );
 	battery_request_events( 0 );
+#ifdef ID_LANG_EVENT_UPDATE_SYS_LANG
+	locale_request_events( 0 );
+#endif
 
 	cmdSystem->AddCommand( "in_restart", Sys_In_Restart_f, CMD_FL_SYSTEM, "restarts the input system" );
 
@@ -1028,6 +1031,9 @@ Sys_Shutdown
 */
 void Sys_Shutdown() {
 	Sys_ShutdownInput();
+#ifdef ID_LANG_EVENT_UPDATE_SYS_LANG
+	locale_stop_events( 0 );
+#endif
 	battery_stop_events( 0 );
 	navigator_stop_events( 0 );
 	bps_shutdown();
@@ -1326,28 +1332,40 @@ void Sys_SetFatalError( const char *error ) {
 
 /*
 ================
-Sys_SetLanguageFromSystem
+Sys_UpdateLanguage
 ================
 */
 extern idCVar sys_lang;
-void Sys_SetLanguageFromSystem() {
+void Sys_UpdateLanguage( const char *language ) {
 	sys_lang.ClearModified();
 
+	int count = Sys_NumLangs();
+	for ( int i = 0; i < count; i++ ) {
+		if ( idStr::Icmp( language, Sys_LangCodes( i ) ) == 0 ) {
+			sys_lang.SetString( Sys_Lang( i ) );
+			break;
+		}
+	}
+
+	if ( !sys_lang.IsModified() ) {
+		sys_lang.SetString( Sys_DefaultLanguage() );
+	}
+}
+
+/*
+================
+Sys_SetLanguageFromSystem
+================
+*/
+void Sys_SetLanguageFromSystem() {
 	char* language;
 	char* country;
 	if ( locale_get( &language, &country ) == BPS_SUCCESS ) {
-		int count = Sys_NumLangs();
-		for ( int i = 0; i < count; i++ ) {
-			if ( idStr::Icmp( language, Sys_LangCodes( i ) ) == 0 ) {
-				sys_lang.SetString( Sys_Lang( i ) );
-				break;
-			}
-		}
+		Sys_UpdateLanguage( language );
 
 		bps_free( language );
 		bps_free( country );
-	}
-	if ( !sys_lang.IsModified() ) {
+	} else {
 		sys_lang.SetString( Sys_DefaultLanguage() );
 	}
 }

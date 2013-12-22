@@ -36,6 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <bps/event.h>
 #include <bps/virtualkeyboard.h>
 #include <bps/battery.h>
+#include <bps/locale.h>
 
 #include <signal.h>
 
@@ -490,6 +491,11 @@ void Sys_PumpEvents() {
 					break;
 				}
 			}
+#ifdef ID_LANG_EVENT_UPDATE_SYS_LANG
+			else if ( domain == locale_get_domain() ) {
+				Sys_UpdateLanguage( locale_event_get_language( event ) );
+			}
+#endif
 		} else {
 			break;
 		}

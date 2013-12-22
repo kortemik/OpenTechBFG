@@ -55,8 +55,12 @@ bool	EmailCrashReport( const char* messageText );
 #define ID_LANG_CODE_ITALIAN	"it"
 #define ID_LANG_CODE_GERMAN		"de"
 #define ID_LANG_CODE_SPANISH	"es"
-#define ID_LANG_CODE_JAPANESE	"jp"
+#define ID_LANG_CODE_JAPANESE	"ja"
 const char * Sys_LangCodes( int idx );
+
+// This overwrites any user set language
+//#define ID_LANG_EVENT_UPDATE_SYS_LANG
+void	Sys_UpdateLanguage( const char *language );
 
 typedef struct {
 	cpuid_t						cpuid;
