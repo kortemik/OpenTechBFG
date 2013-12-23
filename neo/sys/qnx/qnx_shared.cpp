@@ -904,7 +904,7 @@ int Json_FindValueLen( const char *json, int start ) {
 			} else {
 				return -1;
 			}
-		} else if ( *c == '-' || idStr::CharIsNumeric( *c ) ) {
+		} else if ( idStr::CharIsNumeric( *c ) || ( ( *c == '-' || *c == '+' ) && idStr::CharIsNumeric( *( c + 1 ) ) ) ) {
 			// number
 			if ( *c == '-' ) {
 				c++;
@@ -912,7 +912,7 @@ int Json_FindValueLen( const char *json, int start ) {
 			bool dot = false;
 			while ( *c ) {
 				if ( !idStr::CharIsNumeric( *c ) ) {
-					if ( *c == ',' || Json_IsWhitespace( *c ) ) {
+					if ( *c == ',' || *c == ']' || *c == '}' || Json_IsWhitespace( *c ) ) {
 						return c - ( json + start );
 					}
 					if ( *c == '.' && !dot ) {
@@ -951,12 +951,15 @@ int Json_FindValueLen( const char *json, int start ) {
 					}
 					c += len;
 				}
+				if ( *c == '}' ) {
+					break;
+				}
 				c++;
 			}
 			if ( *c == '\0' ) {
 				return -1;
 			} else {
-				return c - ( json + start );
+				return c - ( json + start ) + 1;
 			}
 		} else if ( *c == '[' ) {
 			// array
@@ -972,12 +975,15 @@ int Json_FindValueLen( const char *json, int start ) {
 					}
 					c += len + ( *c == '"' ? 1 : 0 );
 				}
+				if ( *c == ']' ) {
+					break;
+				}
 				c++;
 			}
 			if ( *c == '\0' ) {
 				return -1;
 			} else {
-				return c - ( json + start );
+				return c - ( json + start ) + 1;
 			}
 		}
 		c++;
@@ -1079,7 +1085,11 @@ int Json_FindKey( const char *json, const char *key ) {
 					return c - json + 1;
 				}
 				c += len + ( *c == '"' ? 1 : 0 );
-				state = 3;
+				if ( *c != ',' ) {
+					state = 3;
+				} else {
+					state = 0;
+				}
 			}
 		} else if ( state == 3 ) {
 			// Looking for ,
@@ -1139,8 +1149,6 @@ const char *Sys_ParseJSONObj( const char* json, const char* key, bool allocateMe
 		return NULL;
 	}
 
-	text[0] = '\0';
-
 	int valueStart = Json_FindKey( json + 1, key );
 	if ( valueStart == -1 ) {
 		return NULL;
@@ -1151,7 +1159,7 @@ const char *Sys_ParseJSONObj( const char* json, const char* key, bool allocateMe
 		return NULL;
 	}
 	bool isString = false;
-	if ( *( json + valueStart ) == '"' ) {
+	if ( json[valueStart] == '"' ) {
 		valueStart++;
 		isString = true;
 	}
@@ -1165,7 +1173,66 @@ const char *Sys_ParseJSONObj( const char* json, const char* key, bool allocateMe
 	}
 
 	// Copy data
-	strncpy( dst, json + valueStart, len );
+	memcpy( dst, json + valueStart, len );
+	dst[len] = '\0';
+	if ( isString ) {
+		Json_EscapeString( dst );
+	}
+	return dst;
+}
+
+/*
+==================
+Sys_ParseJSONArr
+==================
+*/
+const char *Sys_ParseJSONArr( const char* json, unsigned int index, bool allocateMemory ) {
+	static char text[2048];
+
+	if ( !json || json[0] != '[' ) {
+		return NULL;
+	}
+
+	int valueStart = 1;
+	int len = -1;
+
+	while ( json[valueStart] ) {
+		if ( json[valueStart] == ']' ) {
+			return NULL;
+		}
+		if ( !Json_IsWhitespace( json[valueStart] ) && ( json[valueStart] ) != ',' ) {
+			len = Json_FindValueLen( json, valueStart );
+			if ( len == -1 ) {
+				return NULL;
+			}
+			if ( index == 0 ) {
+				break;
+			}
+			index--;
+			valueStart += len + ( json[valueStart] == '"' ? 1 : 0 );
+		}
+		if ( json[valueStart] == ']' ) {
+			return NULL;
+		}
+		valueStart++;
+	}
+
+	bool isString = false;
+	if ( json[valueStart] == '"' ) {
+		valueStart++;
+		isString = true;
+	}
+
+	char *dst = text;
+	if ( allocateMemory ) {
+		dst = ( char* )Mem_Alloc( len + 1, TAG_STRING );
+		dst[0] = '\0';
+	} else if ( ( unsigned int )( len + 1 ) > sizeof( text ) ) {
+		return "";
+	}
+
+	// Copy data
+	memcpy( dst, json + valueStart, len );
 	dst[len] = '\0';
 	if ( isString ) {
 		Json_EscapeString( dst );

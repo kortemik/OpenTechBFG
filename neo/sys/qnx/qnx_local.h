@@ -65,6 +65,7 @@ void	Sys_UpdateLanguage( const char *language );
 
 // JSON
 const char *Sys_ParseJSONObj( const char* json, const char* key, bool allocateMemory = false );
+const char *Sys_ParseJSONArr( const char* json, unsigned int index, bool allocateMemory = false );
 
 typedef struct {
 	cpuid_t						cpuid;
