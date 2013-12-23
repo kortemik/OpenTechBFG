@@ -234,6 +234,11 @@ If you have questions concerning this license or the applicable additional terms
 #define USE_OS_ZLIB
 #define USE_OS_LIBJPEG
 
+// Needed to be able to compile with spawn.h
+#if defined(__cplusplus) && !defined(__STDC_CONSTANT_MACROS)
+#define __STDC_CONSTANT_MACROS
+#endif
+
 #endif
 
 /*

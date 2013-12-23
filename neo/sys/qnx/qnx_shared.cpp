@@ -133,7 +133,6 @@ int Sys_GetSystemRam() {
 	return Sys_GetSystemRamInBytes() / ( 1024 * 1024 );
 }
 
-
 /*
 ================
 Sys_GetDriveFreeSpace
@@ -856,3 +855,320 @@ void Sys_ShutdownSymbols() {
 	Sym_Shutdown();
 }
 
+/*
+==================
+Json_IsWhitespace
+==================
+*/
+bool Json_IsWhitespace( char c ) {
+	switch ( c ) {
+	case ' ':
+	case '\n':
+	case '\t':
+	case '\r':
+	case '\v':
+		return true;
+	default:
+		return false;
+	}
+}
+
+/*
+==================
+Json_FindValueLen
+==================
+*/
+int Json_FindKeyValueLen( const char *json, int start );
+int Json_FindValueLen( const char *json, int start ) {
+	const char* c = json + start;
+
+	while ( *c ) {
+		if ( *c == 'n' ) {
+			// null
+			if ( *( c + 1 ) == 'u' && *( c + 2 ) == 'l' && *( c + 3 ) == 'l' ) {
+				return 4;
+			} else {
+				return -1;
+			}
+		} else if ( *c == 't' ) {
+			// true
+			if ( *( c + 1 ) == 'r' && *( c + 2 ) == 'u' && *( c + 3 ) == 'e' ) {
+				return 4;
+			} else {
+				return -1;
+			}
+		} else if ( *c == 'f' ) {
+			// false
+			if ( *( c + 1 ) == 'a' && *( c + 2 ) == 'l' && *( c + 3 ) == 's' && *( c + 4 ) == 'e' ) {
+				return 5;
+			} else {
+				return -1;
+			}
+		} else if ( *c == '-' || idStr::CharIsNumeric( *c ) ) {
+			// number
+			if ( *c == '-' ) {
+				c++;
+			}
+			bool dot = false;
+			while ( *c ) {
+				if ( !idStr::CharIsNumeric( *c ) ) {
+					if ( *c == ',' || Json_IsWhitespace( *c ) ) {
+						return c - ( json + start );
+					}
+					if ( *c == '.' && !dot ) {
+						dot = true;
+						c++;
+						continue;
+					}
+					return -1;
+				}
+				c++;
+			}
+		} else if ( *c == '"' ) {
+			// string
+			c++;
+
+			// Nieve parsing... Valid: {"a":"b"} -> {"a":"{\"a\":\"b\"}"} -> {"a":"{\"a\":\"{\"a\":\"b\"}\"}"}... but so is {"a":"{{{{{"} so it would requires some manual parsing
+			while ( *c && *c != '"' ) {
+				c++;
+			}
+			if ( *c == '\0' ) {
+				return -1;
+			} else {
+				return c - ( json + start + 1 );
+			}
+		} else if ( *c == '{' ) {
+			// object
+			c++;
+			while ( *c ) {
+				if ( *c == '}' ) {
+					break;
+				}
+				if ( !Json_IsWhitespace( *c ) && ( *c ) != ',' ) {
+					int len = Json_FindKeyValueLen( c, 0 );
+					if ( len == -1 ) {
+						return -1;
+					}
+					c += len;
+				}
+				c++;
+			}
+			if ( *c == '\0' ) {
+				return -1;
+			} else {
+				return c - ( json + start );
+			}
+		} else if ( *c == '[' ) {
+			// array
+			c++;
+			while ( *c ) {
+				if ( *c == ']' ) {
+					break;
+				}
+				if ( !Json_IsWhitespace( *c ) && ( *c ) != ',' ) {
+					int len = Json_FindValueLen( c, 0 );
+					if ( len == -1 ) {
+						return -1;
+					}
+					c += len + ( *c == '"' ? 1 : 0 );
+				}
+				c++;
+			}
+			if ( *c == '\0' ) {
+				return -1;
+			} else {
+				return c - ( json + start );
+			}
+		}
+		c++;
+	}
+
+	return -1;
+}
+
+/*
+==================
+Json_FindKeyValueLen
+==================
+*/
+int Json_FindKeyValueLen( const char *json, int start ) {
+	const char* c = json + start;
+	int state = 0;
+
+	while ( *c ) {
+		if ( *c == '}' ) {
+			// End of object
+			return -1;
+		}
+
+		if ( state == 0 ) {
+			// Key
+			if ( *c == '"' ) {
+				int len = Json_FindValueLen( c, 0 );
+				if ( len == -1 ||
+						*( c + len + 1 ) != '"' ) {
+					return -1;
+				}
+				c += len + 1;
+				state = 1;
+			}
+		} else if ( state == 1 ) {
+			// Looking for :
+			if ( *c == ':' ) {
+				state = 2;
+			}
+		} else if ( state == 2 ) {
+			// Value
+			if ( !Json_IsWhitespace( *c ) ) {
+				int len = Json_FindValueLen( c, 0 );
+				if ( len == -1 ) {
+					return -1;
+				}
+				c += len + ( *c == '"' ? 1 : 0 );
+				return c - ( json + start );
+			}
+		}
+		c++;
+	}
+
+	return -1;
+}
+
+/*
+==================
+Json_FindKey
+==================
+*/
+int Json_FindKey( const char *json, const char *key ) {
+	const char* c = json;
+	int state = 0;
+	bool found = false;
+
+	while ( *c ) {
+		if ( *c == '}' ) {
+			// End of object
+			return -1;
+		}
+
+		// Key/value search
+		if ( state == 0 ) {
+			// Looking for key
+			if ( *c == '"' ) {
+				int len = Json_FindValueLen( c, 0 );
+				if ( len == -1 ||
+						*( c + len + 1 ) != '"' ) {
+					return -1;
+				}
+				found = idStr::Cmpn( key, c + 1, len ) == 0;
+				c += len + 1;
+				state = 1;
+			}
+		} else if ( state == 1 ) {
+			// Looking for :
+			if ( *c == ':' ) {
+				state = 2;
+			}
+		} else if ( state == 2 ) {
+			// Skipping value
+			if ( !Json_IsWhitespace( *c ) ) {
+				int len = Json_FindValueLen( c, 0 );
+				if ( len == -1 ) {
+					return -1;
+				}
+				if ( found ) {
+					return c - json + 1;
+				}
+				c += len + ( *c == '"' ? 1 : 0 );
+				state = 3;
+			}
+		} else if ( state == 3 ) {
+			// Looking for ,
+			if ( *c == ',' ) {
+				state = 0;
+			}
+		}
+		c++;
+	}
+
+	return -1;
+}
+
+/*
+==================
+Json_EscapeString
+==================
+*/
+void Json_EscapeString( char *str ) {
+	int s = 0;
+	int d = 0;
+	while ( str[s] ) {
+		char c = str[s++];
+		if ( str[s - 1] == '\\' ) {
+			switch ( str[s++] ) {
+#define ESCAPE_CHAR( sc, rc ) case (sc): c = (rc); break
+			ESCAPE_CHAR( '\'', '\'' );
+			ESCAPE_CHAR( '"', '"' );
+			ESCAPE_CHAR( '?', '\?' );
+			ESCAPE_CHAR( '\\', '\\' );
+			ESCAPE_CHAR( '0', '\0' ); // Problem?
+			ESCAPE_CHAR( 'a', '\a' );
+			ESCAPE_CHAR( 'b', '\b' );
+			ESCAPE_CHAR( 'f', '\f' );
+			ESCAPE_CHAR( 'n', '\n' );
+			ESCAPE_CHAR( 'r', '\r' );
+			ESCAPE_CHAR( 't', '\t' );
+			ESCAPE_CHAR( 'v', '\v' );
+			// Don't worry about octal and hex?
+#undef ESCAPE_CHAR
+			}
+		}
+		str[d++] = c;
+	}
+	str[d] = '\0';
+}
+
+/*
+==================
+Sys_ParseJSONObj
+==================
+*/
+const char *Sys_ParseJSONObj( const char* json, const char* key, bool allocateMemory ) {
+	static char text[2048];
+
+	if ( !json || json[0] != '{' ) {
+		return NULL;
+	}
+
+	text[0] = '\0';
+
+	int valueStart = Json_FindKey( json + 1, key );
+	if ( valueStart == -1 ) {
+		return NULL;
+	}
+
+	int len = Json_FindValueLen( json, valueStart );
+	if ( len == -1 ) {
+		return NULL;
+	}
+	bool isString = false;
+	if ( *( json + valueStart ) == '"' ) {
+		valueStart++;
+		isString = true;
+	}
+
+	char *dst = text;
+	if ( allocateMemory ) {
+		dst = ( char* )Mem_Alloc( len + 1, TAG_STRING );
+		dst[0] = '\0';
+	} else if ( ( unsigned int )( len + 1 ) > sizeof( text ) ) {
+		return "";
+	}
+
+	// Copy data
+	strncpy( dst, json + valueStart, len );
+	dst[len] = '\0';
+	if ( isString ) {
+		Json_EscapeString( dst );
+	}
+	return dst;
+}

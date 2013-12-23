@@ -48,6 +48,7 @@ cpuid_t	Sys_GetCPUId();
 uint64	Sys_Microseconds();
 
 bool	EmailCrashReport( const char* messageText );
+void	Sys_StartProcess_Spawn( const char *path, bool doexit );
 
 // localization
 #define ID_LANG_CODE_ENGLISH	"en"
@@ -62,6 +63,9 @@ const char * Sys_LangCodes( int idx );
 //#define ID_LANG_EVENT_UPDATE_SYS_LANG
 void	Sys_UpdateLanguage( const char *language );
 
+// JSON
+const char *Sys_ParseJSONObj( const char* json, const char* key, bool allocateMemory = false );
+
 typedef struct {
 	cpuid_t						cpuid;
 
@@ -73,6 +77,7 @@ typedef struct {
 	navigator_window_state_t	windowState;
 	bool						permSharedFile;
 	bool						permEmail;
+	bool						personalPerimeter;
 	bool						canSpawn;
 	bool						canNewApp;
 	bool						canLockMem;

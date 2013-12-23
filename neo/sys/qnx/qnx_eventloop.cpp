@@ -37,6 +37,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <bps/virtualkeyboard.h>
 #include <bps/battery.h>
 #include <bps/locale.h>
+#include <bps/navigator_invoke.h>
 
 #include <signal.h>
 
@@ -457,14 +458,52 @@ void Sys_PumpEvents() {
 				   - Once rotation is complete, the OS tells the app it's done (NAVIGATOR_ORIENTATION_DONE) */
 
 				case NAVIGATOR_BACK:
-					// Acts like pressing ~ to open in-game console //XXX This should be disabled if key-bindings is in use
+					// Acts like pressing ~ to open in-game console //XXX This should be disabled if the key-binding is in use
 					Sys_QueEvent( SE_KEY, K_GRAVE, true, 0, NULL, 0 );
 					Sys_QueEvent( SE_KEY, K_GRAVE, false, 0, NULL, 0 );
 					break;
 
+				case NAVIGATOR_INVOKE_TARGET_RESULT: {
+					// (quite a) Bit of hacky way to do this. There is no way to get the original invoke request, meaning there is no way to
+					// get any metadata attached to it that we use for other functionality
+
+					const char *id = navigator_event_get_id(event);
+					if ( id && id[0] ) {
+						navigator_invoke_invocation_t *invoke = NULL;
+						if ( sscanf( id, "%p", &invoke ) == 1 && invoke ) {
+
+							bool doexit = false;
+							static char path[2048];
+							path[0] = '\0';
+
+							const char *err = navigator_event_get_err(event);
+							if ( err && idStr::Icmp( err, "INVOKE_NO_TARGET_ERROR" ) ) {
+
+								const char *metadata = navigator_invoke_invocation_get_metadata( invoke );
+								if ( metadata && metadata[0] ) {
+									const char *type = Sys_ParseJSONObj( metadata, "type" );
+									if ( type && idStr::Icmp( type, "doom.sys_local.start_process" ) == 0 ) {
+
+										// Save data so that invoke can be freed and memory leak is avoided if error occurs
+										doexit = idStr::Icmp( Sys_ParseJSONObj( metadata, "doexit" ), "true" );
+										strcpy( path, Sys_ParseJSONObj( metadata, "path" ) );
+									}
+								}
+							}
+
+							// As the invoke was not freed so that this function could parse it, we clean it up here
+							navigator_invoke_invocation_destroy( invoke );
+
+							if ( path[0] ) {
+								Sys_StartProcess_Spawn( path, doexit );
+							}
+						}
+					}
+					break;
+				}
+
 				//TODO: is this needed? Probably keyboard state...
 				//NAVIGATOR_INVOKE_QUERY_RESULT
-				//NAVIGATOR_INVOKE_TARGET_RESULT
 				//NAVIGATOR_INVOKE_VIEWER_RESULT
 				//NAVIGATOR_INVOKE_VIEWER_RELAY
 				//NAVIGATOR_INVOKE_VIEWER_STOPPED

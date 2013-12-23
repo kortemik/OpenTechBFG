@@ -31,8 +31,6 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 #include "../../idlib/precompiled.h"
 
-//#define IMPLEMENT_SPAWN //XXX Compile errors with spawn.h header
-
 #include <errno.h>
 #include <float.h>
 #include <fcntl.h>
@@ -41,9 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <dlfcn.h>
 #include <dirent.h>
 #include <fnmatch.h>
-#ifdef IMPLEMENT_SPAWN
 #include <spawn.h>
-#endif
 #include <signal.h>
 
 #include <bps/bps.h>
@@ -147,7 +143,7 @@ void Sys_Error( const char *error, ... ) {
 Sys_Launch
 ========================
 */
-void Sys_Launch( const char * path, idCmdArgs & args,  void * data, unsigned int dataSize ) {
+void Sys_Launch( const char * path, idCmdArgs & args, void * data, unsigned int dataSize ) {
 
 	/* TODO
 	TCHAR				szPathOrig[_MAX_PATH];
@@ -584,7 +580,6 @@ void Sys_SetClipboardData( const char *string ) {
 	set_clipboard_data( "text/plain", strlen( string ) + 1, string );
 }
 
-#ifdef IMPLEMENT_SPAWN
 /*
 ========================
 ExecOutputFn
@@ -593,7 +588,6 @@ ExecOutputFn
 static void ExecOutputFn( const char * text ) {
 	idLib::Printf( text );
 }
-#endif
 
 
 /*
@@ -611,10 +605,6 @@ bool Sys_Exec(	const char * appPath, const char * workingPath, const char * args
 
 	exitCode = 0;
 
-#ifndef IMPLEMENT_SPAWN
-	common->Warning( "Sys_Exec not implemented\n" );
-	return false;
-#else
 	/*
 	if ( !qnx.canSpawn ) {
 		common->Warning( "Sys_Exec not supported by process manager\n" );
@@ -757,7 +747,6 @@ bool Sys_Exec(	const char * appPath, const char * workingPath, const char * args
 	close( stdOutPipe[1] );
 	close( stdInPipe[0] );
 	return true;
-#endif
 }
 
 /*
@@ -859,6 +848,14 @@ void Sys_Init() {
 	qnx.canSpawn	= procmgr_ability( 0, PROCMGR_ADN_NONROOT | PROCMGR_AOP_ALLOW | PROCMGR_AID_SPAWN,			PROCMGR_AID_EOL );
 	qnx.canNewApp	= procmgr_ability( 0, PROCMGR_ADN_NONROOT | PROCMGR_AOP_ALLOW | PROCMGR_AID_CHILD_NEWAPP,	PROCMGR_AID_EOL );
 	qnx.canLockMem	= procmgr_ability( 0, PROCMGR_ADN_NONROOT | PROCMGR_AOP_ALLOW | PROCMGR_AID_MEM_LOCK,		PROCMGR_AID_EOL );
+
+	//
+	// other info
+	//
+	qnx.personalPerimeter = idStr::Icmp( getenv( "PERIMETER" ), "personal" );
+	if ( !qnx.personalPerimeter ) {
+		common->Printf( "%s is not running under personal perimeter. Some functions may be disabled\n", GAME_NAME );
+	}
 
 	//
 	// QNX version
@@ -1221,7 +1218,7 @@ void idSysLocal::OpenURL( const char *url, bool doexit ) {
 	static bool doexit_spamguard = false;
 	navigator_invoke_invocation_t* invoke = NULL;
 
-	if (doexit_spamguard) {
+	if ( doexit_spamguard ) {
 		common->DPrintf( "OpenURL: already in an exit sequence, ignoring %s\n", url );
 		return;
 	}
@@ -1250,40 +1247,16 @@ void idSysLocal::OpenURL( const char *url, bool doexit ) {
 
 /*
 ==================
-idSysLocal::StartProcess
+Sys_StartProcess_Spawn
 ==================
 */
-void idSysLocal::StartProcess( const char *exePath, bool doexit ) {
-
-	idCmdArgs args( exePath, true );
-	if ( args.Argc() < 1 ) {
-		// No args
-		return;
-	}
+void Sys_StartProcess_Spawn( const char *path, bool doexit ) {
+	idCmdArgs args( path, true );
 
 	bool success = false;
-
-	// Try invocation
-	navigator_invoke_invocation_t *invoke = NULL;
 	const char* target = args.Argv( 0 );
 
-	navigator_invoke_invocation_create( &invoke );
-	navigator_invoke_invocation_set_action( invoke, "bb.action.OPEN" );
-	success = navigator_invoke_invocation_set_target( invoke, target ) == BPS_SUCCESS;
-	if ( success ) {
-		if ( args.Argc() > 1 ) {
-			const char *data = args.Args( 1 );
-			navigator_invoke_invocation_set_data( invoke, data, strlen( data ) + 1 );
-		}
-
-		success = navigator_invoke_invocation_send( invoke ) == BPS_SUCCESS;
-	}
-
-	navigator_invoke_invocation_destroy( invoke );
-
-#ifdef IMPLEMENT_SPAWN
-	// Try spawn if supported and if invoke failed
-	if ( !success /*&& qnx.canSpawn*/ && qnx.canNewApp ) {
+	if ( /*qnx.canSpawn && */ qnx.canNewApp ) {
 		char ** argv = NULL;
 		if ( args.Argc() > 1 ) {
 			int argc;
@@ -1310,14 +1283,70 @@ void idSysLocal::StartProcess( const char *exePath, bool doexit ) {
 			Mem_Free( ( void* )argv );
 		}
 	}
-#endif
 
 	if ( success ) {
 		if ( doexit ) {
 			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "quit\n" );
 		}
 	} else {
-		common->Error( "Could not start process: '%s' ", exePath );
+		common->Error( "Could not start process: '%s' ", path );
+	}
+}
+
+/*
+==================
+idSysLocal::StartProcess
+==================
+*/
+void idSysLocal::StartProcess( const char *exePath, bool doexit ) {
+
+#if __SIZEOF_POINTER__ != __SIZEOF_INT__
+#error Pointer is not the same size as a pointer, meaning the method of retrieving the invocation won't work
+#endif
+
+	// Try to invoke the process. If that doesn't work, then the BPS loop will catch it and try to spawn the process instead
+
+	idCmdArgs args( exePath, true );
+	if ( args.Argc() < 1 ) {
+		// No args
+		common->Warning( "StartProcess: exePath is empty\n" );
+		if ( doexit ) {
+			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "quit\n" );
+		}
+		return;
+	}
+
+	bool success = false;
+
+	// Try invocation
+	navigator_invoke_invocation_t *invoke = NULL;
+	const char* target = args.Argv( 0 );
+
+	navigator_invoke_invocation_create( &invoke );
+	{
+		idStr ptr;
+		ptr.Format( "%p", invoke );
+		navigator_invoke_invocation_set_id( invoke, ptr.c_str() );
+	}
+	navigator_invoke_invocation_set_action( invoke, "bb.action.OPEN" );
+	success = navigator_invoke_invocation_set_target( invoke, target ) == BPS_SUCCESS;
+	if ( success ) {
+		idStr metadata;
+		metadata.Format( "{\"type\":\"doom.sys_local.start_process\", \"doexit\":%s, \"path\":\"%s\"}", ( doexit ? "true" : "false" ), exePath );
+		navigator_invoke_invocation_set_metadata( invoke, metadata.c_str() );
+
+		if ( args.Argc() > 1 ) {
+			const char *data = args.Args( 1 );
+			navigator_invoke_invocation_set_data( invoke, data, strlen( data ) + 1 );
+		}
+
+		success = navigator_invoke_invocation_send( invoke ) == BPS_SUCCESS;
+	}
+
+	if ( !success ) {
+		navigator_invoke_invocation_destroy( invoke );
+
+		Sys_StartProcess_Spawn( exePath, doexit );
 	}
 }
 
