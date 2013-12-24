@@ -473,20 +473,32 @@ void Sys_PumpEvents() {
 						if ( sscanf( id, "%p", &invoke ) == 1 && invoke ) {
 
 							bool doexit = false;
+							bool handleDoexit = false;
+
 							static char path[2048];
 							path[0] = '\0';
 
-							const char *err = navigator_event_get_err(event);
-							if ( err && idStr::Icmp( err, "INVOKE_NO_TARGET_ERROR" ) ) {
+							const char *metadata = navigator_invoke_invocation_get_metadata( invoke );
+							const char *type = NULL;
+							if ( metadata && metadata[0] ) {
+								type = Sys_ParseJSONObj( metadata, "type" );
+							}
 
-								const char *metadata = navigator_invoke_invocation_get_metadata( invoke );
-								if ( metadata && metadata[0] ) {
-									const char *type = Sys_ParseJSONObj( metadata, "type" );
-									if ( type && idStr::Icmp( type, "doom.sys_local.start_process" ) == 0 ) {
+							// Parse metadata
+							if ( type ) {
+								const char *err = navigator_event_get_err( event );
+								if ( idStr::Icmp( type, "doom.sys_local.start_process" ) == 0 ) {
+									if ( err && idStr::Icmp( err, "INVOKE_NO_TARGET_ERROR" ) ) {
 
 										// Save data so that invoke can be freed and memory leak is avoided if error occurs
 										doexit = idStr::Icmp( Sys_ParseJSONObj( metadata, "doexit" ), "true" );
 										strcpy( path, Sys_ParseJSONObj( metadata, "path" ) );
+									}
+								} else if ( idStr::Icmp( type, "doom.sys.launch" ) == 0 ) {
+									doexit = idStr::Icmp( Sys_ParseJSONObj( metadata, "doexit" ), "true" );
+									handleDoexit = true;
+									if ( err ) {
+										common->Warning( "Sys_Launch error invoking application: %s\n", err );
 									}
 								}
 							}
@@ -494,8 +506,12 @@ void Sys_PumpEvents() {
 							// As the invoke was not freed so that this function could parse it, we clean it up here
 							navigator_invoke_invocation_destroy( invoke );
 
+							// Reactions to invoke
 							if ( path[0] ) {
 								Sys_StartProcess_Spawn( path, doexit );
+							}
+							if ( handleDoexit && doexit ) {
+								cmdSystem->AppendCommandText( "quit\n" );
 							}
 						}
 					}

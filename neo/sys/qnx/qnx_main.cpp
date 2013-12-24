@@ -146,22 +146,40 @@ Sys_Launch
 */
 void Sys_Launch( const char * path, idCmdArgs & args, void * data, unsigned int dataSize ) {
 
-	/* TODO
-	TCHAR				szPathOrig[_MAX_PATH];
-	STARTUPINFO			si;
-	PROCESS_INFORMATION	pi;
+#if __SIZEOF_POINTER__ != __SIZEOF_INT__
+#error Pointer is not the same size as a pointer, meaning the method of retrieving the invocation won't work
+#endif
 
-	ZeroMemory( &si, sizeof(si) );
-	si.cb = sizeof(si);
+	// Purely an invoke call
 
-	strcpy( szPathOrig, va( "\"%s\" %s", Sys_EXEPath(), (const char *)data ) );
+	bool success = false;
 
-	if ( !CreateProcess( NULL, szPathOrig, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi ) ) {
-		idLib::Error( "Could not start process: '%s' ", szPathOrig );
-		return;
+	// Try invocation
+	navigator_invoke_invocation_t *invoke = NULL;
+
+	navigator_invoke_invocation_create( &invoke );
+	{
+		idStr ptr;
+		ptr.Format( "%p", invoke );
+		navigator_invoke_invocation_set_id( invoke, ptr.c_str() );
 	}
-	cmdSystem->AppendCommandText( "quit\n" );
-	*/
+	navigator_invoke_invocation_set_action( invoke, "bb.action.OPEN" );
+	success = navigator_invoke_invocation_set_target( invoke, path ) == BPS_SUCCESS;
+	if ( success ) {
+		idStr metadata;
+		metadata.Format( "{\"type\":\"doom.sys.launch\", \"doexit\":true, \"args\":\"%s\"}", args.Args() );
+		navigator_invoke_invocation_set_metadata( invoke, metadata.c_str() );
+
+		if ( data && dataSize > 0 ) {
+			navigator_invoke_invocation_set_data( invoke, data, dataSize );
+		}
+
+		success = navigator_invoke_invocation_send( invoke ) == BPS_SUCCESS;
+	}
+
+	if ( !success ) {
+		navigator_invoke_invocation_destroy( invoke );
+	}
 }
 
 /*
@@ -302,6 +320,8 @@ Sys_Sleep
 ==============
 */
 void Sys_Sleep( int msec ) {
+	// Don't use usleep because it has a limit of 1000000 microseconds (1000 milliseconds)
+
 	struct timespec tm;
 	nsec2timespec( &tm, msec * 1000000ULL ); //XXX Should this be done by hand?
 	nanosleep( &tm, NULL );
@@ -1221,7 +1241,7 @@ int main( int argc, char** argv ) {
 	if ( cmdLine == NULL ) {
 		// Use the system arguments
 		idCmdArgs args;
-		for ( int i = 1; i < argc; i++ ) {
+		for ( int i = 0; i < argc; i++ ) {
 			args.AppendArg( argv[i] );
 		}
 		idStr::Copynz( sys_cmdline, args.Args(), sizeof( sys_cmdline ) );
