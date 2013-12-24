@@ -59,6 +59,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/pps.h>
 
 #include "../sys_local.h"
 #include "qnx_local.h"
@@ -333,7 +334,22 @@ Sys_ShowWindow
 ==============
 */
 void Sys_ShowWindow( bool show ) {
-	//XXX ::ShowWindow( win32.hWnd, show ? SW_SHOW : SW_HIDE );
+	if ( show ) {
+		common->Warning( "Sys_ShowWindow: Maximizing a window is not supported\n" );
+	} else {
+		// From QQnxWindow (QNX implementation of Qt)
+
+		pps_encoder_t encoder;
+
+		pps_encoder_initialize( &encoder, false );
+		pps_encoder_add_string( &encoder, "msg", "minimizeWindow" );
+
+		if ( navigator_raw_write( pps_encoder_buffer( &encoder ), pps_encoder_length( &encoder ) ) != BPS_SUCCESS ) {
+			common->Warning( "Sys_ShowWindow: Failed to minimize window\n" );
+		}
+
+		pps_encoder_cleanup( &encoder );
+	}
 }
 
 /*
@@ -888,7 +904,7 @@ void Sys_Init() {
 	//
 	navigator_rotation_lock( true );
 
-	if ( navigator_request_events( 0 ) != BPS_SUCCESS )
+	if ( navigator_request_events( NAVIGATOR_EXTENDED_DATA ) != BPS_SUCCESS )
 		Sys_Error( "Couldn't request navigator events" );
 	battery_request_events( 0 );
 #ifdef USE_EVENT_UPDATE_SYS_LANG
