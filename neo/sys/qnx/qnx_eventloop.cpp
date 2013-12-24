@@ -524,15 +524,27 @@ void Sys_PumpEvents() {
 					int time = battery_info_get_time_to_empty( info );
 					if ( time != BATTERY_TIME_NA && time < BATTERY_MIN_TO_LOW_BATTERY_WARNING ) {
 						common->Dialog().AddDialog( GDM_WARNING_LOW_BATTERY, DIALOG_ACCEPT, NULL, NULL, true );
-					} else {
+					} else if ( common->Dialog().HasDialogMsg( GDM_WARNING_LOW_BATTERY, NULL ) ) {
 						common->Dialog().ClearDialog( GDM_WARNING_LOW_BATTERY );
 					}
 					break;
 				}
 			}
-#ifdef ID_LANG_EVENT_UPDATE_SYS_LANG
+#ifdef USE_EVENT_UPDATE_SYS_LANG
 			else if ( domain == locale_get_domain() ) {
 				Sys_UpdateLanguage( locale_event_get_language( event ) );
+			}
+#endif
+#ifndef USE_EXEC_APP_RESTART
+			else if ( domain == dialog_get_domain() ) {
+				dialog_instance_t dialog = dialog_event_get_dialog_instance( event );
+				if ( dialog == qnx.dialog ) {
+					//TODO: check what the dialog is. If it's a relaunch, then "cmdSystem->AppendCommandText( "quit\n" );"
+					dialog_destroy( qnx.dialog );
+					qnx.dialog = NULL;
+				} else {
+					common->Warning( "Unknown dialog event\n" );
+				}
 			}
 #endif
 		} else {

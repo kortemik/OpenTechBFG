@@ -41,6 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <fnmatch.h>
 #include <spawn.h>
 #include <signal.h>
+#include <process.h>
 
 #include <bps/bps.h>
 #include <bps/navigator_invoke.h>
@@ -177,25 +178,47 @@ const char * Sys_GetCmdLine() {
 Sys_ReLaunch
 ========================
 */
+#ifdef USE_EXEC_APP_RESTART
+idCmdArgs relaunchArgs;
+#endif
 void Sys_ReLaunch( void * data, const unsigned int dataSize ) {
-	/* TODO
-	TCHAR				szPathOrig[MAX_PRINT_MSG];
-	STARTUPINFO			si;
-	PROCESS_INFORMATION	pi;
 
-	ZeroMemory( &si, sizeof(si) );
-	si.cb = sizeof(si);
+#ifdef USE_EXEC_APP_RESTART
+	char newCmd[MAX_PRINT_MSG];
+	strcpy( newCmd, va( "\"%s\" %s", Sys_EXEPath(), (const char *)data ) );
 
-	strcpy( szPathOrig, va( "\"%s\" %s", Sys_EXEPath(), (const char *)data ) );
-
-	CloseHandle( hProcessMutex );
-
-	if ( !CreateProcess( NULL, szPathOrig, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi ) ) {
-		idLib::Error( "Could not start process: '%s' ", szPathOrig );
-		return;
-	}
+	relaunchArgs.TokenizeString( newCmd, true );
 	cmdSystem->AppendCommandText( "quit\n" );
-	*/
+#else
+	if ( qnx.dialog ) {
+		common->Error( "Sys_ReLaunch: Dialog already open\n" );
+	}
+	if ( dialog_create_alert( &qnx.dialog ) != BPS_SUCCESS ) {
+		common->Error( "Sys_ReLaunch: Could not create alert\n" );
+	}
+	// Text: Game will exit. Please run again to apply changes
+	if ( dialog_set_alert_message_text( qnx.dialog, idLocalization::FindString( "#str_01000001" ) ) != BPS_SUCCESS ) {
+		common->Error( "Sys_ReLaunch: Could not set alert message text\n" );
+	}
+	// Button: Exit Game
+	if ( dialog_add_button( qnx.dialog, idLocalization::FindString( "#str_01975" ), true, NULL, true ) != BPS_SUCCESS ) {
+		common->Error( "Sys_ReLaunch: Could not add button to alert\n" );
+	}
+
+	// Save the arguments
+	int fd = open( "data/relaunch.txt", O_WRONLY | O_CREAT, S_IRWXU );
+	if ( fd >= 0 ) {
+		write( fd, data, dataSize );
+		close( fd );
+	} else {
+		common->Error( "Sys_ReLaunch: Could not save args\n" );
+	}
+
+	// Show dialog if no error occurred when saving args
+	if ( dialog_show( qnx.dialog ) != BPS_SUCCESS ) {
+		common->Error( "Sys_ReLaunch: Could not show alert\n" );
+	}
+#endif
 }
 
 /*
@@ -207,6 +230,18 @@ void Sys_Quit() {
 	if ( qnx.errorGraphics ) {
 		GLimp_Shutdown();
 	}
+#ifdef USE_EXEC_APP_RESTART
+	int argc;
+	const char * const * argvTmp = relaunchArgs.GetArgs( &argc );
+	if ( argc > 0 /*&& qnx.canSpawn*/ ) {
+		char ** argv = ( char ** )_alloca( sizeof( char ** ) * ( argc + 1 ) );
+		memcpy( &argv[1], argvTmp, sizeof( char ** ) * argc );
+		argv[argc + 1] = NULL;
+
+		// If this fails, it simply exits
+		execv( argv[0], argv );
+	}
+#endif
 	exit( 0 );
 }
 
@@ -268,7 +303,7 @@ Sys_Sleep
 */
 void Sys_Sleep( int msec ) {
 	struct timespec tm;
-	nsec2timespec( &tm, msec * 1000000 ); //XXX Should this be done by hand?
+	nsec2timespec( &tm, msec * 1000000ULL ); //XXX Should this be done by hand?
 	nanosleep( &tm, NULL );
 }
 
@@ -836,8 +871,11 @@ void Sys_Init() {
 	if ( navigator_request_events( 0 ) != BPS_SUCCESS )
 		Sys_Error( "Couldn't request navigator events" );
 	battery_request_events( 0 );
-#ifdef ID_LANG_EVENT_UPDATE_SYS_LANG
+#ifdef USE_EVENT_UPDATE_SYS_LANG
 	locale_request_events( 0 );
+#endif
+#ifndef USE_EXEC_APP_RESTART
+	dialog_request_events( 0 );
 #endif
 
 	cmdSystem->AddCommand( "in_restart", Sys_In_Restart_f, CMD_FL_SYSTEM, "restarts the input system" );
@@ -1028,7 +1066,14 @@ Sys_Shutdown
 */
 void Sys_Shutdown() {
 	Sys_ShutdownInput();
-#ifdef ID_LANG_EVENT_UPDATE_SYS_LANG
+#ifndef USE_EXEC_APP_RESTART
+	if ( qnx.dialog ) {
+		dialog_destroy( qnx.dialog );
+		qnx.dialog = NULL;
+	}
+	dialog_stop_events( 0 );
+#endif
+#ifdef USE_EVENT_UPDATE_SYS_LANG
 	locale_stop_events( 0 );
 #endif
 	battery_stop_events( 0 );
@@ -1154,12 +1199,32 @@ int main( int argc, char** argv ) {
 	Sys_GetCurrentMemoryStatus( appLaunchMemoryStats );
 
 	// build command line
-	{
+	char* cmdLine = NULL;
+	int relaunchFd = open( "data/relaunch.txt", O_RDONLY );
+	if ( relaunchFd >= 0 ) {
+		// Use the relaunch arguments
+		lseek( relaunchFd, 0, SEEK_END );
+		int dataLen = tell( relaunchFd );
+		lseek( relaunchFd, 0, SEEK_SET );
+
+		cmdLine = ( char* )Mem_Alloc( dataLen + 1, TAG_TEMP );
+		int pos = read( relaunchFd, cmdLine, dataLen );
+		if ( pos < 0 ) {
+			Mem_Free( ( void* )cmdLine );
+			cmdLine = NULL;
+		} else {
+			cmdLine[pos] = '\0';
+		}
+		close( relaunchFd );
+		remove( "data/relaunch.txt" );
+	}
+	if ( cmdLine == NULL ) {
+		// Use the system arguments
 		idCmdArgs args;
 		for ( int i = 1; i < argc; i++ ) {
 			args.AppendArg( argv[i] );
 		}
-		idStr::Copynz( sys_cmdline, args.Args( 0, -1 ), sizeof( sys_cmdline ) );
+		idStr::Copynz( sys_cmdline, args.Args(), sizeof( sys_cmdline ) );
 	}
 
 	// get the initial time base
@@ -1185,11 +1250,16 @@ int main( int argc, char** argv ) {
 		//cmdSystem->Shutdown();
 	}
 
-	// initialize system
-	if ( argc > 1 ) {
-		common->Init( argc - 1, &argv[1], NULL );
+	// initialize system (done like this because cmdLine will just be parsed into argc and argv anyway, so if we have it, use it)
+	if ( cmdLine ) {
+		if ( argc > 1 ) {
+			common->Init( argc - 1, &argv[1], NULL );
+		} else {
+			common->Init( 0, NULL, NULL );
+		}
 	} else {
-		common->Init( 0, NULL, NULL );
+		common->Init( 0, NULL, cmdLine );
+		Mem_Free( ( void* )cmdLine );
 	}
 
 #if TEST_FPU_EXCEPTIONS != 0

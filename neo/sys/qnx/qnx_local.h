@@ -37,9 +37,16 @@ If you have questions concerning this license or the applicable additional terms
 #include <sys/slog2.h>
 #include <bps/navigator.h>
 #include <bps/screen.h>
+#include <bps/dialog.h>
 
 #define BATTERY_MIN_TO_LOW_BATTERY_WARNING 20
 #define SLOG_BUFFER_COUNT 1
+
+// This overwrites any user set language
+//#define USE_EVENT_UPDATE_SYS_LANG
+
+// This uses exec* to restart the game. Doesn't work as of 10.2.0
+//#define USE_EXEC_APP_RESTART
 
 void	Sys_QueEvent( sysEventType_t type, int value, int value2, int ptrLength, void *ptr, int inputDeviceNum );
 
@@ -59,8 +66,6 @@ void	Sys_StartProcess_Spawn( const char *path, bool doexit );
 #define ID_LANG_CODE_JAPANESE	"ja"
 const char * Sys_LangCodes( int idx );
 
-// This overwrites any user set language
-//#define ID_LANG_EVENT_UPDATE_SYS_LANG
 void	Sys_UpdateLanguage( const char *language );
 
 // JSON
@@ -82,6 +87,7 @@ typedef struct {
 	bool						canSpawn;
 	bool						canNewApp;
 	bool						canLockMem;
+	dialog_instance_t			dialog;
 
 	// Input vars
 	int							mouseWheelPosition;
