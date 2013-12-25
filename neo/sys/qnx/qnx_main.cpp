@@ -1188,9 +1188,6 @@ bool TestPermission( const char* permission ) {
 			remove( str.c_str() );
 		}
 		return success;
-	} else if ( idStr::Cmp( permission, "access_pimdomain_messages" ) == 0 ) {
-		//TODO
-		return true;
 	}
 	return false;
 }
@@ -1271,7 +1268,6 @@ int main( int argc, char** argv ) {
 
 	// test permissions
 	qnx.permSharedFile = TestPermission( "access_shared" );
-	qnx.permEmail = TestPermission( "access_pimdomain_messages" );
 
 	if ( qnx.permSharedFile ) {
 		// check for data, copy if it doesn't exist
@@ -1281,21 +1277,21 @@ int main( int argc, char** argv ) {
 
 		//cmdSystem->Init();
 		cvarSystem->Init();
-		common->Printf( "No access to shared files, %s will error and crash.\n", GAME_NAME );
+		common->Printf( "No access to shared files, %s will probably error and crash.\n", GAME_NAME );
 		cvarSystem->Shutdown();
 		//cmdSystem->Shutdown();
 	}
 
 	// initialize system (done like this because cmdLine will just be parsed into argc and argv anyway, so if we have it, use it)
 	if ( cmdLine ) {
+		common->Init( 0, NULL, cmdLine );
+		Mem_Free( ( void* )cmdLine );
+	} else {
 		if ( argc > 1 ) {
 			common->Init( argc - 1, &argv[1], NULL );
 		} else {
 			common->Init( 0, NULL, NULL );
 		}
-	} else {
-		common->Init( 0, NULL, cmdLine );
-		Mem_Free( ( void* )cmdLine );
 	}
 
 #if TEST_FPU_EXCEPTIONS != 0

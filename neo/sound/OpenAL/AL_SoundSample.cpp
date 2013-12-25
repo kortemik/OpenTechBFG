@@ -275,14 +275,17 @@ void idSoundSample_OpenAL::CreateOpenALBuffer() {
 			buffer = buffers[0].buffer;
 			bufferSize = buffers[0].bufferSize;
 
-			if( MS_ADPCM_decode( ( uint8** ) &buffer, &bufferSize ) < 0 ) {
-				common->Error( "idSoundSample_OpenAL::CreateOpenALBuffer: could not decode ADPCM '%s' to 16 bit format", GetName() );
+			if ( !static_cast<const idSoundHardware_OpenAL*>( soundSystemLocal.GetHardware() )->SupportsIMA4() ) {
+
+				if( MS_ADPCM_decode( ( uint8** ) &buffer, &bufferSize ) < 0 ) {
+					common->Error( "idSoundSample_OpenAL::CreateOpenALBuffer: could not decode ADPCM '%s' to 16 bit format", GetName() );
+				}
+
+				buffers[0].buffer = buffer;
+				buffers[0].bufferSize = bufferSize;
+
+				totalBufferSize = bufferSize;
 			}
-
-			buffers[0].buffer = buffer;
-			buffers[0].bufferSize = bufferSize;
-
-			totalBufferSize = bufferSize;
 		} else if( format.basic.formatTag == idWaveFile::FORMAT_XMA2 ) {
 			// RB: not used in the PC version of the BFG edition
 			common->Error( "idSoundSample_OpenAL::CreateOpenALBuffer: could not decode XMA2 '%s' to 16 bit format", GetName() );
@@ -596,9 +599,12 @@ ALenum idSoundSample_OpenAL::GetOpenALBufferFormat() const {
 	if( format.basic.formatTag == idWaveFile::FORMAT_PCM ) {
 		alFormat = NumChannels() == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
 	} else if( format.basic.formatTag == idWaveFile::FORMAT_ADPCM ) {
-		//alFormat = NumChannels() == 1 ? AL_FORMAT_MONO8 : AL_FORMAT_STEREO8;
-		alFormat = NumChannels() == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
-		//alFormat = NumChannels() == 1 ? AL_FORMAT_MONO_IMA4 : AL_FORMAT_STEREO_IMA4;
+		if ( static_cast<const idSoundHardware_OpenAL*>( soundSystemLocal.GetHardware() )->SupportsIMA4() ) {
+			alFormat = NumChannels() == 1 ? AL_FORMAT_MONO_IMA4 : AL_FORMAT_STEREO_IMA4;
+		} else {
+			//alFormat = NumChannels() == 1 ? AL_FORMAT_MONO8 : AL_FORMAT_STEREO8;
+			alFormat = NumChannels() == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
+		}
 	} else if( format.basic.formatTag == idWaveFile::FORMAT_XMA2 ) {
 		alFormat = NumChannels() == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
 	} else {

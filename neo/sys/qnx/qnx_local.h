@@ -82,7 +82,6 @@ typedef struct {
 	bool						errorGraphics;
 	navigator_window_state_t	windowState;
 	bool						permSharedFile;
-	bool						permEmail;
 	bool						personalPerimeter;
 	bool						canSpawn;
 	bool						canNewApp;

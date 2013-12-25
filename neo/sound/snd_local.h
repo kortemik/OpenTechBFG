@@ -420,6 +420,7 @@ public:
 	virtual void			FreeStreamBuffers();
 
 	virtual void *			GetIXAudio2() const;
+	virtual const idSoundHardware *GetHardware() const { return &hardware; }
 
 	// for the sound level meter window
 	virtual cinData_t		ImageForTime( const int milliseconds, const bool waveform );

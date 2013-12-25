@@ -191,10 +191,18 @@ void idSoundHardware_OpenAL::Init() {
 
 	common->Printf( "Done setting up OpenAL.\n" );
 
+	const char *extensions = alGetString( AL_EXTENSIONS );
+
 	common->Printf( "OpenAL vendor: %s\n", alGetString( AL_VENDOR ) );
 	common->Printf( "OpenAL renderer: %s\n", alGetString( AL_RENDERER ) );
 	common->Printf( "OpenAL version: %s\n", alGetString( AL_VERSION ) );
-	common->Printf( "OpenAL extensions: %s\n", alGetString( AL_EXTENSIONS ) );
+	common->Printf( "OpenAL extensions: %s\n", extensions );
+
+#ifdef AL_EXT_IMA4
+	hasIMA4Support = strstr( extensions, "AL_EXT_IMA4" ) != NULL;
+#else
+	hasIMA4Support = false;
+#endif
 
 	// ---------------------
 	// Try to get information about the sound device
