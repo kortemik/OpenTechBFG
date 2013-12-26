@@ -256,33 +256,50 @@ void Sys_ReLaunch( void * data, const unsigned int dataSize ) {
 	relaunchArgs.TokenizeString( newCmd, true );
 	cmdSystem->AppendCommandText( "quit\n" );
 #else
-	if ( qnx.dialog ) {
-		common->Error( "Sys_ReLaunch: Dialog already open\n" );
-	}
-	if ( dialog_create_alert( &qnx.dialog ) != BPS_SUCCESS ) {
-		common->Error( "Sys_ReLaunch: Could not create alert\n" );
-	}
-	// Text: Game will exit. Please run again to apply changes
-	if ( dialog_set_alert_message_text( qnx.dialog, idLocalization::FindString( "#str_01000001" ) ) != BPS_SUCCESS ) {
-		common->Error( "Sys_ReLaunch: Could not set alert message text\n" );
-	}
-	// Button: Exit Game
-	if ( dialog_add_button( qnx.dialog, idLocalization::FindString( "#str_01975" ), true, NULL, true ) != BPS_SUCCESS ) {
-		common->Error( "Sys_ReLaunch: Could not add button to alert\n" );
-	}
+	if ( qnx.dontShowRelaunchDialog ) {
+		// Save the arguments
+		int fd = open( "data/relaunch.txt", O_WRONLY | O_CREAT, S_IRWXU );
+		if ( fd >= 0 ) {
+			write( fd, data, dataSize );
+			close( fd );
+		} else {
+			common->Error( "Sys_ReLaunch: Could not save args\n" );
+		}
 
-	// Save the arguments
-	int fd = open( "data/relaunch.txt", O_WRONLY | O_CREAT, S_IRWXU );
-	if ( fd >= 0 ) {
-		write( fd, data, dataSize );
-		close( fd );
+		cmdSystem->AppendCommandText( "quit\n" );
 	} else {
-		common->Error( "Sys_ReLaunch: Could not save args\n" );
-	}
+		if ( qnx.dialog ) {
+			common->Error( "Sys_ReLaunch: Dialog already open\n" );
+		}
+		if ( dialog_create_alert( &qnx.dialog ) != BPS_SUCCESS ) {
+			common->Error( "Sys_ReLaunch: Could not create alert\n" );
+		}
+		// Text: Game will exit. Please run again to apply changes
+		dialog_set_alert_message_text( qnx.dialog, idLocalization::FindString( "#str_01000001" ) );
+		// Button: Exit Game
+		dialog_add_button( qnx.dialog, idLocalization::FindString( "#str_01975" ), true, NULL, true );
+#if BBNDK_VERSION_AT_LEAST(10, 2, 0)
+		// Setup checkbox if the dialog should be shown or not
+		dialog_set_alert_checkbox_enabled( qnx.dialog, true );
+		dialog_set_alert_checkbox_checked( qnx.dialog, false );
+		// Text: Do not show this popup again.
+		dialog_set_alert_checkbox_label( qnx.dialog, idLocalization::FindString( "#str_01000002" ) );
+#endif
 
-	// Show dialog if no error occurred when saving args
-	if ( dialog_show( qnx.dialog ) != BPS_SUCCESS ) {
-		common->Error( "Sys_ReLaunch: Could not show alert\n" );
+		// Save the arguments
+		int fd = open( "data/relaunch.txt", O_WRONLY | O_CREAT, S_IRWXU );
+		if ( fd >= 0 ) {
+			write( fd, data, dataSize );
+			close( fd );
+		} else {
+			common->Error( "Sys_ReLaunch: Could not save args\n" );
+		}
+
+		// Show dialog if no error occurred when saving args
+		if ( dialog_show( qnx.dialog ) != BPS_SUCCESS ) {
+			common->Error( "Sys_ReLaunch: Could not show alert\n" );
+		}
+		qnx.dialogType = QnxDialog_Relaunch;
 	}
 #endif
 }
@@ -1245,6 +1262,41 @@ bool TestPermission( const char* permission ) {
 	return false;
 }
 
+/*
+====================
+showRelaunchDialog_f
+====================
+*/
+CONSOLE_COMMAND_SHIP( showRelaunchDialog, "Enable or disable game relaunch dialog", NULL ) {
+	if ( args.Argc() < 2 || args.Argc() > 3 ) {
+		common->Printf( "usage: showRelaunchDialog <show> [current value]\n" );
+		return;
+	}
+
+	const char *arg = args.Argv( 1 );
+	char show = arg && arg[0] == '1' ? 'F' : 'T';
+
+	bool returnCurrentValue = args.Argc() > 2;
+
+	int fd = open( "data/relaunch_dialog.txt", O_RDWR | O_CREAT, S_IRWXU );
+	if ( fd >= 0 ) {
+		qnx.dontShowRelaunchDialog = show == 'T';
+		if ( returnCurrentValue ) {
+			char tmp;
+			if ( read( fd, &tmp, sizeof( char ) ) > 0 ) {
+				common->Printf( "Show relaunch dialog: %s\n", ( tmp == 'F' ? "1" : "0" ) );
+			} else {
+				common->Warning( "Could not read relaunch dialog setting" );
+			}
+		}
+		lseek( fd, 0, SEEK_SET );
+		write( fd, &show, sizeof( char ) );
+		close( fd );
+	} else {
+		common->Warning( "Could not get or change relaunch dialog setting" );
+	}
+}
+
 #define TEST_FPU_EXCEPTIONS	/*	FPU_EXCEPTION_INVALID_OPERATION |		*/	\
 							/*	FPU_EXCEPTION_DENORMALIZED_OPERAND |	*/	\
 							/*	FPU_EXCEPTION_DIVIDE_BY_ZERO |			*/	\
@@ -1286,22 +1338,22 @@ int main( int argc, char** argv ) {
 
 	// build command line
 	char* cmdLine = NULL;
-	int relaunchFd = open( "data/relaunch.txt", O_RDONLY );
-	if ( relaunchFd >= 0 ) {
+	int fd = open( "data/relaunch.txt", O_RDONLY );
+	if ( fd >= 0 ) {
 		// Use the relaunch arguments
-		lseek( relaunchFd, 0, SEEK_END );
-		int dataLen = tell( relaunchFd );
-		lseek( relaunchFd, 0, SEEK_SET );
+		lseek( fd, 0, SEEK_END );
+		int dataLen = tell( fd );
+		lseek( fd, 0, SEEK_SET );
 
 		cmdLine = ( char* )Mem_Alloc( dataLen + 1, TAG_TEMP );
-		int pos = read( relaunchFd, cmdLine, dataLen );
+		int pos = read( fd, cmdLine, dataLen );
 		if ( pos < 0 ) {
 			Mem_Free( ( void* )cmdLine );
 			cmdLine = NULL;
 		} else {
 			cmdLine[pos] = '\0';
 		}
-		close( relaunchFd );
+		close( fd );
 		remove( "data/relaunch.txt" );
 	}
 	if ( cmdLine == NULL ) {
@@ -1311,6 +1363,16 @@ int main( int argc, char** argv ) {
 			args.AppendArg( argv[i] );
 		}
 		idStr::Copynz( sys_cmdline, args.Args(), sizeof( sys_cmdline ) );
+	}
+
+	// determine if dialog shouldn't be shown
+	fd = open( "data/relaunch_dialog.txt", O_RDONLY );
+	if ( fd >= 0 ) {
+		char tmp;
+		if ( read( fd, &tmp, sizeof( char ) ) > 0 ) {
+			qnx.dontShowRelaunchDialog = tmp == 'T';
+		}
+		close( fd );
 	}
 
 	// get the initial time base

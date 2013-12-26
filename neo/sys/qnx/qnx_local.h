@@ -57,6 +57,11 @@ uint64	Sys_Microseconds();
 bool	EmailCrashReport( const char *messageText, const char *errorLog );
 void	Sys_StartProcess_Spawn( const char *path, bool doexit );
 
+enum qnxDialogType {
+	QnxDialog_Unknown			= 0,
+	QnxDialog_Relaunch			= 1
+};
+
 // localization
 #define ID_LANG_CODE_ENGLISH	"en"
 #define ID_LANG_CODE_FRENCH		"fr"
@@ -86,7 +91,11 @@ typedef struct {
 	bool						canSpawn;
 	bool						canNewApp;
 	bool						canLockMem;
+
+	// Dialog vars
 	dialog_instance_t			dialog;
+	qnxDialogType				dialogType;
+	bool						dontShowRelaunchDialog;
 
 	// Input vars
 	int							mouseWheelPosition;

@@ -40,6 +40,8 @@ If you have questions concerning this license or the applicable additional terms
 #include <bps/navigator_invoke.h>
 
 #include <signal.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "qnx_local.h"
 
@@ -553,13 +555,32 @@ void Sys_PumpEvents() {
 #endif
 #ifndef USE_EXEC_APP_RESTART
 			else if ( domain == dialog_get_domain() ) {
-				dialog_instance_t dialog = dialog_event_get_dialog_instance( event );
-				if ( dialog == qnx.dialog ) {
-					//TODO: check what the dialog is. If it's a relaunch, then "cmdSystem->AppendCommandText( "quit\n" );"
-					dialog_destroy( qnx.dialog );
-					qnx.dialog = NULL;
-				} else {
-					common->Warning( "Unknown dialog event\n" );
+				code = bps_event_get_code( event );
+				switch( code ) {
+				case DIALOG_RESPONSE: {
+					dialog_instance_t dialog = dialog_event_get_dialog_instance( event );
+					if ( dialog == qnx.dialog ) {
+						if ( qnx.dialogType == QnxDialog_Relaunch ) {
+#if BBNDK_VERSION_AT_LEAST(10, 2, 0)
+							if ( dialog_event_get_alert_checkbox_checked( event ) ) {
+								int fd = open( "data/relaunch_dialog.txt", O_WRONLY | O_CREAT, S_IRWXU );
+								if ( fd >= 0 ) {
+									char tmp = '1';
+									write( fd, &tmp, sizeof( char ) );
+									close( fd );
+								}
+							}
+#endif
+							cmdSystem->AppendCommandText( "quit\n" );
+						}
+						dialog_destroy( qnx.dialog );
+						qnx.dialog = NULL;
+						qnx.dialogType = QnxDialog_Unknown;
+					} else {
+						common->Warning( "Unknown dialog\n" );
+					}
+					break;
+				}
 				}
 			}
 #endif
