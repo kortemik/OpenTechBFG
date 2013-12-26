@@ -599,9 +599,13 @@ ALenum idSoundSample_OpenAL::GetOpenALBufferFormat() const {
 	if( format.basic.formatTag == idWaveFile::FORMAT_PCM ) {
 		alFormat = NumChannels() == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
 	} else if( format.basic.formatTag == idWaveFile::FORMAT_ADPCM ) {
+#ifdef AL_EXT_IMA4
 		if ( static_cast<const idSoundHardware_OpenAL*>( soundSystemLocal.GetHardware() )->SupportsIMA4() ) {
 			alFormat = NumChannels() == 1 ? AL_FORMAT_MONO_IMA4 : AL_FORMAT_STEREO_IMA4;
-		} else {
+		}
+		else
+#endif
+		{
 			//alFormat = NumChannels() == 1 ? AL_FORMAT_MONO8 : AL_FORMAT_STEREO8;
 			alFormat = NumChannels() == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
 		}

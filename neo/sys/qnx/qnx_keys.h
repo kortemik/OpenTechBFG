@@ -37,8 +37,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #define SUPPORT_EMAIL_ADDRESS	"account@domain.com"
 #define SUPPORT_EMAIL_SUBJECT	"DOOM 3 Fatal Error"
-#define SUPPORT_EMAIL_BODY_PRE	""
-#define SUPPORT_EMAIL_BODY_POST	""
+#define SUPPORT_EMAIL_BODY		"%s"	// One string argument has to exist, which will be the error message.
 
 #define USE_SCORELOOP
 

@@ -203,6 +203,7 @@ void idSoundHardware_OpenAL::Init() {
 #else
 	hasIMA4Support = false;
 #endif
+	// XXX should AL_LOKI_IMA_ADPCM_format be checked as well?
 
 	// ---------------------
 	// Try to get information about the sound device

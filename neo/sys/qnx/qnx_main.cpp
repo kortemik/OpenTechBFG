@@ -67,9 +67,15 @@ If you have questions concerning this license or the applicable additional terms
 
 idCVar QNXVars_t::sys_arch( "sys_arch", "", CVAR_SYSTEM | CVAR_INIT, "" );
 idCVar QNXVars_t::sys_cpustring( "sys_cpustring", "detect", CVAR_SYSTEM | CVAR_INIT, "" );
-//XXX
+#ifndef ID_RETAIL
+idCVar QNXVars_t::qnx_errorAttachLogs( "qnx_errorAttachLogs", "1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "1 - attach slog2 files only, 2 - parse slog2 files before sending", 0, 2 );
+#else
+idCVar QNXVars_t::qnx_errorAttachLogs( "qnx_errorAttachLogs", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "attach slog2 logs on error" );
+#endif
 
 QNXVars_t	qnx;
+
+extern char* __progname;
 
 static char		sys_cmdline[MAX_STRING_CHARS];
 
@@ -117,8 +123,43 @@ void Sys_Error( const char *error, ... ) {
 		void GLimp_SwapBuffers();
 		GLimp_SwapBuffers();
 
+		// Get error log
+		const char *errorLog = NULL;
+		bool removeLog = false;
+		if ( qnx.qnx_errorAttachLogs.GetBool() ) {
+			idStr path;
+
+#ifndef ID_RETAIL
+			switch ( qnx.qnx_errorAttachLogs.GetInteger() ) {
+			case 1: {
+				path.Format( "/tmp/slogger2/%s.%d", __progname, getpid() );
+				int fd = open( path.c_str(), O_RDONLY );
+				if ( fd >= 0 ) {
+					errorLog = Mem_CopyString( path.c_str() );
+					close( fd );
+				}
+				break;
+			}
+
+			case 2:
+#endif
+				FILE *destFile = fopen( "logs/error_msg.txt", "w" );
+				if ( destFile ) {
+					if ( slog2_dump_logs_to_file( destFile, 0 ) == 0 ) {
+						path.Format( "%s/logs/error_msg.txt", Sys_CWD() );
+						errorLog = Mem_CopyString( path.c_str() );
+						removeLog = true;
+					}
+					fclose( destFile );
+				}
+#ifndef ID_RETAIL
+				break;
+			}
+#endif
+		}
+
 		// Invoke email card
-		EmailCrashReport( text );
+		EmailCrashReport( text, errorLog );
 
 		// wait for the user to quit
 		while ( 1 ) {
@@ -127,6 +168,12 @@ void Sys_Error( const char *error, ... ) {
 					switch( bps_event_get_code( event ) ) {
 					case NAVIGATOR_CHILD_CARD_CLOSED:
 					case NAVIGATOR_EXIT:
+						if ( errorLog ) {
+							if ( removeLog ) {
+								remove( errorLog );
+							}
+							Mem_Free( ( void* )errorLog );
+						}
 						common->Quit();
 						break;
 					}
@@ -426,10 +473,10 @@ sysFolder_t Sys_IsFolder( const char *path ) {
 
 /*
 ==============
-Sys_Cwd
+Sys_CWD
 ==============
 */
-const char *Sys_Cwd() {
+const char *Sys_CWD() {
 	static char cwd[MAX_OSPATH];
 
 	getcwd( cwd, sizeof( cwd ) - 1 );
@@ -483,7 +530,7 @@ const char *Sys_DefaultSavePath() {
 	static char savePath[ PATH_MAX ];
 	memset( savePath, 0, PATH_MAX );
 
-	strcpy( savePath, Sys_Cwd() );
+	strcpy( savePath, Sys_CWD() );
 	strcat( savePath, SAVE_PATH );
 
 	return savePath;
@@ -496,17 +543,17 @@ Sys_AdditionalSearchPaths
 */
 void Sys_AdditionalSearchPaths( idStrList & paths ) {
 	// Shared storage
-	idStr str = Sys_Cwd();
+	idStr str = Sys_CWD();
 	str += "/shared/misc/appdata/doom3bfg";
 	paths.Append( str );
 
 	// App assets
-	str = Sys_Cwd();
+	str = Sys_CWD();
 	str += "/app/native/assets";
 	paths.Append( str );
 
 	// Not temp/not backed-up cache (**UNTESTED**)
-	str = Sys_Cwd();
+	str = Sys_CWD();
 	str += "/cache";
 	paths.Append( str );
 }
@@ -683,7 +730,7 @@ bool Sys_Exec(	const char * appPath, const char * workingPath, const char * args
 	}
 	*/
 
-	const char* cwd = Sys_Cwd();
+	const char* cwd = Sys_CWD();
 	if ( chdir( workingPath ) != 0 ) {
 		return false;
 	}
@@ -885,8 +932,6 @@ returns true if there is a copy of D3 running already
 bool Sys_AlreadyRunning() {
 	return false;
 }
-
-extern char* __progname;
 
 /*
 ================
@@ -1144,7 +1189,7 @@ EmailCrashReport
   emailer originally from Raven/Quake 4
 ====================
 */
-bool EmailCrashReport( const char* messageText ) {
+bool EmailCrashReport( const char *messageText, const char *errorLog ) {
 	static int lastEmailTime = 0;
 
 	if ( Sys_Milliseconds() < lastEmailTime + 10000 ) {
@@ -1153,9 +1198,17 @@ bool EmailCrashReport( const char* messageText ) {
 
 	lastEmailTime = Sys_Milliseconds();
 
+	idStr attachment;
+	if ( errorLog ) {
+		attachment.Format( ", \"attachment\":[\"file://%s\"]", errorLog );
+	}
+
+	idStr emailBody;
+	emailBody.Format( SUPPORT_EMAIL_BODY, messageText );
+
 	idStr format;
-	format.Format( "data:json:{\"to\":\"%s\",\"subject\":\"%s\",\"body\":\"%s%s%s\"}\n",
-			SUPPORT_EMAIL_ADDRESS, SUPPORT_EMAIL_SUBJECT, SUPPORT_EMAIL_BODY_PRE, messageText, SUPPORT_EMAIL_BODY_POST );
+	format.Format( "data:json:{\"to\":\"%s\",\"subject\":\"%s\",\"body\":\"%s\"%s}\n",
+			SUPPORT_EMAIL_ADDRESS, SUPPORT_EMAIL_SUBJECT, emailBody.c_str(), attachment.c_str() );
 
 	navigator_invoke_invocation_t *invoke = NULL;
 
@@ -1179,8 +1232,8 @@ TestPermission
 */
 bool TestPermission( const char* permission ) {
 	if ( idStr::Cmp( permission, "access_shared" ) == 0 ) {
-		idStr str = Sys_Cwd();
-		str += "/shared/misc/testofdoom.txt";
+		idStr str;
+		str.Format( "%s/shared/misc/testofdoom.txt", Sys_CWD() );
 		int file = open( str.c_str(), O_CREAT, S_IRWXU );
 		bool success = file >= 0;
 		if ( file >= 0 ) {

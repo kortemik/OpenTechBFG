@@ -63,7 +63,7 @@ void idSignInManagerQnx::Pump() {
 
 #ifndef ID_RETAIL
 	// If we don't have enough, then make sure we do
-	// NOTE - We always want at least one user on windows for now,
+	// NOTE - We always want at least one user on QNX for now,
 	// and this master user will always use controller 0
 	while ( localUsers.Num() < minDesiredLocalUsers ) {
 		RegisterLocalUser( localUsers.Num() );

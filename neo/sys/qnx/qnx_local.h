@@ -54,7 +54,7 @@ cpuid_t	Sys_GetCPUId();
 
 uint64	Sys_Microseconds();
 
-bool	EmailCrashReport( const char* messageText );
+bool	EmailCrashReport( const char *messageText, const char *errorLog );
 void	Sys_StartProcess_Spawn( const char *path, bool doexit );
 
 // localization
@@ -134,6 +134,7 @@ typedef struct {
 	// CVar
 	static idCVar				sys_arch;
 	static idCVar				sys_cpustring;
+	static idCVar				qnx_errorAttachLogs;
 } QNXVars_t;
 
 extern idCVar qnx_skipPointerPolling;
