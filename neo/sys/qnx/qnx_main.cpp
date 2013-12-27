@@ -1155,6 +1155,18 @@ void Sys_Init() {
 #else
 #error Unknown CPU architecture
 #endif
+
+	//
+	// Determine if dialog shouldn't be shown
+	//
+	int fd = open( "data/relaunch_dialog.txt", O_RDONLY );
+	if ( fd >= 0 ) {
+		char tmp;
+		if ( read( fd, &tmp, sizeof( char ) ) > 0 ) {
+			qnx.dontShowRelaunchDialog = tmp == 'T';
+		}
+		close( fd );
+	}
 }
 
 /*
@@ -1363,16 +1375,6 @@ int main( int argc, char** argv ) {
 			args.AppendArg( argv[i] );
 		}
 		idStr::Copynz( sys_cmdline, args.Args(), sizeof( sys_cmdline ) );
-	}
-
-	// determine if dialog shouldn't be shown
-	fd = open( "data/relaunch_dialog.txt", O_RDONLY );
-	if ( fd >= 0 ) {
-		char tmp;
-		if ( read( fd, &tmp, sizeof( char ) ) > 0 ) {
-			qnx.dontShowRelaunchDialog = tmp == 'T';
-		}
-		close( fd );
 	}
 
 	// get the initial time base

@@ -84,13 +84,6 @@ extern "C" {
 //=============
 //Defines for functions and their enums that are defined but may not actually exist
 //=============
-#ifndef GL_BACK_LEFT
-	#define GL_BACK_LEFT 0x0402
-#endif
-#ifndef GL_BACK_RIGHT
-	#define GL_BACK_RIGHT 0x0403
-#endif
-
 #ifndef PFNGLACTIVETEXTUREPROC
 	typedef void (GL_APIENTRYP PFNGLACTIVETEXTUREPROC) (GLenum texture);
 #endif
@@ -419,9 +412,75 @@ extern "C" {
 	#endif
 #endif
 
+#ifndef GL_READ_FRAMEBUFFER_ANGLE
+	#ifdef GL_READ_FRAMEBUFFER_NV
+		#define GL_READ_FRAMEBUFFER_ANGLE GL_READ_FRAMEBUFFER_NV
+	#elif defined(GL_ES_VERSION_3_0)
+		#define GL_READ_FRAMEBUFFER_ANGLE GL_READ_FRAMEBUFFER
+	#else
+		#define GL_READ_FRAMEBUFFER_ANGLE 0x8CA8
+	#endif
+#endif
+#ifndef GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_ANGLE
+	#ifdef GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_NV
+		#define GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_ANGLE GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_NV
+	#elif defined(GL_ES_VERSION_3_0)
+		#define GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_ANGLE GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE
+	#else
+		#define GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_ANGLE 0x8D56
+	#endif
+#endif
+#ifndef GL_DRAW_FRAMEBUFFER_ANGLE
+	#ifdef GL_DRAW_FRAMEBUFFER_NV
+		#define GL_DRAW_FRAMEBUFFER_ANGLE GL_DRAW_FRAMEBUFFER_NV
+	#elif defined(GL_ES_VERSION_3_0)
+		#define GL_DRAW_FRAMEBUFFER_ANGLE GL_DRAW_FRAMEBUFFER
+	#else
+		#define GL_DRAW_FRAMEBUFFER_ANGLE 0x8CA9
+	#endif
+#endif
+#ifndef PFNGLBLITFRAMEBUFFERANGLEPROC
+	typedef void (GL_APIENTRYP PFNGLBLITFRAMEBUFFERANGLEPROC) (GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
+#endif
+
+#ifndef GL_RENDERBUFFER_SAMPLES_ANGLE
+	#ifdef GL_RENDERBUFFER_SAMPLES_NV
+		#define GL_RENDERBUFFER_SAMPLES_ANGLE GL_RENDERBUFFER_SAMPLES_NV
+	#elif defined(GL_ES_VERSION_3_0)
+		#define GL_RENDERBUFFER_SAMPLES_ANGLE GL_RENDERBUFFER_SAMPLES
+	#else
+		#define GL_RENDERBUFFER_SAMPLES_ANGLE 0x8CAB
+	#endif
+#endif
+#ifndef GL_MAX_SAMPLES_ANGLE
+	#ifdef GL_MAX_SAMPLES_NV
+		#define GL_MAX_SAMPLES_ANGLE GL_MAX_SAMPLES_NV
+	#elif defined(GL_ES_VERSION_3_0)
+		#define GL_MAX_SAMPLES_ANGLE GL_MAX_SAMPLES
+	#else
+		#define GL_MAX_SAMPLES_ANGLE 0x8D57
+	#endif
+#endif
+#ifndef PFNGLRENDERBUFFERSTORAGEMULTISAMPLEANGLEPROC
+	typedef void (GL_APIENTRYP PFNGLRENDERBUFFERSTORAGEMULTISAMPLEANGLEPROC) (GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
+#endif
+
 //=============
 //Defines for enums that are defined but may not actually exist
 //=============
+#ifndef GL_FRONT_LEFT
+	#define GL_FRONT_LEFT 0x0400
+#endif
+#ifndef GL_FRONT_RIGHT
+	#define GL_FRONT_RIGHT 0x0401
+#endif
+#ifndef GL_BACK_LEFT
+	#define GL_BACK_LEFT 0x0402
+#endif
+#ifndef GL_BACK_RIGHT
+	#define GL_BACK_RIGHT 0x0403
+#endif
+
 #ifndef GL_TEXTURE_CUBE_MAP_SEAMLESS
 	#define GL_TEXTURE_CUBE_MAP_SEAMLESS 0x884F
 #endif
@@ -534,6 +593,30 @@ extern "C" {
 
 #ifndef GL_PROGRAM_ERROR_STRING_ARB
 	#define GL_PROGRAM_ERROR_STRING_ARB 0x8874
+#endif
+
+#ifndef GL_SRGB8_ALPHA8_EXT
+	#ifdef GL_ES_VERSION_3_0
+		#define GL_SRGB8_ALPHA8_EXT GL_SRGB8_ALPHA8
+	#else
+		#define GL_SRGB8_ALPHA8_EXT 0x8C43
+	#endif
+#endif
+
+#ifndef GL_DEPTH24_STENCIL8_OES
+	#ifdef GL_ES_VERSION_3_0
+		#define GL_DEPTH24_STENCIL8_OES GL_DEPTH24_STENCIL8
+	#else
+		#define GL_DEPTH24_STENCIL8_OES 0x88F0
+	#endif
+#endif
+
+#ifndef GL_DEPTH_COMPONENT24_OES
+	#ifdef GL_ES_VERSION_3_0
+		#define GL_DEPTH_COMPONENT24_OES GL_DEPTH_COMPONENT24
+	#else
+		#define GL_DEPTH_COMPONENT24_OES 0x81A6
+	#endif
 #endif
 
 #ifdef __cplusplus

@@ -1253,7 +1253,6 @@ void R_InitOpenGL() {
 		glConfig.extensions_string = extensions_string.c_str();
 	}
 
-
 	float glVersion = R_ParseVersionString();
 	float glslVersion = R_ParseGLSLVersionString();
 	idLib::Printf( "OpenGL Version: %3.1f\n", glVersion );
@@ -1277,6 +1276,8 @@ void R_InitOpenGL() {
 
 #ifdef GL_ES_VERSION_2_0
 	R_CheckGLESVariableReplacements();
+
+	R_SetupFramebuffers();
 
 	R_SetupTextureCompression();
 

@@ -981,6 +981,7 @@ void R_Init();
 void R_InitOpenGL();
 
 #ifdef GL_ES_VERSION_2_0
+void R_SetupFramebuffers();
 void R_UpdateFramebuffers();
 void R_UpdateGLESVersion();
 #endif

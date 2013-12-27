@@ -41,12 +41,21 @@ If you have questions concerning this license or the applicable additional terms
 
 #define BATTERY_MIN_TO_LOW_BATTERY_WARNING 20
 #define SLOG_BUFFER_COUNT 1
+#define FRAMEBUFFER_COUNT 3
+#define RENDERBUFFER_PER_FRAMEBUFFER 3
+#define RENDERBUFFER_PER_FRAMEBUFFER_PACKED 2
 
 // This overwrites any user set language
 //#define USE_EVENT_UPDATE_SYS_LANG
 
 // This uses exec* to restart the game. Doesn't work as of 10.2.0
 //#define USE_EXEC_APP_RESTART
+
+// Enable multisampling with EGL (can't be modified at runtime)
+//#define GLES_MULTISAMPLE_EGL
+
+// Enable multisampling with framebuffers (can be modified at runtime)
+#define GLES_MULTISAMPLE_FRAMEBUFFER
 
 void	Sys_QueEvent( sysEventType_t type, int value, int value2, int ptrLength, void *ptr, int inputDeviceNum );
 
@@ -129,9 +138,16 @@ typedef struct {
 	EGLConfig					eglConfig;
 
 	// GLES Framebuffer vars
-	//TODO: framebuffers (4 symbols for them [front, back (aka, back_left), back_left, back_right])
+	GLuint						framebuffers[FRAMEBUFFER_COUNT];		// FRONT_RIGHT, BACK_LEFT, BACK_RIGHT
+	GLuint						renderbuffers[FRAMEBUFFER_COUNT * 3];	// FRONT_RIGHT (color, depth, [stencil]), BACK_LEFT, BACK_RIGHT
 	GLenum						frontBuffer;
 	GLenum						backBuffer;
+	bool						discardFramebuffersSupported;
+	bool						blitSupported;
+	bool						multisampleFramebufferSupported;
+	bool						multisampleFramebufferTextureSupported;
+	bool						packedFramebufferSupported;
+	bool						depth24FramebufferSupported;
 
 	// SMP acceleration vars
 	signalHandle_t				renderCommandsEvent;
