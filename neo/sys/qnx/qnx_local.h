@@ -140,12 +140,16 @@ typedef struct {
 	// GLES Framebuffer vars
 	GLuint						framebuffers[FRAMEBUFFER_COUNT];		// FRONT_RIGHT, BACK_LEFT, BACK_RIGHT
 	GLuint						renderbuffers[FRAMEBUFFER_COUNT * 3];	// FRONT_RIGHT (color, depth, [stencil]), BACK_LEFT, BACK_RIGHT
-	GLenum						frontBuffer;
-	GLenum						backBuffer;
+#ifdef GL_IMG_multisampled_render_to_texture
+	GLuint						fbTextures[FRAMEBUFFER_COUNT];
+#endif
+	GLenum						readBuffer;
+	GLenum						drawBuffer;
 	bool						discardFramebuffersSupported;
 	bool						blitSupported;
 	bool						multisampleFramebufferSupported;
 	bool						multisampleFramebufferTextureSupported;
+	bool						useBlit;
 	bool						packedFramebufferSupported;
 	bool						depth24FramebufferSupported;
 

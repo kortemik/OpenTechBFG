@@ -599,7 +599,7 @@ static void R_CheckPortableExtensions() {
 
 	// GL_EXT_texture_lod_bias
 	// The actual extension is broken as specified, storing the state in the texture unit instead
-	// of the texture object.  The behavior in GL 1.4 is the behavior we use.
+	// of the texture object. The behavior in GL 1.4 is the behavior we use.
 #ifndef GL_ES_VERSION_2_0
 	glConfig.textureLODBiasAvailable = ( glConfig.glVersion >= 1.4 || R_CheckExtension( "GL_EXT_texture_lod_bias" ) );
 	glConfig.textureLODBiasShaderOnlyAvailable = false;

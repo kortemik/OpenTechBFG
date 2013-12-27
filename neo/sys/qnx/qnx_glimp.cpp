@@ -38,13 +38,46 @@ If you have questions concerning this license or the applicable additional terms
 idCVar r_useGLES3( "r_useGLES3", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "0 = OpenGL ES 3.0 if available, 1 = OpenGL ES 2.0, 2 = OpenGL 3.0", 0, 2 );
 
 /*
+=================
+R_GetBufferIndex
+=================
+*/
+int R_GetBufferIndex( GLenum value ) {
+	switch ( value ) {
+	case GL_FRONT:
+	//case GL_LEFT:
+	case GL_FRONT_LEFT:
+		return INT_MAX;
+
+	//case GL_RIGHT:
+	case GL_FRONT_RIGHT:
+		return 0;
+
+	case GL_BACK:
+	case GL_BACK_LEFT:
+		return 1;
+
+	case GL_BACK_RIGHT:
+		return 2;
+	}
+	return -1;
+}
+
+
+/*
 ========================
 GLimp_glReadBuffer
 ========================
 */
 void GLimp_glReadBuffer( GLenum mode ) {
 	if ( qnx.blitSupported ) {
-		//TODO
+		if ( qnx.readBuffer != mode ) {
+			int index = R_GetBufferIndex( mode );
+			if ( index >= 0 ) {
+				qglBindFramebuffer( GL_READ_FRAMEBUFFER_ANGLE, ( index == INT_MAX ? 0 : qnx.framebuffers[index] ) );
+				qnx.readBuffer = mode;
+			}
+		}
 	} else {
 		//TODO
 	}
@@ -57,7 +90,13 @@ GLimp_glDrawBuffer
 */
 void GLimp_glDrawBuffer( GLenum mode ) {
 	if ( qnx.blitSupported ) {
-		//TODO
+		if ( qnx.drawBuffer != mode ) {
+			int index = R_GetBufferIndex( mode );
+			if ( index >= 0 ) {
+				qglBindFramebuffer( GL_DRAW_FRAMEBUFFER_ANGLE, ( index == INT_MAX ? 0 : qnx.framebuffers[index] ) );
+				qnx.drawBuffer = mode;
+			}
+		}
 	} else {
 		//TODO
 	}
@@ -75,11 +114,18 @@ bool R_CheckExtension( char *name );
 
 PFNGLBLITFRAMEBUFFERANGLEPROC					qglBlitFramebufferANGLE;
 PFNGLRENDERBUFFERSTORAGEMULTISAMPLEANGLEPROC	qglRenderbufferStorageMultisampleANGLE;
+PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEIMGPROC		qglFramebufferTexture2DMultisampleIMG;
 
 #ifdef GLES_MULTISAMPLE_FRAMEBUFFER
 #define GL_RENDERBUFFER_STORAGE( samples, format, width, height ) qglRenderbufferStorageMultisampleANGLE( GL_RENDERBUFFER, ( samples ), ( format ), ( width ), ( height ) )
 #else
 #define GL_RENDERBUFFER_STORAGE( samples, format, width, height ) qglRenderbufferStorage( GL_RENDERBUFFER, ( format ), ( width ), ( height ) )
+#endif
+
+#ifdef GLES_MULTISAMPLE_FRAMEBUFFER
+#define GL_FRAMEBUFFER_TEXTURE2D( textureID, level, samples ) qglFramebufferTexture2DMultisampleIMG( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ( textureID ), ( level ), ( samples ) )
+#else
+#define GL_FRAMEBUFFER_TEXTURE2D( textureID, level, samples ) qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ( textureID ), ( level ) )
 #endif
 
 PFNGLDISCARDFRAMEBUFFEREXTPROC					qglDiscardFramebufferEXT;
@@ -555,29 +601,38 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t> &
 
 /*
 =================
-R_UpdateFramebuffers
+R_BuildFramebuffers
 =================
 */
-void R_UpdateFramebuffers() {
-	extern idCVar r_useSRGB;
-	bool useSRGB = glConfig.sRGBFramebufferAvailable && ( r_useSRGB.GetInteger() == 1 || r_useSRGB.GetInteger() == 2 );
-	int samples = r_multiSamples.GetInteger();
-	samples = __min( __max( samples, 0 ), glConfig.maxMultisamples );
-
-	//TODO: if GLES_MULTISAMPLE_FRAMEBUFFER isn't defined, check to see if sRGB changed, otherwise check if sRGB or samples changed. If neither changed, then return. Nothing to do
-
-	// According to http://www.opengl.org/wiki/Renderbuffer_Object, it is better to delete the renderbuffer and recreate it then it is to reallocate it
-	int renderbufferOffset = qnx.packedFramebufferSupported ? RENDERBUFFER_PER_FRAMEBUFFER_PACKED : RENDERBUFFER_PER_FRAMEBUFFER;
-	qglDeleteRenderbuffers( FRAMEBUFFER_COUNT * renderbufferOffset, qnx.renderbuffers );
-	qglGenRenderbuffers( FRAMEBUFFER_COUNT * renderbufferOffset, qnx.renderbuffers );
-
+void R_BuildFramebuffers( bool useSRGB, GLsizei samples, int renderbufferOffset ) {
 	for ( int i = 0; i < FRAMEBUFFER_COUNT; i++ ) {
 		qglBindFramebuffer( GL_FRAMEBUFFER, qnx.framebuffers[i] );
 
 		// color
-		qglBindRenderbuffer( GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 0] );
-		GL_RENDERBUFFER_STORAGE( samples, ( useSRGB ? GL_SRGB8_ALPHA8_EXT : GL_RGBA8 ), glConfig.nativeScreenWidth, glConfig.nativeScreenHeight );
-		qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 0] );
+		if ( qnx.useBlit ) {
+			qglBindRenderbuffer( GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 0] );
+			GL_RENDERBUFFER_STORAGE( samples, ( useSRGB ? GL_SRGB8_ALPHA8_EXT : GL_RGBA8 ), glConfig.nativeScreenWidth, glConfig.nativeScreenHeight );
+			qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 0] );
+		}
+#ifdef GL_IMG_multisampled_render_to_texture
+		else {
+			qglBindTexture( GL_TEXTURE_2D, qnx.fbTextures[i] );
+
+			qglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+			qglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+			qglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+			qglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+
+#ifdef GL_ES_VERSION_3_0
+			GLenum internalFormat = ( useSRGB ? ( glConfig.glVersion >= 3.0f ? GL_SRGB8_ALPHA8 : GL_SRGB_ALPHA_EXT ) : GL_RGBA8 );
+#else
+			GLenum internalFormat = ( useSRGB ? GL_SRGB_ALPHA_EXT : GL_RGBA8 );
+#endif
+			qglTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL );
+
+			GL_FRAMEBUFFER_TEXTURE2D( qnx.fbTextures[i], 0, samples );
+		}
+#endif
 
 		if ( qnx.packedFramebufferSupported ) {
 			// Depth and stencil
@@ -615,6 +670,9 @@ void R_UpdateFramebuffers() {
 				error = "Unsupported";
 				break;
 			case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_ANGLE:
+#ifdef GL_IMG_multisampled_render_to_texture
+			case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_IMG:
+#endif
 				error = "Incomplete Multisample";
 				break;
 			default:
@@ -628,6 +686,58 @@ void R_UpdateFramebuffers() {
 
 /*
 =================
+R_UpdateFramebuffers
+=================
+*/
+void R_UpdateFramebuffers() {
+	extern idCVar r_useSRGB;
+	bool useSRGB = glConfig.sRGBFramebufferAvailable && ( r_useSRGB.GetInteger() == 1 || r_useSRGB.GetInteger() == 2 );
+	GLsizei samples = r_multiSamples.GetInteger();
+	samples = __min( __max( samples, 0 ), glConfig.maxMultisamples );
+
+	GLint tmp;
+	if ( qnx.useBlit ) {
+		qglBindRenderbuffer( GL_RENDERBUFFER, qnx.framebuffers[0] ); // First renderbuffer is a color one
+#ifdef GLES_MULTISAMPLE_FRAMEBUFFER
+		qglGetRenderbufferParameteriv( GL_RENDERBUFFER, GL_RENDERBUFFER_SAMPLES_ANGLE, &tmp );
+		if ( samples == tmp )
+#endif
+		{
+			qglGetRenderbufferParameteriv( GL_RENDERBUFFER, GL_RENDERBUFFER_INTERNAL_FORMAT, &tmp );
+			if ( !glConfig.sRGBFramebufferAvailable || tmp == GL_SRGB8_ALPHA8_EXT ) {
+				// Nothing to do, all values are the same
+				return;
+			}
+		}
+	}
+#if defined(GL_IMG_multisampled_render_to_texture) && defined(GLES_MULTISAMPLE_FRAMEBUFFER)
+	// There is no way to get texture format on PVR (can get it on QCOM...), so only check texture samples. If they are the same, and sRGB isn't supported
+	// then return. Otherwise, if the samples are different or sRGB is supported (and we can't check the current texture format) then we regenerate everything.
+	else {
+		qglGetFramebufferAttachmentParameteriv( GL_RENDERBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_SAMPLES_IMG, &tmp );
+		if ( samples == tmp && !glConfig.sRGBFramebufferAvailable )
+		{
+			return;
+		}
+	}
+#endif
+
+	// According to http://www.opengl.org/wiki/Renderbuffer_Object, it is better to delete the renderbuffer and recreate it then it is to reallocate it
+	int renderbufferOffset = qnx.packedFramebufferSupported ? RENDERBUFFER_PER_FRAMEBUFFER_PACKED : RENDERBUFFER_PER_FRAMEBUFFER;
+	qglDeleteRenderbuffers( FRAMEBUFFER_COUNT * renderbufferOffset, qnx.renderbuffers );
+	qglGenRenderbuffers( FRAMEBUFFER_COUNT * renderbufferOffset, qnx.renderbuffers );
+#ifdef GL_IMG_multisampled_render_to_texture
+	if ( !qnx.useBlit ) {
+		qglDeleteTextures( FRAMEBUFFER_COUNT, qnx.fbTextures );
+		qglGenTextures( FRAMEBUFFER_COUNT, qnx.fbTextures );
+	}
+#endif
+
+	R_BuildFramebuffers( useSRGB, samples, renderbufferOffset );
+}
+
+/*
+=================
 R_SetupFramebuffers
 =================
 */
@@ -637,8 +747,8 @@ void R_SetupFramebuffers() {
 	qglGenFramebuffers( FRAMEBUFFER_COUNT, qnx.framebuffers );
 
 	// setup parameters
-	qnx.frontBuffer = GL_FRONT;
-	qnx.backBuffer = GL_FRONT;
+	qnx.readBuffer = GL_FRONT;
+	qnx.drawBuffer = GL_FRONT;
 
 	// quick extension check
 	qnx.discardFramebuffersSupported = R_CheckExtension( "GL_EXT_discard_framebuffer" );
@@ -665,7 +775,10 @@ void R_SetupFramebuffers() {
 	}
 
 	qnx.multisampleFramebufferTextureSupported = R_CheckExtension( "GL_IMG_multisampled_render_to_texture" );
-	//TODO
+	if ( qnx.multisampleFramebufferTextureSupported ) {
+		qglRenderbufferStorageMultisampleANGLE = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLEANGLEPROC)GLimp_ExtensionPointer( "glRenderbufferStorageMultisampleIMG" );
+		qglFramebufferTexture2DMultisampleIMG = (PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEIMGPROC)GLimp_ExtensionPointer( "glFramebufferTexture2DMultisampleIMG" );
+	}
 
 	qnx.packedFramebufferSupported = ( glConfig.glVersion >= 3.0f || R_CheckExtension( "GL_OES_packed_depth_stencil" ) );
 
@@ -682,73 +795,58 @@ void R_SetupFramebuffers() {
 		idLib::Error( "24 bit depth renderbuffer not available" );
 	}
 
+#ifdef GLES_MULTISAMPLE_FRAMEBUFFER
+	// If on a PVR GPU, even if blit is supported, the color buffer won't be multisampled. So we can't use blit.
+	qnx.useBlit = qnx.blitSupported && !qnx.multisampleFramebufferTextureSupported;
+#else
+	// If blit is supported, just use standard framebuffers
+	qnx.useBlit = qnx.blitSupported;
+#endif
+
 	// generate renderbuffers
 	int renderbufferOffset = qnx.packedFramebufferSupported ? RENDERBUFFER_PER_FRAMEBUFFER_PACKED : RENDERBUFFER_PER_FRAMEBUFFER;
 	qglGenRenderbuffers( FRAMEBUFFER_COUNT * renderbufferOffset, qnx.renderbuffers );
 
+#ifdef GL_IMG_multisampled_render_to_texture
+	if ( !qnx.useBlit ) {
+		qglGenTextures( FRAMEBUFFER_COUNT, qnx.fbTextures );
+	}
+#endif
+
 	// setup framebuffers
 	GLint maxSamples;
-	qglGetIntegerv( GL_MAX_SAMPLES_ANGLE, &maxSamples );
+#ifdef GL_IMG_multisampled_render_to_texture
+	if ( qnx.multisampleFramebufferTextureSupported ) {
+		qglGetIntegerv( GL_MAX_SAMPLES_IMG, &maxSamples );
+	}
+	else
+#endif
+	{
+		qglGetIntegerv( GL_MAX_SAMPLES_ANGLE, &maxSamples );
+	}
 	glConfig.maxMultisamples = maxSamples;
 
 	extern idCVar r_useSRGB;
 	bool useSRGB = glConfig.sRGBFramebufferAvailable && ( r_useSRGB.GetInteger() == 1 || r_useSRGB.GetInteger() == 2 );
-	int samples = r_multiSamples.GetInteger();
+	GLsizei samples = r_multiSamples.GetInteger();
 	samples = __min( __max( samples, 0 ), glConfig.maxMultisamples );
 
-	for ( int i = 0; i < FRAMEBUFFER_COUNT; i++ ) {
-		qglBindFramebuffer( GL_FRAMEBUFFER, qnx.framebuffers[i] );
+	R_BuildFramebuffers( useSRGB, samples, renderbufferOffset );
+}
 
-		// color
-		qglBindRenderbuffer( GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 0] );
-		GL_RENDERBUFFER_STORAGE( samples, ( useSRGB ? GL_SRGB8_ALPHA8_EXT : GL_RGBA8 ), glConfig.nativeScreenWidth, glConfig.nativeScreenHeight );
-		qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 0] );
-
-		if ( qnx.packedFramebufferSupported ) {
-			// Depth and stencil
-			qglBindRenderbuffer( GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 1] );
-			GL_RENDERBUFFER_STORAGE( samples, GL_DEPTH24_STENCIL8_OES, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight );
-			qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 1] );
-			qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 1] );
-		} else {
-			// Depth
-			qglBindRenderbuffer( GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 1] );
-			GL_RENDERBUFFER_STORAGE( samples, GL_DEPTH_COMPONENT24_OES, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight );
-			qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 1] );
-
-			// Stencil
-			qglBindRenderbuffer( GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 2] );
-			GL_RENDERBUFFER_STORAGE( samples, GL_STENCIL_INDEX8, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight );
-			qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 2] );
-		}
-
-		// check for completeness
-		GLenum status = qglCheckFramebufferStatus( GL_FRAMEBUFFER );
-		if ( status != GL_FRAMEBUFFER_COMPLETE ) {
-			const char *error;
-			switch ( status ) {
-			case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-				error = "Incomplete Attachment";
-				break;
-			case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
-				error = "Incomplete Dimensions";
-				break;
-			case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-				error = "Missing Attachment";
-				break;
-			case GL_FRAMEBUFFER_UNSUPPORTED:
-				error = "Unsupported";
-				break;
-			case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_ANGLE:
-				error = "Incomplete Multisample";
-				break;
-			default:
-				error = "Unknown status";
-				break;
-			}
-			idLib::Error( "Framebuffer status isn't complete: %s", error );
-		}
+/*
+=================
+R_ShutdownFramebuffers
+=================
+*/
+void R_ShutdownFramebuffers() {
+#ifdef GL_IMG_multisampled_render_to_texture
+	if ( !qnx.useBlit ) {
+		qglDeleteTextures( FRAMEBUFFER_COUNT, qnx.fbTextures );
 	}
+#endif
+	qglDeleteRenderbuffers( ( qnx.packedFramebufferSupported ? RENDERBUFFER_PER_FRAMEBUFFER_PACKED : RENDERBUFFER_PER_FRAMEBUFFER ), qnx.renderbuffers );
+	qglDeleteFramebuffers( FRAMEBUFFER_COUNT, qnx.framebuffers );
 }
 
 /*
@@ -1312,8 +1410,7 @@ void GLimp_Shutdown() {
 	qnx.eglConfig = NULL;
 
 	if ( qnx.eglDisplay != EGL_NO_DISPLAY ) {
-		qglDeleteRenderbuffers( ( qnx.packedFramebufferSupported ? RENDERBUFFER_PER_FRAMEBUFFER_PACKED : RENDERBUFFER_PER_FRAMEBUFFER ), qnx.renderbuffers );
-		qglDeleteFramebuffers( FRAMEBUFFER_COUNT, qnx.framebuffers );
+		R_ShutdownFramebuffers();
 
 		retVal = qeglMakeCurrent( qnx.eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT );
 		common->Printf( "...qeglMakeCurrent( display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT ): %s\n", success[retVal] );
@@ -1375,42 +1472,8 @@ GLimp_SwapBuffers
 =====================
 */
 void GLimp_SwapBuffers() {
-#ifdef GL_EXT_discard_framebuffer
-	if ( qnx.discardFramebuffersSupported ) {
-		static const GLenum discardAttachments[3] = { GL_COLOR_EXT, GL_DEPTH_EXT, GL_STENCIL_EXT };
 
-		// Discard front-right buffer (not needed in current implementation)
-		qglBindFramebuffer( GL_FRAMEBUFFER, qnx.framebuffers[0] );
-		qglDiscardFramebufferEXT( GL_FRAMEBUFFER, 3, discardAttachments );
-
-		// Swap front-right with back-right
-		int tmp = qnx.framebuffers[0];
-		qnx.framebuffers[0] = qnx.framebuffers[2];
-		qnx.framebuffers[2] = tmp;
-
-		int renderbufferOffset = qnx.packedFramebufferSupported ? RENDERBUFFER_PER_FRAMEBUFFER_PACKED : RENDERBUFFER_PER_FRAMEBUFFER;
-		tmp = qnx.renderbuffers[0 * renderbufferOffset + 0];
-		qnx.renderbuffers[0 * renderbufferOffset + 0] = qnx.renderbuffers[2 * renderbufferOffset + 0];
-		qnx.renderbuffers[2 * renderbufferOffset + 0] = tmp;
-
-		tmp = qnx.renderbuffers[0 * renderbufferOffset + 1];
-		qnx.renderbuffers[0 * renderbufferOffset + 1] = qnx.renderbuffers[2 * renderbufferOffset + 1];
-		qnx.renderbuffers[2 * renderbufferOffset + 1] = tmp;
-
-		if ( renderbufferOffset == RENDERBUFFER_PER_FRAMEBUFFER ) {
-			tmp = qnx.renderbuffers[0 * renderbufferOffset + 2];
-			qnx.renderbuffers[0 * renderbufferOffset + 2] = qnx.renderbuffers[2 * renderbufferOffset + 2];
-			qnx.renderbuffers[2 * renderbufferOffset + 2] = tmp;
-		}
-	}
-#endif
-
-	if ( qnx.blitSupported ) {
-		//TODO: blit
-	} else {
-		//TODO: render texture
-	}
-
+	// Setup swap interval
 	if ( r_swapInterval.IsModified() ) {
 		r_swapInterval.ClearModified();
 
@@ -1422,6 +1485,60 @@ void GLimp_SwapBuffers() {
 		qeglSwapInterval( qnx.eglDisplay, interval );
 	}
 
+	// Only if framebuffers have been init should framebuffer processing be executed
+	if ( qnx.framebuffers[0] != 0 ) {
+#ifdef GL_EXT_discard_framebuffer
+		static const GLenum discardAttachments[3] = { GL_COLOR_EXT, GL_DEPTH_EXT, GL_STENCIL_EXT };
+
+		if ( qnx.discardFramebuffersSupported ) {
+
+			// Discard front-right buffer (not needed in current implementation)
+			qglBindFramebuffer( GL_FRAMEBUFFER, qnx.framebuffers[0] );
+			qglDiscardFramebufferEXT( GL_FRAMEBUFFER, 3, discardAttachments );
+
+			// Swap front-right with back-right
+			int tmp = qnx.framebuffers[0];
+			qnx.framebuffers[0] = qnx.framebuffers[2];
+			qnx.framebuffers[2] = tmp;
+
+			int renderbufferOffset = qnx.packedFramebufferSupported ? RENDERBUFFER_PER_FRAMEBUFFER_PACKED : RENDERBUFFER_PER_FRAMEBUFFER;
+			tmp = qnx.renderbuffers[0 * renderbufferOffset + 0];
+			qnx.renderbuffers[0 * renderbufferOffset + 0] = qnx.renderbuffers[2 * renderbufferOffset + 0];
+			qnx.renderbuffers[2 * renderbufferOffset + 0] = tmp;
+
+			tmp = qnx.renderbuffers[0 * renderbufferOffset + 1];
+			qnx.renderbuffers[0 * renderbufferOffset + 1] = qnx.renderbuffers[2 * renderbufferOffset + 1];
+			qnx.renderbuffers[2 * renderbufferOffset + 1] = tmp;
+
+			if ( renderbufferOffset == RENDERBUFFER_PER_FRAMEBUFFER ) {
+				tmp = qnx.renderbuffers[0 * renderbufferOffset + 2];
+				qnx.renderbuffers[0 * renderbufferOffset + 2] = qnx.renderbuffers[2 * renderbufferOffset + 2];
+				qnx.renderbuffers[2 * renderbufferOffset + 2] = tmp;
+			}
+		}
+#endif
+
+		int curRead = R_GetBufferIndex( qnx.readBuffer );
+		int curDraw = R_GetBufferIndex( qnx.drawBuffer );
+		if ( qnx.useBlit ) {
+			qglBindFramebuffer( GL_READ_FRAMEBUFFER_ANGLE, qnx.framebuffers[1] ); // BACK_LEFT framebuffer
+			qglBindFramebuffer( GL_DRAW_FRAMEBUFFER_ANGLE, 0 );
+
+			qglBlitFramebufferANGLE( 0, 0, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight, 0, 0, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight,
+					GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST );
+
+			if ( curRead == curDraw ) {
+				qglBindFramebuffer( GL_FRAMEBUFFER, ( curRead == INT_MAX ? 0 : qnx.framebuffers[curRead] ) );
+			} else {
+				qglBindFramebuffer( GL_READ_FRAMEBUFFER_ANGLE, ( curRead == INT_MAX ? 0 : qnx.framebuffers[curRead] ) );
+				qglBindFramebuffer( GL_DRAW_FRAMEBUFFER_ANGLE, ( curDraw == INT_MAX ? 0 : qnx.framebuffers[curDraw] ) );
+			}
+		} else {
+			//TODO: render texture
+		}
+	}
+
+	// Swap EGL buffers
 	qeglSwapBuffers( qnx.eglDisplay, qnx.eglSurface );
 }
 
