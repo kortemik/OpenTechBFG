@@ -826,7 +826,7 @@ static void R_CheckPortableExtensions() {
 #ifndef GL_ES_VERSION_3_0
 	glConfig.uniformBufferAvailable = R_CheckExtension( "GL_ARB_uniform_buffer_object" );
 #else
-	glConfig.uniformBufferAvailable = ( glConfig.glVersion >= 3.0f );
+	glConfig.uniformBufferAvailable = ( glConfig.glVersion >= 3.0f ); //XXX GL_IMG_uniform_buffer_object?
 #endif
 	if ( glConfig.uniformBufferAvailable ) {
 		qglGetUniformBlockIndex = (PFNGLGETUNIFORMBLOCKINDEXPROC)GLimp_ExtensionPointer( "glGetUniformBlockIndex" );
@@ -1053,7 +1053,7 @@ void R_CheckGLESVariableReplacements() {
 	}
 
 	// Max multisamples
-	//TODO: glConfig.maxMultisamples
+	// Multisample setup is determined in R_SetupFramebuffers
 }
 
 /*

@@ -63,7 +63,6 @@ int R_GetBufferIndex( GLenum value ) {
 	return -1;
 }
 
-
 /*
 ========================
 GLimp_glReadBuffer
@@ -76,6 +75,10 @@ void GLimp_glReadBuffer( GLenum mode ) {
 			if ( index >= 0 ) {
 				qglBindFramebuffer( GL_READ_FRAMEBUFFER_ANGLE, ( index == INT_MAX ? 0 : qnx.framebuffers[index] ) );
 				qnx.readBuffer = mode;
+			} else {
+				// Cause GL_INVALID_ENUM error
+				GLint tmp;
+				qglGetFramebufferAttachmentParameteriv( GL_RENDERBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &tmp );
 			}
 		}
 	} else {
@@ -90,11 +93,16 @@ GLimp_glDrawBuffer
 */
 void GLimp_glDrawBuffer( GLenum mode ) {
 	if ( qnx.blitSupported ) {
+		// Doesn't follow standard OpenGL call specification
 		if ( qnx.drawBuffer != mode ) {
 			int index = R_GetBufferIndex( mode );
 			if ( index >= 0 ) {
 				qglBindFramebuffer( GL_DRAW_FRAMEBUFFER_ANGLE, ( index == INT_MAX ? 0 : qnx.framebuffers[index] ) );
 				qnx.drawBuffer = mode;
+			} else {
+				// Cause GL_INVALID_ENUM error
+				GLint tmp;
+				qglGetFramebufferAttachmentParameteriv( GL_RENDERBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &tmp );
 			}
 		}
 	} else {
@@ -116,13 +124,13 @@ PFNGLBLITFRAMEBUFFERANGLEPROC					qglBlitFramebufferANGLE;
 PFNGLRENDERBUFFERSTORAGEMULTISAMPLEANGLEPROC	qglRenderbufferStorageMultisampleANGLE;
 PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEIMGPROC		qglFramebufferTexture2DMultisampleIMG;
 
-#ifdef GLES_MULTISAMPLE_FRAMEBUFFER
+#ifdef USE_GLES_MULTISAMPLE_FRAMEBUFFER
 #define GL_RENDERBUFFER_STORAGE( samples, format, width, height ) qglRenderbufferStorageMultisampleANGLE( GL_RENDERBUFFER, ( samples ), ( format ), ( width ), ( height ) )
 #else
 #define GL_RENDERBUFFER_STORAGE( samples, format, width, height ) qglRenderbufferStorage( GL_RENDERBUFFER, ( format ), ( width ), ( height ) )
 #endif
 
-#ifdef GLES_MULTISAMPLE_FRAMEBUFFER
+#ifdef USE_GLES_MULTISAMPLE_FRAMEBUFFER
 #define GL_FRAMEBUFFER_TEXTURE2D( textureID, level, samples ) qglFramebufferTexture2DMultisampleIMG( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ( textureID ), ( level ), ( samples ) )
 #else
 #define GL_FRAMEBUFFER_TEXTURE2D( textureID, level, samples ) qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ( textureID ), ( level ) )
@@ -610,9 +618,9 @@ void R_BuildFramebuffers( bool useSRGB, GLsizei samples, int renderbufferOffset 
 
 		// color
 		if ( qnx.useBlit ) {
-			qglBindRenderbuffer( GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 0] );
+			qglBindRenderbuffer( GL_RENDERBUFFER, qnx.renderbuffers[i * renderbufferOffset + 0] );
 			GL_RENDERBUFFER_STORAGE( samples, ( useSRGB ? GL_SRGB8_ALPHA8_EXT : GL_RGBA8 ), glConfig.nativeScreenWidth, glConfig.nativeScreenHeight );
-			qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 0] );
+			qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, qnx.renderbuffers[i * renderbufferOffset + 0] );
 		}
 #ifdef GL_IMG_multisampled_render_to_texture
 		else {
@@ -628,7 +636,7 @@ void R_BuildFramebuffers( bool useSRGB, GLsizei samples, int renderbufferOffset 
 #else
 			GLenum internalFormat = ( useSRGB ? GL_SRGB_ALPHA_EXT : GL_RGBA8 );
 #endif
-			qglTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL );
+			qglTexImage2D( GL_TEXTURE_2D, 0, internalFormat, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL );
 
 			GL_FRAMEBUFFER_TEXTURE2D( qnx.fbTextures[i], 0, samples );
 		}
@@ -636,20 +644,20 @@ void R_BuildFramebuffers( bool useSRGB, GLsizei samples, int renderbufferOffset 
 
 		if ( qnx.packedFramebufferSupported ) {
 			// Depth and stencil
-			qglBindRenderbuffer( GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 1] );
+			qglBindRenderbuffer( GL_RENDERBUFFER, qnx.renderbuffers[i * renderbufferOffset + 1] );
 			GL_RENDERBUFFER_STORAGE( samples, GL_DEPTH24_STENCIL8_OES, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight );
-			qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 1] );
-			qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 1] );
+			qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, qnx.renderbuffers[i * renderbufferOffset + 1] );
+			qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, qnx.renderbuffers[i * renderbufferOffset + 1] );
 		} else {
 			// Depth
-			qglBindRenderbuffer( GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 1] );
+			qglBindRenderbuffer( GL_RENDERBUFFER, qnx.renderbuffers[i * renderbufferOffset + 1] );
 			GL_RENDERBUFFER_STORAGE( samples, GL_DEPTH_COMPONENT24_OES, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight );
-			qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 1] );
+			qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, qnx.renderbuffers[i * renderbufferOffset + 1] );
 
 			// Stencil
-			qglBindRenderbuffer( GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 2] );
+			qglBindRenderbuffer( GL_RENDERBUFFER, qnx.renderbuffers[i * renderbufferOffset + 2] );
 			GL_RENDERBUFFER_STORAGE( samples, GL_STENCIL_INDEX8, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight );
-			qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, qnx.framebuffers[i * renderbufferOffset + 2] );
+			qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, qnx.renderbuffers[i * renderbufferOffset + 2] );
 		}
 
 		// check for completeness
@@ -697,8 +705,8 @@ void R_UpdateFramebuffers() {
 
 	GLint tmp;
 	if ( qnx.useBlit ) {
-		qglBindRenderbuffer( GL_RENDERBUFFER, qnx.framebuffers[0] ); // First renderbuffer is a color one
-#ifdef GLES_MULTISAMPLE_FRAMEBUFFER
+		qglBindRenderbuffer( GL_RENDERBUFFER, qnx.renderbuffers[0] ); // First renderbuffer is a color one
+#ifdef USE_GLES_MULTISAMPLE_FRAMEBUFFER
 		qglGetRenderbufferParameteriv( GL_RENDERBUFFER, GL_RENDERBUFFER_SAMPLES_ANGLE, &tmp );
 		if ( samples == tmp )
 #endif
@@ -710,7 +718,7 @@ void R_UpdateFramebuffers() {
 			}
 		}
 	}
-#if defined(GL_IMG_multisampled_render_to_texture) && defined(GLES_MULTISAMPLE_FRAMEBUFFER)
+#if defined(GL_IMG_multisampled_render_to_texture) && defined(USE_GLES_MULTISAMPLE_FRAMEBUFFER)
 	// There is no way to get texture format on PVR (can get it on QCOM...), so only check texture samples. If they are the same, and sRGB isn't supported
 	// then return. Otherwise, if the samples are different or sRGB is supported (and we can't check the current texture format) then we regenerate everything.
 	else {
@@ -795,7 +803,7 @@ void R_SetupFramebuffers() {
 		idLib::Error( "24 bit depth renderbuffer not available" );
 	}
 
-#ifdef GLES_MULTISAMPLE_FRAMEBUFFER
+#ifdef USE_GLES_MULTISAMPLE_FRAMEBUFFER
 	// If on a PVR GPU, even if blit is supported, the color buffer won't be multisampled. So we can't use blit.
 	qnx.useBlit = qnx.blitSupported && !qnx.multisampleFramebufferTextureSupported;
 #else
@@ -855,7 +863,9 @@ R_UpdateGLVersion
 =================
 */
 void R_UpdateGLESVersion() {
-	//TODO: replace functions based on "actual" opengl version (glConfig.glVersion)
+	if ( !qnx.useBlit ) {
+		//TODO: replace functions based on supported extensions and OpenGL version
+	}
 }
 
 /*
@@ -1061,7 +1071,7 @@ QNXGLimp_CreateEGLConfig
 bool QNXGLimp_CreateEGLConfig( int multisamples, bool gles3bit ) {
 	EGLint eglConfigAttrs[] =
 	{
-#ifdef GLES_MULTISAMPLE_EGL
+#ifdef USE_GLES_MULTISAMPLE_EGL
 		EGL_SAMPLE_BUFFERS,     ( ( multisamples >= 1 ) ? 1 : 0 ),
 		EGL_SAMPLES,            multisamples,
 #endif
@@ -1521,8 +1531,12 @@ void GLimp_SwapBuffers() {
 		int curRead = R_GetBufferIndex( qnx.readBuffer );
 		int curDraw = R_GetBufferIndex( qnx.drawBuffer );
 		if ( qnx.useBlit ) {
-			qglBindFramebuffer( GL_READ_FRAMEBUFFER_ANGLE, qnx.framebuffers[1] ); // BACK_LEFT framebuffer
-			qglBindFramebuffer( GL_DRAW_FRAMEBUFFER_ANGLE, 0 );
+			if ( curRead != 1 ) {
+				qglBindFramebuffer( GL_READ_FRAMEBUFFER_ANGLE, qnx.framebuffers[1] ); // BACK_LEFT framebuffer
+			}
+			if ( curDraw != INT_MAX ) {
+				qglBindFramebuffer( GL_DRAW_FRAMEBUFFER_ANGLE, 0 );
+			}
 
 			qglBlitFramebufferANGLE( 0, 0, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight, 0, 0, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight,
 					GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST );
@@ -1530,8 +1544,12 @@ void GLimp_SwapBuffers() {
 			if ( curRead == curDraw ) {
 				qglBindFramebuffer( GL_FRAMEBUFFER, ( curRead == INT_MAX ? 0 : qnx.framebuffers[curRead] ) );
 			} else {
-				qglBindFramebuffer( GL_READ_FRAMEBUFFER_ANGLE, ( curRead == INT_MAX ? 0 : qnx.framebuffers[curRead] ) );
-				qglBindFramebuffer( GL_DRAW_FRAMEBUFFER_ANGLE, ( curDraw == INT_MAX ? 0 : qnx.framebuffers[curDraw] ) );
+				if ( curRead != 1 ) {
+					qglBindFramebuffer( GL_READ_FRAMEBUFFER_ANGLE, ( curRead == INT_MAX ? 0 : qnx.framebuffers[curRead] ) );
+				}
+				if ( curDraw != INT_MAX ) {
+					qglBindFramebuffer( GL_DRAW_FRAMEBUFFER_ANGLE, ( curDraw == INT_MAX ? 0 : qnx.framebuffers[curDraw] ) );
+				}
 			}
 		} else {
 			//TODO: render texture

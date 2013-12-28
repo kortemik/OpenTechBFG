@@ -52,10 +52,10 @@ If you have questions concerning this license or the applicable additional terms
 //#define USE_EXEC_APP_RESTART
 
 // Enable multisampling with EGL (can't be modified at runtime)
-//#define GLES_MULTISAMPLE_EGL
+//#define USE_GLES_MULTISAMPLE_EGL
 
 // Enable multisampling with framebuffers (can be modified at runtime)
-#define GLES_MULTISAMPLE_FRAMEBUFFER
+#define USE_GLES_MULTISAMPLE_FRAMEBUFFER
 
 void	Sys_QueEvent( sysEventType_t type, int value, int value2, int ptrLength, void *ptr, int inputDeviceNum );
 
