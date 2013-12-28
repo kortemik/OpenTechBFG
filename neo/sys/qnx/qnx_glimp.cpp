@@ -619,11 +619,9 @@ void R_BuildFramebuffers( bool useSRGB, GLsizei samples, int renderbufferOffset 
 		// color
 		if ( qnx.useBlit ) {
 			qglBindRenderbuffer( GL_RENDERBUFFER, qnx.renderbuffers[i * renderbufferOffset + 0] );
-			GL_RENDERBUFFER_STORAGE( samples, ( useSRGB ? GL_SRGB8_ALPHA8_EXT : GL_RGBA8 ), glConfig.nativeScreenWidth, glConfig.nativeScreenHeight );
+			GL_RENDERBUFFER_STORAGE( samples, ( useSRGB ? GL_SRGB8_ALPHA8_EXT : GL_RGBA8_FB ), glConfig.nativeScreenWidth, glConfig.nativeScreenHeight );
 			qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, qnx.renderbuffers[i * renderbufferOffset + 0] );
-		}
-#ifdef GL_IMG_multisampled_render_to_texture
-		else {
+		} else {
 			qglBindTexture( GL_TEXTURE_2D, qnx.fbTextures[i] );
 
 			qglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
@@ -640,7 +638,6 @@ void R_BuildFramebuffers( bool useSRGB, GLsizei samples, int renderbufferOffset 
 
 			GL_FRAMEBUFFER_TEXTURE2D( qnx.fbTextures[i], 0, samples );
 		}
-#endif
 
 		if ( qnx.packedFramebufferSupported ) {
 			// Depth and stencil
@@ -678,9 +675,7 @@ void R_BuildFramebuffers( bool useSRGB, GLsizei samples, int renderbufferOffset 
 				error = "Unsupported";
 				break;
 			case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_ANGLE:
-#ifdef GL_IMG_multisampled_render_to_texture
 			case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_IMG:
-#endif
 				error = "Incomplete Multisample";
 				break;
 			default:
@@ -718,9 +713,9 @@ void R_UpdateFramebuffers() {
 			}
 		}
 	}
-#if defined(GL_IMG_multisampled_render_to_texture) && defined(USE_GLES_MULTISAMPLE_FRAMEBUFFER)
+#ifdef USE_GLES_MULTISAMPLE_FRAMEBUFFER
 	// There is no way to get texture format on PVR (can get it on QCOM...), so only check texture samples. If they are the same, and sRGB isn't supported
-	// then return. Otherwise, if the samples are different or sRGB is supported (and we can't check the current texture format) then we regenerate everything.
+	// then return as format won't change. Otherwise, if the samples are different or sRGB is supported then we regenerate everything.
 	else {
 		qglGetFramebufferAttachmentParameteriv( GL_RENDERBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_SAMPLES_IMG, &tmp );
 		if ( samples == tmp && !glConfig.sRGBFramebufferAvailable )
@@ -734,12 +729,10 @@ void R_UpdateFramebuffers() {
 	int renderbufferOffset = qnx.packedFramebufferSupported ? RENDERBUFFER_PER_FRAMEBUFFER_PACKED : RENDERBUFFER_PER_FRAMEBUFFER;
 	qglDeleteRenderbuffers( FRAMEBUFFER_COUNT * renderbufferOffset, qnx.renderbuffers );
 	qglGenRenderbuffers( FRAMEBUFFER_COUNT * renderbufferOffset, qnx.renderbuffers );
-#ifdef GL_IMG_multisampled_render_to_texture
 	if ( !qnx.useBlit ) {
 		qglDeleteTextures( FRAMEBUFFER_COUNT, qnx.fbTextures );
 		qglGenTextures( FRAMEBUFFER_COUNT, qnx.fbTextures );
 	}
-#endif
 
 	R_BuildFramebuffers( useSRGB, samples, renderbufferOffset );
 }
@@ -815,21 +808,15 @@ void R_SetupFramebuffers() {
 	int renderbufferOffset = qnx.packedFramebufferSupported ? RENDERBUFFER_PER_FRAMEBUFFER_PACKED : RENDERBUFFER_PER_FRAMEBUFFER;
 	qglGenRenderbuffers( FRAMEBUFFER_COUNT * renderbufferOffset, qnx.renderbuffers );
 
-#ifdef GL_IMG_multisampled_render_to_texture
 	if ( !qnx.useBlit ) {
 		qglGenTextures( FRAMEBUFFER_COUNT, qnx.fbTextures );
 	}
-#endif
 
 	// setup framebuffers
 	GLint maxSamples;
-#ifdef GL_IMG_multisampled_render_to_texture
 	if ( qnx.multisampleFramebufferTextureSupported ) {
 		qglGetIntegerv( GL_MAX_SAMPLES_IMG, &maxSamples );
-	}
-	else
-#endif
-	{
+	} else {
 		qglGetIntegerv( GL_MAX_SAMPLES_ANGLE, &maxSamples );
 	}
 	glConfig.maxMultisamples = maxSamples;
@@ -848,11 +835,9 @@ R_ShutdownFramebuffers
 =================
 */
 void R_ShutdownFramebuffers() {
-#ifdef GL_IMG_multisampled_render_to_texture
 	if ( !qnx.useBlit ) {
 		qglDeleteTextures( FRAMEBUFFER_COUNT, qnx.fbTextures );
 	}
-#endif
 	qglDeleteRenderbuffers( ( qnx.packedFramebufferSupported ? RENDERBUFFER_PER_FRAMEBUFFER_PACKED : RENDERBUFFER_PER_FRAMEBUFFER ), qnx.renderbuffers );
 	qglDeleteFramebuffers( FRAMEBUFFER_COUNT, qnx.framebuffers );
 }

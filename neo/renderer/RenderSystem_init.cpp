@@ -1026,11 +1026,17 @@ Some variables depend on configuration and can't be set at compile time, adjust 
 */
 void R_CheckGLESVariableReplacements() {
 
-	// GL_RGBA8
+	// GL_RGBA8 (and GL_RGBA8_FB [see comment in qgl_es.h])
 	if ( ( glConfig.glVersion >= 3.0f ) || R_CheckExtension( "GL_OES_required_internalformat" ) ) {
 		glConfig.ID_GLES_VAR_DEF( GL_RGBA8 ) = ID_GLES_REAL_GL_RGBA8;
+		glConfig.ID_GLES_VAR_DEF( GL_RGBA8_FB ) = ID_GLES_REAL_GL_RGBA8;
 	} else {
 		glConfig.ID_GLES_VAR_DEF( GL_RGBA8 ) = GL_RGBA;
+		if ( R_CheckExtension( "GL_OES_rgb8_rgba8" ) ) {
+			glConfig.ID_GLES_VAR_DEF( GL_RGBA8_FB ) = GL_RGBA8_OES;
+		} else {
+			glConfig.ID_GLES_VAR_DEF( GL_RGBA8_FB ) = GL_RGBA4;
+		}
 	}
 
 	// GL_CLAMP_TO_BORDER

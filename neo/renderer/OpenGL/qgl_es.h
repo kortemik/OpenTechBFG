@@ -465,6 +465,22 @@ extern "C" {
 	typedef void (GL_APIENTRYP PFNGLRENDERBUFFERSTORAGEMULTISAMPLEANGLEPROC) (GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
 #endif
 
+#ifndef GL_RENDERBUFFER_SAMPLES_IMG
+	#define GL_RENDERBUFFER_SAMPLES_IMG 0x9133
+#endif
+#ifndef GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_IMG
+	#define GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_IMG 0x9134
+#endif
+#ifndef GL_MAX_SAMPLES_IMG
+	#define GL_MAX_SAMPLES_IMG 0x9135
+#endif
+#ifndef GL_TEXTURE_SAMPLES_IMG
+	#define GL_TEXTURE_SAMPLES_IMG 0x9136
+#endif
+#ifndef PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEIMGPROC
+	typedef void (GL_APIENTRYP PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEIMGPROC) (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLsizei samples);
+#endif
+
 //=============
 //Defines for enums that are defined but may not actually exist
 //=============
@@ -566,6 +582,14 @@ extern "C" {
 	#endif
 #endif
 #define GL_RGBA8 ID_GLES_VAR_REPLACE_DEF( GL_RGBA8 )
+// This is a workaround for many renderbuffers only supporting RGBA4 for color-buffers, and
+// GL_OES_rgb8_rgba8 not supporting RGBA8 for textures, which is where this is needed
+#define GL_RGBA8_FB ID_GLES_VAR_REPLACE_DEF( GL_RGBA8_FB )
+
+// Do this after the above just so that it doesn't effect it
+#ifndef GL_RGBA8_OES
+	#define GL_RGBA8_OES 0x8058
+#endif
 
 #ifndef GL_STENCIL_INDEX
 	#define GL_STENCIL_INDEX GL_STENCIL_INDEX8
