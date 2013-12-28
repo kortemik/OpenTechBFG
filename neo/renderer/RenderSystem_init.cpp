@@ -822,6 +822,14 @@ static void R_CheckPortableExtensions() {
 		qglUniform4fv = (PFNGLUNIFORM4FVPROC)GLimp_ExtensionPointer( "glUniform4fv" );
 	}
 
+#ifdef GL_ES_VERSION_2_0
+	// Functions aren't used, but exist
+	if ( glConfig.glVersion >= 3.0f ) {
+		// GL_EXT_separate_shader_objects has a similar function, but is otherwise unrelated in use. GLES 3.0 is related in use
+		qglProgramParameteri = (PFNGLPROGRAMPARAMETERIPROC)GLimp_ExtensionPointer( "glProgramParameteri" );
+	}
+#endif
+
 	// GL_ARB_uniform_buffer_object
 #ifndef GL_ES_VERSION_3_0
 	glConfig.uniformBufferAvailable = R_CheckExtension( "GL_ARB_uniform_buffer_object" );
@@ -888,6 +896,8 @@ static void R_CheckPortableExtensions() {
 	// GL_ARB_occlusion_query
 	glConfig.occlusionQueryAvailable = R_CheckExtension( "GL_ARB_occlusion_query" ) || R_CheckExtension( "GL_EXT_occlusion_query_boolean" );
 #else
+	// While the functions are supported in GLES 3.0 and with GL_EXT_occlusion_query_boolean, they don't support the targets that are used by Doom 3.
+	// But! if GL_EXT_disjoint_timer_query is supported, then its functionality matches the desired use.
 	glConfig.occlusionQueryAvailable = ( glConfig.glVersion >= 3.0f  || R_CheckExtension( "GL_EXT_occlusion_query_boolean" ) );
 #endif
 	if ( glConfig.occlusionQueryAvailable ) {
@@ -932,6 +942,12 @@ static void R_CheckPortableExtensions() {
 			qglGetQueryObjectui64vEXT = (PFNGLGETQUERYOBJECTUI64VEXTPROC)GLimp_ExtensionPointer( "glGetQueryObjectui64vEXT" );
 		}
 	}
+#ifdef GL_ES_VERSION_2_0
+	// See reasons for this with occlusionQueryAvailable checks
+	if ( glConfig.occlusionQueryAvailable && !glConfig.timerQueryAvailable ) {
+		glConfig.occlusionQueryAvailable = false;
+	}
+#endif
 
 	// GL_ARB_debug_output
 	glConfig.debugOutputAvailable = R_CheckExtension( "GL_ARB_debug_output" ) || R_CheckExtension( "GL_KHR_debug" );
