@@ -37,6 +37,31 @@ If you have questions concerning this license or the applicable additional terms
 
 idCVar r_useGLES3( "r_useGLES3", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "0 = OpenGL ES 3.0 if available, 1 = OpenGL ES 2.0, 2 = OpenGL 3.0", 0, 2 );
 
+//
+// function replacement
+//
+
+void ( APIENTRY * qglReadPixels_real )(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels);
+void ( APIENTRY * qglCopyTexImage2D_real )(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border);
+void ( APIENTRY * qglCopyTexSubImage2D_real )(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height);
+void ( APIENTRY * qglCopyTexSubImage3D_real )(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height);
+
+// If in blit mode, produces a GL_INVALID_OPERATION error. Otherwise, switches to the correct read buffer if needed, executes the function, then switches back to the prior draw buffer
+#define GL_READ_REPLACEMENT( x ) \
+	if ( qnx.useBlit ) { \
+		qglTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL ); \
+	} else { \
+		if ( qnx.readBuffer != qnx.drawBuffer ) { \
+			int index = R_GetBufferIndex( qnx.readBuffer ); \
+			qglBindFramebuffer( GL_FRAMEBUFFER, ( index == INT_MAX ? 0 : qnx.framebuffers[index] ) ); \
+		} \
+		x; \
+		if ( qnx.readBuffer != qnx.drawBuffer ) { \
+			int index = R_GetBufferIndex( qnx.drawBuffer ); \
+			qglBindFramebuffer( GL_FRAMEBUFFER, ( index == INT_MAX ? 0 : qnx.framebuffers[index] ) ); \
+		} \
+	}
+
 /*
 =================
 R_GetBufferIndex
@@ -69,20 +94,18 @@ GLimp_glReadBuffer
 ========================
 */
 void GLimp_glReadBuffer( GLenum mode ) {
-	if ( qnx.blitSupported ) {
-		if ( qnx.readBuffer != mode ) {
-			int index = R_GetBufferIndex( mode );
-			if ( index >= 0 ) {
+	if ( qnx.readBuffer != mode ) {
+		int index = R_GetBufferIndex( mode );
+		if ( index >= 0 ) {
+			if ( qnx.useBlit ) {
 				qglBindFramebuffer( GL_READ_FRAMEBUFFER_ANGLE, ( index == INT_MAX ? 0 : qnx.framebuffers[index] ) );
-				qnx.readBuffer = mode;
-			} else {
-				// Cause GL_INVALID_ENUM error
-				GLint tmp;
-				qglGetFramebufferAttachmentParameteriv( GL_RENDERBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &tmp );
 			}
+			qnx.readBuffer = mode;
+		} else {
+			// Cause GL_INVALID_ENUM error
+			GLint tmp;
+			qglGetFramebufferAttachmentParameteriv( GL_RENDERBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &tmp );
 		}
-	} else {
-		//TODO
 	}
 }
 
@@ -92,25 +115,59 @@ GLimp_glDrawBuffer
 ========================
 */
 void GLimp_glDrawBuffer( GLenum mode ) {
-	if ( qnx.blitSupported ) {
-		// Doesn't follow standard OpenGL call specification
-		if ( qnx.drawBuffer != mode ) {
-			int index = R_GetBufferIndex( mode );
-			if ( index >= 0 ) {
-				qglBindFramebuffer( GL_DRAW_FRAMEBUFFER_ANGLE, ( index == INT_MAX ? 0 : qnx.framebuffers[index] ) );
-				qnx.drawBuffer = mode;
-			} else {
-				// Cause GL_INVALID_ENUM error
-				GLint tmp;
-				qglGetFramebufferAttachmentParameteriv( GL_RENDERBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &tmp );
-			}
+	// Doesn't follow standard OpenGL call specification
+	if ( qnx.drawBuffer != mode ) {
+		int index = R_GetBufferIndex( mode );
+		if ( index >= 0 ) {
+			qglBindFramebuffer( ( qnx.useBlit ? GL_DRAW_FRAMEBUFFER_ANGLE : GL_FRAMEBUFFER ), ( index == INT_MAX ? 0 : qnx.framebuffers[index] ) );
+			qnx.drawBuffer = mode;
+		} else {
+			// Cause GL_INVALID_ENUM error
+			GLint tmp;
+			qglGetFramebufferAttachmentParameteriv( GL_RENDERBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &tmp );
 		}
-	} else {
-		//TODO
 	}
 }
 
-//XXX Functions that might need replacing-glDrawBuffers, gl functions that read and draw
+/*
+========================
+GLimp_glReadPixels
+========================
+*/
+void GLimp_glReadPixels( GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels ) {
+	GL_READ_REPLACEMENT( qglReadPixels_real( x, y, width, height, format, type, pixels ) )
+}
+
+/*
+========================
+GLimp_glCopyTexImage2D
+========================
+*/
+void GLimp_glCopyTexImage2D( GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border ) {
+	GL_READ_REPLACEMENT( qglCopyTexImage2D_real( target, level, internalformat, x, y, width, height, border ) )
+}
+
+/*
+========================
+GLimp_glCopyTexSubImage2D
+========================
+*/
+void GLimp_glCopyTexSubImage2D( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height ) {
+	GL_READ_REPLACEMENT( qglCopyTexSubImage2D_real( target, level, xoffset, yoffset, x, y, width, height ) )
+}
+
+#ifdef GL_ES_VERSION_3_0
+
+/*
+========================
+GLimp_glCopyTexSubImage3D
+========================
+*/
+void GLimp_glCopyTexSubImage3D( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height ) {
+	GL_READ_REPLACEMENT( qglCopyTexSubImage3D_real( target, level, xoffset, yoffset, zoffset, x, y, width, height ) )
+}
+
+#endif
 
 //
 // function declaration
@@ -848,7 +905,20 @@ R_UpdateGLVersion
 =================
 */
 void R_UpdateGLESVersion() {
-	if ( !qnx.useBlit ) {
+	if ( qnx.useBlit ) {
+		qglReadPixels_real = NULL;
+		qglCopyTexImage2D_real = NULL;
+		qglCopyTexSubImage2D_real = NULL;
+#ifdef GL_ES_VERSION_3_0
+		qglCopyTexSubImage3D_real = NULL;
+#endif
+	} else {
+		qglReadPixels_real = qglReadPixels;
+		qglCopyTexImage2D_real = qglCopyTexImage2D;
+		qglCopyTexSubImage2D_real = qglCopyTexSubImage2D;
+#ifdef GL_ES_VERSION_3_0
+		qglCopyTexSubImage3D_real = qglCopyTexSubImage3D;
+#endif
 		//TODO: replace functions based on supported extensions and OpenGL version
 	}
 }
@@ -858,7 +928,7 @@ void R_UpdateGLESVersion() {
 EGL_CheckExtension
 =================
 */
-bool EGL_CheckExtension( const char *name ) {
+ID_FORCE_INLINE bool EGL_CheckExtension( const char *name ) {
 	return strstr( glConfig.egl_extensions_string, name ) != NULL;
 }
 
@@ -1513,9 +1583,9 @@ void GLimp_SwapBuffers() {
 		}
 #endif
 
-		int curRead = R_GetBufferIndex( qnx.readBuffer );
 		int curDraw = R_GetBufferIndex( qnx.drawBuffer );
 		if ( qnx.useBlit ) {
+			int curRead = R_GetBufferIndex( qnx.readBuffer );
 			if ( curRead != 1 ) {
 				qglBindFramebuffer( GL_READ_FRAMEBUFFER_ANGLE, qnx.framebuffers[1] ); // BACK_LEFT framebuffer
 			}
@@ -1533,11 +1603,19 @@ void GLimp_SwapBuffers() {
 					qglBindFramebuffer( GL_READ_FRAMEBUFFER_ANGLE, ( curRead == INT_MAX ? 0 : qnx.framebuffers[curRead] ) );
 				}
 				if ( curDraw != INT_MAX ) {
-					qglBindFramebuffer( GL_DRAW_FRAMEBUFFER_ANGLE, ( curDraw == INT_MAX ? 0 : qnx.framebuffers[curDraw] ) );
+					qglBindFramebuffer( GL_DRAW_FRAMEBUFFER_ANGLE, qnx.framebuffers[curDraw] );
 				}
 			}
 		} else {
-			//TODO: render texture
+			if ( curDraw != INT_MAX ) {
+				qglBindFramebuffer( GL_FRAMEBUFFER, 0 );
+			}
+
+			//TODO: switch shaders, render texture, go back to prior shaders
+
+			if ( curDraw != INT_MAX ) {
+				qglBindFramebuffer( GL_FRAMEBUFFER, qnx.framebuffers[curDraw] );
+			}
 		}
 	}
 

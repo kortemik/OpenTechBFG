@@ -93,7 +93,7 @@ void idSoundHardware_OpenAL::PrintALCInfo( ALCdevice* device )
 		}
 
 		if( alcGetError( device ) != ALC_NO_ERROR || !devname ) {
-			devname = alcGetString( device, ALC_DEVICE_SPECIFIER );
+			devname = alcGetString( device, /*ALC_DEVICE_SPECIFIER*/ALC_CAPTURE_DEVICE_SPECIFIER );
 		}
 
 		idLib::Printf( "** Info for device \"%s\" **\n", devname );
@@ -127,7 +127,7 @@ void listDevices_f( const idCmdArgs& args ) {
 	if( alcIsExtensionPresent( NULL, "ALC_ENUMERATE_ALL_EXT" ) != AL_FALSE ) {
 		idSoundHardware_OpenAL::PrintDeviceList( alcGetString( NULL, ALC_ALL_DEVICES_SPECIFIER ) );
 	} else {
-		idSoundHardware_OpenAL::PrintDeviceList( alcGetString( NULL, ALC_DEVICE_SPECIFIER ) );
+		idSoundHardware_OpenAL::PrintDeviceList( alcGetString( NULL, /*ALC_DEVICE_SPECIFIER*/ALC_CAPTURE_DEVICE_SPECIFIER ) );
 	}
 
 	//idLib::Printf("Available capture devices:\n");
@@ -136,7 +136,7 @@ void listDevices_f( const idCmdArgs& args ) {
 	if( alcIsExtensionPresent( NULL, "ALC_ENUMERATE_ALL_EXT" ) != AL_FALSE ) {
 		idLib::Printf( "Default playback device: %s\n", alcGetString( NULL, ALC_DEFAULT_ALL_DEVICES_SPECIFIER ) );
 	} else {
-		idLib::Printf( "Default playback device: %s\n",  alcGetString( NULL, ALC_DEFAULT_DEVICE_SPECIFIER ) );
+		idLib::Printf( "Default playback device: %s\n",  alcGetString( NULL, /*ALC_DEFAULT_DEVICE_SPECIFIER*/ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER ) );
 	}
 
 	//idLib::Printf("Default capture device: %s\n", alcGetString(NULL, ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER));
@@ -158,7 +158,7 @@ void idSoundHardware_OpenAL::Init() {
 	common->Printf( "Setup OpenAL device and context... " );
 
 	// Get device
-	openalDevice = alcOpenDevice( NULL );
+	openalDevice = alcOpenDevice( NULL ); //XXX check s_device
 	if ( openalDevice == NULL ) {
 		idLib::FatalError( "Failed to open default OpenAL device." );
 		return;
@@ -221,7 +221,7 @@ void idSoundHardware_OpenAL::Init() {
 	int outputChannels = 0;
 	int channelMask = 0;
 
-	const ALCchar* deviceName = alcGetString( openalDevice, ALC_DEVICE_SPECIFIER );
+	const ALCchar* deviceName = alcGetString( openalDevice, /*ALC_DEVICE_SPECIFIER*/ALC_CAPTURE_DEVICE_SPECIFIER );
 
 	if ( snd_pcm_open_name( &handle, deviceName, SND_PCM_OPEN_PLAYBACK ) >= 0 ) {
 
