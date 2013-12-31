@@ -175,6 +175,7 @@ void GLimp_glCopyTexSubImage3D( GLenum target, GLint level, GLint xoffset, GLint
 bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacements );
 void* QGL_GetSym( const char *function, bool egl );
 void QGL_Shutdown();
+void OGL_UpdateReplacements( const EGLFunctionReplacements_t & replacements );
 bool R_CheckExtension( char *name );
 
 PFNGLBLITFRAMEBUFFERANGLEPROC					qglBlitFramebufferANGLE;
@@ -902,10 +903,28 @@ void R_ShutdownFramebuffers() {
 /*
 =================
 R_UpdateGLVersion
+
+Acts like a "check and swap" function. If blit is enabled, check if "real" functions are already set. If not, then set them.
+If blit is not enabled, check if "fake" functions are already set. If not, then set them.
 =================
 */
 void R_UpdateGLESVersion() {
+	bool update = false;
+	EGLFunctionReplacements_t replacements = {
+		GLimp_glReadBuffer,			// glReadBufferImpl
+		GLimp_glDrawBuffer,			// glDrawBufferImpl
+		qglReadPixels_real,			// glReadPixelsImpl
+		qglCopyTexImage2D_real,		// glCopyTexImage2DImpl
+		qglCopyTexSubImage2D_real,	// glCopyTexSubImage2DImpl
+#ifdef GL_ES_VERSION_3_0
+		qglCopyTexSubImage3D_real	// glCopyTexSubImage3DImpl
+#endif
+	};
+
+	// Update functions
 	if ( qnx.useBlit ) {
+		update = qglReadPixels_real != NULL;
+
 		qglReadPixels_real = NULL;
 		qglCopyTexImage2D_real = NULL;
 		qglCopyTexSubImage2D_real = NULL;
@@ -913,13 +932,25 @@ void R_UpdateGLESVersion() {
 		qglCopyTexSubImage3D_real = NULL;
 #endif
 	} else {
+		update = qglReadPixels_real == NULL;
+
 		qglReadPixels_real = qglReadPixels;
 		qglCopyTexImage2D_real = qglCopyTexImage2D;
 		qglCopyTexSubImage2D_real = qglCopyTexSubImage2D;
 #ifdef GL_ES_VERSION_3_0
 		qglCopyTexSubImage3D_real = qglCopyTexSubImage3D;
 #endif
-		//TODO: replace functions based on supported extensions and OpenGL version
+
+		replacements.glReadPixelsImpl = GLimp_glReadPixels;
+		replacements.glCopyTexImage2DImpl = GLimp_glCopyTexImage2D;
+		replacements.glCopyTexSubImage2DImpl = GLimp_glCopyTexSubImage2D;
+#ifdef GL_ES_VERSION_3_0
+		replacements.glCopyTexSubImage3DImpl = GLimp_glCopyTexSubImage3D;
+#endif
+	}
+
+	if ( update ) {
+		OGL_UpdateReplacements( replacements );
 	}
 }
 
@@ -1302,7 +1333,11 @@ bool GLimp_Init( glimpParms_t parms ) {
 
 	const EGLFunctionReplacements_t replacements = {
 		GLimp_glReadBuffer,	// glReadBufferImpl
-		GLimp_glDrawBuffer	// glDrawBufferImpl
+		GLimp_glDrawBuffer,	// glDrawBufferImpl
+		NULL,				// glReadPixelsImpl
+		NULL,				// glCopyTexImage2DImpl
+		NULL,				// glCopyTexSubImage2DImpl
+		NULL				// glCopyTexSubImage3DImpl
 	};
 
 	// r_glDriver is only intended for using instrumented OpenGL

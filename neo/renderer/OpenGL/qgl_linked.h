@@ -392,8 +392,8 @@ If you have questions concerning this license or the applicable additional terms
 //#define qglCompileShader glCompileShader
 #define qglCompressedTexImage2D glCompressedTexImage2D
 #define qglCompressedTexSubImage2D glCompressedTexSubImage2D
-#define qglCopyTexImage2D glCopyTexImage2D
-#define qglCopyTexSubImage2D glCopyTexSubImage2D
+//#define qglCopyTexImage2D glCopyTexImage2D
+//#define qglCopyTexSubImage2D glCopyTexSubImage2D
 //#define qglCreateProgram glCreateProgram
 //#define qglCreateShader glCreateShader
 #define qglCullFace glCullFace
@@ -465,7 +465,7 @@ If you have questions concerning this license or the applicable additional terms
 //#define qglLinkProgram glLinkProgram
 #define qglPixelStorei glPixelStorei
 #define qglPolygonOffset glPolygonOffset
-#define qglReadPixels glReadPixels
+//#define qglReadPixels glReadPixels
 #define qglReleaseShaderCompiler glReleaseShaderCompiler
 #define qglRenderbufferStorage glRenderbufferStorage
 #define qglSampleCoverage glSampleCoverage
@@ -520,7 +520,7 @@ If you have questions concerning this license or the applicable additional terms
 #define qglDrawRangeElements glDrawRangeElements
 #define qglTexImage3D glTexImage3D
 #define qglTexSubImage3D glTexSubImage3D
-#define qglCopyTexSubImage3D glCopyTexSubImage3D
+//#define qglCopyTexSubImage3D glCopyTexSubImage3D
 #define qglCompressedTexImage3D glCompressedTexImage3D
 #define qglCompressedTexSubImage3D glCompressedTexSubImage3D
 #define qglGenQueries glGenQueries

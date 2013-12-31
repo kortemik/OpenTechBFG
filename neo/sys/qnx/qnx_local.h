@@ -171,6 +171,12 @@ extern QNXVars_t	qnx;
 typedef struct {
 	void ( * glReadBufferImpl )(GLenum);
 	void ( * glDrawBufferImpl )(GLenum);
+	void ( * glReadPixelsImpl )(GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, GLvoid*);
+	void ( * glCopyTexImage2DImpl )(GLenum, GLint, GLenum, GLint, GLint, GLsizei, GLsizei, GLint);
+	void ( * glCopyTexSubImage2DImpl )(GLenum, GLint, GLint, GLint, GLint, GLint, GLsizei, GLsizei);
+#ifdef GL_ES_VERSION_3_0
+	void ( * glCopyTexSubImage3DImpl )(GLenum, GLint, GLint, GLint, GLint, GLint, GLint, GLsizei, GLsizei);
+#endif
 } EGLFunctionReplacements_t;
 
 #endif /* !__QNX_LOCAL_H__ */

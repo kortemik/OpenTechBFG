@@ -110,6 +110,19 @@ static void *glLinkGet( const char *name, bool isEgl, float maxGLVersion ) {
 
 void ( APIENTRY * qeglDebugEnableLoggingFunc )(EGLBoolean logging);
 
+//Not actual GLES commands (glReadBuffer exists on GLES 3.0 but not the way it's needed)
+void ( APIENTRY * qglReadBuffer )(GLenum mode);
+void ( APIENTRY * qglDrawBuffer )(GLenum mode);
+void ( APIENTRY * qglReadPixels )(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels);
+void ( APIENTRY * qglCopyTexImage2D )(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border);
+void ( APIENTRY * qglCopyTexSubImage2D )(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height);
+
+#ifdef GL_ES_VERSION_3_0
+
+void ( APIENTRY * qglCopyTexSubImage3D )(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height);
+
+#endif
+
 #ifndef ID_GL_HARDLINK
 
 EGLint ( APIENTRY * qeglGetError )(void);
@@ -147,10 +160,6 @@ EGLBoolean ( APIENTRY * qeglSwapBuffers )(EGLDisplay dpy, EGLSurface surface);
 EGLBoolean ( APIENTRY * qeglCopyBuffers )(EGLDisplay dpy, EGLSurface surface, EGLNativePixmapType target);
 GLExtension_t ( APIENTRY * qeglGetProcAddress )(const char *procname);
 
-//Not actual GLES commands (glReadBuffer exists on GLES 3.0 but not the way it's needed)
-void ( APIENTRY * qglReadBuffer )(GLenum mode);
-void ( APIENTRY * qglDrawBuffer )(GLenum mode);
-
 void ( APIENTRY * qglActiveTexture )(GLenum texture);
 //void ( APIENTRY * qglAttachShader )(GLuint program, GLuint shader);
 //void ( APIENTRY * qglBindAttribLocation )(GLuint program, GLuint index, const GLchar* name);
@@ -174,8 +183,8 @@ void ( APIENTRY * qglColorMask )(GLboolean red, GLboolean green, GLboolean blue,
 //void ( APIENTRY * qglCompileShader )(GLuint shader);
 void ( APIENTRY * qglCompressedTexImage2D )(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data);
 void ( APIENTRY * qglCompressedTexSubImage2D )(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid* data);
-void ( APIENTRY * qglCopyTexImage2D )(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border);
-void ( APIENTRY * qglCopyTexSubImage2D )(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height);
+//void ( APIENTRY * qglCopyTexImage2D )(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border);
+//void ( APIENTRY * qglCopyTexSubImage2D )(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height);
 //GLuint ( APIENTRY * qglCreateProgram )(void);
 //GLuint ( APIENTRY * qglCreateShader )(GLenum type);
 void ( APIENTRY * qglCullFace )(GLenum mode);
@@ -243,7 +252,7 @@ void ( APIENTRY * qglLineWidth )(GLfloat width);
 //void ( APIENTRY * qglLinkProgram )(GLuint program);
 void ( APIENTRY * qglPixelStorei )(GLenum pname, GLint param);
 void ( APIENTRY * qglPolygonOffset )(GLfloat factor, GLfloat units);
-void ( APIENTRY * qglReadPixels )(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels);
+//void ( APIENTRY * qglReadPixels )(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels);
 void ( APIENTRY * qglReleaseShaderCompiler )(void);
 void ( APIENTRY * qglRenderbufferStorage )(GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
 void ( APIENTRY * qglSampleCoverage )(GLfloat value, GLboolean invert);
@@ -300,7 +309,7 @@ void ( APIENTRY * qglViewport )(GLint x, GLint y, GLsizei width, GLsizei height)
 void ( APIENTRY * qglDrawRangeElements )(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid* indices);
 void ( APIENTRY * qglTexImage3D )(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid* pixels);
 void ( APIENTRY * qglTexSubImage3D )(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const GLvoid* pixels);
-void ( APIENTRY * qglCopyTexSubImage3D )(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height);
+//void ( APIENTRY * qglCopyTexSubImage3D )(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height);
 void ( APIENTRY * qglCompressedTexImage3D )(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const GLvoid* data);
 void ( APIENTRY * qglCompressedTexSubImage3D )(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const GLvoid* data);
 void ( APIENTRY * qglGenQueries )(GLsizei n, GLuint* ids);
@@ -1148,6 +1157,21 @@ glEnumName_t	glEnumNames[] = {
 
 #endif
 
+//---
+// Must... constrain... gag reflex... Big abuse of macros
+//---
+
+// Macros that work regardless of ID_GL_HARDLINK
+#define SYM_DIR_SET_ALWAYS( a, v ) q##a = v
+#if 0 //#ifdef _DEBUG
+	#define SYM_LINK_ALWAYS( a ) q##a = ( ?? )dlsym( qnx.openGLLib, #a )
+	#define ESYM_LINK_ALWAYS( a ) q##a = ( ?? )dlsym( qnx.eglLib, #a )
+#else
+	#define SYM_LINK_ALWAYS( a ) SYM_DIR_SET_ALWAYS( a, a )
+	#define ESYM_LINK_ALWAYS( a ) SYM_LINK_ALWAYS( a )
+#endif
+
+// Macros dependent on if ID_GL_HARDLINK exists or not
 #ifdef ID_GL_HARDLINK
 	#define SET_SYM( a, egl ) glLinkSet( #a, ( void* )a, egl, glVersion )
 	#define SYM_LINK( a )
@@ -1155,30 +1179,37 @@ glEnumName_t	glEnumNames[] = {
 	#define SYM_DIR_SET( a, v )
 #else
 	#define SET_SYM( a, egl ) glLinkSet( #a, ( void* )q##a, egl, glVersion )
-	#if 0 //#ifdef _DEBUG
-		#define SYM_LINK( a ) q##a = ( q#a )dlsym( qnx.openGLLib, #a )
-		#define ESYM_LINK( a ) q##a = ( q#a )dlsym( qnx.eglLib, #a )
-	#else
-		#define SYM_LINK( a ) q##a = a
-		#define ESYM_LINK( a ) SYM_LINK( a )
-	#endif
-	#define SYM_DIR_SET( a, v ) q##a = v
+	#define SYM_LINK( a ) SYM_LINK_ALWAYS( a );
+	#define ESYM_LINK( a ) ESYM_LINK_ALWAYS( a );
+	#define SYM_DIR_SET( a, v ) SYM_DIR_SET_ALWAYS( a, v );
 #endif
 
+// Macros for getting GL/EGL functions ([] is normal, [S] is "skip link", [R] is "replacement"
 #define GLSYM( a ) \
-	SYM_LINK( a ); \
+	SYM_LINK( a ) \
 	SET_SYM( a, false )
 #define GLSYMS( a ) SET_SYM( a, false )
+#define GLSYMR_NULL( a, rep, op ) \
+	q##a = (rep).a##Impl; \
+	if ( q##a == NULL ) { \
+		op; \
+	} \
+	GLSYMS( a )
+#define GLSYMR( a, rep ) GLSYMR_NULL( a, rep, SYM_LINK_ALWAYS( a ) )
 #define GLDIRECTSYMS( a ) glLinkSet( #a, ( void* )a, false, glVersion )
 #define EGLSYM( a ) \
-	ESYM_LINK( a ); \
+	ESYM_LINK( a ) \
 	SET_SYM( a, true )
 
+// Macros for nulling GL/EGL functions
 #define GLNULL( a ) \
-	SYM_DIR_SET( a, NULL ); \
+	SYM_DIR_SET( a, NULL ) \
+	glLinkSet( #a, NULL, false, glVersion )
+#define GLNULLR( a ) \
+	SYM_DIR_SET_ALWAYS( a, NULL ); \
 	glLinkSet( #a, NULL, false, glVersion )
 #define EGLNULL( a ) \
-	SYM_DIR_SET( a, NULL ); \
+	SYM_DIR_SET( a, NULL ) \
 	glLinkSet( #a, NULL, true, glVersion )
 #define GLDIRECTNULL( a ) glLinkSet( #a, NULL, false, glVersion )
 
@@ -1209,8 +1240,17 @@ void QGL_Shutdown( void )
 
 	float glVersion = 0.0f;
 
-	GLNULL( glReadBuffer );
-	GLNULL( glDrawBuffer );
+	GLNULLR( glReadBuffer );
+	GLNULLR( glDrawBuffer );
+	GLNULLR( glReadPixels );
+	GLNULLR( glCopyTexImage2D );
+	GLNULLR( glCopyTexSubImage2D );
+
+#ifdef GL_ES_VERSION_3_0
+
+	GLNULLR( glCopyTexSubImage3D );
+
+#endif
 
 	GLNULL( glActiveTexture );
 	GLDIRECTNULL( glAttachShader );
@@ -1235,8 +1275,8 @@ void QGL_Shutdown( void )
 	GLDIRECTNULL( glCompileShader );
 	GLNULL( glCompressedTexImage2D );
 	GLNULL( glCompressedTexSubImage2D );
-	GLNULL( glCopyTexImage2D );
-	GLNULL( glCopyTexSubImage2D );
+	//GLNULL( glCopyTexImage2D );
+	//GLNULL( glCopyTexSubImage2D );
 	GLDIRECTNULL( glCreateProgram );
 	GLDIRECTNULL( glCreateShader );
 	GLNULL( glCullFace );
@@ -1304,7 +1344,7 @@ void QGL_Shutdown( void )
 	GLDIRECTNULL( glLinkProgram );
 	GLNULL( glPixelStorei );
 	GLNULL( glPolygonOffset );
-	GLNULL( glReadPixels );
+	//GLNULL( glReadPixels );
 	GLNULL( glReleaseShaderCompiler );
 	GLNULL( glRenderbufferStorage );
 	GLNULL( glSampleCoverage );
@@ -1361,7 +1401,7 @@ void QGL_Shutdown( void )
 	GLNULL( glDrawRangeElements );
 	GLNULL( glTexImage3D );
 	GLNULL( glTexSubImage3D );
-	GLNULL( glCopyTexSubImage3D );
+	//GLNULL( glCopyTexSubImage3D );
 	GLNULL( glCompressedTexImage3D );
 	GLNULL( glCompressedTexSubImage3D );
 	GLNULL( glGenQueries );
@@ -1550,10 +1590,21 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 
 	float glVersion = 2.0f;
 
-	qglReadBuffer = replacements.glReadBufferImpl;
-	GLSYMS( glReadBuffer );
-	qglDrawBuffer = replacements.glDrawBufferImpl;
-	GLSYMS( glDrawBuffer );
+	GLSYMR( glReadBuffer, replacements );
+	GLSYMR_NULL( glDrawBuffer, replacements, ((void)qglDrawBuffer) );
+	GLSYMR( glReadPixels, replacements );
+	GLSYMR( glCopyTexImage2D, replacements );
+	GLSYMR( glCopyTexSubImage2D, replacements );
+
+#ifdef GL_ES_VERSION_3_0
+
+	glVersion = 3.0f;
+
+	GLSYMR( glCopyTexSubImage3D, replacements );
+
+	glVersion = 2.0f;
+
+#endif
 
 	GLSYM( glActiveTexture );
 	GLDIRECTSYMS( glAttachShader );
@@ -1587,8 +1638,8 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 	GLDIRECTSYMS( glCompileShader );
 	GLSYM( glCompressedTexImage2D );
 	GLSYM( glCompressedTexSubImage2D );
-	GLSYM( glCopyTexImage2D );
-	GLSYM( glCopyTexSubImage2D );
+	//GLSYM( glCopyTexImage2D );
+	//GLSYM( glCopyTexSubImage2D );
 	GLDIRECTSYMS( glCreateProgram );
 	GLDIRECTSYMS( glCreateShader );
 	GLSYM( glCullFace );
@@ -1665,7 +1716,7 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 	GLDIRECTSYMS( glLinkProgram );
 	GLSYM( glPixelStorei );
 	GLSYM( glPolygonOffset );
-	GLSYM( glReadPixels );
+	//GLSYM( glReadPixels );
 	GLSYM( glReleaseShaderCompiler );
 	GLSYM( glRenderbufferStorage );
 	GLSYM( glSampleCoverage );
@@ -1865,6 +1916,29 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 	EGLSYM( eglGetProcAddress );
 
 	return true;
+}
+
+/*
+==================
+OGL_UpdateReplacements
+==================
+*/
+void OGL_UpdateReplacements( const EGLFunctionReplacements_t & replacements ) {
+	float glVersion = 2.0f;
+
+	GLSYMR( glReadBuffer, replacements );
+	GLSYMR_NULL( glDrawBuffer, replacements, ((void)qglDrawBuffer) );
+	GLSYMR( glReadPixels, replacements );
+	GLSYMR( glCopyTexImage2D, replacements );
+	GLSYMR( glCopyTexSubImage2D, replacements );
+
+#ifdef GL_ES_VERSION_3_0
+
+	glVersion = 3.0f;
+
+	GLSYMR( glCopyTexSubImage3D, replacements );
+
+#endif
 }
 
 /*

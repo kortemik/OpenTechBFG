@@ -170,6 +170,23 @@ extern PFNGLDEBUGMESSAGEINSERTARBPROC		qglDebugMessageInsertARB;
 extern PFNGLDEBUGMESSAGECALLBACKARBPROC		qglDebugMessageCallbackARB;
 extern PFNGLGETDEBUGMESSAGELOGARBPROC		qglGetDebugMessageLogARB;
 
+#ifdef GL_ES_VERSION_2_0
+
+// Special functions that will always be function pointers
+extern  void ( APIENTRY * qglReadBuffer )(GLenum mode);
+extern  void ( APIENTRY * qglDrawBuffer )(GLenum mode);
+extern  void ( APIENTRY * qglReadPixels )(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels);
+extern  void ( APIENTRY * qglCopyTexImage2D )(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border);
+extern  void ( APIENTRY * qglCopyTexSubImage2D )(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height);
+
+#ifdef GL_ES_VERSION_3_0
+
+extern  void ( APIENTRY * qglCopyTexSubImage3D )(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height);
+
+#endif
+
+#endif
+
 //===========================================================================
 
 // non-windows systems will just redefine qgl* to gl*
@@ -522,9 +539,6 @@ extern  void ( APIENTRY * qglViewport )(GLint x, GLint y, GLsizei width, GLsizei
 
 #else
 
-extern  void ( APIENTRY * qglReadBuffer )(GLenum mode);
-extern  void ( APIENTRY * qglDrawBuffer )(GLenum mode);
-
 extern  void ( APIENTRY * qglActiveTexture )(GLenum texture);
 //extern  void ( APIENTRY * qglAttachShader )(GLuint program, GLuint shader);
 //extern  void ( APIENTRY * qglBindAttribLocation )(GLuint program, GLuint index, const GLchar* name);
@@ -548,8 +562,8 @@ extern  void ( APIENTRY * qglColorMask )(GLboolean red, GLboolean green, GLboole
 //extern  void ( APIENTRY * qglCompileShader )(GLuint shader);
 extern  void ( APIENTRY * qglCompressedTexImage2D )(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data);
 extern  void ( APIENTRY * qglCompressedTexSubImage2D )(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid* data);
-extern  void ( APIENTRY * qglCopyTexImage2D )(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border);
-extern  void ( APIENTRY * qglCopyTexSubImage2D )(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height);
+//extern  void ( APIENTRY * qglCopyTexImage2D )(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border);
+//extern  void ( APIENTRY * qglCopyTexSubImage2D )(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height);
 //extern  GLuint ( APIENTRY * qglCreateProgram )(void);
 //extern  GLuint ( APIENTRY * qglCreateShader )(GLenum type);
 extern  void ( APIENTRY * qglCullFace )(GLenum mode);
@@ -617,7 +631,7 @@ extern  void ( APIENTRY * qglLineWidth )(GLfloat width);
 //extern  void ( APIENTRY * qglLinkProgram )(GLuint program);
 extern  void ( APIENTRY * qglPixelStorei )(GLenum pname, GLint param);
 extern  void ( APIENTRY * qglPolygonOffset )(GLfloat factor, GLfloat units);
-extern  void ( APIENTRY * qglReadPixels )(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels);
+//extern  void ( APIENTRY * qglReadPixels )(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels);
 extern  void ( APIENTRY * qglReleaseShaderCompiler )(void);
 extern  void ( APIENTRY * qglRenderbufferStorage )(GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
 extern  void ( APIENTRY * qglSampleCoverage )(GLfloat value, GLboolean invert);
@@ -674,7 +688,7 @@ extern  void ( APIENTRY * qglViewport )(GLint x, GLint y, GLsizei width, GLsizei
 extern  void ( APIENTRY * qglDrawRangeElements )(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid* indices);
 extern  void ( APIENTRY * qglTexImage3D )(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid* pixels);
 extern  void ( APIENTRY * qglTexSubImage3D )(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const GLvoid* pixels);
-extern  void ( APIENTRY * qglCopyTexSubImage3D )(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height);
+//extern  void ( APIENTRY * qglCopyTexSubImage3D )(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height);
 extern  void ( APIENTRY * qglCompressedTexImage3D )(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const GLvoid* data);
 extern  void ( APIENTRY * qglCompressedTexSubImage3D )(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const GLvoid* data);
 extern  void ( APIENTRY * qglGenQueries )(GLsizei n, GLuint* ids);
