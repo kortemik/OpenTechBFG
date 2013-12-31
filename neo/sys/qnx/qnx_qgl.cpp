@@ -1588,23 +1588,11 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 	}
 	common->Printf( "succeeded\n" );
 
+	// Setup replaceable items
+	void OGL_UpdateReplacements( const EGLFunctionReplacements_t & replacements );
+	OGL_UpdateReplacements( replacements );
+
 	float glVersion = 2.0f;
-
-	GLSYMR( glReadBuffer, replacements );
-	GLSYMR_NULL( glDrawBuffer, replacements, ((void)qglDrawBuffer) );
-	GLSYMR( glReadPixels, replacements );
-	GLSYMR( glCopyTexImage2D, replacements );
-	GLSYMR( glCopyTexSubImage2D, replacements );
-
-#ifdef GL_ES_VERSION_3_0
-
-	glVersion = 3.0f;
-
-	GLSYMR( glCopyTexSubImage3D, replacements );
-
-	glVersion = 2.0f;
-
-#endif
 
 	GLSYM( glActiveTexture );
 	GLDIRECTSYMS( glAttachShader );

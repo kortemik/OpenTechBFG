@@ -798,6 +798,9 @@ void R_UpdateFramebuffers() {
 /*
 =================
 R_SetupFramebuffers
+
+There are many functions and classes to deal with images and other components that makes this useless, but to keep it
+fast, we want to interact with the OpenGL primitives directly.
 =================
 */
 void R_SetupFramebuffers() {
@@ -1646,11 +1649,53 @@ void GLimp_SwapBuffers() {
 				qglBindFramebuffer( GL_FRAMEBUFFER, 0 );
 			}
 
-			//TODO: switch shaders, render texture, go back to prior shaders
+			// ---
+			// Taken from RB_StereoRenderExecuteBackEndCommands
+			//
+			// Not really a light operation, especially to do every frame, but the same thing happens 2+ times a frame for stereo rendering.
+			// The bigger issue is how much is needed to do this. Preferred would be simple setup of some states, a simple quad, and to draw.
+			// But shaders are still needed, and all the functions and classes interact with each other, so it'd just be rebuilding the framework
+			// in order to do a simple draw. So just use the framework.
+			//
+			// XXX This does not copy depth and stencil buffers. Would require reading pixels directly to a texture, and drawing that too... which
+			// wouldn't actually draw the depth and stencil textures
+			// ---
+			GL_SetDefaultState(); // Changes draw buffer to GL_BACK (an index of 1)
 
-			if ( curDraw != INT_MAX ) {
-				qglBindFramebuffer( GL_FRAMEBUFFER, qnx.framebuffers[curDraw] );
-			}
+			void RB_SetMVP( const idRenderMatrix & mvp );
+			RB_SetMVP( renderMatrix_identity );
+
+			GL_State( GLS_DEPTHFUNC_ALWAYS );
+			GL_Cull( CT_TWO_SIDED );
+
+			// We just want to do a quad pass - so make sure we disable any texgen and
+			// set the texture matrix to the identity so we don't get anomalies from
+			// any stale uniform data being present from a previous draw call
+			const float texS[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
+			const float texT[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+			renderProgManager.SetRenderParm( RENDERPARM_TEXTUREMATRIX_S, texS );
+			renderProgManager.SetRenderParm( RENDERPARM_TEXTUREMATRIX_T, texT );
+
+			// disable any texgen
+			const float texGenEnabled[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+			renderProgManager.SetRenderParm( RENDERPARM_TEXGEN_0_ENABLED, texGenEnabled );
+
+			renderProgManager.BindShader_Texture();
+			GL_Color( 1, 1, 1, 1 );
+
+			GL_ViewportAndScissor( 0, 0, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight );
+
+			backEnd.glState.currenttmu = 0;
+			tmu_t * tmu = &backEnd.glState.tmu[0];
+			tmu->current2DMap = qnx.fbTextures[1];
+			qglBindMultiTextureEXT( GL_TEXTURE0, GL_TEXTURE_2D, qnx.fbTextures[1] ); // BACK_LEFT framebuffer
+
+			// Heaviest function here...
+			RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
+
+			qglFlush();
+
+			qglBindFramebuffer( GL_FRAMEBUFFER, qnx.framebuffers[1] );
 		}
 	}
 
