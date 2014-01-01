@@ -469,7 +469,7 @@ void Sys_PumpEvents() {
 					// (quite a) Bit of hacky way to do this. There is no way to get the original invoke request, meaning there is no way to
 					// get any metadata attached to it that we use for other functionality
 
-					const char *id = navigator_event_get_id(event);
+					const char *id = navigator_event_get_id( event );
 					if ( id && id[0] ) {
 						navigator_invoke_invocation_t *invoke = NULL;
 						if ( sscanf( id, "%p", &invoke ) == 1 && invoke ) {
@@ -515,6 +515,11 @@ void Sys_PumpEvents() {
 							if ( handleDoexit && doexit ) {
 								cmdSystem->AppendCommandText( "quit\n" );
 							}
+						}
+					} else {
+						const char *err = navigator_event_get_err( event );
+						if ( err != NULL ) {
+							common->Warning( "Unknown invoke had following error: %s\n", err );
 						}
 					}
 					break;

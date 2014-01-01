@@ -119,7 +119,7 @@ struct glconfig_t {
 	bool				multitextureAvailable;
 	bool				directStateAccess;
 	bool				textureCompressionAvailable;
-#ifdef GL_ES_VERSION_3_0
+#ifdef GL_ES_VERSION_2_0
 	bool				textureCompressionFakeAvailable;
 	bool				textureCompressionDXTAvailable;
 	bool				textureCompressionETC1Available;
@@ -141,6 +141,9 @@ struct glconfig_t {
 #ifdef GL_ES_VERSION_3_0
 	bool				textureSwizzleAvailable;
 #endif
+#ifdef GL_ES_VERSION_2_0
+	bool				vertexHalfFloatAvailable;
+#endif
 	bool				clampToBorderAvailable;
 	bool				textureMaxLevelAvailable;
 	bool				fragmentProgramAvailable;
@@ -158,6 +161,11 @@ struct glconfig_t {
 	GLenum				ID_GLES_VAR_DEF( GL_RGBA8 );
 	GLenum				ID_GLES_VAR_DEF( GL_RGBA8_FB );
 	GLenum				ID_GLES_VAR_DEF( GL_CLAMP_TO_BORDER );
+	GLenum				ID_GLES_VAR_DEF( GL_RED );
+	GLenum				ID_GLES_VAR_DEF( GL_RG );
+	GLenum				ID_GLES_VAR_DEF( GL_R8 );
+	GLenum				ID_GLES_VAR_DEF( GL_RG8 );
+	GLenum				ID_GLES_VAR_DEF( GL_HALF_FLOAT );
 #endif
 
 	stereo3DMode_t		stereo3Dmode;

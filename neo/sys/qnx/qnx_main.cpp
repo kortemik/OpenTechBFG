@@ -75,11 +75,13 @@ idCVar QNXVars_t::qnx_errorAttachLogs( "qnx_errorAttachLogs", "0", CVAR_SYSTEM |
 
 QNXVars_t	qnx;
 
-extern char* __progname;
+extern char 	*__progname;
 
 static char		sys_cmdline[MAX_STRING_CHARS];
 
 static sysMemoryStats_t appLaunchMemoryStats;
+
+static bool hasFatalError = false;
 
 /*
 ================
@@ -158,12 +160,11 @@ void Sys_Error( const char *error, ... ) {
 #endif
 		}
 
-		// Invoke email card
-		EmailCrashReport( text, errorLog );
-
-		// wait for the user to quit
+		// Invoke email card and wait for the user to quit
+		int attempts = 0;
+		bool cardOpened = false;
 		while ( 1 ) {
-			if ( ( ret = bps_get_event( &event, 1 ) ) == BPS_SUCCESS && event ) {
+			if ( ( ret = bps_get_event( &event, 250 ) ) == BPS_SUCCESS && event ) {
 				if ( bps_event_get_domain( event ) == navigator_get_domain() ) {
 					switch( bps_event_get_code( event ) ) {
 					case NAVIGATOR_CHILD_CARD_CLOSED:
@@ -177,6 +178,13 @@ void Sys_Error( const char *error, ... ) {
 						common->Quit();
 						break;
 					}
+				}
+			}
+			if ( !cardOpened && attempts < 2 ) {
+				cardOpened = EmailCrashReport( text, errorLog );
+				attempts++;
+				if ( !cardOpened ) {
+					common->Printf( "Attempt #%d, Email card failed to open, trying again: %s\n", attempts, strerror( errno ) );
 				}
 			}
 		}
@@ -388,7 +396,9 @@ void Sys_Sleep( int msec ) {
 	// Don't use usleep because it has a limit of 1000000 microseconds (1000 milliseconds)
 
 	struct timespec tm;
-	nsec2timespec( &tm, msec * 1000000ULL ); //XXX Should this be done by hand?
+	tm.tv_sec = msec / 1000;
+	tm.tv_nsec = ( msec * 1000000ULL ) % 1000000000;
+	//nsec2timespec( &tm, msec * 1000000ULL );
 	nanosleep( &tm, NULL );
 }
 
@@ -1237,7 +1247,7 @@ bool EmailCrashReport( const char *messageText, const char *errorLog ) {
 
 	idStr format;
 	format.Format( "data:json:{\"to\":\"%s\",\"subject\":\"%s\",\"body\":\"%s\"%s}\n",
-			SUPPORT_EMAIL_ADDRESS, SUPPORT_EMAIL_SUBJECT, emailBody.c_str(), attachment.c_str() );
+			SUPPORT_EMAIL_ADDRESS, ( hasFatalError ? SUPPORT_EMAIL_SUBJECT_FATAL : SUPPORT_EMAIL_SUBJECT ), emailBody.c_str(), attachment.c_str() );
 
 	navigator_invoke_invocation_t *invoke = NULL;
 
@@ -1576,6 +1586,7 @@ Sys_SetFatalError
 */
 void Sys_SetFatalError( const char *error ) {
 	slog2c( NULL, SLOG_CODE, SLOG2_CRITICAL, error );
+	hasFatalError = true;
 }
 
 /*

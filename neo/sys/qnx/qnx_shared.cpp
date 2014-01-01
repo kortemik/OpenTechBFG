@@ -93,30 +93,30 @@ int64 Sys_GetSystemRamInBytes() {
 	}
 	return total;
 #else
-	//Usable, but a lot of reading and writing... requires libpps to be added
-	int fd = open("/pps/services/hw_info/inventory", O_RDONLY);
-	lseek(fd, 0, SEEK_END);
-	int size = tell(fd) + 1;
-	lseek(fd, 0, SEEK_SET);
+	//Usable, but more reading and writing then desired... requires libpps to be added
+	int fd = open( "/pps/services/hw_info/inventory", O_RDONLY );
+	lseek( fd, 0, SEEK_END );
+	int size = tell( fd ) + 1;
+	lseek( fd, 0, SEEK_SET );
 
-	char* data = (char*)calloc(size, sizeof(char));
-	read(fd, data, size - 1);
-	close(fd);
+	char* data = ( char* )calloc( size, sizeof( char ) );
+	read( fd, data, size - 1 );
+	close( fd );
 
 	int ramSize = 0;
 	pps_decoder_t dec;
-	if(pps_decoder_initialize(&dec, data) == PPS_DECODER_OK) {
+	if ( pps_decoder_initialize( &dec, data ) == PPS_DECODER_OK ) {
 
-		if(pps_decoder_push(&dec, "@inventory") == PPS_DECODER_OK) {
+		if( pps_decoder_push( &dec, "@inventory" ) == PPS_DECODER_OK ) {
 			const char* ram;
-			if(pps_decoder_get_string(&dec, "RAM_Size", &ram) == PPS_DECODER_OK) {
-				ramSize = atoi(ram);
+			if( pps_decoder_get_string( &dec, "RAM_Size", &ram ) == PPS_DECODER_OK ) {
+				ramSize = atoi( ram );
 			}
 		}
 
-		pps_decoder_cleanup(&dec);
+		pps_decoder_cleanup( &dec );
 	}
-	free(data);
+	free( data );
 
 	return ramSize;
 #endif
@@ -1136,6 +1136,9 @@ void Json_EscapeString( char *str ) {
 	}
 	str[d] = '\0';
 }
+
+// Originally wanted to use PPS decoder, but along with having the same issue this JSON parser has (strings can't contain sub-strings), it doesn't return
+// the full value desired. So {"test":{"test2":10}} with a request for "test" would result in a NULL (error) as opposed to {"test2":10} as this parser does.
 
 /*
 ==================

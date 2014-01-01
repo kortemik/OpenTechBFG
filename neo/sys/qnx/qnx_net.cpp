@@ -653,9 +653,11 @@ const char* Net_InterfaceType( netstatus_interface_type_t type ) {
 		typeStr = "Cellular";
 		break;
 
+#if BBNDK_VERSION_AT_LEAST(10, 2, 0)
 	case NETSTATUS_INTERFACE_TYPE_P2P:
 		typeStr = "P2P";
 		break;
+#endif
 
 	case NETSTATUS_INTERFACE_TYPE_UNKNOWN:
 	default:

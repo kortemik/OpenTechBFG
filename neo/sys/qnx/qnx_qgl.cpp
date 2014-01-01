@@ -1912,9 +1912,12 @@ OGL_UpdateReplacements
 ==================
 */
 void OGL_UpdateReplacements( const EGLFunctionReplacements_t & replacements ) {
+
+	assert( replacements.glReadBufferImpl && replacements.glDrawBufferImpl );
+
 	float glVersion = 2.0f;
 
-	GLSYMR( glReadBuffer, replacements );
+	GLSYMR_NULL( glReadBuffer, replacements, ((void)qglReadBuffer) );
 	GLSYMR_NULL( glDrawBuffer, replacements, ((void)qglDrawBuffer) );
 	GLSYMR( glReadPixels, replacements );
 	GLSYMR( glCopyTexImage2D, replacements );

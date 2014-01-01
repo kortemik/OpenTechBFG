@@ -432,8 +432,10 @@ void DumpAllDisplayDevices() {
 		PrintDisplayTransparency( vals[0] );
 		screen_get_display_property_iv( display, SCREEN_PROPERTY_GAMMA, vals );
 		common->Printf( "      Gamma             : %i\n", vals[0] );
+#if BBNDK_VERSION_AT_LEAST(10, 2, 0)
 		screen_get_display_property_iv( display, SCREEN_PROPERTY_INTENSITY, vals );
 		common->Printf( "      Intensity         : %i\n", vals[0] );
+#endif
 		screen_get_display_property_iv( display, SCREEN_PROPERTY_IDLE_STATE, vals );
 		common->Printf( "      Idle              : %s\n", ( vals[0] ? "True" : "False" ) );
 		screen_get_display_property_llv( display, SCREEN_PROPERTY_IDLE_TIMEOUT, &longVal );
@@ -1340,7 +1342,9 @@ bool GLimp_Init( glimpParms_t parms ) {
 		NULL,				// glReadPixelsImpl
 		NULL,				// glCopyTexImage2DImpl
 		NULL,				// glCopyTexSubImage2DImpl
+#ifdef GL_ES_VERSION_3_0
 		NULL				// glCopyTexSubImage3DImpl
+#endif
 	};
 
 	// r_glDriver is only intended for using instrumented OpenGL

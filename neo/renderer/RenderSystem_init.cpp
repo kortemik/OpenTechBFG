@@ -335,26 +335,14 @@ void APIENTRY glBindMultiTextureEXT( GLenum texunit, GLenum target, GLuint textu
 	qglBindTexture( target, texture );
 }
 
-#ifdef GL_ES_VERSION_2_0
-/*
-========================
-glBindBufferRange
-
-OpenGL ES 2.0 does not have BindBufferRange as an extension or built-in
-========================
-*/
-void APIENTRY glBindBufferRangeImpl( GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size ) {
-	//TODO: not sure if this is possible, since it's an internal-to-OpenGL state
-}
-#endif
-
 /*
 ========================
 glMapBufferRange
 ========================
 */
 GLvoid* APIENTRY glMapBufferRangeImpl( GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access ) {
-	/*
+#ifdef _DEBUG
+	// Make sure everything works during debugging, release we can save some time by not requiring state to be flushed (which happens during queries, such as buffer size)
 	if ( offset < 0 || length < 0 ) {
 		return NULL;
 	}
@@ -365,7 +353,7 @@ GLvoid* APIENTRY glMapBufferRangeImpl( GLenum target, GLintptr offset, GLsizeipt
 	if ( offset + length > size ) {
 		return NULL;
 	}
-	*/
+#endif
 
 	GLvoid* buffer = NULL;
 	if ( ( access & GL_MAP_READ_BIT ) || ( access & GL_MAP_WRITE_BIT ) ) {
@@ -434,7 +422,7 @@ static void CALLBACK DebugCallback(unsigned int source, unsigned int type,
 static float R_ParseVersionString() {
 	float version = atof( glConfig.version_string );
 #ifdef GL_ES_VERSION_2_0
-	// Probably a better way to do this... (XXX RegEx?)
+	// Probably a better way to do this...
 	if ( version == 0.0f ) {
 		idStr ver = glConfig.version_string;
 
@@ -462,7 +450,7 @@ static float R_ParseVersionString() {
 static float R_ParseGLSLVersionString() {
 	float version = atof( glConfig.shading_language_string );
 #ifdef GL_ES_VERSION_2_0
-	// Probably a better way to do this... (XXX RegEx?)
+	// Probably a better way to do this...
 	if ( version == 0.0f ) {
 		idStr ver = glConfig.shading_language_string;
 
@@ -642,6 +630,9 @@ static void R_CheckPortableExtensions() {
 #ifdef GL_ES_VERSION_3_0
 	glConfig.textureSwizzleAvailable = ( glConfig.glVersion >= 3.0 );
 #endif
+#ifdef GL_ES_VERSION_2_0
+	glConfig.vertexHalfFloatAvailable = ( glConfig.glVersion >= 3.0 || R_CheckExtension( "GL_OES_vertex_half_float" ) );
+#endif
 
 #ifndef GL_ES_VERSION_2_0
 	glConfig.clampToBorderAvailable = true;
@@ -675,11 +666,7 @@ static void R_CheckPortableExtensions() {
 #else
 	glConfig.vertexBufferObjectAvailable = true;
 	qglBindBufferARB = (PFNGLBINDBUFFERARBPROC)GLimp_ExtensionPointer( "glBindBuffer" );
-	qglBindBufferRange = (PFNGLBINDBUFFERRANGEPROC)GLimp_ExtensionPointer( "glBindBufferRange" );
-	if ( qglBindBufferRange == NULL ) {
-		qglBindBufferRange = glBindBufferRangeImpl;
-		common->Printf( "...using fake %s\n", "glBindBufferRange" );
-	}
+	qglBindBufferRange = (PFNGLBINDBUFFERRANGEPROC)GLimp_ExtensionPointer( "glBindBufferRange" ); // This is only for uniform buffer objects
 	qglDeleteBuffersARB = (PFNGLDELETEBUFFERSARBPROC)GLimp_ExtensionPointer( "glDeleteBuffers" );
 	qglGenBuffersARB = (PFNGLGENBUFFERSARBPROC)GLimp_ExtensionPointer( "glGenBuffers" );
 	qglIsBufferARB = (PFNGLISBUFFERARBPROC)GLimp_ExtensionPointer( "glIsBuffer" );
@@ -992,6 +979,12 @@ static void R_CheckPortableExtensions() {
 #endif
 		idLib::Error( "GL_ARB_texture_compression or GL_EXT_texture_compression_s3tc not available" );
 	}
+#ifdef GL_ES_VERSION_2_0
+	// GL_OES_vertex_half_float
+	if ( !glConfig.vertexHalfFloatAvailable ) {
+		idLib::Error( "GL_OES_vertex_half_float not available" );
+	}
+#endif
 	// GL_ARB_vertex_buffer_object
 	if ( !glConfig.vertexBufferObjectAvailable ) {
 		idLib::Error( "GL_ARB_vertex_buffer_object not available" );
@@ -1053,6 +1046,27 @@ void R_CheckGLESVariableReplacements() {
 		} else {
 			glConfig.ID_GLES_VAR_DEF( GL_RGBA8_FB ) = GL_RGBA4;
 		}
+	}
+
+	// GL_R8, GL_RED, GL_RG8, GL_RG
+	if ( ( glConfig.glVersion >= 3.0f ) || ( R_CheckExtension( "GL_EXT_texture_storage" ) && R_CheckExtension( "GL_EXT_texture_rg" ) ) ) {
+		glConfig.ID_GLES_VAR_DEF( GL_R8 ) = ID_GLES_REAL_GL_R8;
+		glConfig.ID_GLES_VAR_DEF( GL_RED ) = ID_GLES_REAL_GL_RED;
+		glConfig.ID_GLES_VAR_DEF( GL_RG8 ) = ID_GLES_REAL_GL_RG8;
+		glConfig.ID_GLES_VAR_DEF( GL_RG ) = ID_GLES_REAL_GL_RG;
+	} else {
+		glConfig.ID_GLES_VAR_DEF( GL_R8 ) = GL_LUMINANCE;
+		glConfig.ID_GLES_VAR_DEF( GL_RED ) = GL_LUMINANCE;
+		glConfig.ID_GLES_VAR_DEF( GL_RG8 ) = GL_LUMINANCE_ALPHA;
+		glConfig.ID_GLES_VAR_DEF( GL_RG ) = GL_LUMINANCE_ALPHA;
+	}
+
+	// GL_HALF_FLOAT
+	if ( glConfig.vertexHalfFloatAvailable ) {
+		glConfig.ID_GLES_VAR_DEF( GL_HALF_FLOAT ) = ID_GLES_REAL_GL_HALF_FLOAT;
+	} else {
+		// Should never get here...
+		glConfig.ID_GLES_VAR_DEF( GL_HALF_FLOAT ) = GL_SHORT;
 	}
 
 	// GL_CLAMP_TO_BORDER
@@ -1257,6 +1271,7 @@ void R_InitOpenGL() {
 	glConfig.shading_language_string = (const char *)qglGetString( GL_SHADING_LANGUAGE_VERSION );
 	glConfig.extensions_string = (const char *)qglGetString( GL_EXTENSIONS );
 
+#if !defined(GL_ES_VERSION_2_0) || defined(GL_ES_VERSION_3_0)
 	if ( glConfig.extensions_string == NULL ) {
 		// As of OpenGL 3.2, glGetStringi is required to obtain the available extensions
 		qglGetStringi = (PFNGLGETSTRINGIPROC)GLimp_ExtensionPointer( "glGetStringi" );
@@ -1274,6 +1289,7 @@ void R_InitOpenGL() {
 		}
 		glConfig.extensions_string = extensions_string.c_str();
 	}
+#endif
 
 	float glVersion = R_ParseVersionString();
 	float glslVersion = R_ParseGLSLVersionString();

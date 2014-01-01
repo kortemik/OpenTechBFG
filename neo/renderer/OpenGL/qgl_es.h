@@ -140,6 +140,34 @@ extern "C" {
 	typedef const GLubyte * (GL_APIENTRYP PFNGLGETSTRINGIPROC) (GLenum name, GLuint index);
 #endif
 
+#ifndef GL_MAP_READ_BIT
+	#ifdef GL_MAP_READ_BIT_EXT
+		#define GL_MAP_READ_BIT GL_MAP_READ_BIT_EXT
+	#else
+		#define GL_MAP_READ_BIT 0x0001
+	#endif
+#endif
+#ifndef GL_MAP_WRITE_BIT
+	#ifdef GL_MAP_WRITE_BIT_EXT
+		#define GL_MAP_WRITE_BIT GL_MAP_WRITE_BIT_EXT
+	#else
+		#define GL_MAP_WRITE_BIT 0x0002
+	#endif
+#endif
+#ifndef GL_MAP_INVALIDATE_RANGE_BIT
+	#ifdef GL_MAP_INVALIDATE_RANGE_BIT_EXT
+		#define GL_MAP_INVALIDATE_RANGE_BIT GL_MAP_INVALIDATE_RANGE_BIT_EXT
+	#else
+		#define GL_MAP_INVALIDATE_RANGE_BIT 0x0004
+	#endif
+#endif
+#ifndef GL_MAP_UNSYNCHRONIZED_BIT
+	#ifdef GL_MAP_UNSYNCHRONIZED_BIT_EXT
+		#define GL_MAP_UNSYNCHRONIZED_BIT GL_MAP_UNSYNCHRONIZED_BIT_EXT
+	#else
+		#define GL_MAP_UNSYNCHRONIZED_BIT 0x0020
+	#endif
+#endif
 #ifndef GL_ARB_map_buffer_range
 	#ifdef GL_EXT_map_buffer_range
 		typedef PFNGLMAPBUFFERRANGEEXTPROC PFNGLMAPBUFFERRANGEPROC;
@@ -228,6 +256,13 @@ extern "C" {
 		#define GL_SYNC_GPU_COMMANDS_COMPLETE GL_SYNC_GPU_COMMANDS_COMPLETE_APPLE
 	#else
 		#define GL_SYNC_GPU_COMMANDS_COMPLETE 0x9117
+	#endif
+#endif
+#ifndef GL_TIMEOUT_EXPIRED
+	#ifdef GL_APPLE_sync
+		#define GL_TIMEOUT_EXPIRED GL_TIMEOUT_EXPIRED_APPLE
+	#else
+		#define GL_TIMEOUT_EXPIRED 0x911B
 	#endif
 #endif
 #ifndef GL_SYNC_FLUSH_COMMANDS_BIT
@@ -501,6 +536,54 @@ extern "C" {
 	#define GL_STENCIL_INDEX GL_STENCIL_INDEX8
 #endif
 
+#ifdef GL_RED
+	#define ID_GLES_REAL_GL_RED 0x1903
+	#undef GL_RED
+#else
+	#ifdef GL_RED_EXT
+		#define ID_GLES_REAL_GL_RED GL_RED_EXT
+	#else
+		#define ID_GLES_REAL_GL_RED GL_LUMINANCE
+	#endif
+#endif
+#define GL_RED ID_GLES_VAR_REPLACE_DEF( GL_RED )
+
+#ifdef GL_RG
+	#define ID_GLES_REAL_GL_RG 0x8227
+	#undef GL_RG
+#else
+	#ifdef GL_RG_EXT
+		#define ID_GLES_REAL_GL_RG GL_RG_EXT
+	#else
+		#define ID_GLES_REAL_GL_RG GL_LUMINANCE_ALPHA
+	#endif
+#endif
+#define GL_RG ID_GLES_VAR_REPLACE_DEF( GL_RG )
+
+#ifdef GL_R8
+	#define ID_GLES_REAL_GL_R8 0x8229
+	#undef GL_R8
+#else
+	#ifdef GL_R8_EXT
+		#define ID_GLES_REAL_GL_R8 GL_R8_EXT
+	#else
+		#define ID_GLES_REAL_GL_R8 GL_LUMINANCE
+	#endif
+#endif
+#define GL_R8 ID_GLES_VAR_REPLACE_DEF( GL_R8 )
+
+#ifdef GL_RG8
+	#define ID_GLES_REAL_GL_RG8 0x822B
+	#undef GL_RG8
+#else
+	#ifdef GL_RG8_EXT
+		#define ID_GLES_REAL_GL_RG8 GL_RG8_EXT
+	#else
+		#define ID_GLES_REAL_GL_RG8 GL_LUMINANCE_ALPHA
+	#endif
+#endif
+#define GL_RG8 ID_GLES_VAR_REPLACE_DEF( GL_RG8 )
+
 #ifndef GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT
 	#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
 #endif
@@ -548,6 +631,25 @@ extern "C" {
 		#define GL_DEPTH_COMPONENT24_OES 0x81A6
 	#endif
 #endif
+
+#ifndef GL_UNIFORM_BUFFER
+	#define GL_UNIFORM_BUFFER 0x8A11
+#endif
+#ifndef GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT
+	#define GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT 0x8A34
+#endif
+
+#ifdef GL_HALF_FLOAT
+	#define ID_GLES_REAL_GL_HALF_FLOAT 0x140B //GLES 3.0 value
+	#undef GL_HALF_FLOAT
+#else
+	#ifdef GL_HALF_FLOAT_OES
+		#define ID_GLES_REAL_GL_HALF_FLOAT GL_HALF_FLOAT_OES
+	#else
+		#define ID_GLES_REAL_GL_HALF_FLOAT 0x8D61 //GL_OES_vertex_half_float value, as it is supported in GLES 3.0 and 2.0, so use as last resort
+	#endif
+#endif
+#define GL_HALF_FLOAT ID_GLES_VAR_REPLACE_DEF( GL_HALF_FLOAT )
 
 #ifdef __cplusplus
 }
