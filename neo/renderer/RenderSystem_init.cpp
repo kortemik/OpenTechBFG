@@ -337,7 +337,7 @@ void APIENTRY glBindMultiTextureEXT( GLenum texunit, GLenum target, GLuint textu
 
 /*
 ========================
-glMapBufferRange
+glMapBufferRangeImpl
 ========================
 */
 GLvoid* APIENTRY glMapBufferRangeImpl( GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access ) {
@@ -373,7 +373,7 @@ GLvoid* APIENTRY glMapBufferRangeImpl( GLenum target, GLintptr offset, GLsizeipt
 
 /*
 ========================
-glDrawElementsBaseVertex
+glDrawElementsBaseVertexImpl
 ========================
 */
 void APIENTRY glDrawElementsBaseVertexImpl( GLenum mode, GLsizei count, GLenum type, const GLvoid *indices, GLint basevertex ) {
@@ -821,7 +821,9 @@ static void R_CheckPortableExtensions() {
 #ifndef GL_ES_VERSION_3_0
 	glConfig.uniformBufferAvailable = R_CheckExtension( "GL_ARB_uniform_buffer_object" );
 #else
-	glConfig.uniformBufferAvailable = ( glConfig.glVersion >= 3.0f ); //XXX GL_IMG_uniform_buffer_object?
+	// There is a legacy extension GL_IMG_uniform_buffer_object that was introduced, but never released (assume due to it coming out around the same time as GLES 3.0)
+	// Explanation in responses: https://twitter.com/rcmaniac25/status/416683757186207745
+	glConfig.uniformBufferAvailable = ( glConfig.glVersion >= 3.0f );
 #endif
 	if ( glConfig.uniformBufferAvailable ) {
 		qglGetUniformBlockIndex = (PFNGLGETUNIFORMBLOCKINDEXPROC)GLimp_ExtensionPointer( "glGetUniformBlockIndex" );

@@ -260,9 +260,6 @@ static void R_CheckCvars() {
 		if ( glConfig.sRGBFramebufferAvailable ) {
 #ifdef GL_ES_VERSION_2_0
 			updateFramebuffers = true;
-		}
-		{
-			globalImages->ReloadSRGBImages();
 #else
 			if ( r_useSRGB.GetBool() ) {
 				qglEnable( GL_FRAMEBUFFER_SRGB );

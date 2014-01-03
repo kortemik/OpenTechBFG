@@ -259,11 +259,6 @@ public:
 	// reloads all appropriate images after a vid_restart
 	void				ReloadImages( bool all );
 
-#ifdef GL_ES_VERSION_2_0
-	// reloads all images based on r_useSRGB settings
-	void				ReloadSRGBImages();
-#endif
-
 	// unbind all textures from all texture units
 	void				UnbindAll();
 

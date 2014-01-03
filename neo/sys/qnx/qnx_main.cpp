@@ -73,15 +73,15 @@ idCVar QNXVars_t::qnx_errorAttachLogs( "qnx_errorAttachLogs", "1", CVAR_SYSTEM |
 idCVar QNXVars_t::qnx_errorAttachLogs( "qnx_errorAttachLogs", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "attach slog2 logs on error" );
 #endif
 
-QNXVars_t	qnx;
+QNXVars_t				qnx;
 
-extern char 	*__progname;
+extern char 			*__progname;
 
-static char		sys_cmdline[MAX_STRING_CHARS];
+static char				sys_cmdline[MAX_STRING_CHARS];
 
-static sysMemoryStats_t appLaunchMemoryStats;
+static sysMemoryStats_t	appLaunchMemoryStats;
 
-static bool hasFatalError = false;
+static bool				hasFatalError = false;
 
 /*
 ================

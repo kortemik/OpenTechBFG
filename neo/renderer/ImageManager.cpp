@@ -555,16 +555,6 @@ void idImageManager::ReloadImages( bool all ) {
 	}
 }
 
-#ifdef GL_ES_VERSION_2_0
-
-void idImageManager::ReloadSRGBImages() {
-	//TODO: r_useSRGB
-	for ( int i = 0 ; i < globalImages->images.Num() ; i++ ) {
-		globalImages->images[ i ]->Reload( true );
-	}
-}
-#endif
-
 /*
 ===============
 R_CombineCubeImages_f
