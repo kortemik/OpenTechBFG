@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -584,9 +585,6 @@ void R_AddSingleModel( viewEntity_t * vEntity ) {
 		drawSurf_t * baseDrawSurf = NULL;
 		if ( surfaceDirectlyVisible ) {
 			// make sure we have an ambient cache and all necessary normals / tangents
-			if ( !vertexCache.CacheIsCurrent( tri->indexCache ) ) {
-				tri->indexCache = vertexCache.AllocIndex( tri->indexes, ALIGN( tri->numIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN ) );
-			}
 			if ( !vertexCache.CacheIsCurrent( tri->ambientCache ) ) {
 				// we are going to use it for drawing, so make sure we have the tangents and normals
 				if ( shader->ReceivesLighting() && !tri->tangentsCalculated ) {
@@ -596,9 +594,27 @@ void R_AddSingleModel( viewEntity_t * vEntity ) {
 				}
 				tri->ambientCache = vertexCache.AllocVertex( tri->verts, ALIGN( tri->numVerts * sizeof( idDrawVert ), VERTEX_CACHE_ALIGN ) );
 			}
+			if ( !vertexCache.CacheIsCurrent( tri->indexCache ) ) {
+				// Adjust vertex offset within indices
+				int vertexOffset = vertexCache.GetCacheVertexOffset( tri->ambientCache ) / sizeof ( idDrawVert );
+				triIndex_t * indexes = tri->indexes;
+				if ( vertexOffset != 0 ) {
+					indexes = (triIndex_t *)alloca( ALIGN( tri->numIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN ) );
+					if ( tri->numIndexes & 1 ) {
+						for ( int i = 0; i < tri->numIndexes; i++ ) {
+							indexes[i] = tri->indexes[i] + vertexOffset;
+						}
+					} else {
+						for ( int i = 0; i < tri->numIndexes; i += 2 ) {
+							WriteIndexPair( &indexes[i], tri->indexes[i + 0] + vertexOffset, tri->indexes[i + 1] + vertexOffset );
+						}
+					}
+				}
+				tri->indexCache = vertexCache.AllocIndex( indexes, ALIGN( tri->numIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN ) );
+			}
 
 			// add the surface for drawing
-			// we can re-use some of the values for light interaction surfaces			
+			// we can re-use some of the values for light interaction surfaces
 			baseDrawSurf = (drawSurf_t *)R_FrameAlloc( sizeof( *baseDrawSurf ), FRAME_ALLOC_DRAW_SURFACE );
 			baseDrawSurf->frontEndGeo = tri;
 			baseDrawSurf->space = vEntity;
@@ -632,7 +648,22 @@ void R_AddSingleModel( viewEntity_t * vEntity ) {
 					tri->ambientCache = vertexCache.AllocVertex( tri->verts, ALIGN( tri->numVerts * sizeof( tri->verts[0] ), VERTEX_CACHE_ALIGN ) );
 				}
 				if ( !vertexCache.CacheIsCurrent( tri->indexCache ) ) {
-					tri->indexCache = vertexCache.AllocIndex( tri->indexes, ALIGN( tri->numIndexes * sizeof( tri->indexes[0] ), INDEX_CACHE_ALIGN ) );
+					// Adjust vertex offset within indices
+					int vertexOffset = vertexCache.GetCacheVertexOffset( tri->ambientCache ) / sizeof( tri->verts[0] );
+					triIndex_t * indexes = tri->indexes;
+					if ( vertexOffset != 0 ) {
+						indexes = (triIndex_t *)alloca( ALIGN( tri->numIndexes * sizeof( tri->indexes[0] ), INDEX_CACHE_ALIGN ) );
+						if ( tri->numIndexes & 1 ) {
+							for ( int i = 0; i < tri->numIndexes; i++ ) {
+								indexes[i] = tri->indexes[i] + vertexOffset;
+							}
+						} else {
+							for ( int i = 0; i < tri->numIndexes; i += 2 ) {
+								WriteIndexPair( &indexes[i], tri->indexes[i + 0] + vertexOffset, tri->indexes[i + 1] + vertexOffset );
+							}
+						}
+					}
+					tri->indexCache = vertexCache.AllocIndex( indexes, ALIGN( tri->numIndexes * sizeof( tri->indexes[0] ), INDEX_CACHE_ALIGN ) );
 				}
 
 				R_SetupDrawSurfJoints( baseDrawSurf, tri, shader );
@@ -668,7 +699,7 @@ void R_AddSingleModel( viewEntity_t * vEntity ) {
 					continue;
 				}
 			}
-			
+
 			// "invisible ink" lights and shaders (imp spawn drawing on walls, etc)
 			if ( shader->Spectrum() != lightDef->lightShader->Spectrum() ) {
 				continue;
@@ -986,7 +1017,7 @@ void R_LinkDrawSurfToView( drawSurf_t * drawSurf, viewDef_t * viewDef ) {
 		viewDef->drawSurfs = (drawSurf_t **)R_FrameAlloc( viewDef->maxDrawSurfs * sizeof( viewDef->drawSurfs[0] ), FRAME_ALLOC_DRAW_SURFACE_POINTER );
 		memcpy( viewDef->drawSurfs, old, count );
 	}
-	
+
 	viewDef->drawSurfs[viewDef->numDrawSurfs] = drawSurf;
 	viewDef->numDrawSurfs++;
 }

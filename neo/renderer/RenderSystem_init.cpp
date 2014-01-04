@@ -377,12 +377,12 @@ glDrawElementsBaseVertexImpl
 ========================
 */
 void APIENTRY glDrawElementsBaseVertexImpl( GLenum mode, GLsizei count, GLenum type, const GLvoid *indices, GLint basevertex ) {
-	if ( basevertex == 0 ) {
-		// No offset, just draw like normal
-		qglDrawElements( mode, count, type, indices );
-	} else {
-		//TODO: http://www.opengl.org/registry/specs/ARB/draw_elements_base_vertex.txt, will also need to figure out if there is a more efficient way to do this
-	}
+	// All indice adjustment is done when the model is setup as opposed to at draw.
+	// This makes it a little more resource intensive, but removes the need to bind and unbind buffers.
+	// Which is especially good since all buffers are mapped, meaning there is no real way to adjust them
+	// without unmapping the buffers, moving them, then remapping them and saving the offset so the smp
+	// functions don't break... every draw call...
+	qglDrawElements( mode, count, type, indices );
 }
 
 /*
@@ -728,10 +728,14 @@ static void R_CheckPortableExtensions() {
 
 	// GL_ARB_draw_elements_base_vertex
 	glConfig.drawElementsBaseVertexAvailable = R_CheckExtension( "GL_ARB_draw_elements_base_vertex" );
-	glConfig.drawElementsBaseVertexFakeAvailable = false; //XXX If this variable isn't needed, remove it
+	glConfig.drawElementsBaseVertexFakeAvailable = false;
 	if ( glConfig.drawElementsBaseVertexAvailable ) {
 		qglDrawElementsBaseVertex = (PFNGLDRAWELEMENTSBASEVERTEXPROC)GLimp_ExtensionPointer( "glDrawElementsBaseVertex" );
+#ifndef GL_ES_VERSION_2_0
 	} else if ( qglDrawElements != NULL ) {
+#else
+	} else if ( qglDrawElements != NULL && ( glConfig.glVersion >= 3.0 || R_CheckExtension( "GL_OES_element_index_uint" ) ) ) {
+#endif
 		qglDrawElementsBaseVertex = glDrawElementsBaseVertexImpl;
 		glConfig.drawElementsBaseVertexAvailable = true;
 		glConfig.drawElementsBaseVertexFakeAvailable = true;

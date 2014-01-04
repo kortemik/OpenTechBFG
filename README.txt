@@ -1,4 +1,5 @@
 Doom 3 BFG Edition GPL Source Code
+                  ^ for BlackBerry
 ==================================
 
 This file contains the following sections:
@@ -83,6 +84,7 @@ THANKS
     Already written OpenAL implementation
     POSIX Sys_ListFiles
     Proof that extern inline works in C++, which otherwise was "not really supported" (so the internet says)
+    A working project to use as a reference if a portion of Doom 3 BFG for BlackBerry fails to work/compile
 
 
 LICENSE

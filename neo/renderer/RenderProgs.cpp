@@ -3,6 +3,7 @@
 
 Doom 3 BFG Edition GPL Source Code
 Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Vincent Simonetti
 
 This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
@@ -30,8 +31,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/precompiled.h"
 
 #include "tr_local.h"
-
-
 
 idRenderProgManager renderProgManager;
 
@@ -285,6 +284,10 @@ idRenderProgManager::LoadShader
 ================================================================================================
 */
 GLuint idRenderProgManager::LoadShader( GLenum target, const char * name, const char * startToken ) {
+
+#ifdef GL_ES_VERSION_2_0
+	common->FatalError( "idRenderProgManager::LoadShader: unsupported" );
+#endif
 
 	idStr fullPath = "renderprogs\\gl\\";
 	fullPath += name;

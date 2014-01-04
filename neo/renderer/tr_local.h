@@ -807,7 +807,7 @@ public:
 	srfTriangles_t *		testImageTriangles;
 
 	// these are allocated at buffer swap time, but
-	// the back end should only use the ones in the backEnd stucture,
+	// the back end should only use the ones in the backEnd structure,
 	// which are copied over from the frame that was just swapped.
 	drawSurf_t				unitSquareSurface_;
 	drawSurf_t				zeroOneCubeSurface_;

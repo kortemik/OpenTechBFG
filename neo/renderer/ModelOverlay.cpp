@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -506,7 +507,7 @@ void idRenderModelOverlay::AddDeferredOverlay( const overlayProjectionParms_t & 
 R_CopyOverlaySurface
 ====================
 */
-static void R_CopyOverlaySurface( idDrawVert * verts, int numVerts, triIndex_t * indexes, int numIndexes, const overlay_t * overlay, const idDrawVert * sourceVerts ) {
+static void R_CopyOverlaySurface( idDrawVert * verts, int numVerts, triIndex_t * indexes, int numIndexes, const overlay_t * overlay, const idDrawVert * sourceVerts, int vertexOffset ) {
 	assert_16_byte_aligned( &verts[numVerts] );
 	assert_16_byte_aligned( &indexes[numIndexes] );
 	assert_16_byte_aligned( overlay->verts );
@@ -517,7 +518,7 @@ static void R_CopyOverlaySurface( idDrawVert * verts, int numVerts, triIndex_t *
 #ifdef ID_WIN_X86_SSE2_INTRIN
 
 	const __m128i vector_int_clear_last = _mm_set_epi32( 0, -1, -1, -1 );
-	const __m128i vector_int_num_verts = _mm_shuffle_epi32( _mm_cvtsi32_si128( numVerts ), 0 );
+	const __m128i vector_int_num_verts = _mm_shuffle_epi32( _mm_cvtsi32_si128( numVerts + vertexOffset ), 0 );
 	const __m128i vector_short_num_verts = _mm_packs_epi32( vector_int_num_verts, vector_int_num_verts );
 
 	// copy vertices
@@ -566,7 +567,8 @@ static void R_CopyOverlaySurface( idDrawVert * verts, int numVerts, triIndex_t *
 	// copy indexes
 	for ( int i = 0; i < overlay->numIndexes; i += 2 ) {
 		assert( overlay->indexes[i + 0] < overlay->numVerts && overlay->indexes[i + 1] < overlay->numVerts );
-		WriteIndexPair( &indexes[numIndexes + i], numVerts + overlay->indexes[i + 0], numVerts + overlay->indexes[i + 1] );
+		assert( ( numVerts + overlay->indexes[i + 0] + vertexOffset ) < TRIINDEX_MAX_SIZE && ( numVerts + overlay->indexes[i + 1] + vertexOffset ) < TRIINDEX_MAX_SIZE );
+		WriteIndexPair( &indexes[numIndexes + i], numVerts + overlay->indexes[i + 0] + vertexOffset, numVerts + overlay->indexes[i + 1] + vertexOffset );
 	}
 
 #endif
@@ -639,6 +641,8 @@ drawSurf_t * idRenderModelOverlay::CreateOverlayDrawSurf( const viewEntity_t *sp
 	newTri->ambientCache = vertexCache.AllocVertex( NULL, ALIGN( maxVerts * sizeof( idDrawVert ), VERTEX_CACHE_ALIGN ) );
 	newTri->indexCache = vertexCache.AllocIndex( NULL, ALIGN( maxIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN ) );
 
+	const int vertexOffset = vertexCache.GetCacheVertexOffset( newTri->ambientCache ) / sizeof ( idDrawVert );
+
 	idDrawVert * mappedVerts = (idDrawVert *)vertexCache.MappedVertexBuffer( newTri->ambientCache );
 	triIndex_t * mappedIndexes = (triIndex_t *)vertexCache.MappedIndexBuffer( newTri->indexCache );
 
@@ -690,7 +694,7 @@ drawSurf_t * idRenderModelOverlay::CreateOverlayDrawSurf( const viewEntity_t *sp
 		}
 
 		// use SIMD optimized routine to copy the vertices and indices directly to write-combined memory
-		R_CopyOverlaySurface( mappedVerts, numVerts, mappedIndexes, numIndexes, &overlay, baseTri->verts );
+		R_CopyOverlaySurface( mappedVerts, numVerts, mappedIndexes, numIndexes, &overlay, baseTri->verts, vertexOffset );
 
 		numIndexes += overlay.numIndexes;
 		numVerts += overlay.numVerts;
@@ -698,7 +702,7 @@ drawSurf_t * idRenderModelOverlay::CreateOverlayDrawSurf( const viewEntity_t *sp
 
 	newTri->numVerts = numVerts;
 	newTri->numIndexes = numIndexes;
-	
+
 	// create the drawsurf
 	drawSurf_t * drawSurf = (drawSurf_t *)R_FrameAlloc( sizeof( *drawSurf ), FRAME_ALLOC_DRAW_SURFACE );
 	drawSurf->frontEndGeo = newTri;

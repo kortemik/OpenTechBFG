@@ -597,7 +597,7 @@ R_CopyDecalSurface
 =====================
 */
 static void R_CopyDecalSurface( idDrawVert * verts, int numVerts, triIndex_t * indexes, int numIndexes,
-									const decal_t * decal, const float fadeColor[4] ) {
+									const decal_t * decal, const float fadeColor[4], int vertexOffset ) {
 	assert_16_byte_aligned( &verts[numVerts] );
 	assert_16_byte_aligned( &indexes[numIndexes] );
 	assert_16_byte_aligned( decal->indexes );
@@ -608,7 +608,7 @@ static void R_CopyDecalSurface( idDrawVert * verts, int numVerts, triIndex_t * i
 
 #ifdef ID_WIN_X86_SSE2_INTRIN
 
-	const __m128i vector_int_num_verts = _mm_shuffle_epi32( _mm_cvtsi32_si128( numVerts ), 0 );
+	const __m128i vector_int_num_verts = _mm_shuffle_epi32( _mm_cvtsi32_si128( numVerts + vertexOffset ), 0 );
 	const __m128i vector_short_num_verts = _mm_packs_epi32( vector_int_num_verts, vector_int_num_verts );
 	const __m128 vector_fade_color = _mm_load_ps( fadeColor );
 	const __m128i vector_color_mask = _mm_set_epi32( 0, -1, 0, 0 );
@@ -661,7 +661,8 @@ static void R_CopyDecalSurface( idDrawVert * verts, int numVerts, triIndex_t * i
 	assert( ( decal->numIndexes & 1 ) == 0 );
 	for ( int i = 0; i < decal->numIndexes; i += 2 ) {
 		assert( decal->indexes[i + 0] < decal->numVerts && decal->indexes[i + 1] < decal->numVerts );
-		WriteIndexPair( &indexes[numIndexes + i], numVerts + decal->indexes[i + 0], numVerts + decal->indexes[i + 1] );
+		assert( ( numVerts + decal->indexes[i + 0] + vertexOffset ) < TRIINDEX_MAX_SIZE && ( numVerts + decal->indexes[i + 1] + vertexOffset ) < TRIINDEX_MAX_SIZE );
+		WriteIndexPair( &indexes[numIndexes + i], numVerts + decal->indexes[i + 0] + vertexOffset, numVerts + decal->indexes[i + 1] + vertexOffset );
 	}
 
 #endif
@@ -726,6 +727,8 @@ drawSurf_t * idRenderModelDecal::CreateDecalDrawSurf( const viewEntity_t *space,
 	newTri->ambientCache = vertexCache.AllocVertex( NULL, ALIGN( maxVerts * sizeof( idDrawVert ), VERTEX_CACHE_ALIGN ) );
 	newTri->indexCache = vertexCache.AllocIndex( NULL, ALIGN( maxIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN ) );
 
+	const int vertexOffset = vertexCache.GetCacheVertexOffset( newTri->ambientCache ) / sizeof ( idDrawVert );
+
 	idDrawVert * mappedVerts = (idDrawVert *)vertexCache.MappedVertexBuffer( newTri->ambientCache );
 	triIndex_t * mappedIndexes = (triIndex_t *)vertexCache.MappedIndexBuffer( newTri->indexCache );
 
@@ -764,7 +767,7 @@ drawSurf_t * idRenderModelDecal::CreateDecalDrawSurf( const viewEntity_t *space,
 
 		// use SIMD optimized routine to copy the vertices and indices directly to write-combined memory
 		// this also applies any depth/time based fading while copying
-		R_CopyDecalSurface( mappedVerts, numVerts, mappedIndexes, numIndexes, &decal, fadeColor );
+		R_CopyDecalSurface( mappedVerts, numVerts, mappedIndexes, numIndexes, &decal, fadeColor, vertexOffset );
 
 		numVerts += decal.numVerts;
 		numIndexes += decal.numIndexes;

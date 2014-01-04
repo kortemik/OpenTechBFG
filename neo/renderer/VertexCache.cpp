@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -217,6 +218,18 @@ vertCacheHandle_t idVertexCache::ActuallyAlloc( geoBufferSet_t & vcs, const void
 
 /*
 ==============
+idVertexCache::GetCacheVertexOffset
+==============
+*/
+int idVertexCache::GetCacheVertexOffset ( const vertCacheHandle_t handle ) {
+	if ( glConfig.drawElementsBaseVertexFakeAvailable ) {
+		return (int)( handle >> VERTCACHE_OFFSET_SHIFT ) & VERTCACHE_OFFSET_MASK;
+	}
+	return 0;
+}
+
+/*
+==============
 idVertexCache::GetVertexBuffer
 ==============
 */
@@ -290,7 +303,7 @@ void idVertexCache::BeginBackEnd() {
 	mostUsedJoint = Max( mostUsedJoint, frameData[listNum].jointMemUsed.GetValue() );
 
 	if ( r_showVertexCache.GetBool() ) {
-		idLib::Printf( "%08d: %d allocations, %dkB vertex, %dkB index, %kB joint : %dkB vertex, %dkB index, %kB joint\n", 
+		idLib::Printf( "%08d: %d allocations, %dkB vertex, %dkB index, %kB joint : %dkB vertex, %dkB index, %kB joint\n",
 			currentFrame, frameData[listNum].allocations,
 			frameData[listNum].vertexMemUsed.GetValue() / 1024,
 			frameData[listNum].indexMemUsed.GetValue() / 1024,
