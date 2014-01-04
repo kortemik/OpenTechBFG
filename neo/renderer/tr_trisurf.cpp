@@ -448,7 +448,7 @@ void R_RangeCheckIndexes( const srfTriangles_t *tri ) {
 	}
 
 	for ( i = 0; i < tri->numIndexes; i++ ) {
-		if ( tri->indexes[i] >= tri->numVerts ) {
+		if ( tri->indexes[i] >= (uint32)tri->numVerts ) {
 			common->Error( "R_RangeCheckIndexes: index out of range" );
 		}
 	}
@@ -601,13 +601,13 @@ static void R_DefineEdge( const int v1, const int v2, const int planeNum, const 
 	hashKey = silEdgeHash.GenerateKey( v1, v2 );
 	// search for a matching other side
 	for ( i = silEdgeHash.First( hashKey ); i >= 0 && i < MAX_SIL_EDGES; i = silEdgeHash.Next( i ) ) {
-		if ( silEdges[i].v1 == v1 && silEdges[i].v2 == v2 ) {
+		if ( silEdges[i].v1 == (const uint32)v1 && silEdges[i].v2 == (const uint32)v2 ) {
 			c_duplicatedEdges++;
 			// allow it to still create a new edge
 			continue;
 		}
-		if ( silEdges[i].v2 == v1 && silEdges[i].v1 == v2 ) {
-			if ( silEdges[i].p2 != numPlanes )  {
+		if ( silEdges[i].v2 == (const uint32)v1 && silEdges[i].v1 == (const uint32)v2 ) {
+			if ( silEdges[i].p2 != (const uint32)numPlanes )  {
 				c_tripledEdges++;
 				// allow it to still create a new edge
 				continue;
@@ -719,7 +719,7 @@ void R_IdentifySilEdges( srfTriangles_t *tri, bool omitCoplanarEdges ) {
 			int			j;
 			float		d;
 
-			if ( silEdges[i].p2 == numPlanes ) {	// the fake dangling edge
+			if ( silEdges[i].p2 == (uint32)numPlanes ) {	// the fake dangling edge
 				continue;
 			}
 
@@ -766,7 +766,7 @@ void R_IdentifySilEdges( srfTriangles_t *tri, bool omitCoplanarEdges ) {
 	shared = 0;
 	single = 0;
 	for ( i = 0; i < silEdges.Num(); i++ ) {
-		if ( silEdges[i].p2 == numPlanes ) {
+		if ( silEdges[i].p2 == (uint32)numPlanes ) {
 			single++;
 		} else {
 			shared++;
@@ -1471,7 +1471,7 @@ triangles could have different texture coordinates.
 void R_RemoveDuplicatedTriangles( srfTriangles_t *tri ) {
 	int		c_removed;
 	int		i, j, r;
-	int		a, b, c;
+	uint32	a, b, c;
 
 	c_removed = 0;
 
@@ -1924,7 +1924,7 @@ void R_InitDrawSurfFromTri( drawSurf_t & ds, srfTriangles_t & tri ) {
 		int vertexOffset = vertexCache.GetCacheVertexOffset( tri.ambientCache ) / sizeof ( idDrawVert );
 		triIndex_t * indexes = tri.indexes;
 		if ( vertexOffset != 0 ) {
-			indexes = (triIndex_t *)alloca( ALIGN( tri.numIndexes * sizeof( tri.indexes[0] ), INDEX_CACHE_ALIGN ) );
+			indexes = (triIndex_t *)_alloca16( ALIGN( tri.numIndexes * sizeof( tri.indexes[0] ), INDEX_CACHE_ALIGN ) );
 			if ( tri.numIndexes & 1 ) {
 				for ( int i = 0; i < tri.numIndexes; i++ ) {
 					indexes[i] = tri.indexes[i] + vertexOffset;

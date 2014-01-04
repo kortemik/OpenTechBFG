@@ -502,6 +502,8 @@ void R_AddSingleModel( viewEntity_t * vEntity ) {
 	//---------------------------
 	// add all the model surfaces
 	//---------------------------
+	void * tmpIndexData = NULL;
+	size_t tmpIndexDataSize = 0;
 	for ( int surfaceNum = 0; surfaceNum < model->NumSurfaces(); surfaceNum++ ) {
 		const modelSurface_t *surf = model->Surface( surfaceNum );
 
@@ -597,9 +599,17 @@ void R_AddSingleModel( viewEntity_t * vEntity ) {
 			if ( !vertexCache.CacheIsCurrent( tri->indexCache ) ) {
 				// Adjust vertex offset within indices
 				int vertexOffset = vertexCache.GetCacheVertexOffset( tri->ambientCache ) / sizeof ( idDrawVert );
+				size_t dataSize = ALIGN( tri->numIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN );
 				triIndex_t * indexes = tri->indexes;
 				if ( vertexOffset != 0 ) {
-					indexes = (triIndex_t *)alloca( ALIGN( tri->numIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN ) );
+					if ( !tmpIndexData || dataSize > tmpIndexDataSize ) {
+						if ( tmpIndexData ) {
+							Mem_Free16( tmpIndexData );
+						}
+						tmpIndexData = Mem_Alloc16( dataSize, TAG_TEMP );
+						tmpIndexDataSize = dataSize;
+					}
+					indexes = (triIndex_t *)tmpIndexData;
 					if ( tri->numIndexes & 1 ) {
 						for ( int i = 0; i < tri->numIndexes; i++ ) {
 							indexes[i] = tri->indexes[i] + vertexOffset;
@@ -610,7 +620,7 @@ void R_AddSingleModel( viewEntity_t * vEntity ) {
 						}
 					}
 				}
-				tri->indexCache = vertexCache.AllocIndex( indexes, ALIGN( tri->numIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN ) );
+				tri->indexCache = vertexCache.AllocIndex( indexes, dataSize );
 			}
 
 			// add the surface for drawing
@@ -650,9 +660,17 @@ void R_AddSingleModel( viewEntity_t * vEntity ) {
 				if ( !vertexCache.CacheIsCurrent( tri->indexCache ) ) {
 					// Adjust vertex offset within indices
 					int vertexOffset = vertexCache.GetCacheVertexOffset( tri->ambientCache ) / sizeof( tri->verts[0] );
+					size_t dataSize = ALIGN( tri->numIndexes * sizeof( tri->indexes[0] ), INDEX_CACHE_ALIGN );
 					triIndex_t * indexes = tri->indexes;
 					if ( vertexOffset != 0 ) {
-						indexes = (triIndex_t *)alloca( ALIGN( tri->numIndexes * sizeof( tri->indexes[0] ), INDEX_CACHE_ALIGN ) );
+						if ( !tmpIndexData || dataSize > tmpIndexDataSize ) {
+							if ( tmpIndexData ) {
+								Mem_Free16( tmpIndexData );
+							}
+							tmpIndexData = Mem_Alloc16( dataSize, TAG_TEMP );
+							tmpIndexDataSize = dataSize;
+						}
+						indexes = (triIndex_t *)tmpIndexData;
 						if ( tri->numIndexes & 1 ) {
 							for ( int i = 0; i < tri->numIndexes; i++ ) {
 								indexes[i] = tri->indexes[i] + vertexOffset;
@@ -663,7 +681,7 @@ void R_AddSingleModel( viewEntity_t * vEntity ) {
 							}
 						}
 					}
-					tri->indexCache = vertexCache.AllocIndex( indexes, ALIGN( tri->numIndexes * sizeof( tri->indexes[0] ), INDEX_CACHE_ALIGN ) );
+					tri->indexCache = vertexCache.AllocIndex( indexes, dataSize );
 				}
 
 				R_SetupDrawSurfJoints( baseDrawSurf, tri, shader );
@@ -989,6 +1007,9 @@ void R_AddSingleModel( viewEntity_t * vEntity ) {
 			shadowDrawSurf->nextOnLight = vEntity->drawSurfs;
 			vEntity->drawSurfs = shadowDrawSurf;
 		}
+	}
+	if ( tmpIndexData ) {
+		Mem_Free16( tmpIndexData );
 	}
 }
 

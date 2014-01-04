@@ -450,7 +450,7 @@ public:
 					streamArrayEnd = cachedIndexEnd;
 					for ( int i = cachedArrayEnd; i < streamArrayEnd; i++ ) {
 						assert( i >= cachedIndexStart && i < cachedIndexEnd );
-						assert( inIndex[i] >= 0 && inIndex[i] < inArrayNum );
+						assert( inIndex[i] >= (uint32)0 && inIndex[i] < (uint32)inArrayNum );
 
 						Prefetch( inArray, inIndex[i] * sizeof( _elemType_ ) );
 					}

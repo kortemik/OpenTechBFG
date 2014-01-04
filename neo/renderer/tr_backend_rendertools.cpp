@@ -1565,7 +1565,7 @@ static void RB_ShowEdges( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 	drawSurf_t	*drawSurf;
 	const srfTriangles_t	*tri;
 	const silEdge_t			*edge;
-	int			danglePlane;
+	triIndex_t	danglePlane;
 
 	if ( !r_showEdges.GetBool() ) {
 		return;
@@ -1594,7 +1594,7 @@ static void RB_ShowEdges( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 
 		for ( j = 0; j < tri->numIndexes; j+= 3 ) {
 			for ( k = 0; k < 3; k++ ) {
-				int		l, i1, i2;
+				uint32	l, i1, i2;
 				l = ( k == 2 ) ? 0 : k + 1;
 				i1 = tri->indexes[j+k];
 				i2 = tri->indexes[j+l];

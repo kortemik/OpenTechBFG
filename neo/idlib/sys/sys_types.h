@@ -126,7 +126,7 @@ struct idNullPtr {
 
 const float	MAX_ENTITY_COORDINATE = 64000.0f;
 
-#if 1
+#ifndef USE_32BIT_INDEXES
 
 typedef unsigned short triIndex_t;
 #define GL_INDEX_TYPE		GL_UNSIGNED_SHORT
@@ -137,13 +137,18 @@ typedef unsigned short triIndex_t;
 typedef unsigned int triIndex_t;
 #define GL_INDEX_TYPE		GL_UNSIGNED_INT
 #define TRIINDEX_MAX_SIZE	MAX_UNSIGNED_TYPE( 4 )
-#define TRIINDEX_IS_BIG
+#define TRIINDEX_IS_32BIT
 
 #endif
 
-// if writing to write-combined memory, always write indexes as pairs for 32 bit writes
 ID_INLINE void WriteIndexPair( triIndex_t * dest, const triIndex_t a, const triIndex_t b ) {
+#ifdef TRIINDEX_IS_32BIT
+	dest[0] = a;
+	dest[1] = b;
+#else
+	// if writing to write-combined memory, always write indexes as pairs for 32 bit writes
 	*(unsigned *)dest = (unsigned)a | ( (unsigned)b<<16 );
+#endif
 }
 
 #if defined(_DEBUG) || defined(_lint) || !defined(ID_WIN32)

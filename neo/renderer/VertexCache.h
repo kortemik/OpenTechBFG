@@ -51,7 +51,11 @@ const int VERTCACHE_FRAME_SHIFT = 49;
 const int VERTCACHE_FRAME_MASK = 0x7fff;		// 15 bits = 32k frames to wrap around
 
 const int VERTEX_CACHE_ALIGN		= 32;
+#ifdef TRIINDEX_IS_32BIT
+const int INDEX_CACHE_ALIGN			= 32;
+#else
 const int INDEX_CACHE_ALIGN			= 16;
+#endif
 const int JOINT_CACHE_ALIGN			= 16;
 
 enum cacheType_t {

@@ -419,6 +419,29 @@ uint64 idSWF::GLStateForRenderState( const swfRenderState_t & renderState ) {
 	}
 }
 
+#ifdef TRIINDEX_IS_32BIT
+
+/*
+========================
+idSWF::RenderMorphShape
+========================
+*/
+const triIndex_t * idSWF::LoadTmpIndexBuffer( int numIndexes, const uint16 *oriIndexes ) {
+	if ( numIndexes > 0 && ( !tmpIndices || numIndexes > tmpIndicesSize ) ) {
+		if ( tmpIndices ) {
+			Mem_Free16( tmpIndices );
+		}
+		tmpIndices = (triIndex_t *)Mem_Alloc16( numIndexes * sizeof( triIndex_t ), TAG_SWF );
+		tmpIndicesSize = numIndexes;
+	}
+	for ( int k = 0; k < numIndexes; k++ ) {
+		tmpIndices[k] = oriIndexes[k];
+	}
+	return tmpIndices;
+}
+
+#endif
+
 /*
 ========================
 idSWF::RenderMorphShape
@@ -482,7 +505,11 @@ void idSWF::RenderMorphShape( idRenderSystem * gui, const idSWFShape * shape, co
 
 		gui->SetGLState( GLStateForRenderState( renderState ) );
 
+#ifdef TRIINDEX_IS_32BIT
+		idDrawVert * verts = gui->AllocTris( fill.startVerts.Num(), LoadTmpIndexBuffer( fill.indices.Num(), fill.indices.Ptr() ), fill.indices.Num(), material, renderState.stereoDepth );
+#else
 		idDrawVert * verts = gui->AllocTris( fill.startVerts.Num(), fill.indices.Ptr(), fill.indices.Num(), material, renderState.stereoDepth );
+#endif
 		if ( verts == NULL ) {
 			continue;
 		}
@@ -580,7 +607,11 @@ void idSWF::RenderShape( idRenderSystem * gui, const idSWFShape * shape, const s
 
 		gui->SetGLState( GLStateForRenderState( renderState ) );
 
+#ifdef TRIINDEX_IS_32BIT
+		idDrawVert * verts = gui->AllocTris( fill.startVerts.Num(), LoadTmpIndexBuffer( fill.indices.Num(), fill.indices.Ptr() ), fill.indices.Num(), material, renderState.stereoDepth );
+#else
 		idDrawVert * verts = gui->AllocTris( fill.startVerts.Num(), fill.indices.Ptr(), fill.indices.Num(), material, renderState.stereoDepth );
+#endif
 		if ( verts == NULL ) {
 			continue;
 		}
@@ -644,7 +675,11 @@ void idSWF::RenderShape( idRenderSystem * gui, const idSWFShape * shape, const s
 
 		gui->SetGLState( GLStateForRenderState( renderState ) | GLS_POLYMODE_LINE );
 
+#ifdef TRIINDEX_IS_32BIT
+		idDrawVert * verts = gui->AllocTris( line.startVerts.Num(), LoadTmpIndexBuffer( line.indices.Num(), line.indices.Ptr() ), line.indices.Num(), white, renderState.stereoDepth );
+#else
 		idDrawVert * verts = gui->AllocTris( line.startVerts.Num(), line.indices.Ptr(), line.indices.Num(), white, renderState.stereoDepth );
+#endif
 		if ( verts == NULL ) {
 			continue;
 		}

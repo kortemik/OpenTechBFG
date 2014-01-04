@@ -609,7 +609,9 @@ static void R_CopyDecalSurface( idDrawVert * verts, int numVerts, triIndex_t * i
 #ifdef ID_WIN_X86_SSE2_INTRIN
 
 	const __m128i vector_int_num_verts = _mm_shuffle_epi32( _mm_cvtsi32_si128( numVerts + vertexOffset ), 0 );
+#ifndef TRIINDEX_IS_32BIT
 	const __m128i vector_short_num_verts = _mm_packs_epi32( vector_int_num_verts, vector_int_num_verts );
+#endif
 	const __m128 vector_fade_color = _mm_load_ps( fadeColor );
 	const __m128i vector_color_mask = _mm_set_epi32( 0, -1, 0, 0 );
 
@@ -634,6 +636,17 @@ static void R_CopyDecalSurface( idDrawVert * verts, int numVerts, triIndex_t * i
 	}
 
 	// copy indexes
+#ifdef TRIINDEX_IS_32BIT
+	assert( ( decal->numIndexes & 3 ) == 0 );
+	assert( sizeof( triIndex_t ) == 4 );
+	for ( int i = 0; i < decal->numIndexes; i += 4 ) {
+		__m128i vi = _mm_load_si128( (const __m128i *)&decal->indexes[i] );
+
+		vi = _mm_add_epi32( vi, vector_int_num_verts );
+
+		_mm_stream_si128( (__m128i *)&indexes[numIndexes + i], vi );
+	}
+#else
 	assert( ( decal->numIndexes & 7 ) == 0 );
 	assert( sizeof( triIndex_t ) == 2 );
 	for ( int i = 0; i < decal->numIndexes; i += 8 ) {
@@ -643,6 +656,7 @@ static void R_CopyDecalSurface( idDrawVert * verts, int numVerts, triIndex_t * i
 
 		_mm_stream_si128( (__m128i *)&indexes[numIndexes + i], vi );
 	}
+#endif
 
 	_mm_sfence();
 

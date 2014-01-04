@@ -519,7 +519,9 @@ static void R_CopyOverlaySurface( idDrawVert * verts, int numVerts, triIndex_t *
 
 	const __m128i vector_int_clear_last = _mm_set_epi32( 0, -1, -1, -1 );
 	const __m128i vector_int_num_verts = _mm_shuffle_epi32( _mm_cvtsi32_si128( numVerts + vertexOffset ), 0 );
+#ifndef TRIINDEX_IS_32BIT
 	const __m128i vector_short_num_verts = _mm_packs_epi32( vector_int_num_verts, vector_int_num_verts );
+#endif
 
 	// copy vertices
 	for ( int i = 0; i < overlay->numVerts; i++ ) {
@@ -540,6 +542,17 @@ static void R_CopyOverlaySurface( idDrawVert * verts, int numVerts, triIndex_t *
 	}
 
 	// copy indexes
+#ifdef TRIINDEX_IS_32BIT
+	assert( ( overlay->numIndexes & 3 ) == 0 );
+	assert( sizeof( triIndex_t ) == 4 );
+	for ( int i = 0; i < overlay->numIndexes; i += 4 ) {
+		__m128i vi = _mm_load_si128( (const __m128i *)&overlay->indexes[i] );
+
+		vi = _mm_add_epi32( vi, vector_int_num_verts );
+
+		_mm_stream_si128( (__m128i *)&indexes[numIndexes + i], vi );
+	}
+#else
 	assert( ( overlay->numIndexes & 7 ) == 0 );
 	assert( sizeof( triIndex_t ) == 2 );
 	for ( int i = 0; i < overlay->numIndexes; i += 8 ) {
@@ -549,6 +562,7 @@ static void R_CopyOverlaySurface( idDrawVert * verts, int numVerts, triIndex_t *
 
 		_mm_stream_si128( (__m128i *)&indexes[numIndexes + i], vi );
 	}
+#endif
 
 	_mm_sfence();
 

@@ -52,7 +52,7 @@ static drawSurf_t * R_FinishDeform( drawSurf_t * surf, srfTriangles_t * newTri, 
 	int vertexOffset = vertexCache.GetCacheVertexOffset( newTri->ambientCache ) / sizeof ( idDrawVert );
 	const triIndex_t * indexes = newIndexes;
 	if ( vertexOffset != 0 ) {
-		triIndex_t * nIndexes = (triIndex_t *)alloca( ALIGN( newTri->numIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN ) );
+		triIndex_t * nIndexes = (triIndex_t *)_alloca16( ALIGN( newTri->numIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN ) );
 		indexes = nIndexes;
 		if ( newTri->numIndexes & 1 ) {
 			for ( int i = 0; i < newTri->numIndexes; i++ ) {
@@ -291,7 +291,7 @@ int	R_WindingFromTriangles( const srfTriangles_t *tri, triIndex_t indexes[MAX_TR
 				if ( tri->indexes[i*3+j] != indexes[numIndexes-1] ) {
 					continue;
 				}
-				int next = tri->indexes[i*3+(j+1)%3];
+				uint32 next = tri->indexes[i*3+(j+1)%3];
 
 				// make sure it isn't already used
 				if ( numIndexes == 1 ) {
@@ -315,7 +315,7 @@ int	R_WindingFromTriangles( const srfTriangles_t *tri, triIndex_t indexes[MAX_TR
 						continue;
 					}
 					for ( l = 0; l < 3; l++ ) {
-						int	a, b;
+						uint32	a, b;
 
 						a = tri->indexes[k*3+l];
 						if ( a != next ) {
@@ -607,9 +607,9 @@ static void AddTriangleToIsland_r( const srfTriangles_t *tri, int triangleNum, b
 	const idJointMat * joints = ( tri->staticModelWithJoints != NULL && r_useGPUSkinning.GetBool() ) ? tri->staticModelWithJoints->jointsInverted : NULL;
 
 	// recurse into all neighbors
-	const int a = tri->indexes[triangleNum*3+0];
-	const int b = tri->indexes[triangleNum*3+1];
-	const int c = tri->indexes[triangleNum*3+2];
+	const uint32 a = tri->indexes[triangleNum*3+0];
+	const uint32 b = tri->indexes[triangleNum*3+1];
+	const uint32 c = tri->indexes[triangleNum*3+2];
 
 	const idVec3 va = idDrawVert::GetSkinnedDrawVertPosition( tri->verts[a], joints );
 	const idVec3 vb = idDrawVert::GetSkinnedDrawVertPosition( tri->verts[b], joints );

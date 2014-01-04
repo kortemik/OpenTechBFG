@@ -233,6 +233,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #define USE_OS_ZLIB
 #define USE_OS_LIBJPEG
+#define USE_32BIT_INDEXES
 
 // Needed to be able to compile with spawn.h
 #if defined(__cplusplus) && !defined(__STDC_CONSTANT_MACROS)
