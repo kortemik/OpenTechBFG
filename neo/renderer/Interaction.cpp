@@ -687,6 +687,8 @@ void idInteraction::CreateStaticInteraction() {
 	bool interactionGenerated = false;
 
 	// check each surface in the model
+	triIndex_t * tmpIndices = NULL;
+	int tmpIndicesSize = 0;
 	for ( int c = 0 ; c < model->NumSurfaces() ; c++ ) {
 		const modelSurface_t * surf = model->Surface( c );
 		const srfTriangles_t * tri = surf->geometry;
@@ -717,7 +719,29 @@ void idInteraction::CreateStaticInteraction() {
 			if ( lightTris != NULL ) {
 				// make a static index cache
 				sint->numLightTrisIndexes = lightTris->numIndexes;
-				sint->lightTrisIndexCache = vertexCache.AllocStaticIndex( lightTris->indexes, ALIGN( lightTris->numIndexes * sizeof( lightTris->indexes[0] ), INDEX_CACHE_ALIGN ) );
+				int vertexOffset = vertexCache.GetCacheVertexOffset( tri->shadowCache ) / sizeof ( idShadowVert ); //TODO: is this the proper type for sizeof?
+				int byteSize = ALIGN( lightTris->numIndexes * sizeof( lightTris->indexes[0] ), INDEX_CACHE_ALIGN );
+				const triIndex_t * indexes = lightTris->indexes;
+				if ( vertexOffset != 0 ) {
+					if ( !tmpIndices || tmpIndicesSize < byteSize ) {
+						if ( tmpIndices ) {
+							Mem_Free16( tmpIndices );
+						}
+						tmpIndices = (triIndex_t *)Mem_Alloc16( byteSize, TAG_TEMP );
+						tmpIndicesSize = byteSize;
+					}
+					indexes = tmpIndices;
+					if ( lightTris->numIndexes & 1 ) {
+						for ( int i = 0; i < lightTris->numIndexes; i++ ) {
+							tmpIndices[i] = lightTris->indexes[i] + vertexOffset;
+						}
+					} else {
+						for ( int i = 0; i < lightTris->numIndexes; i += 2 ) {
+							WriteIndexPair( &tmpIndices[i], lightTris->indexes[i + 0] + vertexOffset, lightTris->indexes[i + 1] + vertexOffset );
+						}
+					}
+				}
+				sint->lightTrisIndexCache = vertexCache.AllocStaticIndex( indexes, byteSize );
 
 				interactionGenerated = true;
 				R_FreeStaticTriSurf( lightTris );
@@ -732,7 +756,29 @@ void idInteraction::CreateStaticInteraction() {
 				srfTriangles_t * shadowTris = R_CreateInteractionShadowVolume( entityDef, tri, lightDef );
 				if ( shadowTris != NULL ) {
 					// make a static index cache
-					sint->shadowIndexCache = vertexCache.AllocStaticIndex( shadowTris->indexes, ALIGN( shadowTris->numIndexes * sizeof( shadowTris->indexes[0] ), INDEX_CACHE_ALIGN ) );
+					int vertexOffset = vertexCache.GetCacheVertexOffset( tri->shadowCache ) / sizeof ( idShadowVert ); //TODO: is this the proper type for sizeof?
+					int byteSize = ALIGN( shadowTris->numIndexes * sizeof( shadowTris->indexes[0] ), INDEX_CACHE_ALIGN );
+					const triIndex_t * indexes = shadowTris->indexes;
+					if ( vertexOffset != 0 ) {
+						if ( !tmpIndices || tmpIndicesSize < byteSize ) {
+							if ( tmpIndices ) {
+								Mem_Free16( tmpIndices );
+							}
+							tmpIndices = (triIndex_t *)Mem_Alloc16( byteSize, TAG_TEMP );
+							tmpIndicesSize = byteSize;
+						}
+						indexes = tmpIndices;
+						if ( shadowTris->numIndexes & 1 ) {
+							for ( int i = 0; i < shadowTris->numIndexes; i++ ) {
+								tmpIndices[i] = shadowTris->indexes[i] + vertexOffset;
+							}
+						} else {
+							for ( int i = 0; i < shadowTris->numIndexes; i += 2 ) {
+								WriteIndexPair( &tmpIndices[i], shadowTris->indexes[i + 0] + vertexOffset, shadowTris->indexes[i + 1] + vertexOffset );
+							}
+						}
+					}
+					sint->shadowIndexCache = vertexCache.AllocStaticIndex( indexes, byteSize );
 					sint->numShadowIndexes = shadowTris->numIndexes;
 #if defined( KEEP_INTERACTION_CPU_DATA )
 					sint->shadowIndexes = shadowTris->indexes;
@@ -751,6 +797,9 @@ void idInteraction::CreateStaticInteraction() {
 				interactionGenerated = true;
 			}
 		}
+	}
+	if ( tmpIndices ) {
+		Mem_Free16( tmpIndices );
 	}
 
 	// if none of the surfaces generated anything, don't even bother checking?

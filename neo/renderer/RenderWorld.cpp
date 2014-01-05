@@ -1548,7 +1548,7 @@ void idRenderWorldLocal::GenerateAllInteractions() {
 	int	size =  interactionTableWidth * interactionTableHeight * sizeof( *interactionTable );
 	interactionTable = (idInteraction **)R_ClearedStaticAlloc( size );
 
-	// itterate through all lights
+	// iterate through all lights
 	int	count = 0;
 	for ( int i = 0; i < this->lightDefs.Num(); i++ ) {
 		idRenderLightLocal	*ldef = this->lightDefs[i];

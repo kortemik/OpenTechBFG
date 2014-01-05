@@ -688,6 +688,8 @@ bool idRenderModelMD5::LoadBinaryModel( idFile * file, const ID_TIME_T sourceTim
 	int tmpIndicesSize = 0;
 	uint16 tmp[4];
 #endif
+	triIndex_t * tmpAmbientIndices = NULL;
+	int tmpAmbientIndicesSize = 0;
 	for ( int i = 0; i < meshes.Num(); i++ ) {
 
 		idStr materialName;
@@ -786,7 +788,31 @@ bool idRenderModelMD5::LoadBinaryModel( idFile * file, const ID_TIME_T sourceTim
 		idShadowVertSkinned::CreateShadowCache( shadowVerts, deform.verts, deform.numOutputVerts );
 
 		deform.staticAmbientCache = vertexCache.AllocStaticVertex( deform.verts, ALIGN( deform.numOutputVerts * sizeof( idDrawVert ), VERTEX_CACHE_ALIGN ) );
-		deform.staticIndexCache = vertexCache.AllocStaticIndex( deform.indexes, ALIGN( deform.numIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN ) );
+
+		int vertexOffset = vertexCache.GetCacheVertexOffset( deform.staticAmbientCache ) / sizeof( idDrawVert );
+		int deformIndexSize = ALIGN( deform.numIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN );
+		const triIndex_t * indexes = deform.indexes;
+		if ( vertexOffset != 0 ) {
+			if ( !tmpAmbientIndices || tmpAmbientIndicesSize < deformIndexSize ) {
+				if ( tmpAmbientIndices ) {
+					Mem_Free16( tmpAmbientIndices );
+				}
+				tmpAmbientIndices = (triIndex_t *)Mem_Alloc16( deformIndexSize, TAG_TEMP );
+				tmpAmbientIndicesSize = deformIndexSize;
+			}
+			indexes = tmpAmbientIndices;
+			if ( deform.numIndexes & 1 ) {
+				for ( int i = 0; i < deform.numIndexes; i++ ) {
+					tmpAmbientIndices[i] = deform.indexes[i] + vertexOffset;
+				}
+			} else {
+				for ( int i = 0; i < deform.numIndexes; i += 2 ) {
+					WriteIndexPair( &tmpAmbientIndices[i], deform.indexes[i + 0] + vertexOffset, deform.indexes[i + 1] + vertexOffset );
+				}
+			}
+		}
+		deform.staticIndexCache = vertexCache.AllocStaticIndex( indexes, deformIndexSize );
+
 		deform.staticShadowCache = vertexCache.AllocStaticVertex( shadowVerts, ALIGN( deform.numOutputVerts * 2 * sizeof( idShadowVertSkinned ), VERTEX_CACHE_ALIGN ) );
 
 		Mem_Free( shadowVerts );
@@ -798,6 +824,9 @@ bool idRenderModelMD5::LoadBinaryModel( idFile * file, const ID_TIME_T sourceTim
 		Mem_Free( tmpIndices );
 	}
 #endif
+	if ( tmpAmbientIndices ) {
+		Mem_Free16( tmpAmbientIndices );
+	}
 
 	return true;
 }

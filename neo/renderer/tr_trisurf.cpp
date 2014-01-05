@@ -1824,7 +1824,24 @@ deformInfo_t *R_BuildDeformInfo( int numVerts, const idDrawVert *verts, int numI
 	idShadowVertSkinned::CreateShadowCache( shadowVerts, deform->verts, deform->numOutputVerts );
 
 	deform->staticAmbientCache = vertexCache.AllocStaticVertex( deform->verts, ALIGN( deform->numOutputVerts * sizeof( idDrawVert ), VERTEX_CACHE_ALIGN ) );
-	deform->staticIndexCache = vertexCache.AllocStaticIndex( deform->indexes, ALIGN( deform->numIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN ) );
+
+	int vertexOffset = vertexCache.GetCacheVertexOffset( deform->staticAmbientCache ) / sizeof( idDrawVert );
+	int deformIndexSize = ALIGN( deform->numIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN );
+	triIndex_t * nIndexes = deform->indexes;
+	if ( vertexOffset != 0 ) {
+		nIndexes = (triIndex_t *)_alloca16( deformIndexSize );
+		if ( deform->numIndexes & 1 ) {
+			for ( int i = 0; i < deform->numIndexes; i++ ) {
+				nIndexes[i] = deform->indexes[i] + vertexOffset;
+			}
+		} else {
+			for ( int i = 0; i < deform->numIndexes; i += 2 ) {
+				WriteIndexPair( &nIndexes[i], deform->indexes[i + 0] + vertexOffset, deform->indexes[i + 1] + vertexOffset );
+			}
+		}
+	}
+	deform->staticIndexCache = vertexCache.AllocStaticIndex( nIndexes, deformIndexSize );
+
 	deform->staticShadowCache = vertexCache.AllocStaticVertex( shadowVerts, ALIGN( deform->numOutputVerts * 2 * sizeof( idShadowVertSkinned ), VERTEX_CACHE_ALIGN ) );
 
 	Mem_Free( shadowVerts );
@@ -1922,9 +1939,10 @@ void R_InitDrawSurfFromTri( drawSurf_t & ds, srfTriangles_t & tri ) {
 	if ( !vertexCache.CacheIsCurrent( tri.indexCache ) ) {
 		// Adjust vertex offset within indices
 		int vertexOffset = vertexCache.GetCacheVertexOffset( tri.ambientCache ) / sizeof ( idDrawVert );
+		int indexSize = ALIGN( tri.numIndexes * sizeof( tri.indexes[0] ), INDEX_CACHE_ALIGN );
 		triIndex_t * indexes = tri.indexes;
 		if ( vertexOffset != 0 ) {
-			indexes = (triIndex_t *)_alloca16( ALIGN( tri.numIndexes * sizeof( tri.indexes[0] ), INDEX_CACHE_ALIGN ) );
+			indexes = (triIndex_t *)_alloca16( indexSize );
 			if ( tri.numIndexes & 1 ) {
 				for ( int i = 0; i < tri.numIndexes; i++ ) {
 					indexes[i] = tri.indexes[i] + vertexOffset;
@@ -1935,7 +1953,7 @@ void R_InitDrawSurfFromTri( drawSurf_t & ds, srfTriangles_t & tri ) {
 				}
 			}
 		}
-		tri.indexCache = vertexCache.AllocIndex( indexes, ALIGN( tri.numIndexes * sizeof( tri.indexes[0] ), INDEX_CACHE_ALIGN ) );
+		tri.indexCache = vertexCache.AllocIndex( indexes, indexSize );
 	}
 
 	ds.numIndexes = tri.numIndexes;
@@ -1957,11 +1975,6 @@ void R_CreateStaticBuffersForTri( srfTriangles_t & tri ) {
 	tri.indexCache = 0;
 	tri.ambientCache = 0;
 	tri.shadowCache = 0;
-
-	// index cache
-	if ( tri.indexes != NULL ) {
-		tri.indexCache = vertexCache.AllocStaticIndex( tri.indexes, ALIGN( tri.numIndexes * sizeof( tri.indexes[0] ), INDEX_CACHE_ALIGN ) );
-	}
 
 	// vertex cache
 	if ( tri.verts != NULL ) {
@@ -1988,5 +2001,31 @@ void R_CreateStaticBuffersForTri( srfTriangles_t & tri ) {
 		Mem_Free( tri.staticShadowVertexes );
 		tri.staticShadowVertexes = NULL;
 #endif
+	}
+
+	// index cache
+	if ( tri.indexes != NULL ) {
+		// Adjust vertex offset within indices
+		int vertexOffset = 0;
+		if ( tri.verts != NULL ) {
+			vertexOffset = vertexCache.GetCacheVertexOffset( tri.ambientCache ) / sizeof( tri.verts[0] );
+		} else if ( tri.preLightShadowVertexes != NULL ) {
+			vertexOffset = vertexCache.GetCacheVertexOffset( tri.shadowCache ) / sizeof( idShadowVert );
+		}
+		int indexSize = ALIGN( tri.numIndexes * sizeof( tri.indexes[0] ), INDEX_CACHE_ALIGN );
+		triIndex_t * indexes = tri.indexes;
+		if ( vertexOffset != 0 ) {
+			indexes = (triIndex_t *)_alloca16( indexSize );
+			if ( tri.numIndexes & 1 ) {
+				for ( int i = 0; i < tri.numIndexes; i++ ) {
+					indexes[i] = tri.indexes[i] + vertexOffset;
+				}
+			} else {
+				for ( int i = 0; i < tri.numIndexes; i += 2 ) {
+					WriteIndexPair( &indexes[i], tri.indexes[i + 0] + vertexOffset, tri.indexes[i + 1] + vertexOffset );
+				}
+			}
+		}
+		tri.indexCache = vertexCache.AllocStaticIndex( indexes, indexSize );
 	}
 }

@@ -731,6 +731,7 @@ static void R_CheckPortableExtensions() {
 	glConfig.drawElementsBaseVertexFakeAvailable = false;
 	if ( glConfig.drawElementsBaseVertexAvailable ) {
 		qglDrawElementsBaseVertex = (PFNGLDRAWELEMENTSBASEVERTEXPROC)GLimp_ExtensionPointer( "glDrawElementsBaseVertex" );
+#ifdef USE_32BIT_INDEXES
 #ifndef GL_ES_VERSION_2_0
 	} else if ( qglDrawElements != NULL ) {
 #else
@@ -740,6 +741,7 @@ static void R_CheckPortableExtensions() {
 		glConfig.drawElementsBaseVertexAvailable = true;
 		glConfig.drawElementsBaseVertexFakeAvailable = true;
 		common->Printf( "...using fake %s\n", "GL_ARB_draw_elements_base_vertex" );
+#endif
 	}
 
 #ifndef GL_ES_VERSION_2_0
