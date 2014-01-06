@@ -761,6 +761,7 @@ void R_AddSingleModel( viewEntity_t * vEntity ) {
 
 								dynamicShadowParms->verts = tri->verts;
 								dynamicShadowParms->numVerts = tri->numVerts;
+								dynamicShadowParms->vertOffset = vertexCache.GetCacheVertexOffset( tri->ambientCache ) / sizeof( idDrawVert );
 								dynamicShadowParms->indexes = tri->indexes;
 								dynamicShadowParms->numIndexes = tri->numIndexes;
 								dynamicShadowParms->silEdges = tri->silEdges;
@@ -872,6 +873,8 @@ void R_AddSingleModel( viewEntity_t * vEntity ) {
 
 			drawSurf_t * shadowDrawSurf = (drawSurf_t *)R_FrameAlloc( sizeof( *shadowDrawSurf ), FRAME_ALLOC_DRAW_SURFACE );
 
+			bool surfaceHasJoints = tri->staticModelWithJoints != NULL && r_useGPUSkinning.GetBool();
+
 			if ( surfInter != NULL ) {
 				shadowDrawSurf->numIndexes = 0;
 				shadowDrawSurf->indexCache = surfInter->shadowIndexCache;
@@ -944,6 +947,7 @@ void R_AddSingleModel( viewEntity_t * vEntity ) {
 
 					dynamicShadowParms->verts = tri->verts;
 					dynamicShadowParms->numVerts = tri->numVerts;
+					dynamicShadowParms->vertOffset = vertexCache.GetCacheVertexOffset( tri->shadowCache ) / ( surfaceHasJoints ? sizeof( idShadowVertSkinned ) : sizeof( idShadowVert ) );
 					dynamicShadowParms->indexes = tri->indexes;
 					dynamicShadowParms->numIndexes = tri->numIndexes;
 					dynamicShadowParms->silEdges = tri->silEdges;

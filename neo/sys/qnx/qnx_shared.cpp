@@ -292,6 +292,10 @@ Sys_SetPhysicalWorkMemory
 ================
 */
 void Sys_SetPhysicalWorkMemory( int minBytes, int maxBytes ) {
+	if ( minBytes == -1 && maxBytes == -1 ) {
+		//XXX Removes as many unused memory pages as possible
+		return;
+	}
 	// Cannot set min process size, but can set max
 	struct rlimit64 limit;
 	if ( getrlimit64( RLIMIT_DATA, &limit ) == 0 ) {

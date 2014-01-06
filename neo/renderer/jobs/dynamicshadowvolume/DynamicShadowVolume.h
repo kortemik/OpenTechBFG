@@ -75,6 +75,7 @@ struct dynamicShadowVolumeParms_t {
 	// input
 	const idDrawVert *				verts;					// streamed in from main memory
 	int								numVerts;
+	int								vertOffset;
 	const triIndex_t *				indexes;				// streamed in from main memory
 	int								numIndexes;
 	const silEdge_t	*				silEdges;				// streamed in from main memory
