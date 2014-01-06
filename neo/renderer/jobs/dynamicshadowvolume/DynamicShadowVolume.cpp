@@ -617,15 +617,10 @@ static int CalculateTriangleFacingCulledSkinned( byte * __restrict facing, byte 
 
 /*
 ============
-StreamOut
-
-Only used for indices!
-
-Everything except for the if statement, the content of the else clause, and the vertexOffset param
-is unchanged from the original StreamOut
+StreamOutIndexes
 ============
 */
-static void StreamOut( void * dst, const void * src, int numBytes, const int vertexOffset ) {
+static void StreamOutIndexes( triIndex_t * dst, const triIndex_t * src, int numBytes, const int vertexOffset ) {
 	numBytes = ( numBytes + 15 ) & ~15;
 	assert_16_byte_aligned( dst );
 	assert_16_byte_aligned( src );
@@ -658,12 +653,9 @@ static void StreamOut( void * dst, const void * src, int numBytes, const int ver
 #else
 		memcpy( dst, src, numBytes );
 #endif
-#if 1
 	} else {
 		int elementCount = numBytes / sizeof( triIndex_t );
 		int i = 0;
-		triIndex_t * dstElement = (triIndex_t *)dst;
-		const triIndex_t * srcElement = (const triIndex_t *)src;
 
 #ifdef ID_WIN_X86_SSE2_INTRIN
 		const __m128i vector_int_vertex_offset = _mm_shuffle_epi32( _mm_cvtsi32_si128( vertexOffset ), 0 );
@@ -673,14 +665,14 @@ static void StreamOut( void * dst, const void * src, int numBytes, const int ver
 
 #ifdef TRIINDEX_IS_32BIT
 		for ( ; i + 32 <= elementCount; i += 32 ) {
-			__m128i vi0 = _mm_load_si128( (const __m128i *)( &srcElement[i+ 0] ) );
-			__m128i vi1 = _mm_load_si128( (const __m128i *)( &srcElement[i+ 4] ) );
-			__m128i vi2 = _mm_load_si128( (const __m128i *)( &srcElement[i+ 8] ) );
-			__m128i vi3 = _mm_load_si128( (const __m128i *)( &srcElement[i+12] ) );
-			__m128i vi4 = _mm_load_si128( (const __m128i *)( &srcElement[i+16] ) );
-			__m128i vi5 = _mm_load_si128( (const __m128i *)( &srcElement[i+20] ) );
-			__m128i vi6 = _mm_load_si128( (const __m128i *)( &srcElement[i+24] ) );
-			__m128i vi7 = _mm_load_si128( (const __m128i *)( &srcElement[i+28] ) );
+			__m128i vi0 = _mm_load_si128( (const __m128i *)( &src[i+ 0] ) );
+			__m128i vi1 = _mm_load_si128( (const __m128i *)( &src[i+ 4] ) );
+			__m128i vi2 = _mm_load_si128( (const __m128i *)( &src[i+ 8] ) );
+			__m128i vi3 = _mm_load_si128( (const __m128i *)( &src[i+12] ) );
+			__m128i vi4 = _mm_load_si128( (const __m128i *)( &src[i+16] ) );
+			__m128i vi5 = _mm_load_si128( (const __m128i *)( &src[i+20] ) );
+			__m128i vi6 = _mm_load_si128( (const __m128i *)( &src[i+24] ) );
+			__m128i vi7 = _mm_load_si128( (const __m128i *)( &src[i+28] ) );
 			vi0 = _mm_add_epi32( vi0, vector_int_vertex_offset );
 			vi1 = _mm_add_epi32( vi1, vector_int_vertex_offset );
 			vi2 = _mm_add_epi32( vi2, vector_int_vertex_offset );
@@ -689,30 +681,30 @@ static void StreamOut( void * dst, const void * src, int numBytes, const int ver
 			vi5 = _mm_add_epi32( vi5, vector_int_vertex_offset );
 			vi6 = _mm_add_epi32( vi6, vector_int_vertex_offset );
 			vi7 = _mm_add_epi32( vi7, vector_int_vertex_offset );
-			_mm_stream_si128( (__m128i *)( &dstElement[i+ 0] ), vi0 );
-			_mm_stream_si128( (__m128i *)( &dstElement[i+ 4] ), vi1 );
-			_mm_stream_si128( (__m128i *)( &dstElement[i+ 8] ), vi2 );
-			_mm_stream_si128( (__m128i *)( &dstElement[i+12] ), vi3 );
-			_mm_stream_si128( (__m128i *)( &dstElement[i+16] ), vi4 );
-			_mm_stream_si128( (__m128i *)( &dstElement[i+20] ), vi5 );
-			_mm_stream_si128( (__m128i *)( &dstElement[i+24] ), vi6 );
-			_mm_stream_si128( (__m128i *)( &dstElement[i+28] ), vi7 );
+			_mm_stream_si128( (__m128i *)( &dst[i+ 0] ), vi0 );
+			_mm_stream_si128( (__m128i *)( &dst[i+ 4] ), vi1 );
+			_mm_stream_si128( (__m128i *)( &dst[i+ 8] ), vi2 );
+			_mm_stream_si128( (__m128i *)( &dst[i+12] ), vi3 );
+			_mm_stream_si128( (__m128i *)( &dst[i+16] ), vi4 );
+			_mm_stream_si128( (__m128i *)( &dst[i+20] ), vi5 );
+			_mm_stream_si128( (__m128i *)( &dst[i+24] ), vi6 );
+			_mm_stream_si128( (__m128i *)( &dst[i+28] ), vi7 );
 		}
 		for ( ; i + 4 <= elementCount; i += 4 ) {
-			__m128i vi = _mm_load_si128( (const __m128i *)( &srcElement[i] ) );
+			__m128i vi = _mm_load_si128( (const __m128i *)( &src[i] ) );
 			vi = _mm_add_epi32( vi, vector_int_vertex_offset );
-			_mm_stream_si128( (__m128i *)( &dstElement[i] ), vi );
+			_mm_stream_si128( (__m128i *)( &dst[i] ), vi );
 		}
 #else
 		for ( ; i + 64 <= elementCount; i += 64 ) {
-			__m128i vi0 = _mm_load_si128( (const __m128i *)( &srcElement[i+ 0] ) );
-			__m128i vi1 = _mm_load_si128( (const __m128i *)( &srcElement[i+ 8] ) );
-			__m128i vi2 = _mm_load_si128( (const __m128i *)( &srcElement[i+16] ) );
-			__m128i vi3 = _mm_load_si128( (const __m128i *)( &srcElement[i+24] ) );
-			__m128i vi4 = _mm_load_si128( (const __m128i *)( &srcElement[i+32] ) );
-			__m128i vi5 = _mm_load_si128( (const __m128i *)( &srcElement[i+40] ) );
-			__m128i vi6 = _mm_load_si128( (const __m128i *)( &srcElement[i+48] ) );
-			__m128i vi7 = _mm_load_si128( (const __m128i *)( &srcElement[i+56] ) );
+			__m128i vi0 = _mm_load_si128( (const __m128i *)( &src[i+ 0] ) );
+			__m128i vi1 = _mm_load_si128( (const __m128i *)( &src[i+ 8] ) );
+			__m128i vi2 = _mm_load_si128( (const __m128i *)( &src[i+16] ) );
+			__m128i vi3 = _mm_load_si128( (const __m128i *)( &src[i+24] ) );
+			__m128i vi4 = _mm_load_si128( (const __m128i *)( &src[i+32] ) );
+			__m128i vi5 = _mm_load_si128( (const __m128i *)( &src[i+40] ) );
+			__m128i vi6 = _mm_load_si128( (const __m128i *)( &src[i+48] ) );
+			__m128i vi7 = _mm_load_si128( (const __m128i *)( &src[i+56] ) );
 			vi0 = _mm_add_epi32( vi0, vector_short_vertex_offset );
 			vi1 = _mm_add_epi32( vi1, vector_short_vertex_offset );
 			vi2 = _mm_add_epi32( vi2, vector_short_vertex_offset );
@@ -721,29 +713,39 @@ static void StreamOut( void * dst, const void * src, int numBytes, const int ver
 			vi5 = _mm_add_epi32( vi5, vector_short_vertex_offset );
 			vi6 = _mm_add_epi32( vi6, vector_short_vertex_offset );
 			vi7 = _mm_add_epi32( vi7, vector_short_vertex_offset );
-			_mm_stream_si128( (__m128i *)( &dstElement[i+ 0] ), vi0 );
-			_mm_stream_si128( (__m128i *)( &dstElement[i+ 8] ), vi1 );
-			_mm_stream_si128( (__m128i *)( &dstElement[i+16] ), vi2 );
-			_mm_stream_si128( (__m128i *)( &dstElement[i+24] ), vi3 );
-			_mm_stream_si128( (__m128i *)( &dstElement[i+32] ), vi4 );
-			_mm_stream_si128( (__m128i *)( &dstElement[i+40] ), vi5 );
-			_mm_stream_si128( (__m128i *)( &dstElement[i+48] ), vi6 );
-			_mm_stream_si128( (__m128i *)( &dstElement[i+56] ), vi7 );
+			_mm_stream_si128( (__m128i *)( &dst[i+ 0] ), vi0 );
+			_mm_stream_si128( (__m128i *)( &dst[i+ 8] ), vi1 );
+			_mm_stream_si128( (__m128i *)( &dst[i+16] ), vi2 );
+			_mm_stream_si128( (__m128i *)( &dst[i+24] ), vi3 );
+			_mm_stream_si128( (__m128i *)( &dst[i+32] ), vi4 );
+			_mm_stream_si128( (__m128i *)( &dst[i+40] ), vi5 );
+			_mm_stream_si128( (__m128i *)( &dst[i+48] ), vi6 );
+			_mm_stream_si128( (__m128i *)( &dst[i+56] ), vi7 );
 		}
 		for ( ; i + 8 <= elementCount; i += 8 ) {
-			__m128i vi = _mm_load_si128( (const __m128i *)( &srcElement[i] ) );
+			__m128i vi = _mm_load_si128( (const __m128i *)( &src[i] ) );
 			vi = _mm_add_epi16( vi, vector_short_vertex_offset );
-			_mm_stream_si128( (__m128i *)( &dstElement[i] ), vi );
+			_mm_stream_si128( (__m128i *)( &dst[i] ), vi );
 		}
 #endif
 
 #endif
 		for ( ; i < elementCount; i++ ) {
-			dstElement[i] = srcElement[i] + vertexOffset;
+			dst[i] = src[i] + vertexOffset;
 		}
 	}
-#endif
 }
+
+#if 0
+/*
+============
+StreamOut
+============
+*/
+static void StreamOut( void * dst, const void * src, int numBytes ) {
+	StreamOutIndexes( (triIndex_t *)dst, (const triIndex_t *)src, numBytes, 0 );
+}
+#endif
 
 /*
 ============
@@ -780,7 +782,7 @@ static void R_CreateShadowVolumeTriangles( triIndex_t *__restrict shadowIndices,
 
 			// NOTE: we rely on FetchNextBatch() to wait for all previous DMAs to complete
 			while( numShadowIndices - numStreamedIndices >= OUT_BUFFER_SIZE ) {
-				StreamOut( shadowIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], OUT_BUFFER_SIZE * sizeof( triIndex_t ), vertexOffset );
+				StreamOutIndexes( shadowIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], OUT_BUFFER_SIZE * sizeof( triIndex_t ), vertexOffset );
 				numStreamedIndices += OUT_BUFFER_SIZE;
 			}
 
@@ -873,7 +875,7 @@ static void R_CreateShadowVolumeTriangles( triIndex_t *__restrict shadowIndices,
 
 			// NOTE: we rely on FetchNextBatch() to wait for all previous DMAs to complete
 			while( numShadowIndices - numStreamedIndices >= OUT_BUFFER_SIZE ) {
-				StreamOut( shadowIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], OUT_BUFFER_SIZE * sizeof( triIndex_t ), vertexOffset );
+				StreamOutIndexes( shadowIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], OUT_BUFFER_SIZE * sizeof( triIndex_t ), vertexOffset );
 				numStreamedIndices += OUT_BUFFER_SIZE;
 			}
 
@@ -941,12 +943,12 @@ static void R_CreateShadowVolumeTriangles( triIndex_t *__restrict shadowIndices,
 	}
 
 	while( numShadowIndices - numStreamedIndices >= OUT_BUFFER_SIZE ) {
-		StreamOut( shadowIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], OUT_BUFFER_SIZE * sizeof( triIndex_t ), vertexOffset );
+		StreamOutIndexes( shadowIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], OUT_BUFFER_SIZE * sizeof( triIndex_t ), vertexOffset );
 		numStreamedIndices += OUT_BUFFER_SIZE;
 	}
 	if ( numShadowIndices > numStreamedIndices ) {
 		assert( numShadowIndices - numStreamedIndices < OUT_BUFFER_SIZE );
-		StreamOut( shadowIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], ( numShadowIndices - numStreamedIndices ) * sizeof( triIndex_t ), vertexOffset );
+		StreamOutIndexes( shadowIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], ( numShadowIndices - numStreamedIndices ) * sizeof( triIndex_t ), vertexOffset );
 	}
 
 	numShadowIndexesTotal = numShadowIndices;
@@ -1069,7 +1071,7 @@ void R_CreateLightTriangles( triIndex_t * __restrict lightIndices, triIndex_t * 
 
 		// NOTE: we rely on FetchNextBatch() to wait for all previous DMAs to complete
 		while( numLightIndices - numStreamedIndices >= OUT_BUFFER_SIZE ) {
-			StreamOut( lightIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], OUT_BUFFER_SIZE * sizeof( triIndex_t ), vertexOffset );
+			StreamOutIndexes( lightIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], OUT_BUFFER_SIZE * sizeof( triIndex_t ), vertexOffset );
 			numStreamedIndices += OUT_BUFFER_SIZE;
 		}
 
@@ -1116,12 +1118,12 @@ void R_CreateLightTriangles( triIndex_t * __restrict lightIndices, triIndex_t * 
 	}
 
 	while( numLightIndices - numStreamedIndices >= OUT_BUFFER_SIZE ) {
-		StreamOut( lightIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], OUT_BUFFER_SIZE * sizeof( triIndex_t ), vertexOffset );
+		StreamOutIndexes( lightIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], OUT_BUFFER_SIZE * sizeof( triIndex_t ), vertexOffset );
 		numStreamedIndices += OUT_BUFFER_SIZE;
 	}
 	if ( numLightIndices > numStreamedIndices ) {
 		assert( numLightIndices - numStreamedIndices < OUT_BUFFER_SIZE );
-		StreamOut( lightIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], ( numLightIndices - numStreamedIndices ) * sizeof( triIndex_t ), vertexOffset );
+		StreamOutIndexes( lightIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], ( numLightIndices - numStreamedIndices ) * sizeof( triIndex_t ), vertexOffset );
 	}
 
 	numLightIndicesTotal = numLightIndices;

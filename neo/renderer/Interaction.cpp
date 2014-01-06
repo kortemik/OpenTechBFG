@@ -719,7 +719,7 @@ void idInteraction::CreateStaticInteraction() {
 			if ( lightTris != NULL ) {
 				// make a static index cache
 				sint->numLightTrisIndexes = lightTris->numIndexes;
-				int vertexOffset = vertexCache.GetCacheVertexOffset( tri->shadowCache ) / sizeof ( idShadowVert ); //TODO: is this the proper type for sizeof?
+				int vertexOffset = vertexCache.GetCacheVertexOffset( tri->ambientCache ) / sizeof ( idDrawVert );
 				int byteSize = ALIGN( lightTris->numIndexes * sizeof( lightTris->indexes[0] ), INDEX_CACHE_ALIGN );
 				const triIndex_t * indexes = lightTris->indexes;
 				if ( vertexOffset != 0 ) {
