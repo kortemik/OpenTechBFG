@@ -92,6 +92,7 @@ typedef struct {
 	slog2_buffer_t				logBuffers[SLOG_BUFFER_COUNT];
 
 	// System state vars
+	bool						isSimulator;
 	bool						quitStarted;
 	bool						errorGraphics;
 	navigator_window_state_t	windowState;

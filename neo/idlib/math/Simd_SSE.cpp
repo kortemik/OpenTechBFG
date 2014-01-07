@@ -32,7 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "Simd_Generic.h"
 #include "Simd_SSE.h"
 
-#ifdef ID_WIN32 //XXX Should support x86 BlackBerry build
+#if defined(ID_WIN32) || defined(ID_QNX_X86_SSE_INTRIN)
 
 //===============================================================
 //                                                        M

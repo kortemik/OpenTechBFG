@@ -574,14 +574,14 @@ void Sys_AdditionalSearchPaths( idStrList & paths ) {
 	str += "/shared/misc/appdata/doom3bfg";
 	paths.Append( str );
 
-	// App assets
-	str = Sys_CWD();
-	str += "/app/native/assets";
-	paths.Append( str );
-
 	// Not temp/not backed-up cache (**UNTESTED**)
 	str = Sys_CWD();
 	str += "/cache";
+	paths.Append( str );
+
+	// App assets
+	str = Sys_CWD();
+	str += "/app/native/assets";
 	paths.Append( str );
 }
 
@@ -996,14 +996,6 @@ void Sys_Init() {
 	qnx.canLockMem	= procmgr_ability( 0, PROCMGR_ADN_NONROOT | PROCMGR_AOP_ALLOW | PROCMGR_AID_MEM_LOCK,		PROCMGR_AID_EOL );
 
 	//
-	// other info
-	//
-	qnx.personalPerimeter = idStr::Icmp( getenv( "PERIMETER" ), "personal" );
-	if ( !qnx.personalPerimeter ) {
-		common->Printf( "%s is not running under personal perimeter. Some functions may be disabled\n", GAME_NAME );
-	}
-
-	//
 	// QNX version
 	//
 	deviceinfo_details_t *devDetails;
@@ -1145,7 +1137,7 @@ void Sys_Init() {
 		qnx.cpuid = (cpuid_t) id;
 	}
 
-	if ( deviceinfo_details_is_simulator( devDetails ) ) {
+	if ( ( qnx.isSimulator = deviceinfo_details_is_simulator( devDetails ) ) ) {
 		common->Printf( "Running in Simulator\n" );
 	}
 
@@ -1165,6 +1157,14 @@ void Sys_Init() {
 #else
 #error Unknown CPU architecture
 #endif
+
+	//
+	// other info
+	//
+	qnx.personalPerimeter = qnx.isSimulator || idStr::Icmp( getenv( "PERIMETER" ), "personal" );
+	if ( !qnx.personalPerimeter ) {
+		common->Printf( "%s is not running under personal perimeter. Some functions may be disabled\n", GAME_NAME );
+	}
 
 	//
 	// Determine if dialog shouldn't be shown

@@ -73,7 +73,7 @@ void idSIMD::InitProcessor( const char *module, bool forceGeneric ) {
 	} else {
 
 		if ( processor == NULL ) {
-#if defined(ID_WIN32)//XXX || defined(ID_QNX_X86)
+#if defined(ID_WIN32) || defined(ID_QNX_X86_SSE_INTRIN)
 			if ( ( cpuid & CPUID_MMX ) && ( cpuid & CPUID_SSE ) ) {
 				processor = new (TAG_MATH) idSIMD_SSE;
 			} else {
@@ -1271,7 +1271,7 @@ void idSIMD::Test_f( const idCmdArgs &args ) {
 
 		argString.Replace( " ", "" );
 
-#if defined(ID_WIN32)//XXX || defined(ID_QNX_X86)
+#if defined(ID_WIN32) || defined(ID_QNX_X86_SSE_INTRIN)
 		if ( idStr::Icmp( argString, "SSE" ) == 0 ) {
 			if ( !( cpuid & CPUID_MMX ) || !( cpuid & CPUID_SSE ) ) {
 				common->Printf( "CPU does not support MMX & SSE\n" );

@@ -487,6 +487,8 @@ static void R_CheckPortableExtensions() {
 		glConfig.vendor = VENDOR_INTEL;
 	} else if ( idStr::Icmpn( glConfig.vendor_string, "NVIDIA", 6 ) == 0 ) {
 		glConfig.vendor = VENDOR_NVIDIA;
+	} else if ( idStr::Icmpn( glConfig.vendor_string, "VMware", 6 ) == 0 ) {
+		glConfig.vendor = VENDOR_VM;
 	} else if ( idStr::Icmpn( glConfig.vendor_string, "Qualcomm", 8 ) == 0 ) {
 		glConfig.vendor = VENDOR_QC;
 	} else if ( idStr::Icmpn( glConfig.vendor_string, "Imagination ", 12 ) == 0 ) {
@@ -1029,7 +1031,6 @@ static void R_CheckPortableExtensions() {
 	// generate one global Vertex Array Object (VAO)
 	qglGenVertexArrays( 1, &glConfig.global_vao );
 	qglBindVertexArray( glConfig.global_vao );
-
 }
 
 #ifdef GL_ES_VERSION_2_0

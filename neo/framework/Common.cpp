@@ -1362,6 +1362,12 @@ void idCommonLocal::Shutdown() {
 	// shutdown idLib
 	printf( "idLib::ShutDown();\n" );
 	idLib::ShutDown();
+
+	// remove interface pointers used by idLib
+	idLib::sys			= NULL;
+	idLib::common		= NULL;
+	idLib::cvarSystem	= NULL;
+	idLib::fileSystem	= NULL;
 }
 
 /*

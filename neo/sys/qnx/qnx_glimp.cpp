@@ -520,6 +520,19 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t> &
 
 	modeList.Clear();
 
+	if ( qnx.isSimulator ) {
+		if ( requestedDisplayNum == 0 ) {
+			vidMode_t mode;
+			mode.width = 1280;
+			mode.height = 720;
+			mode.displayHz = 59;
+			modeList.AddUnique( mode );
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	bool	verbose = false;
 	bool	hasContext = qnx.screenCtx != NULL;
 
@@ -1251,11 +1264,6 @@ bool QNXGLimp_CreateEGLSurface( EGLNativeWindowType window, const int multisampl
 	}
 #endif
 
-	if ( qeglInitialize( qnx.eglDisplay, NULL, NULL ) != EGL_TRUE ) {
-		common->Printf( "...^3Could not initialize EGL display^0\n");
-		return false;
-	}
-
 	if ( !QNXGLimp_CreateEGLConfig( multisamples, createContextAvaliable && r_useGLES3.GetInteger() != 1 ) ) {
 		if ( r_useGLES3.GetInteger() != 0 || !QNXGLimp_CreateEGLConfig( multisamples, false ) ) {
 			common->Printf( "...^3Could not determine EGL config^0\n");
@@ -1359,6 +1367,16 @@ bool GLimp_Init( glimpParms_t parms ) {
 	qnx.eglDisplay = qeglGetDisplay( EGL_DEFAULT_DISPLAY );
 	if ( qnx.eglDisplay == EGL_NO_DISPLAY ) {
 		common->Printf( "...^3Could not get EGL display^0\n");
+		return false;
+	}
+
+	if ( qeglInitialize( qnx.eglDisplay, NULL, NULL ) != EGL_TRUE ) {
+		common->Printf( "...^3Could not initialize EGL display^0\n");
+		return false;
+	}
+
+	if ( qeglBindAPI( EGL_OPENGL_ES_API ) != EGL_TRUE ) {
+		common->Printf( "...^3Could not bind to OpenGL API^0\n");
 		return false;
 	}
 
