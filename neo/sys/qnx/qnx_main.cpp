@@ -1161,7 +1161,7 @@ void Sys_Init() {
 	//
 	// other info
 	//
-	qnx.personalPerimeter = qnx.isSimulator || idStr::Icmp( getenv( "PERIMETER" ), "personal" );
+	qnx.personalPerimeter = idStr::Icmp( getenv( "PERIMETER" ), "personal" ) == 0;
 	if ( !qnx.personalPerimeter ) {
 		common->Printf( "%s is not running under personal perimeter. Some functions may be disabled\n", GAME_NAME );
 	}

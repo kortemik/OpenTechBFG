@@ -37,6 +37,41 @@ Contains the Image implementation for OpenGL.
 
 #include "../tr_local.h"
 
+#ifdef GL_ES_VERSION_2_0
+
+void SwapBytes_16bit( uint16 *dst, const uint16 *src, int len ) {
+	int i = 0;
+	// X86 might be useful, but SSE lacks an ability to swap bytes, only elements and doesn't support byte elements
+#if defined( ID_QNX_ARM_NEON_INTRIN )
+	for ( ; i + 16 <= len; i += 16 ) {
+		uint8x16x2_t data = vld2q_u8( (uint8_t *)&src[i] );
+
+		uint8x16_t tmp = data.val[0];
+		data.val[0] = data.val[1];
+		data.val[1] = tmp;
+
+		vst2q_u8( (uint8_t *)&dst[i], data );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM )
+	for ( ; i + 16 <= len; i += 16 ) {
+		__asm__ __volatile__(
+				"MOV r1, #2\n"
+				"MLA r0, %[i], r1, %[s]\n"
+				"MLA r1, %[i], r1, %[d]\n"
+				"VLD2.8 {q0, q1}, [r0]\n"
+				"VSWP q0, q1\n"
+				"VST2.8 {q0, q1}, [r1]"
+				: [d] "+r" (dst) : [i] "r" (i), [s] "r" (src) : "r0", "r1", "q0", "q1", "memory");
+	}
+#endif
+	for ( ; i < len; i++ ) {
+		uint16 s = src[i];
+		dst[i] = ( ( s & 0xFF00 ) >> 8 ) | ( ( s & 0x00FF ) << 8 );
+	}
+}
+
+#endif
+
 /*
 ========================
 idImage::SubImageUpload
@@ -89,14 +124,19 @@ void idImage::SubImageUpload( int mipLevel, int x, int y, int z, int width, int 
 	qglBindTexture( target, texnum );
 
 	if ( pixelPitch != 0 && glConfig.textureUnpackRowLengthAvaliable ) {
-		qglPixelStorei( GL_UNPACK_ROW_LENGTH, pixelPitch ); //XXX What if this isn't available, what will happen with the image?
+		qglPixelStorei( GL_UNPACK_ROW_LENGTH, pixelPitch );
 	}
-#ifndef GL_ES_VERSION_2_0
-	//XXX Should something be done about this?
 	if ( opts.format == FMT_RGB565 ) {
+#ifndef GL_ES_VERSION_2_0
 		qglPixelStorei( GL_UNPACK_SWAP_BYTES, GL_TRUE );
-	}
+#else
+		assert( pixelPitch == 0 ); //XXX
+
+		uint16 * dst = (uint16 *)_alloca16( width * height * sizeof( uint16 ) );
+		SwapBytes_16bit( dst, (uint16 *)pic, width * height );
+		pic = dst;
 #endif
+	}
 #ifdef DEBUG
 	GL_CheckErrors();
 #endif
@@ -120,7 +160,6 @@ void idImage::SubImageUpload( int mipLevel, int x, int y, int z, int width, int 
 	GL_CheckErrors();
 #endif
 #ifndef GL_ES_VERSION_2_0
-	//XXX
 	if ( opts.format == FMT_RGB565 ) {
 		qglPixelStorei( GL_UNPACK_SWAP_BYTES, GL_FALSE );
 	}
@@ -212,7 +251,7 @@ void idImage::SetTexParameters() {
 #ifdef GL_ES_VERSION_3_0
 	} else {
 #endif
-#endif
+#endif //!defined( GL_ES_VERSION_2_0 ) || defined( GL_ES_VERSION_3_0 )
 #ifdef GL_ES_VERSION_2_0
 #ifndef GL_ES_VERSION_3_0
 	{
@@ -275,7 +314,7 @@ void idImage::SetTexParameters() {
 		case TR_CLAMP_TO_ZERO: {
 			if ( glConfig.clampToBorderAvailable ) {
 				float color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-				qglTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, color );
+				qglTexParameterfv( target, GL_TEXTURE_BORDER_COLOR, color );
 			}
 			qglTexParameterf( target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
 			qglTexParameterf( target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
@@ -284,7 +323,7 @@ void idImage::SetTexParameters() {
 		case TR_CLAMP_TO_ZERO_ALPHA: {
 			if ( glConfig.clampToBorderAvailable ) {
 				float color[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-				qglTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, color );
+				qglTexParameterfv( target, GL_TEXTURE_BORDER_COLOR, color );
 			}
 			qglTexParameterf( target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
 			qglTexParameterf( target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );

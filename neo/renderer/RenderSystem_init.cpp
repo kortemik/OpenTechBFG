@@ -527,7 +527,8 @@ static void R_CheckPortableExtensions() {
 	}
 #else
 	// The functions exist, but the supported compressions may not... this is why GLES 3.0 is good since it has a required compression format
-	glConfig.textureCompressionDXTAvailable = R_CheckExtension( "GL_EXT_texture_compression_s3tc" ) || ( R_CheckExtension( "GL_EXT_texture_compression_dxt1" ) && R_CheckExtension( "GL_ANGLE_texture_compression_dxt5" ) );
+	glConfig.textureCompressionDXTAvailable = R_CheckExtension( "GL_EXT_texture_compression_s3tc" ) || ( R_CheckExtension( "GL_EXT_texture_compression_dxt1" ) &&
+			( R_CheckExtension( "GL_ANGLE_texture_compression_dxt5" ) || R_CheckExtension( "GL_EXT_texture_compression_dxt5" ) ) );
 	glConfig.textureCompressionETC1Available = ( glConfig.glVersion >= 3.0 ||  R_CheckExtension( "GL_OES_compressed_ETC1_RGB8_texture" ) );
 	glConfig.textureCompressionETC2Available = ( glConfig.glVersion >= 3.0 );
 	glConfig.textureCompressionAvailable = glConfig.textureCompressionDXTAvailable || glConfig.textureCompressionETC2Available;

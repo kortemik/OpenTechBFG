@@ -1052,6 +1052,9 @@ void idCommonLocal::Init( int argc, const char * const * argv, const char *cmdli
 		// if any archived cvars are modified after this, we will trigger a writing of the config file
 		cvarSystem->ClearModifiedFlags( CVAR_ARCHIVE );
 
+		// initialize string database so we can use it for loading messages
+		InitLanguageDict();
+
 		// init OpenGL, which will open a window and connect sound and input hardware
 		renderSystem->InitOpenGL();
 
@@ -1092,12 +1095,8 @@ void idCommonLocal::Init( int argc, const char * const * argv, const char *cmdli
 			RenderSplash();
 		}
 
-
 		int legalStartTime = Sys_Milliseconds();
 		declManager->Init2();
-
-		// initialize string database so we can use it for loading messages
-		InitLanguageDict();
 
 		// spawn the game thread, even if we are going to run without SMP
 		// one meg stack, because it can parse decls from gui surfaces (unfortunately)
