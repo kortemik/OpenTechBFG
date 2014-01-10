@@ -57,6 +57,14 @@ idAchievementSystemQnx::AchievementUnlock
 ================================
 */
 void idAchievementSystemQnx::AchievementUnlock( idLocalUser * user, int achievementID ) {
+#ifdef USE_SCORELOOP
+	char achievementIdStr[32];
+	int pos = idStr::snPrintf( achievementIdStr, sizeof( achievementIdStr ) - 1, "com.rebuild.doom3bfg.award%d", achievementID );
+	if ( pos >= 0 ) {
+		achievementIdStr[pos] = '\0';
+		//TODO
+	}
+#endif
 }
 
 /*

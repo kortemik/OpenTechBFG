@@ -132,8 +132,13 @@ void idImage::SubImageUpload( int mipLevel, int x, int y, int z, int width, int 
 #else
 		assert( pixelPitch == 0 ); //XXX
 
+#if 1
 		uint16 * dst = (uint16 *)_alloca16( width * height * sizeof( uint16 ) );
 		SwapBytes_16bit( dst, (uint16 *)pic, width * height );
+#else
+		memcpy( dst, pic, width * height * sizeof( uint16 ) );
+		idSwap::BigArray( dst, width * height );
+#endif
 		pic = dst;
 #endif
 	}

@@ -433,6 +433,7 @@ idBinaryImage::MakeGeneratedFileName
 void idBinaryImage::MakeGeneratedFileName( idStr & gfn ) {
 	GetGeneratedFileName( gfn, GetName() );
 }
+
 /*
 ==========================
 idBinaryImage::GetGeneratedFileName
@@ -445,5 +446,3 @@ void idBinaryImage::GetGeneratedFileName( idStr & gfn, const char *name ) {
 	gfn.Replace( ")", "" );
 	gfn.Replace( " ", "" );
 }
-
-
