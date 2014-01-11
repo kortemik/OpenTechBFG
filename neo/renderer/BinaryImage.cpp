@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -38,9 +39,15 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 #include "dxt/DXTCodec.h"
+#ifdef GL_ES_VERSION_2_0
+#include "etc/ETCCodec.h"
+#endif
 #include "color/ColorSpace.h"
 
 idCVar image_highQualityCompression( "image_highQualityCompression", "0", CVAR_BOOL, "Use high quality (slow) compression" );
+#ifdef GL_ES_VERSION_2_0
+idCVar image_attemptETC1Encoding( "image_attemptETC1Encoding", "0", CVAR_BOOL, "Attempt to encode all compressed images as ETC1. Valid only if alpha doesn't exist" );
+#endif
 
 /*
 ========================
@@ -59,11 +66,17 @@ void idBinaryImage::Load2DFromMemory( int width, int height, const byte * pic_co
 	memcpy( pic, pic_const, width * height * 4 );
 
 	if ( colorFormat == CFM_YCOCG_DXT5 ) {
-		// convert the image data to YCoCg and use the YCoCgDXT5 compressor
-		idColorSpace::ConvertRGBToCoCg_Y( pic, pic, width, height );
+		if ( textureFormat == FMT_DXT5 ) {
+			// convert the image data to YCoCg and use the YCoCgDXT5 compressor
+			idColorSpace::ConvertRGBToCoCg_Y( pic, pic, width, height );
+		} else {
+			// get within the YCoCg range while keeping it in RGB
+			idColorSpace::ConvertRGBToCoCg_YInPlace( pic, pic, width, height );
+		}
 	} else if ( colorFormat == CFM_NORMAL_DXT5 ) {
+		//XXX For OpenGL ES, would GL_COMPRESSED_RG11_EAC or GL_3DC_XY_AMD be better then a standard RGBA image?
 		// Blah, HQ swizzles automatically, Fast doesn't
-		if ( !image_highQualityCompression.GetBool() ) {
+		if ( textureFormat != FMT_DXT5 || !image_highQualityCompression.GetBool() ) {
 			for ( int i = 0; i < width * height; i++ ) {
 				pic[i*4+3] = pic[i*4+0];
 				pic[i*4+0] = 0;
@@ -85,12 +98,16 @@ void idBinaryImage::Load2DFromMemory( int width, int height, const byte * pic_co
 	for ( int level = 0; level < images.Num(); level++ ) {
 		idBinaryImageData &img = images[ level ];
 
-		// Images that are going to be DXT compressed and aren't multiples of 4 need to be 
+		// Images that are going to be DXT compressed and aren't multiples of 4 need to be
 		// padded out before compressing.
 		byte * dxtPic = pic;
 		int	dxtWidth = 0;
 		int	dxtHeight = 0;
-		if ( textureFormat == FMT_DXT5 || textureFormat == FMT_DXT1 ) {
+#ifdef GL_ES_VERSION_2_0
+		if ( textureFormat == FMT_DXT1 || textureFormat == FMT_DXT5 || textureFormat == FMT_ETC1 || textureFormat == FMT_ETC2_PUNCH || textureFormat == FMT_ETC2_ALPHA ) {
+#else
+		if ( textureFormat == FMT_DXT1 || textureFormat == FMT_DXT5 ) {
+#endif
 			if ( ( scaledWidth & 3 ) || ( scaledHeight & 3 ) ) {
 				dxtWidth = ( scaledWidth + 3 ) & ~3;
 				dxtHeight = ( scaledHeight + 3 ) & ~3;
@@ -142,6 +159,36 @@ void idBinaryImage::Load2DFromMemory( int width, int height, const byte * pic_co
 					dxt.CompressImageDXT5Fast( dxtPic, img.data, dxtWidth, dxtHeight );
 				}
 			}
+#ifdef GL_ES_VERSION_2_0
+		} else if ( textureFormat == FMT_ETC1 ) {
+			img.Alloc( dxtWidth * dxtHeight );
+			idEtcEncoder etc;
+			if ( image_highQualityCompression.GetBool() ) {
+				etc.CompressImageETC1HQ( dxtPic, img.data, dxtWidth, dxtHeight );
+			} else {
+				etc.CompressImageETC1Fast( dxtPic, img.data, dxtWidth, dxtHeight );
+			}
+		} else if ( textureFormat == FMT_ETC2_PUNCH ) {
+			img.Alloc( dxtWidth * dxtHeight );
+			idEtcEncoder etc;
+			if ( image_highQualityCompression.GetBool() ) {
+				etc.CompressImageETC2PunchAlphaHQ( dxtPic, img.data, dxtWidth, dxtHeight );
+			} else {
+				etc.CompressImageETC2PunchAlphaFast( dxtPic, img.data, dxtWidth, dxtHeight );
+			}
+		} else if ( textureFormat == FMT_ETC2_ALPHA ) {
+			img.Alloc( dxtWidth * dxtHeight * 2 );
+			idEtcEncoder etc;
+			if ( !( colorFormat == CFM_NORMAL_DXT5 || colorFormat == CFM_YCOCG_DXT5 ) ) {
+				// For any non-normal or YCoCg image, set it's format to default
+				fileData.colorFormat = colorFormat = CFM_DEFAULT;
+			}
+			if ( image_highQualityCompression.GetBool() ) {
+				etc.CompressImageETC2AlphaHQ( dxtPic, img.data, dxtWidth, dxtHeight );
+			} else {
+				etc.CompressImageETC2AlphaFast( dxtPic, img.data, dxtWidth, dxtHeight );
+			}
+#endif
 		} else if ( textureFormat == FMT_LUM8 || textureFormat == FMT_INT8 ) {
 			// LUM8 and INT8 just read the red channel
 			img.Alloc( scaledWidth * scaledHeight );
@@ -250,7 +297,11 @@ void idBinaryImage::LoadCubeFromMemory( int width, const byte * pics[6], int num
 			ALIGN16( byte padBlock[64] );
 			int		padSize;
 			const byte *padSrc;
+#ifdef GL_ES_VERSION_2_0
+			if ( scaledWidth < 4 && ( textureFormat == FMT_DXT1 || textureFormat == FMT_DXT5 || textureFormat == FMT_ETC1 || textureFormat == FMT_ETC2_PUNCH || textureFormat == FMT_ETC2_ALPHA ) ) {
+#else
 			if ( scaledWidth < 4 && ( textureFormat == FMT_DXT1 || textureFormat == FMT_DXT5 ) ) {
+#endif
 				PadImageTo4x4( pic, scaledWidth, scaledWidth, padBlock );
 				padSize = 4;
 				padSrc = padBlock;
@@ -271,6 +322,20 @@ void idBinaryImage::LoadCubeFromMemory( int width, const byte * pics[6], int num
 				img.Alloc( padSize * padSize );
 				idDxtEncoder dxt;
 				dxt.CompressImageDXT5Fast( padSrc, img.data, padSize, padSize );
+#ifdef GL_ES_VERSION_2_0
+			} else if ( textureFormat == FMT_ETC1 ) {
+				img.Alloc( padSize * padSize );
+				idEtcEncoder etc;
+				etc.CompressImageETC1Fast( padSrc, img.data, padSize, padSize );
+			} else if ( textureFormat == FMT_ETC2_PUNCH ) {
+				img.Alloc( padSize * padSize );
+				idEtcEncoder etc;
+				etc.CompressImageETC2PunchAlphaFast( padSrc, img.data, padSize, padSize );
+			} else if ( textureFormat == FMT_ETC2_ALPHA ) {
+				img.Alloc( padSize * padSize * 2 );
+				idEtcEncoder etc;
+				etc.CompressImageETC2AlphaFast( padSrc, img.data, padSize, padSize );
+#endif
 			} else {
 				fileData.format = textureFormat = FMT_RGBA8;
 				img.Alloc( padSize * padSize * 4 );
@@ -298,6 +363,136 @@ void idBinaryImage::LoadCubeFromMemory( int width, const byte * pics[6], int num
 			pic = NULL;
 		}
 	}
+}
+
+/*
+========================
+idBinaryImage::ConvertFormat
+========================
+*/
+bool idBinaryImage::ConvertFormat( textureFormat_t desiredFormat ) {
+	bool ret = false;
+#ifdef GL_ES_VERSION_2_0
+	if ( fileData.format != desiredFormat ) {
+		if ( ( fileData.format == FMT_DXT1 || fileData.format == FMT_DXT5 ) && !glConfig.textureCompressionDXTAvailable ) {
+			if ( desiredFormat == FMT_ETC1 || desiredFormat == FMT_ETC2_PUNCH || desiredFormat == FMT_ETC2_ALPHA ) {
+
+				byte **newImgData = new (TAG_TEMP) byte *[images.Num()];
+
+				// decode
+				int level = 0;
+				for ( ; level < images.Num(); level++ ) {
+					idBinaryImageData &img = images[ level ];
+					const byte * imgData = images[ level ].data;
+
+					newImgData[level] = new (TAG_TEMP) byte[img.width * img.height * 4];
+
+					if ( fileData.format == FMT_DXT1 ) {
+						idDxtDecoder dxt;
+						dxt.DecompressImageDXT1( imgData, newImgData[level], img.width, img.height );
+					} else {
+						if ( fileData.colorFormat == CFM_NORMAL_DXT5 ) {
+							idDxtDecoder dxt;
+							dxt.DecompressNormalMapDXT5( imgData, newImgData[level], img.width, img.height );
+						} else if ( fileData.colorFormat == CFM_YCOCG_DXT5 ) {
+							idDxtDecoder dxt;
+							dxt.DecompressYCoCgDXT5( imgData, newImgData[level], img.width, img.height );
+							idColorSpace::ConvertCoCg_YToRGB( newImgData[level], newImgData[level], img.width, img.height );
+						} else {
+							idDxtDecoder dxt;
+							dxt.DecompressImageDXT5( imgData, newImgData[level], img.width, img.height );
+						}
+					}
+				}
+				// re-encode
+				fileData.format = desiredFormat;
+				for ( level = 0; level < images.Num(); level++ ) {
+					idBinaryImageData &img = images[ level ];
+
+					if ( desiredFormat == FMT_ETC1 ) {
+						img.Alloc( img.width * img.height );
+						idEtcEncoder etc;
+						if ( image_highQualityCompression.GetBool() ) {
+							etc.CompressImageETC1HQ( newImgData[level], img.data, img.width, img.height );
+						} else {
+							etc.CompressImageETC1Fast( newImgData[level], img.data, img.width, img.height );
+						}
+					} else if ( desiredFormat == FMT_ETC2_PUNCH ) {
+						img.Alloc( img.width * img.height );
+						idEtcEncoder etc;
+						if ( image_highQualityCompression.GetBool() ) {
+							etc.CompressImageETC2PunchAlphaHQ( newImgData[level], img.data, img.width, img.height );
+						} else {
+							etc.CompressImageETC2PunchAlphaFast( newImgData[level], img.data, img.width, img.height );
+						}
+					} else {
+						img.Alloc( img.width * img.height * 2 );
+						idEtcEncoder etc;
+						if ( image_highQualityCompression.GetBool() ) {
+							etc.CompressImageETC2AlphaHQ( newImgData[level], img.data, img.width, img.height );
+						} else {
+							etc.CompressImageETC2AlphaFast( newImgData[level], img.data, img.width, img.height );
+						}
+					}
+					delete newImgData[level];
+					newImgData[level] = NULL;
+				}
+				delete[] newImgData;
+				ret = true;
+			} else {
+				idLib::Warning( "Image (%s) is not in a supported format, but the desired format was unexpected. Image may not load properly.\n", GetName() );
+			}
+		}
+	} else {
+		ret = true;
+	}
+#endif
+	return ret;
+}
+
+/*
+========================
+idBinaryImage::OptimizeDesiredImageFormat2D
+========================
+*/
+bool idBinaryImage::OptimizeDesiredImageFormat2D( int width, int height, const byte * pic_const, textureFormat_t & currentFormat, const textureColor_t & colorFormat ) {
+#ifdef GL_ES_VERSION_2_0
+	// As of the current implementation, only check if we can convert to ECT1
+	if ( currentFormat != FMT_ETC1 && image_attemptETC1Encoding.GetBool() && colorFormat != CFM_NORMAL_DXT5 ) {
+		if ( idEtcEncoder::CanEncodeAsETC1( pic_const, width, height ) ) {
+			currentFormat = FMT_ETC1;
+			return true;
+		}
+	}
+#endif
+	return false;
+}
+
+/*
+========================
+idBinaryImage::OptimizeDesiredImageFormatCube
+========================
+*/
+bool idBinaryImage::OptimizeDesiredImageFormatCube( int width, const byte * pics[6], textureFormat_t & currentFormat ) {
+#ifdef GL_ES_VERSION_2_0
+	if ( image_attemptETC1Encoding.GetBool() ) {
+		textureFormat_t format = currentFormat;
+		textureFormat_t altFormat = FMT_NONE;
+		for ( int i = 0; i < 6; i++ ) {
+			if ( OptimizeDesiredImageFormat2D( width, width, pics[i], format, CFM_DEFAULT ) ) {
+				if ( altFormat == FMT_NONE || format > altFormat ) {
+					altFormat = format;
+				}
+				format = currentFormat;
+			}
+		}
+		if ( altFormat != FMT_NONE ) {
+			currentFormat = altFormat;
+			return true;
+		}
+	}
+#endif
+	return false;
 }
 
 /*

@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -54,9 +55,9 @@ enum textureFormat_t {
 	// Alpha channel only
 	//------------------------
 
-	// Alpha ends up being the same as L8A8 in our current implementation, because straight 
+	// Alpha ends up being the same as L8A8 in our current implementation, because straight
 	// alpha gives 0 for color, but we want 1.
-	FMT_ALPHA,		
+	FMT_ALPHA,
 
 	//------------------------
 	// Luminance replicates the value across RGB with a constant A of 255
@@ -87,6 +88,15 @@ enum textureFormat_t {
 	FMT_X16,			// 16 bpp
 	FMT_Y16_X16,		// 32 bpp
 	FMT_RGB565,			// 16 bpp
+
+#ifdef GL_ES_VERSION_2_0
+	//------------------------
+	// Mobile texture formats
+	//------------------------
+	FMT_ETC1,			// 8 bpp
+	FMT_ETC2_PUNCH,		// 8 bpp
+	FMT_ETC2_ALPHA,		// 16 bpp
+#endif
 };
 
 int BitsForFormat( textureFormat_t format );

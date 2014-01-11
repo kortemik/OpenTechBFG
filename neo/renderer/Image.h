@@ -147,7 +147,7 @@ public:
 	// done under any normal circumstances, and probably not at all on consoles.
 	void		Resize( int width, int height );
 
-	bool		IsCompressed() const { return ( opts.format == FMT_DXT1 || opts.format == FMT_DXT5 ); }
+	bool		IsCompressed() const;
 
 	void		SetTexParameters();	// update aniso and trilinear
 

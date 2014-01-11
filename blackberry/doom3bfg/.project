@@ -596,6 +596,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>src/renderer/ETC</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>src/renderer/Font.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/neo/renderer/Font.cpp</locationURI>
@@ -1666,6 +1671,26 @@
 			<locationURI>PARENT-2-PROJECT_LOC/neo/renderer/DXT/DXTEncoder_SSE2.cpp</locationURI>
 		</link>
 		<link>
+			<name>src/renderer/ETC/ETCCodec.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/renderer/ETC/ETCCodec.h</locationURI>
+		</link>
+		<link>
+			<name>src/renderer/ETC/ETCCodec_local.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/renderer/ETC/ETCCodec_local.h</locationURI>
+		</link>
+		<link>
+			<name>src/renderer/ETC/ETCEncoder.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/renderer/ETC/ETCEncoder.cpp</locationURI>
+		</link>
+		<link>
+			<name>src/renderer/ETC/rg-etc1</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>src/renderer/OpenGL/gl_GraphicsAPIWrapper.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/neo/renderer/OpenGL/gl_GraphicsAPIWrapper.cpp</locationURI>
@@ -1844,6 +1869,16 @@
 			<name>src/sys/qnx/qnx_signin.h</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/neo/sys/qnx/qnx_signin.h</locationURI>
+		</link>
+		<link>
+			<name>src/renderer/ETC/rg-etc1/rg_etc1.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/renderer/ETC/rg-etc1/rg_etc1.cpp</locationURI>
+		</link>
+		<link>
+			<name>src/renderer/ETC/rg-etc1/rg_etc1.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/renderer/ETC/rg-etc1/rg_etc1.h</locationURI>
 		</link>
 		<link>
 			<name>src/renderer/jobs/dynamicshadowvolume/DynamicShadowVolume.cpp</name>

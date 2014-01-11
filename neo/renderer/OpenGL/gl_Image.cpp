@@ -446,6 +446,27 @@ void idImage::AllocImage() {
 		dataFormat = GL_LUMINANCE_ALPHA;
 		dataType = GL_UNSIGNED_SHORT;
 		break;
+#ifdef GL_ES_VERSION_2_0
+	case FMT_ETC1:
+		if ( glConfig.glVersion >= 3.0f ) {
+			internalFormat = GL_COMPRESSED_RGB8_ETC2;
+		} else {
+			internalFormat = GL_ETC1_RGB8_OES;
+		}
+		dataFormat = GL_RGB;
+		dataType = GL_UNSIGNED_BYTE;
+		break;
+	case FMT_ETC2_PUNCH:
+		internalFormat = GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2;
+		dataFormat = GL_RGBA;
+		dataType = GL_UNSIGNED_BYTE;
+		break;
+	case FMT_ETC2_ALPHA:
+		internalFormat = GL_COMPRESSED_RGBA8_ETC2_EAC;
+		dataFormat = GL_RGBA;
+		dataType = GL_UNSIGNED_BYTE;
+		break;
+#endif
 	default:
 		idLib::Error( "Unhandled image format %d in %s\n", opts.format, GetName() );
 	}
@@ -567,4 +588,17 @@ void idImage::Resize( int width, int height ) {
 	opts.width = width;
 	opts.height = height;
 	AllocImage();
+}
+
+/*
+========================
+idImage::IsCompressed
+========================
+*/
+bool idImage::IsCompressed() const {
+#ifndef GL_ES_VERSION_2_0
+	return ( opts.format == FMT_DXT1 || opts.format == FMT_DXT5 );
+#else
+	return ( opts.format == FMT_DXT1 || opts.format == FMT_DXT5 || opts.format == FMT_ETC1 || opts.format == FMT_ETC2_PUNCH || opts.format == FMT_ETC2_ALPHA );
+#endif
 }
