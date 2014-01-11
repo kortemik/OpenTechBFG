@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -134,6 +135,29 @@ void idColorSpace::ConvertCoCg_YToRGB( byte *dst, const byte *src, int width, in
 
 /*
 ========================
+idColorSpace::ConvertRGBToCoCg_YInPlace
+
+Purpose of this is to get the CoCg_Y colorspace range within the RGB colorspace
+========================
+*/
+void idColorSpace::ConvertRGBToCoCg_YInPlace( byte *dst, const byte *src, int width, int height ) {
+	for ( int i = 0; i < width * height; i++ ) {
+		int r = src[i*4+0];
+		int g = src[i*4+1];
+		int b = src[i*4+2];
+		//int a = src[i*4+3];
+		int co = CLAMP_BYTE( RGB_TO_YCOCG_CO( r, g, b ) + 128 ) - 128;
+		int cg = CLAMP_BYTE( RGB_TO_YCOCG_CG( r, g, b ) + 128 ) - 128;
+		int y = CLAMP_BYTE( RGB_TO_YCOCG_Y( r, g, b ) );
+		dst[i*4+0] = CLAMP_BYTE( y + COCG_TO_R( co, cg ) );
+		dst[i*4+1] = CLAMP_BYTE( y + COCG_TO_G( co, cg ) );
+		dst[i*4+2] = CLAMP_BYTE( y + COCG_TO_B( co, cg ) );
+		dst[i*4+3] = 255;
+	}
+}
+
+/*
+========================
 idColorSpace::ConvertCoCgSYToRGB
 
 A scale factor is encoded in the Z value to give better compression of
@@ -239,8 +263,8 @@ void idColorSpace::ConvertYCoCg420ToRGB( byte *dst, const byte *src, int width, 
 
 /*
 ================================================================================================
-To *Color-Convert RGB and YCbCr* ColorSpaces, note that YCbCr is defined per 
-CCIR 601-1, except that Cb and Cr are normalized to the range 0 -> 255 rather than -0.5 -> 0.5. 
+To *Color-Convert RGB and YCbCr* ColorSpaces, note that YCbCr is defined per
+CCIR 601-1, except that Cb and Cr are normalized to the range 0 -> 255 rather than -0.5 -> 0.5.
 The conversion equations to be implemented are therefore:
 
 
@@ -253,9 +277,9 @@ The conversion equations to be implemented are therefore:
 	B  = [ 1.00000  1.77200  0.00000] [Cr - 128]
 
 
-These numbers are derived from TIFF 6.0 section 21, dated 3-June-92. To avoid floating-point 
+These numbers are derived from TIFF 6.0 section 21, dated 3-June-92. To avoid floating-point
 arithmetic, we represent the fractional constants as integers scaled up by 2^16 (about 4 digits
-precision); we have to divide the products by 2^16, with appropriate rounding, to get the 
+precision); we have to divide the products by 2^16, with appropriate rounding, to get the
 correct answer.
 ================================================================================================
 */
