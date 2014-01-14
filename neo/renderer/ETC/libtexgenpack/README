@@ -1,0 +1,9 @@
+
+libtexgenpack v0.6.1 -- a texture compressor using a genetic algorithm library.
+
+This is simply a very basic restructuring of texgenpack so that it can be used like a library.
+Mainly just wrapping everything in a namespace (texgen), replacing printf file fprintf and a FILE*
+handle, and removing globals which were used to pass all options arround for the texgenpack program.
+
+texgenpack by Harm Hanemaaijer
+libtexgenpack converted by Vincent Simonetti

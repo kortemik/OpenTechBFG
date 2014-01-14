@@ -36,6 +36,6 @@ Contains the EtcEncoder declarations.
 */
 #include "../../idlib/precompiled.h"
 
-#include "rg-etc1/rg_etc1.h"
+#include "libtexgenpack/libtexgenpack.h"
 
 #endif // !__ETCCODEC_LOCAL_H__

@@ -38,67 +38,6 @@ Contains the EtcEncoder implementation.
 
 /*
 ========================
-idEtcEncoder::CompressImageETC1_Quality
-
-params:	inBuf		- image to compress
-paramO:	outBuf		- result of compression
-params:	width		- width of image
-params:	height		- height of image
-params: quality		- quality of compression (1 - 3, negative for dithering)
-========================
-*/
-void idEtcEncoder::CompressImageETC1_Quality( const byte *inBuf, byte *outBuf, int width, int height, int quality ) {
-	ALIGN16( uint32 block[16] );
-
-	// init etc1 block if needed
-	static bool etc1_block_init = false;
-	if ( !etc1_block_init ) {
-		rg_etc1::pack_etc1_block_init();
-		etc1_block_init = true;
-	}
-
-	this->width = width;
-	this->height = height;
-	this->outData = outBuf;
-
-	if ( width > 4 && ( width & 3 ) != 0 ) {
-		return;
-	}
-	if ( height > 4 && ( height & 3 ) != 0 ) {
-		return;
-	}
-
-	int absQuality = abs( quality );
-	if ( absQuality < 1 || absQuality > 3 ) {
-		return;
-	}
-
-	if ( width < 4 || height < 4 ) {
-		WriteTinyETC1Block( (uint32 *)inBuf, width, height, absQuality - 1, quality < 0 );
-		return;
-	}
-
-	absQuality--;
-	bool dither = quality < 0;
-
-	//TODO
-	for ( int j = 0; j < height; j += 4, inBuf += width * 4*4 ) {
-		for ( int i = 0; i < width; i += 4 ) {
-			ExtractBlock( block, (uint32 *)inBuf ); //TODO
-
-			WriteETC1Block( block, absQuality, dither );
-
-			//idLib::Printf( "\r%3d%%", ( j * width + i ) * 100 / ( width * height ) );
-		}
-		outData += dstPadding;
-		inBuf += srcPadding;
-	}
-
-	//idLib::Printf( "\r100%%\n" );
-}
-
-/*
-========================
 idEtcEncoder::IsAlphaSignificant
 ========================
 */
@@ -130,66 +69,78 @@ idEtcEncoder::AlphaSignificance idEtcEncoder::IsAlphaSignificant( const byte *in
 idEtcEncoder::ExtractBlock
 ========================
 */
-void idEtcEncoder::ExtractBlock( uint32 * outBlock, const uint32 * inBuf ) const {
-	memcpy( &outBlock[0], &inBuf[0], 4 * sizeof( uint32 ) );
-	//TODO
+void idEtcEncoder::ExtractBlock( uint32 * outBlock, const byte * inBuf, int width, int padding ) const {
+	int rowWidthBytes = ( width * sizeof( uint32 ) + padding + 3 ) & ~3;
+	/*for ( int i = 0; i < 4; i++ ) {
+		memcpy( &outBlock[i * 4], &inBuf[i * rowWidthBytes], 4 * sizeof( uint32 ) );
+	}*/
+	memcpy( &outBlock[0 * 4], &inBuf[0 * rowWidthBytes], 4 * sizeof( uint32 ) );
+	memcpy( &outBlock[1 * 4], &inBuf[1 * rowWidthBytes], 4 * sizeof( uint32 ) );
+	memcpy( &outBlock[2 * 4], &inBuf[2 * rowWidthBytes], 4 * sizeof( uint32 ) );
+	memcpy( &outBlock[3 * 4], &inBuf[3 * rowWidthBytes], 4 * sizeof( uint32 ) );
+}
+
+static void compress_callback(texgen::BlockUserData *user_data) {
+	// Do nothing.
 }
 
 /*
 ========================
-idEtcEncoder::PadBlock
+idEtcEncoder::GenericCompress
 
-Pads a color block with 0xFF
+params:	inBuf		- image to compress
+paramO:	outBuf		- result of compression
+params:	width		- width of image
+params:	height		- height of image
+params: quality		- quality of compression (1 - 4)
+params: type		- the format to compress to
 ========================
 */
-void idEtcEncoder::PadBlock( uint32 * outBuf, const uint32 * inBuf, int width, int height ) const {
-	if ( width >= 4 && height >= 4 ) {
+void idEtcEncoder::GenericCompress( const byte *inBuf, byte *outBuf, int width, int height, int quality, int type ) {
+	quality--;
+	if ( quality < SPEED_ULTRA || quality > SPEED_SLOW ) {
 		return;
 	}
-	int pad = 4 - width;
-	for ( int i = 0; i < 4; i++ ) {
-		if ( i < height ) {
-			// copy existing data by row
-			memcpy( &outBuf[i * 4], &inBuf[i * width], width * sizeof( uint32 ) );
-			// pad remaining of row
-			memset( &( ( ( byte * )outBuf )[width * sizeof( uint32 ) + i * 4] ), 0xFF, pad * sizeof( uint32 ) );
-		} else {
-			outBuf[i] = 0xFFFFFFFFU;
-		}
-	}
+
+	texgen::Image sourceImage;
+	sourceImage.pixels = (uint32 *)inBuf;
+	sourceImage.width = width;
+	sourceImage.height = height;
+	sourceImage.extended_width = width;
+	sourceImage.extended_height = height;
+	sourceImage.alpha_bits = 8;
+	sourceImage.nu_components = 4;
+	sourceImage.bits_per_component = 8;
+	sourceImage.is_signed = 0;
+	sourceImage.srgb = 0;
+	sourceImage.is_half_float = 0;
+
+	texgen::Options opt;
+	texgen::init_options( &opt );
+	opt.speed = quality;
+
+	texgen::Texture destTexture;
+	texgen::compress_image( &opt, &sourceImage, type, compress_callback, &destTexture, 0, 0, 0 );
+
+	int n = (destTexture.extended_height / destTexture.block_height) * (destTexture.extended_width / destTexture.block_width);
+	memcpy( outBuf, destTexture.pixels, n * (destTexture.bits_per_block / 8) );
+
+	texgen::destroy_texture( &destTexture );
 }
 
 /*
 ========================
-idEtcEncoder::WriteTinyETC1Block
+idEtcEncoder::CompressImageETC1_Quality
+
+params:	inBuf		- image to compress
+paramO:	outBuf		- result of compression
+params:	width		- width of image
+params:	height		- height of image
+params: quality		- quality of compression (1 - 4)
 ========================
 */
-void idEtcEncoder::WriteTinyETC1Block( const uint32 * inBuf, int width, int height, int quality, bool dither ) {
-	ALIGN16( uint32 block[16] );
-	PadBlock( block, inBuf, width, height );
-	WriteETC1Block( block, quality, dither );
-}
-
-/*
-========================
-idEtcEncoder::WriteETC1Block
-
-Takes 4x4 block, emits one ETC1 block
-========================
-*/
-uint32 idEtcEncoder::WriteETC1Block( const uint32 * inBuf, int quality, bool dither ) {
-	ALIGN16( uint32 block[2] );
-
-	rg_etc1::etc1_pack_params params;
-	params.m_dithering = dither;
-	params.m_quality = (rg_etc1::etc1_quality)quality;
-
-	uint32 err = rg_etc1::pack_etc1_block( (void *)block, inBuf, params );
-
-	EmitUInt( block[0] );
-	EmitUInt( block[1] );
-
-	return err;
+void idEtcEncoder::CompressImageETC1_Quality( const byte *inBuf, byte *outBuf, int width, int height, int quality ) {
+	GenericCompress( inBuf, outBuf, width, height, quality, TEXTURE_TYPE_ETC1 );
 }
 
 /*
@@ -201,11 +152,11 @@ paramO:	outBuf		- result of compression
 params:	width		- width of image
 params:	height		- height of image
 params: punchAlpha	- if alpha should be punchthrough, otherwise full alpha
-params: quality		- ?
+params: quality		- quality of compression (1 - 4)
 ========================
 */
 void idEtcEncoder::CompressImageETC2_Quality( const byte *inBuf, byte *outBuf, int width, int height, bool punchAlpha, int quality ) {
-	//TODO
+	GenericCompress( inBuf, outBuf, width, height, quality, punchAlpha ? TEXTURE_TYPE_ETC2_PUNCHTHROUGH : TEXTURE_TYPE_ETC2_EAC );
 }
 
 //TODO

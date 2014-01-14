@@ -48,11 +48,8 @@ The supported formats are:
 */
 class idEtcEncoder {
 public:
-				idEtcEncoder() { srcPadding = dstPadding = 0; }
+				idEtcEncoder() {}
 				~idEtcEncoder() {}
-
-	void		SetSrcPadding( int pad ) { srcPadding = pad; }
-	void		SetDstPadding( int pad ) { dstPadding = pad; }
 
 	// ETC1 (no alpha)
 	void		CompressImageETC1HQ( const byte *inBuf, byte *outBuf, int width, int height );
@@ -66,10 +63,10 @@ public:
 	void		CompressImageETC2AlphaHQ( const byte *inBuf, byte *outBuf, int width, int height );
 	void		CompressImageETC2AlphaFast( const byte *inBuf, byte *outBuf, int width, int height );
 
-	// ETC1 (no alpha) with variable quality (1, fastest; 3 highest quality)
+	// ETC1 (no alpha) with variable quality (1, fastest; 4 highest quality)
 	void		CompressImageETC1_Quality( const byte *inBuf, byte *outBuf, int width, int height, int quality );
 
-	// ETC1 (punchthrough/alpha) with variable quality (1, fastest; 3 highest quality)
+	// ETC1 (punchthrough/alpha) with variable quality (1, fastest; 4 highest quality)
 	void		CompressImageETC2_Quality( const byte *inBuf, byte *outBuf, int width, int height, bool punchAlpha, int quality );
 
 	static bool	CanEncodeAsETC1( const byte *inBuf, int width, int height );
@@ -83,22 +80,10 @@ private:
 		Alpha
 	};
 
-	int							width;
-	int							height;
-	byte *						outData;
-	int							srcPadding;
-	int							dstPadding;
-
-	void						EmitByte( byte b );
-	void						EmitUShort( unsigned short s );
-	void						EmitUInt( unsigned int i );
 	static AlphaSignificance	IsAlphaSignificant( const byte *inBuf, int width, int height );
 
-	void						ExtractBlock( uint32 * outBlock, const uint32 * inBuf ) const;
-	void						PadBlock( uint32 * outBuf, const uint32 * inBuf, int width, int height ) const;
-
-	void						WriteTinyETC1Block( const uint32 * inBuf, int width, int height, int quality, bool dither );
-	uint32						WriteETC1Block( const uint32 * inBuf, int quality, bool dither );
+	void						GenericCompress( const byte *inBuf, byte *outBuf, int width, int height, int quality, int type );
+	void						ExtractBlock( uint32 * outBlock, const byte * inBuf, int width, int padding ) const;
 };
 
 /*
@@ -107,7 +92,7 @@ idEtcEncoder::CompressImageETC1HQ
 ========================
 */
 ID_INLINE void idEtcEncoder::CompressImageETC1HQ( const byte *inBuf, byte *outBuf, int width, int height ) {
-	CompressImageETC1_Quality( inBuf, outBuf, width, height, 3 );
+	CompressImageETC1_Quality( inBuf, outBuf, width, height, 4 );
 }
 
 /*
@@ -125,7 +110,7 @@ idEtcEncoder::CompressImageETC2PunchAlphaHQ
 ========================
 */
 ID_INLINE void idEtcEncoder::CompressImageETC2PunchAlphaHQ( const byte *inBuf, byte *outBuf, int width, int height ) {
-	CompressImageETC2_Quality( inBuf, outBuf, width, height, true, 3 );
+	CompressImageETC2_Quality( inBuf, outBuf, width, height, true, 4 );
 }
 
 /*
@@ -143,7 +128,7 @@ idEtcEncoder::CompressImageETC2AlphaHQ
 ========================
 */
 ID_INLINE void idEtcEncoder::CompressImageETC2AlphaHQ( const byte *inBuf, byte *outBuf, int width, int height ) {
-	CompressImageETC2_Quality( inBuf, outBuf, width, height, false, 3 );
+	CompressImageETC2_Quality( inBuf, outBuf, width, height, false, 4 );
 }
 
 /*
@@ -173,34 +158,6 @@ ID_INLINE bool idEtcEncoder::CanEncodeAsETC2_Punchthrough( const byte *inBuf, in
 	return IsAlphaSignificant( inBuf, width, height ) == Punchthrough;
 }
 
-/*
-========================
-idEtcEncoder::EmitByte
-========================
-*/
-ID_INLINE void idEtcEncoder::EmitByte( byte b ) {
-	*outData = b;
-	outData += 1;
-}
-
-/*
-========================
-idEtcEncoder::EmitUShort
-========================
-*/
-ID_INLINE void idEtcEncoder::EmitUShort( unsigned short s ) {
-	*((unsigned short *)outData) = s;
-	outData += 2;
-}
-
-/*
-========================
-idEtcEncoder::EmitUInt
-========================
-*/
-ID_INLINE void idEtcEncoder::EmitUInt( unsigned int i ) {
-	*((unsigned int *)outData) = i;
-	outData += 4;
-}
+//TODO: decoder
 
 #endif // !__ETCCODEC_H__
