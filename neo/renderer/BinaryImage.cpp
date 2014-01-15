@@ -377,7 +377,7 @@ bool idBinaryImage::ConvertFormat( textureFormat_t desiredFormat ) {
 #ifdef GL_ES_VERSION_2_0
 	if ( fileData.format != desiredFormat ) {
 		if ( ( fileData.format == FMT_DXT1 || fileData.format == FMT_DXT5 ) && !glConfig.textureCompressionDXTAvailable ) {
-			if ( desiredFormat == FMT_ETC1 || desiredFormat == FMT_ETC2_PUNCH || desiredFormat == FMT_ETC2_ALPHA ) {
+			if ( desiredFormat == FMT_ETC1 || desiredFormat == FMT_ETC2_PUNCH || desiredFormat == FMT_ETC2_ALPHA || desiredFormat == FMT_RGBA8 ) {
 
 				byte **newImgData = new (TAG_TEMP) byte *[images.Num()];
 
@@ -427,7 +427,7 @@ bool idBinaryImage::ConvertFormat( textureFormat_t desiredFormat ) {
 						} else {
 							etc.CompressImageETC2PunchAlphaFast( newImgData[level], img.data, img.width, img.height );
 						}
-					} else {
+					} else if ( desiredFormat == FMT_ETC2_ALPHA ) {
 						img.Alloc( img.width * img.height * 2 );
 						idEtcEncoder etc;
 						if ( image_highQualityCompression.GetBool() ) {
@@ -435,6 +435,9 @@ bool idBinaryImage::ConvertFormat( textureFormat_t desiredFormat ) {
 						} else {
 							etc.CompressImageETC2AlphaFast( newImgData[level], img.data, img.width, img.height );
 						}
+					} else {
+						img.Alloc( img.width * img.height * 4 );
+						memcpy( img.data, newImgData[level], img.width * img.height * 4 );
 					}
 					delete newImgData[level];
 					newImgData[level] = NULL;

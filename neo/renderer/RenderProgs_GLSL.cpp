@@ -957,6 +957,7 @@ GLuint idRenderProgManager::LoadGLSLShader( GLenum target, const char * name, id
 			return false;
 		}
 		idStr hlslCode( ( const char* ) hlslFileBuffer );
+		Mem_Free( hlslFileBuffer );
 		idStr programHLSL = StripDeadCode( hlslCode, inFile );
 		programGLSL = ConvertCG2GLSL( programHLSL, inFile, target == GL_VERTEX_SHADER, programUniforms );
 
