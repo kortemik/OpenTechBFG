@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 /*
 ================================================================================================
-Contains the EtcEncoder declarations.
+Contains the EtcEncoder and EtcDecoder declarations.
 ================================================================================================
 */
 
@@ -83,7 +83,6 @@ private:
 	static AlphaSignificance	IsAlphaSignificant( const byte *inBuf, int width, int height );
 
 	void						GenericCompress( const byte *inBuf, byte *outBuf, int width, int height, int quality, int type );
-	void						ExtractBlock( uint32 * outBlock, const byte * inBuf, int width, int padding ) const;
 };
 
 /*
@@ -158,6 +157,27 @@ ID_INLINE bool idEtcEncoder::CanEncodeAsETC2_Punchthrough( const byte *inBuf, in
 	return IsAlphaSignificant( inBuf, width, height ) == Punchthrough;
 }
 
-//TODO: decoder
+/*
+================================================
+idEtcDecoder decodes ETC-compressed Images. Raw output Images are in
+4-byte RGBA format.
+================================================
+*/
+class idEtcDecoder {
+public:
+
+	// ETC1 decompression (no alpha)
+	void	DecompressImageETC1( const byte *inBuf, byte *outBuf, int width, int height );
+
+	// ETC2 decompression (punchthrough alpha)
+	void	DecompressImageETC2PunchAlpha( const byte *inBuf, byte *outBuf, int width, int height );
+
+	// ETC2 decompression (alpha)
+	void	DecompressImageETC2Alpha( const byte *inBuf, byte *outBuf, int width, int height );
+
+private:
+
+	void	GenericDecompress( const byte *inBuf, byte *outBuf, int width, int height, int sourceType );
+};
 
 #endif // !__ETCCODEC_H__

@@ -64,22 +64,6 @@ idEtcEncoder::AlphaSignificance idEtcEncoder::IsAlphaSignificant( const byte *in
 	return ret;
 }
 
-/*
-========================
-idEtcEncoder::ExtractBlock
-========================
-*/
-void idEtcEncoder::ExtractBlock( uint32 * outBlock, const byte * inBuf, int width, int padding ) const {
-	int rowWidthBytes = ( width * sizeof( uint32 ) + padding + 3 ) & ~3;
-	/*for ( int i = 0; i < 4; i++ ) {
-		memcpy( &outBlock[i * 4], &inBuf[i * rowWidthBytes], 4 * sizeof( uint32 ) );
-	}*/
-	memcpy( &outBlock[0 * 4], &inBuf[0 * rowWidthBytes], 4 * sizeof( uint32 ) );
-	memcpy( &outBlock[1 * 4], &inBuf[1 * rowWidthBytes], 4 * sizeof( uint32 ) );
-	memcpy( &outBlock[2 * 4], &inBuf[2 * rowWidthBytes], 4 * sizeof( uint32 ) );
-	memcpy( &outBlock[3 * 4], &inBuf[3 * rowWidthBytes], 4 * sizeof( uint32 ) );
-}
-
 static void compress_callback(texgen::BlockUserData *user_data) {
 	// Do nothing.
 }
@@ -158,5 +142,3 @@ params: quality		- quality of compression (1 - 4)
 void idEtcEncoder::CompressImageETC2_Quality( const byte *inBuf, byte *outBuf, int width, int height, bool punchAlpha, int quality ) {
 	GenericCompress( inBuf, outBuf, width, height, quality, punchAlpha ? TEXTURE_TYPE_ETC2_PUNCHTHROUGH : TEXTURE_TYPE_ETC2_EAC );
 }
-
-//TODO

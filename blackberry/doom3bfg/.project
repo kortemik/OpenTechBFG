@@ -1681,6 +1681,11 @@
 			<locationURI>PARENT-2-PROJECT_LOC/neo/renderer/ETC/ETCCodec_local.h</locationURI>
 		</link>
 		<link>
+			<name>src/renderer/ETC/ETCDecoder.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/renderer/ETC/ETCDecoder.cpp</locationURI>
+		</link>
+		<link>
 			<name>src/renderer/ETC/ETCEncoder.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/neo/renderer/ETC/ETCEncoder.cpp</locationURI>

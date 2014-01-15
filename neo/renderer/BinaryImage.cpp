@@ -45,8 +45,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "color/ColorSpace.h"
 
 idCVar image_highQualityCompression( "image_highQualityCompression", "0", CVAR_BOOL, "Use high quality (slow) compression" );
+
 #ifdef GL_ES_VERSION_2_0
-idCVar image_attemptETC1Encoding( "image_attemptETC1Encoding", "0", CVAR_BOOL, "Attempt to encode all compressed images as ETC1. Valid only if alpha doesn't exist" );
+idCVar image_attemptETC1Encoding( "image_attemptETC1Encoding", "0", CVAR_BOOL, "Attempt to encode compressed images as ETC1. Valid only if alpha doesn't exist" );
+idCVar image_attemptETC2PunchthroughEncoding( "image_attemptETC2PunchthroughEncoding", "0", CVAR_BOOL, "Attempt to encode compressed images as ETC2-Punchthrough. Valid only if alpha is \"off\" or \"on\"" );
 #endif
 
 /*
@@ -457,11 +459,17 @@ idBinaryImage::OptimizeDesiredImageFormat2D
 */
 bool idBinaryImage::OptimizeDesiredImageFormat2D( int width, int height, const byte * pic_const, textureFormat_t & currentFormat, const textureColor_t & colorFormat ) {
 #ifdef GL_ES_VERSION_2_0
-	// As of the current implementation, only check if we can convert to ECT1
-	if ( currentFormat != FMT_ETC1 && image_attemptETC1Encoding.GetBool() && colorFormat != CFM_NORMAL_DXT5 ) {
-		if ( idEtcEncoder::CanEncodeAsETC1( pic_const, width, height ) ) {
-			currentFormat = FMT_ETC1;
-			return true;
+	if ( colorFormat != CFM_NORMAL_DXT5 ) {
+		if ( currentFormat != FMT_ETC1 && image_attemptETC1Encoding.GetBool() ) {
+			if ( idEtcEncoder::CanEncodeAsETC1( pic_const, width, height ) ) {
+				currentFormat = FMT_ETC1;
+				return true;
+			}
+		} else if ( currentFormat != FMT_ETC2_PUNCH && image_attemptETC2PunchthroughEncoding.GetBool() ) {
+			if ( idEtcEncoder::CanEncodeAsETC2_Punchthrough( pic_const, width, height ) ) {
+				currentFormat = FMT_ETC2_PUNCH;
+				return true;
+			}
 		}
 	}
 #endif
@@ -475,7 +483,7 @@ idBinaryImage::OptimizeDesiredImageFormatCube
 */
 bool idBinaryImage::OptimizeDesiredImageFormatCube( int width, const byte * pics[6], textureFormat_t & currentFormat ) {
 #ifdef GL_ES_VERSION_2_0
-	if ( image_attemptETC1Encoding.GetBool() ) {
+	if ( image_attemptETC1Encoding.GetBool() || image_attemptETC2PunchthroughEncoding.GetBool() ) {
 		textureFormat_t format = currentFormat;
 		textureFormat_t altFormat = FMT_NONE;
 		for ( int i = 0; i < 6; i++ ) {
