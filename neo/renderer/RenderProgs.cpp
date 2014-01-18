@@ -61,13 +61,29 @@ static void R_ReloadShaders( const idCmdArgs &args ) {
 }
 
 /*
+================
+idRenderProgManager::R_ExportCGShaders
+================
+*/
+void idRenderProgManager::R_ExportCGShaders( const idCmdArgs &args ) {
+	// vertex shaders
+	for ( int i = 0; i < renderProgManager.GetProgramCount(); i++ ) {
+		renderProgManager.SaveCGShader( GL_VERTEX_SHADER, renderProgManager.GetProgramName( i ) );
+	}
+
+	// fragment shaders
+	for ( int i = 0; i < renderProgManager.GetProgramCount(); i++ ) {
+		renderProgManager.SaveCGShader( GL_FRAGMENT_SHADER, renderProgManager.GetProgramName( i ) );
+	}
+}
+
+/*
 ================================================================================================
 idRenderProgManager::Init()
 ================================================================================================
 */
 void idRenderProgManager::Init() {
 	common->Printf( "----- Initializing Render Shaders -----\n" );
-
 
 	for ( int i = 0; i < MAX_BUILTINS; i++ ) {
 		builtinShaders[i] = -1;
@@ -145,6 +161,9 @@ void idRenderProgManager::Init() {
 	vertexShaders[builtinShaders[BUILTIN_FOG_SKINNED]].usesJoints = true;
 
 	cmdSystem->AddCommand( "reloadShaders", R_ReloadShaders, CMD_FL_RENDERER, "reloads shaders" );
+#ifdef _DEBUG
+	cmdSystem->AddCommand( "exportcgshaders", R_ExportCGShaders, CMD_FL_RENDERER, "export CG shaders" );
+#endif
 }
 
 /*
@@ -199,6 +218,16 @@ idRenderProgManager::Shutdown()
 */
 void idRenderProgManager::Shutdown() {
 	KillAllShaders();
+}
+
+/*
+================================================================================================
+idRenderProgManager::GetProgramName
+================================================================================================
+*/
+const char *idRenderProgManager::GetProgramName( int index ) const {
+	assert( index >= 0 && index < glslPrograms.Num() );
+	return glslPrograms[index].name.c_str();
 }
 
 /*

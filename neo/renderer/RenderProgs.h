@@ -254,7 +254,12 @@ protected:
 	GLuint	LoadShader( GLenum target, const char * name, const char * startToken );
 	bool	CompileGLSL( GLenum target, const char * name );
 	GLuint	LoadGLSLShader( GLenum target, const char * name, idList<int> & uniforms );
+	bool	SaveCGShader( GLenum target, const char * name );
 	void	LoadGLSLProgram( const int programIndex, const int vertexShaderIndex, const int fragmentShaderIndex );
+
+	int GetProgramCount() const { return glslPrograms.Num(); }
+	const char *GetProgramName( int index ) const;
+	static void	R_ExportCGShaders( const idCmdArgs &args );
 
 	static const GLuint INVALID_PROGID = 0xFFFFFFFF;
 

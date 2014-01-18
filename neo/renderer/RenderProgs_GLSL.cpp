@@ -508,6 +508,7 @@ const char * vertexInsert = {
 	"vec4 tex2Dlod( sampler2D sampler, vec4 texcoord ) { return textureLod( sampler, texcoord.xy, texcoord.w ); }\n"
 	"\n"
 };
+const int vertexInsertLineCount = 9;
 
 const char * fragmentInsert = {
 	"#version 150\n"
@@ -547,6 +548,7 @@ const char * fragmentInsert = {
 	"vec4 texCUBElod( samplerCube sampler, vec4 texcoord ) { return textureLod( sampler, texcoord.xyz, texcoord.w ); }\n"
 	"\n"
 };
+const int fragmentInsertLineCount = 36;
 
 struct builtinConversion_t {
 	const char * nameCG;
@@ -905,6 +907,37 @@ idStr ConvertCG2GLSL( const idStr & in, const char * name, bool isVertexProgram,
 }
 
 /*
+========================
+ConvertGLSL2CG
+========================
+*/
+idStr ConvertGLSL2CG( const idStr & in, const idStr & uniforms, const char * name, bool isVertexProgram ) {
+	idStr program;
+	program.ReAllocate( in.Length() * 2, false );
+
+	idList< idStr > uniformList;
+	if ( r_useUniformArrays.GetBool() ) {
+		//TODO: load uniforms (if available)
+	}
+
+	idLexer src( LEXFL_NOFATALERRORS );
+	src.LoadMemory( in.c_str(), in.Length(), name, isVertexProgram ? vertexInsertLineCount : fragmentInsertLineCount );
+
+	const char * uniformArrayName = isVertexProgram ? VERTEX_UNIFORM_ARRAY_NAME : FRAGMENT_UNIFORM_ARRAY_NAME;
+	char newline[128] = { "\n" };
+
+	idToken token;
+	while ( src.ReadToken( &token ) ) {
+		/* TODO:
+		 * Parse uniforms (if an array, then convert to list of uniforms based on specified uniform names [if those don't exist, then just have uni_#], otherwise just read each uniform)
+		 * same as ConvertCG2GLSL, but with reversed token swaps and building structs
+		 */
+	}
+
+	return program;
+}
+
+/*
 ================================================================================================
 idRenderProgManager::LoadGLSLShader
 ================================================================================================
@@ -1067,12 +1100,96 @@ GLuint idRenderProgManager::LoadGLSLShader( GLenum target, const char * name, id
 
 	return shader;
 }
+
+/*
+================================================================================================
+idRenderProgManager::SaveCGShader
+================================================================================================
+*/
+bool idRenderProgManager::SaveCGShader( GLenum target, const char * name ) {
+	idStr inFileGLSL;
+	idStr inFileUniforms;
+	idStr outFileCG;
+	inFileGLSL.Format( "renderprogs\\glsl\\%s", name );
+	inFileGLSL.StripFileExtension();
+	inFileUniforms.Format( "renderprogs\\glsl\\%s", name );
+	inFileUniforms.StripFileExtension();
+	outFileCG.Format( "renderprogs\\%s", name );
+	outFileCG.StripFileExtension();
+	if ( target == GL_FRAGMENT_SHADER ) {
+		inFileGLSL += "_fragment.glsl";
+		inFileUniforms += "_fragment.uniforms";
+		outFileCG += ".pixel";
+	} else {
+		inFileGLSL += "_vertex.glsl";
+		inFileUniforms += "_vertex.uniforms";
+		outFileCG += ".vertex";
+	}
+
+	// first check whether we already have a valid CG file and compare it to the GLSL timestamp;
+	ID_TIME_T glslTimeStamp;
+	int glslFileLength = fileSystem->ReadFile( inFileGLSL.c_str(), NULL, &glslTimeStamp );
+
+	ID_TIME_T cgTimeStamp;
+	int cgFileLength = fileSystem->ReadFile( outFileCG.c_str(), NULL, &cgTimeStamp );
+
+	// if the CG file doesn't exist or we have a newer GLSL file we need to recreate the CG file.
+	idStr programCG;
+	if ( ( cgFileLength <= 0 ) || ( glslTimeStamp > cgTimeStamp ) ) {
+		if ( glslFileLength <= 0 ) {
+			// GLSL file doesn't even exist bail out
+			return false;
+		}
+
+		void * glslFileBuffer = NULL;
+		int len = fileSystem->ReadFile( inFileGLSL.c_str(), &glslFileBuffer );
+		if ( len <= 0 ) {
+			return false;
+		}
+		idStr glslCode( ( const char* ) glslFileBuffer );
+		Mem_Free( glslFileBuffer );
+
+		idStr programUniforms = "";
+
+		ID_TIME_T uniformsTimeStamp;
+		int uniformsFileLength = fileSystem->ReadFile( inFileUniforms.c_str(), NULL, &uniformsTimeStamp );
+		if ( r_useUniformArrays.GetBool() ) {
+			if ( uniformsFileLength <= 0 ) {
+				// uniforms file not found, fail
+				return false;
+			} else {
+				// read in the Uniforms file
+				void * fileBufferUniforms = NULL;
+				int lengthUniforms = fileSystem->ReadFile( inFileUniforms.c_str(), &fileBufferUniforms );
+				if ( lengthUniforms <= 0 ) {
+					return false;
+				}
+				programUniforms = ( const char * ) fileBufferUniforms;
+				Mem_Free( fileBufferUniforms );
+			}
+		}
+
+		programCG = ConvertGLSL2CG( glslCode, programUniforms, name, target == GL_VERTEX_SHADER );
+	} else {
+		// read in the CG file
+		void * fileBufferCG = NULL;
+		int lengthCG = fileSystem->ReadFile( outFileCG.c_str(), &fileBufferCG );
+		if ( lengthCG <= 0 ) {
+			idLib::Error( "CG file %s could not be loaded and may be corrupt", outFileCG.c_str() );
+		}
+		programCG = ( const char * ) fileBufferCG;
+		Mem_Free( fileBufferCG );
+	}
+
+	return fileSystem->WriteFile( outFileCG, programCG.c_str(), programCG.Length(), "fs_basepath" ) != -1;
+}
+
 /*
 ================================================================================================
 idRenderProgManager::FindGLSLProgram
 ================================================================================================
 */
-int	 idRenderProgManager::FindGLSLProgram( const char * name, int vIndex, int fIndex ) {
+int	idRenderProgManager::FindGLSLProgram( const char * name, int vIndex, int fIndex ) {
 
 	for ( int i = 0; i < glslPrograms.Num(); ++i ) {
 		if ( ( glslPrograms[i].vertexShaderIndex == vIndex ) && ( glslPrograms[i].fragmentShaderIndex == fIndex ) ) {
