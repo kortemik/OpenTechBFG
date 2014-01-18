@@ -291,6 +291,7 @@ idCVar	fs_basepath( "fs_basepath", "", CVAR_SYSTEM | CVAR_INIT, "" );
 idCVar	fs_savepath( "fs_savepath", "", CVAR_SYSTEM | CVAR_INIT, "" );
 idCVar	fs_resourceLoadPriority( "fs_resourceLoadPriority", "1", CVAR_SYSTEM , "if 1, open requests will be honored from resource files first; if 0, the resource files are checked after normal search paths" );
 idCVar	fs_enableBackgroundCaching( "fs_enableBackgroundCaching", "1", CVAR_SYSTEM , "if 1 allow the 360 to precache game files in the background" );
+idCVar	fs_checkFilesIfNotInResource( "fs_checkFilesIfNotInResource", "0", CVAR_SYSTEM , "if a file is not in a resource file, and resource files are in use, then check file system instead of just the resource files" );
 
 idFileSystemLocal	fileSystemLocal;
 idFileSystem *		fileSystem = &fileSystemLocal;
@@ -1657,7 +1658,9 @@ int idFileSystemLocal::ReadFile( const char *relativePath, void **buffer, ID_TIM
 			*timestamp = 0;
 			size = rc.length;
 		}
-		return size;
+		if ( *timestamp != FILE_NOT_FOUND_TIMESTAMP || !fs_checkFilesIfNotInResource.GetBool() ) {
+			return size;
+		}
 	}
 
 	buf = NULL;	// quiet compiler warning

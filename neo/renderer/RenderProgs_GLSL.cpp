@@ -508,7 +508,7 @@ const char * vertexInsert = {
 	"vec4 tex2Dlod( sampler2D sampler, vec4 texcoord ) { return textureLod( sampler, texcoord.xy, texcoord.w ); }\n"
 	"\n"
 };
-const int vertexInsertLineCount = 9;
+const int vertexInsertLineCount = 7;
 
 const char * fragmentInsert = {
 	"#version 150\n"
@@ -548,7 +548,7 @@ const char * fragmentInsert = {
 	"vec4 texCUBElod( samplerCube sampler, vec4 texcoord ) { return textureLod( sampler, texcoord.xyz, texcoord.w ); }\n"
 	"\n"
 };
-const int fragmentInsertLineCount = 36;
+const int fragmentInsertLineCount = 27;
 
 struct builtinConversion_t {
 	const char * nameCG;
@@ -915,26 +915,63 @@ idStr ConvertGLSL2CG( const idStr & in, const idStr & uniforms, const char * nam
 	idStr program;
 	program.ReAllocate( in.Length() * 2, false );
 
-	idList< idStr > uniformList;
-	if ( r_useUniformArrays.GetBool() ) {
-		//TODO: load uniforms (if available)
-	}
-
-	idLexer src( LEXFL_NOFATALERRORS );
-	src.LoadMemory( in.c_str(), in.Length(), name, isVertexProgram ? vertexInsertLineCount : fragmentInsertLineCount );
-
-	const char * uniformArrayName = isVertexProgram ? VERTEX_UNIFORM_ARRAY_NAME : FRAGMENT_UNIFORM_ARRAY_NAME;
-	char newline[128] = { "\n" };
-
+	// skip pre-written "insert"
 	idToken token;
-	while ( src.ReadToken( &token ) ) {
-		/* TODO:
-		 * Parse uniforms (if an array, then convert to list of uniforms based on specified uniform names [if those don't exist, then just have uni_#], otherwise just read each uniform)
-		 * same as ConvertCG2GLSL, but with reversed token swaps and building structs
-		 */
+	idLexer src( LEXFL_NOFATALERRORS );
+	src.LoadMemory( in.c_str(), in.Length(), name );
+	const int linesToSkip = isVertexProgram ? vertexInsertLineCount : fragmentInsertLineCount;
+	for ( int i = 0; i < linesToSkip; i++ ) {
+		src.SkipRestOfLine();
+		src.ReadToken( &token );
 	}
 
-	return program;
+	idList< idStr > uniformList;
+	const char * uniformArrayName = isVertexProgram ? VERTEX_UNIFORM_ARRAY_NAME : FRAGMENT_UNIFORM_ARRAY_NAME;
+	//char newline[128] = { "\n" };
+
+	do {
+
+		// check for uniforms
+		while ( token == "uniform" && src.CheckTokenString( "vec4" ) ) {
+			src.ReadToken( &token );
+			if ( token == uniformArrayName ) {
+				// uniform array
+				idLexer uniformSrc( LEXFL_NOFATALERRORS );
+				uniformSrc.LoadMemory( uniforms.c_str(), uniforms.Length(), name );
+
+				while ( uniformSrc.ReadToken( &token ) ) {
+					uniformList.Append( token );
+				}
+
+				// check uniform count
+				src.ExpectTokenString( "[" );
+				src.ReadToken( & token );
+				int uniformCount = token.GetIntValue();
+				src.SkipUntilString( ";" );
+				if ( uniformCount != uniformList.Num() ) {
+					idLib::Error( "Number of uniforms for %s don't match the number of uniforms that exist in uniform list\n", name );
+				}
+			} else {
+				// individual uniforms
+				uniformList.Append( token );
+				src.ExpectTokenString( ";" );
+			}
+
+			src.ReadToken( & token );
+		}
+		//TODO: same as ConvertCG2GLSL, but with reversed token swaps and building structs
+	} while ( src.ReadToken( &token ) );
+
+	// write CG
+	idStr out;
+
+	for ( int i = 0; i < uniformList.Num(); i++ ) {
+		out += "uniform float4 " + uniformList[i] + "\n";
+	}
+
+	out += "\n" + program;
+
+	return out;
 }
 
 /*
@@ -1153,20 +1190,15 @@ bool idRenderProgManager::SaveCGShader( GLenum target, const char * name ) {
 
 		ID_TIME_T uniformsTimeStamp;
 		int uniformsFileLength = fileSystem->ReadFile( inFileUniforms.c_str(), NULL, &uniformsTimeStamp );
-		if ( r_useUniformArrays.GetBool() ) {
-			if ( uniformsFileLength <= 0 ) {
-				// uniforms file not found, fail
+		if ( uniformsFileLength > 0 ) {
+			// read in the Uniforms file
+			void * fileBufferUniforms = NULL;
+			int lengthUniforms = fileSystem->ReadFile( inFileUniforms.c_str(), &fileBufferUniforms );
+			if ( lengthUniforms <= 0 ) {
 				return false;
-			} else {
-				// read in the Uniforms file
-				void * fileBufferUniforms = NULL;
-				int lengthUniforms = fileSystem->ReadFile( inFileUniforms.c_str(), &fileBufferUniforms );
-				if ( lengthUniforms <= 0 ) {
-					return false;
-				}
-				programUniforms = ( const char * ) fileBufferUniforms;
-				Mem_Free( fileBufferUniforms );
 			}
+			programUniforms = ( const char * ) fileBufferUniforms;
+			Mem_Free( fileBufferUniforms );
 		}
 
 		programCG = ConvertGLSL2CG( glslCode, programUniforms, name, target == GL_VERTEX_SHADER );

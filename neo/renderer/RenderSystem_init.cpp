@@ -828,7 +828,7 @@ static void R_CheckPortableExtensions() {
 	// Explanation in responses: https://twitter.com/rcmaniac25/status/416683757186207745
 	glConfig.uniformBufferAvailable = ( glConfig.glVersion >= 3.0f );
 #endif
-	if ( glConfig.uniformBufferAvailable ) {
+	if ( glConfig.uniformBufferAvailable ) { //XXX Replacement for GLES 2.0
 		qglGetUniformBlockIndex = (PFNGLGETUNIFORMBLOCKINDEXPROC)GLimp_ExtensionPointer( "glGetUniformBlockIndex" );
 		qglUniformBlockBinding = (PFNGLUNIFORMBLOCKBINDINGPROC)GLimp_ExtensionPointer( "glUniformBlockBinding" );
 
@@ -837,7 +837,6 @@ static void R_CheckPortableExtensions() {
 			glConfig.uniformBufferOffsetAlignment = 256;
 		}
 	}
-	//TODO
 
 #ifndef GL_ES_VERSION_2_0
 	// ATI_separate_stencil / OpenGL (ES) 2.0 separate stencil
@@ -929,9 +928,12 @@ static void R_CheckPortableExtensions() {
 	// GL_ARB_timer_query
 	glConfig.timerQueryAvailable = R_CheckExtension( "GL_ARB_timer_query" ) || R_CheckExtension( "GL_EXT_timer_query" ) || R_CheckExtension( "GL_EXT_disjoint_timer_query" );
 	if ( glConfig.timerQueryAvailable ) {
-		qglGetQueryObjectui64vEXT = (PFNGLGETQUERYOBJECTUI64VEXTPROC)GLimp_ExtensionPointer( "glGetQueryObjectui64vARB" );
+		qglGetQueryObjectui64vEXT = (PFNGLGETQUERYOBJECTUI64VEXTPROC)GLimp_ExtensionPointer( "glGetQueryObjectui64v" );
 		if ( qglGetQueryObjectui64vEXT == NULL ) {
-			qglGetQueryObjectui64vEXT = (PFNGLGETQUERYOBJECTUI64VEXTPROC)GLimp_ExtensionPointer( "glGetQueryObjectui64vEXT" );
+			qglGetQueryObjectui64vEXT = (PFNGLGETQUERYOBJECTUI64VEXTPROC)GLimp_ExtensionPointer( "glGetQueryObjectui64vARB" );
+			if ( qglGetQueryObjectui64vEXT == NULL ) {
+				qglGetQueryObjectui64vEXT = (PFNGLGETQUERYOBJECTUI64VEXTPROC)GLimp_ExtensionPointer( "glGetQueryObjectui64vEXT" );
+			}
 		}
 	}
 #ifdef GL_ES_VERSION_2_0
