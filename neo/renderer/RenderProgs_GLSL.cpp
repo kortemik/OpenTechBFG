@@ -136,17 +136,6 @@ attribInfo_t attribsPC[] = {
 	{ "half4",		"hcolor0",		"COLOR0",		"gl_Color",				0,	AT_PS_IN,		0 },
 	{ "half4",		"hcolor1",		"COLOR1",		"gl_SecondaryColor",	0,	AT_PS_IN,		0 },
 
-	{ "float4",		"texcoord0",	"TEXCOORD0_centroid",	"vofi_TexCoord0",	0,	AT_PS_IN,	0 },
-	{ "float4",		"texcoord1",	"TEXCOORD1_centroid",	"vofi_TexCoord1",	0,	AT_PS_IN,	0 },
-	{ "float4",		"texcoord2",	"TEXCOORD2_centroid",	"vofi_TexCoord2",	0,	AT_PS_IN,	0 },
-	{ "float4",		"texcoord3",	"TEXCOORD3_centroid",	"vofi_TexCoord3",	0,	AT_PS_IN,	0 },
-	{ "float4",		"texcoord4",	"TEXCOORD4_centroid",	"vofi_TexCoord4",	0,	AT_PS_IN,	0 },
-	{ "float4",		"texcoord5",	"TEXCOORD5_centroid",	"vofi_TexCoord5",	0,	AT_PS_IN,	0 },
-	{ "float4",		"texcoord6",	"TEXCOORD6_centroid",	"vofi_TexCoord6",	0,	AT_PS_IN,	0 },
-	{ "float4",		"texcoord7",	"TEXCOORD7_centroid",	"vofi_TexCoord7",	0,	AT_PS_IN,	0 },
-	{ "float4",		"texcoord8",	"TEXCOORD8_centroid",	"vofi_TexCoord8",	0,	AT_PS_IN,	0 },
-	{ "float4",		"texcoord9",	"TEXCOORD9_centroid",	"vofi_TexCoord9",	0,	AT_PS_IN,	0 },
-
 	{ "float4",		"texcoord0",	"TEXCOORD0",	"vofi_TexCoord0",		0,	AT_VS_OUT | AT_PS_IN,	0 },
 	{ "float4",		"texcoord1",	"TEXCOORD1",	"vofi_TexCoord1",		0,	AT_VS_OUT | AT_PS_IN,	0 },
 	{ "float4",		"texcoord2",	"TEXCOORD2",	"vofi_TexCoord2",		0,	AT_VS_OUT | AT_PS_IN,	0 },
@@ -157,6 +146,17 @@ attribInfo_t attribsPC[] = {
 	{ "float4",		"texcoord7",	"TEXCOORD7",	"vofi_TexCoord7",		0,	AT_VS_OUT | AT_PS_IN,	0 },
 	{ "float4",		"texcoord8",	"TEXCOORD8",	"vofi_TexCoord8",		0,	AT_VS_OUT | AT_PS_IN,	0 },
 	{ "float4",		"texcoord9",	"TEXCOORD9",	"vofi_TexCoord9",		0,	AT_VS_OUT | AT_PS_IN,	0 },
+
+	{ "float4",		"texcoord0",	"TEXCOORD0_centroid",	"vofi_TexCoord0",	0,	AT_PS_IN,	0 },
+	{ "float4",		"texcoord1",	"TEXCOORD1_centroid",	"vofi_TexCoord1",	0,	AT_PS_IN,	0 },
+	{ "float4",		"texcoord2",	"TEXCOORD2_centroid",	"vofi_TexCoord2",	0,	AT_PS_IN,	0 },
+	{ "float4",		"texcoord3",	"TEXCOORD3_centroid",	"vofi_TexCoord3",	0,	AT_PS_IN,	0 },
+	{ "float4",		"texcoord4",	"TEXCOORD4_centroid",	"vofi_TexCoord4",	0,	AT_PS_IN,	0 },
+	{ "float4",		"texcoord5",	"TEXCOORD5_centroid",	"vofi_TexCoord5",	0,	AT_PS_IN,	0 },
+	{ "float4",		"texcoord6",	"TEXCOORD6_centroid",	"vofi_TexCoord6",	0,	AT_PS_IN,	0 },
+	{ "float4",		"texcoord7",	"TEXCOORD7_centroid",	"vofi_TexCoord7",	0,	AT_PS_IN,	0 },
+	{ "float4",		"texcoord8",	"TEXCOORD8_centroid",	"vofi_TexCoord8",	0,	AT_PS_IN,	0 },
+	{ "float4",		"texcoord9",	"TEXCOORD9_centroid",	"vofi_TexCoord9",	0,	AT_PS_IN,	0 },
 
 	{ "half4",		"htexcoord0",	"TEXCOORD0",	"vofi_TexCoord0",		0,	AT_PS_IN,		0 },
 	{ "half4",		"htexcoord1",	"TEXCOORD1",	"vofi_TexCoord1",		0,	AT_PS_IN,		0 },
@@ -448,9 +448,11 @@ struct typeConversion_t {
 } typeConversion[] = {
 	{ "void",				"void" },
 
+	{ "float",				"float" }, // make sure when converting from GLSL to Cg, we don't end up with "fixed"
+
 	{ "fixed",				"float" },
 
-	{ "float",				"float" },
+	//{ "float",				"float" },
 	{ "float2",				"vec2" },
 	{ "float3",				"vec3" },
 	{ "float4",				"vec4" },
@@ -644,18 +646,11 @@ ParseInOutVars
 */
 void ParseInOutVars( bool isInput, idLexer & src, int attribType, idList< inOutVariableCG_t > & inOutVars ) {
 	const char *prefix = isInput ? "in" : "out";
-	bool firstRun = true;
 
 	do {
 		inOutVariableCG_t var;
 
 		idToken token;
-		if ( firstRun ) {
-			firstRun = false;
-		} else {
-			// in/out
-			src.ExpectTokenString( prefix );
-		}
 		src.ReadToken( & token );
 		var.type = token;
 		src.ReadToken( & token );
@@ -692,7 +687,7 @@ void ParseInOutVars( bool isInput, idLexer & src, int attribType, idList< inOutV
 		// find semantic and Cg name
 		for ( int i = 0; attribsPC[i].semantic != NULL; i++ ) {
 			if ( ( attribsPC[i].flags & attribType ) != 0 ) {
-				if ( var.type.Cmp( attribsPC[i].type ) == 0 && var.nameGLSL.Cmp( attribsPC[i].glsl ) == 0 ) {
+				if ( var.nameGLSL.Cmp( attribsPC[i].glsl ) == 0 ) {
 					var.nameCg = attribsPC[i].name;
 					var.semanticCg = attribsPC[i].semantic;
 					break;
@@ -1066,15 +1061,16 @@ idStr ConvertGLSL2CG( const idStr & in, const idStr & uniforms, const char * nam
 
 			ParseInOutVars( token == "in", src, attrib, vars );
 
+			program += ( token.linesCrossed > 0 ) ? newline : ( token.WhiteSpaceBeforeToken() > 0 ? " " : "" );
 			program += "\nstruct ";
 			program += isIn ? inName : outName;
 			program += " {\n";
 			for ( int i = 0; i < vars.Num(); i++ ) {
 				if ( vars[i].declareInOut ) {
-					program += "\t" + vars[i].type + " " + vars[i].nameCg + "\t:" + vars[i].semanticCg + " ;\n";
+					program += "\t" + vars[i].type + " " + vars[i].nameCg + "\t: " + vars[i].semanticCg + " ;\n";
 				}
 			}
-			program += "}\n";
+			program += "} ;\n";
 			continue;
 		}
 
@@ -1448,7 +1444,7 @@ bool idRenderProgManager::SaveCGShader( GLenum target, const char * name ) {
 
 		programCG = ConvertGLSL2CG( glslCode, programUniforms, inFileGLSL, target == GL_VERTEX_SHADER );
 
-#ifdef _DEBUG
+#if 0
 		idStr compareUniforms;
 		idStr compareGLSL = ConvertCG2GLSL( programCG, inFileGLSL, target == GL_VERTEX_SHADER, compareUniforms );
 		idLib::WarningIf( compareUniforms != programUniforms, "Uniforms from Cg-2-GLSL don't match uniforms in original GLSL\n" );

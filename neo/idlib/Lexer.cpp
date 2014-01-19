@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -337,10 +338,10 @@ int idLexer::ReadWhiteSpace() {
 				if ( !*idLexer::script_p ) {
 					return 0;
 				}
-				idLexer::script_p++;
+				/*idLexer::script_p++;
 				if ( !*idLexer::script_p ) {
 					return 0;
-				}
+				}*/
 				continue;
 			}
 		}
@@ -353,7 +354,7 @@ int idLexer::ReadWhiteSpace() {
 ========================
 idLexer::SkipWhiteSpace
 
-Reads spaces, tabs, C-like comments etc. When a newline character is found, the scripts line 
+Reads spaces, tabs, C-like comments etc. When a newline character is found, the scripts line
 counter is increased. Returns false if there is no token left to be read.
 ========================
 */
@@ -1474,7 +1475,7 @@ const char *idLexer::ParseBracedSectionExact( idStr &out, int tabs ) {
 	}
 
 	out = "{";
-	depth = 1;	
+	depth = 1;
 	skipWhite = false;
 	doTabs = tabs >= 0;
 
@@ -1505,7 +1506,7 @@ const char *idLexer::ParseBracedSectionExact( idStr &out, int tabs ) {
 			case '}': {
 				depth--;
 				tabs--;
-				break;				
+				break;
 			}
 		}
 
@@ -1719,7 +1720,7 @@ int idLexer::LoadFile( const char *filename, bool OSPath ) {
 		idLib::common->Error("idLexer::LoadFile: another script already loaded");
 		return false;
 	}
-	
+
 	if ( !OSPath && ( baseFolder[0] != '\0' ) ) {
 		pathname = va( "%s/%s", baseFolder, filename );
 	} else {
