@@ -833,9 +833,11 @@ static void R_CheckPortableExtensions() {
 		qglUniformBlockBinding = (PFNGLUNIFORMBLOCKBINDINGPROC)GLimp_ExtensionPointer( "glUniformBlockBinding" );
 
 		qglGetIntegerv( GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, (GLint *)&glConfig.uniformBufferOffsetAlignment );
-		if ( glConfig.uniformBufferOffsetAlignment < 256 ) {
+#ifndef GL_ES_VERSION_2_0
+		if ( glConfig.uniformBufferOffsetAlignment < 256 ) { //XXX Is this needed for GLES 3.0?
 			glConfig.uniformBufferOffsetAlignment = 256;
 		}
+#endif
 	}
 
 #ifndef GL_ES_VERSION_2_0

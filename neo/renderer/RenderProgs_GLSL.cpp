@@ -629,6 +629,90 @@ void ParseInOutStruct( idLexer & src, int attribType, idList< inOutVariable_t > 
 	src.ExpectTokenString( ";" );
 }
 
+struct inOutVariableCG_t {
+	idStr	type;
+	idStr	nameCg;
+	idStr	nameGLSL;
+	idStr	semanticCg;
+	bool	declareInOut;
+};
+
+/*
+========================
+ParseInOutVars
+========================
+*/
+void ParseInOutVars( bool isInput, idLexer & src, int attribType, idList< inOutVariableCG_t > & inOutVars ) {
+	const char *prefix = isInput ? "in" : "out";
+	bool firstRun = true;
+
+	do {
+		inOutVariableCG_t var;
+
+		idToken token;
+		if ( firstRun ) {
+			firstRun = false;
+		} else {
+			// in/out
+			src.ExpectTokenString( prefix );
+		}
+		src.ReadToken( & token );
+		var.type = token;
+		src.ReadToken( & token );
+		var.nameGLSL = token;
+		
+		// handle gl_ClipDistance
+		if ( var.nameGLSL == "gl_ClipDistance" && src.CheckTokenString( "[" ) ) {
+			src.ReadToken( & token );
+			var.nameGLSL += "[";
+			src.ReadToken( & token );
+			var.nameGLSL += token;
+			src.ReadToken( & token );
+			var.nameGLSL += "]";
+		}
+
+		// verify end of string
+		if ( !src.CheckTokenString( ";" ) ) {
+			src.SkipUntilString( ";" );
+			if ( src.CheckTokenString( prefix ) ) {
+				continue;
+			} else {
+				break;
+			}
+		}
+
+		// convert the type
+		for ( int i = 0; typeConversion[i].typeGLSL != NULL; i++ ) {
+			if ( var.type.Cmp( typeConversion[i].typeGLSL ) == 0 ) {
+				var.type = typeConversion[i].typeCG;
+				break;
+			}
+		}
+
+		// find semantic and Cg name
+		for ( int i = 0; attribsPC[i].semantic != NULL; i++ ) {
+			if ( ( attribsPC[i].flags & attribType ) != 0 ) {
+				if ( var.type.Cmp( attribsPC[i].type ) == 0 && var.nameGLSL.Cmp( attribsPC[i].glsl ) == 0 ) {
+					var.nameCg = attribsPC[i].name;
+					var.semanticCg = attribsPC[i].semantic;
+					break;
+				}
+			}
+		}
+
+		// check if it was defined previously
+		var.declareInOut = true;
+		for ( int i = 0; i < inOutVars.Num(); i++ ) {
+			if ( var.nameCg == inOutVars[i].nameCg ) {
+				var.declareInOut = false;
+				break;
+			}
+		}
+
+		inOutVars.Append( var );
+	} while ( src.CheckTokenString( prefix ) );
+}
+
 /*
 ========================
 ConvertCG2GLSL
@@ -925,9 +1009,16 @@ idStr ConvertGLSL2CG( const idStr & in, const idStr & uniforms, const char * nam
 		src.ReadToken( &token );
 	}
 
+	idList< inOutVariableCG_t, TAG_RENDERPROG > varsIn;
+	idList< inOutVariableCG_t, TAG_RENDERPROG > varsOut;
 	idList< idStr > uniformList;
+
 	const char * uniformArrayName = isVertexProgram ? VERTEX_UNIFORM_ARRAY_NAME : FRAGMENT_UNIFORM_ARRAY_NAME;
-	//char newline[128] = { "\n" };
+	const char * inName = isVertexProgram ? "VS_IN" : "PS_IN";
+	const char * outName = isVertexProgram ? "VS_OUT" : "PS_OUT";
+	const char * mainInputName = isVertexProgram ? "vertex" : "fragment";
+	bool hasUniformArray = false;
+	char newline[128] = { "\n" };
 
 	do {
 
@@ -951,6 +1042,8 @@ idStr ConvertGLSL2CG( const idStr & in, const idStr & uniforms, const char * nam
 				if ( uniformCount != uniformList.Num() ) {
 					idLib::Error( "Number of uniforms for %s don't match the number of uniforms that exist in uniform list\n", name );
 				}
+
+				hasUniformArray = true;
 			} else {
 				// individual uniforms
 				uniformList.Append( token );
@@ -959,7 +1052,159 @@ idStr ConvertGLSL2CG( const idStr & in, const idStr & uniforms, const char * nam
 
 			src.ReadToken( & token );
 		}
-		//TODO: same as ConvertCG2GLSL, but with reversed token swaps and building structs
+
+		// in/out variables
+		if ( token == "in" || token == "out" ) {
+			bool isIn = token == "in";
+			idList< inOutVariableCG_t > & vars = isIn ? varsIn : varsOut;
+			int attrib;
+			if ( isIn ) {
+				attrib = isVertexProgram ? AT_VS_IN : AT_PS_IN;
+			} else {
+				attrib = isVertexProgram ? AT_VS_OUT : AT_PS_OUT;
+			}
+
+			ParseInOutVars( token == "in", src, attrib, vars );
+
+			program += "\nstruct ";
+			program += isIn ? inName : outName;
+			program += " {\n";
+			for ( int i = 0; i < vars.Num(); i++ ) {
+				if ( vars[i].declareInOut ) {
+					program += "\t" + vars[i].type + " " + vars[i].nameCg + "\t:" + vars[i].semanticCg + " ;\n";
+				}
+			}
+			program += "}\n";
+			continue;
+		}
+
+		// strip in/program parameters from main
+		if ( token == "void" && src.CheckTokenString( "main" ) ) {
+			src.ExpectTokenString( "(" );
+			while( src.ReadToken( &token ) ) {
+				if ( token == ")" ) {
+					break;
+				}
+			}
+
+			program += "\nvoid main (";
+			if ( varsIn.Num() > 0 ) {
+				program += " const ";
+				program += inName;
+				program += " ";
+				program += mainInputName;
+
+				if ( varsOut.Num() > 0 ) {
+					program += ", ";
+				}
+			}
+			if ( varsOut.Num() > 0 ) {
+				program += "out ";
+				program += outName;
+				program += " result ";
+			}
+			program += ")";
+			continue;
+		}
+
+		// maintain indentation
+		if ( token == "{" ) {
+			program += ( token.linesCrossed > 0 ) ? newline : ( token.WhiteSpaceBeforeToken() > 0 ? " " : "" );
+			program += "{";
+
+			int len = Min( idStr::Length( newline ) + 1, (int)sizeof( newline ) - 1 );
+			newline[len - 1] = '\t';
+			newline[len - 0] = '\0';
+			continue;
+		}
+		if ( token == "}" ) {
+			int len = Max( idStr::Length( newline ) - 1, 0 );
+			newline[len] = '\0';
+
+			program += ( token.linesCrossed > 0 ) ? newline : ( token.WhiteSpaceBeforeToken() > 0 ? " " : "" );
+			program += "}";
+			continue;
+		}
+
+		// check for a type conversion
+		bool foundType = false;
+		for ( int i = 0; typeConversion[i].typeGLSL != NULL; i++ ) {
+			if ( token.Cmp( typeConversion[i].typeGLSL ) == 0 ) {
+				program += ( token.linesCrossed > 0 ) ? newline : ( token.WhiteSpaceBeforeToken() > 0 ? " " : "" );
+				program += typeConversion[i].typeCG;
+				foundType = true;
+				break;
+			}
+		}
+		if ( foundType ) {
+			continue;
+		}
+
+		// handle uniform variables
+		if ( token == uniformArrayName ) {
+			program += ( token.linesCrossed > 0 ) ? newline : ( token.WhiteSpaceBeforeToken() > 0 ? " " : "" );
+			if ( hasUniformArray ) {
+				// check for uniforms that were used within an array
+				src.ReadToken( & token );
+				src.ReadToken( & token );
+				int uniformIndex = token.GetIntValue();
+				src.SkipUntilString( "]" );
+
+				program += uniformList[uniformIndex];
+			} else {
+				src.Error( "Token is a uniform array, but no uniform arrays are used" );
+				src.SkipUntilString( "*" );
+				src.ReadToken( & token );
+				src.SkipUntilString( "]" );
+
+				program += token;
+			}
+			continue;
+		}
+
+		// check for input/output parameters
+		bool foundInOut = false;
+		for ( int i = 0; i < varsIn.Num(); i++ ) {
+			if ( token.Cmp( varsIn[i].nameGLSL ) == 0 ) {
+				program += ( token.linesCrossed > 0 ) ? newline : ( token.WhiteSpaceBeforeToken() > 0 ? " " : "" );
+				program += mainInputName;
+				program += " . ";
+				program += varsIn[i].nameCg;
+				foundInOut = true;
+				break;
+			}
+		}
+		if ( !foundInOut ) {
+			for ( int i = 0; i < varsOut.Num(); i++ ) {
+				if ( token.Cmp( varsOut[i].nameGLSL ) == 0 ) {
+					program += ( token.linesCrossed > 0 ) ? newline : ( token.WhiteSpaceBeforeToken() > 0 ? " " : "" );
+					program += "result . ";
+					program += varsOut[i].nameCg;
+					foundInOut = true;
+					break;
+				}
+			}
+		}
+		if ( foundInOut ) {
+			continue;
+		}
+
+		// check for a function conversion
+		bool foundFunction = false;
+		for ( int i = 0; builtinConversion[i].nameGLSL != NULL; i++ ) {
+			if ( token.Cmp( builtinConversion[i].nameGLSL ) == 0 ) {
+				program += ( token.linesCrossed > 0 ) ? newline : ( token.WhiteSpaceBeforeToken() > 0 ? " " : "" );
+				program += builtinConversion[i].nameCG;
+				foundFunction = true;
+				break;
+			}
+		}
+		if ( foundFunction ) {
+			continue;
+		}
+
+		program += ( token.linesCrossed > 0 ) ? newline : ( token.WhiteSpaceBeforeToken() > 0 ? " " : "" );
+		program += token;
 	} while ( src.ReadToken( &token ) );
 
 	// write CG
@@ -1201,7 +1446,14 @@ bool idRenderProgManager::SaveCGShader( GLenum target, const char * name ) {
 			Mem_Free( fileBufferUniforms );
 		}
 
-		programCG = ConvertGLSL2CG( glslCode, programUniforms, name, target == GL_VERTEX_SHADER );
+		programCG = ConvertGLSL2CG( glslCode, programUniforms, inFileGLSL, target == GL_VERTEX_SHADER );
+
+#ifdef _DEBUG
+		idStr compareUniforms;
+		idStr compareGLSL = ConvertCG2GLSL( programCG, inFileGLSL, target == GL_VERTEX_SHADER, compareUniforms );
+		idLib::WarningIf( compareUniforms != programUniforms, "Uniforms from Cg-2-GLSL don't match uniforms in original GLSL\n" );
+		idLib::WarningIf( compareGLSL != glslCode, "GLSL from Cg-2-GLSL don't match original GLSL\n" );
+#endif
 	} else {
 		// read in the CG file
 		void * fileBufferCG = NULL;
