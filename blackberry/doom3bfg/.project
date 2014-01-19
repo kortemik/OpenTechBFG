@@ -846,9 +846,9 @@
 			<locationURI>PARENT-2-PROJECT_LOC/neo/renderer/RenderProgs.h</locationURI>
 		</link>
 		<link>
-			<name>src/renderer/RenderProgs_GLSL.cpp</name>
+			<name>src/renderer/RenderProgs_GLSLES.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/neo/renderer/RenderProgs_GLSL.cpp</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/neo/renderer/RenderProgs_GLSLES.cpp</locationURI>
 		</link>
 		<link>
 			<name>src/renderer/RenderSystem.cpp</name>

@@ -1181,6 +1181,15 @@ void Sys_Init() {
 
 /*
 ================
+Sys_InitPostFilesystem
+================
+*/
+void Sys_InitPostFilesystem() {
+	//TODO
+}
+
+/*
+================
 Sys_Shutdown
 ================
 */

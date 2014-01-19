@@ -29,12 +29,17 @@
     <!--  Name of author which is used for signing. Must match the developer name of your developer certificate. -->
     <author>Vincent Simonetti</author>
     <description>Doom 3: BFG</description>
+    
     <category>core.games</category>
+    
     <permission>use_gamepad</permission>
     <permission>access_internet</permission>
     <permission>access_shared</permission>
     <permission>narrow_landscape_exit</permission>
+    
     <asset path="icon.png">icon.png</asset>
+    <asset path="content/shaders">base/renderprogs</asset>
+    
     <configuration name="Device-Debug">
        <platformArchitecture>armle-v7</platformArchitecture>
        <asset path="Device-Debug/doom3bfg" entry="true" type="Qnx/Elf">doom3bfg</asset>

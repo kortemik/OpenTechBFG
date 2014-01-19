@@ -1006,6 +1006,8 @@ void idCommonLocal::Init( int argc, const char * const * argv, const char *cmdli
 		// initialize the file system
 		fileSystem->Init();
 
+		Sys_InitPostFilesystem();
+
 		const char * defaultLang = Sys_DefaultLanguage();
 		com_isJapaneseSKU = ( idStr::Icmp( defaultLang, ID_LANG_JAPANESE ) == 0 );
 

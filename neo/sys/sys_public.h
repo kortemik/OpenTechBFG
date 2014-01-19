@@ -404,6 +404,7 @@ struct sysMemoryStats_t {
 typedef unsigned long address_t;
 
 void			Sys_Init();
+void			Sys_InitPostFilesystem();
 void			Sys_Shutdown();
 void			Sys_Error( const char *error, ...);
 const char *	Sys_GetCmdLine();

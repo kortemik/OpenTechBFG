@@ -101,12 +101,6 @@ attribInfo_t attribsPC[] = {
 
 	// pre-defined vertex program output
 	{ "float4",		"position",		"POSITION",		"gl_Position",			0,	AT_VS_OUT,		0 },
-	{ "float",		"clip0",		"CLP0",			"gl_ClipDistance[0]",	0,	AT_VS_OUT,		0 },
-	{ "float",		"clip1",		"CLP1",			"gl_ClipDistance[1]",	0,	AT_VS_OUT,		0 },
-	{ "float",		"clip2",		"CLP2",			"gl_ClipDistance[2]",	0,	AT_VS_OUT,		0 },
-	{ "float",		"clip3",		"CLP3",			"gl_ClipDistance[3]",	0,	AT_VS_OUT,		0 },
-	{ "float",		"clip4",		"CLP4",			"gl_ClipDistance[4]",	0,	AT_VS_OUT,		0 },
-	{ "float",		"clip5",		"CLP5",			"gl_ClipDistance[5]",	0,	AT_VS_OUT,		0 },
 
 	// pre-defined fragment program input
 	{ "float4",		"position",		"WPOS",			"gl_FragCoord",			0,	AT_PS_IN,		0 },
@@ -114,27 +108,26 @@ attribInfo_t attribsPC[] = {
 	{ "float",		"facing",		"FACE",			"gl_FrontFacing",		0,	AT_PS_IN,		0 },
 
 	// fragment program output
-	{ "float4",		"color",		"COLOR",		"gl_FragColor",		0,	AT_PS_OUT,		0 }, // GLSL version 1.2 doesn't allow for custom color name mappings
-	{ "half4",		"hcolor",		"COLOR",		"gl_FragColor",		0,	AT_PS_OUT,		0 },
-	{ "float4",		"color0",		"COLOR0",		"gl_FragColor",		0,	AT_PS_OUT,		0 },
-	{ "float4",		"color1",		"COLOR1",		"gl_FragColor",		1,	AT_PS_OUT,		0 },
-	{ "float4",		"color2",		"COLOR2",		"gl_FragColor",		2,	AT_PS_OUT,		0 },
-	{ "float4",		"color3",		"COLOR3",		"gl_FragColor",		3,	AT_PS_OUT,		0 },
+	{ "float4",		"color",		"COLOR",		"gles_FragColor",	0,	AT_PS_OUT,		0 },
+	{ "half4",		"hcolor",		"COLOR",		"gles_FragColor",	0,	AT_PS_OUT,		0 },
+	{ "float4",		"color0",		"COLOR0",		"gles_FragColor",	0,	AT_PS_OUT,		0 },
+	{ "float4",		"color1",		"COLOR1",		"gles_FragColor",	1,	AT_PS_OUT,		0 },
+	{ "float4",		"color2",		"COLOR2",		"gles_FragColor",	2,	AT_PS_OUT,		0 },
+	{ "float4",		"color3",		"COLOR3",		"gles_FragColor",	3,	AT_PS_OUT,		0 },
 	{ "float",		"depth",		"DEPTH",		"gl_FragDepth",		4,	AT_PS_OUT,		0 },
 
 	// vertex to fragment program pass through
-	{ "float4",		"color",		"COLOR",		"gl_FrontColor",			0,	AT_VS_OUT,	0 },
-	{ "float4",		"color0",		"COLOR0",		"gl_FrontColor",			0,	AT_VS_OUT,	0 },
-	{ "float4",		"color1",		"COLOR1",		"gl_FrontSecondaryColor",	0,	AT_VS_OUT,	0 },
+	{ "float4",		"color",		"COLOR",		"gles_FrontColor",			0,	AT_VS_OUT,	0 },
+	{ "float4",		"color0",		"COLOR0",		"gles_FrontColor",			0,	AT_VS_OUT,	0 },
+	{ "float4",		"color1",		"COLOR1",		"gles_FrontSecondaryColor",	0,	AT_VS_OUT,	0 },
 
+	{ "float4",		"color",		"COLOR",		"gles_Color()",				0,	AT_PS_IN,	0 },
+	{ "float4",		"color0",		"COLOR0",		"gles_Color()",				0,	AT_PS_IN,	0 },
+	{ "float4",		"color1",		"COLOR1",		"gles_SecondaryColor()",	0,	AT_PS_IN,	0 },
 
-	{ "float4",		"color",		"COLOR",		"gl_Color",				0,	AT_PS_IN,	0 },
-	{ "float4",		"color0",		"COLOR0",		"gl_Color",				0,	AT_PS_IN,	0 },
-	{ "float4",		"color1",		"COLOR1",		"gl_SecondaryColor",	0,	AT_PS_IN,	0 },
-
-	{ "half4",		"hcolor",		"COLOR",		"gl_Color",				0,	AT_PS_IN,		0 },
-	{ "half4",		"hcolor0",		"COLOR0",		"gl_Color",				0,	AT_PS_IN,		0 },
-	{ "half4",		"hcolor1",		"COLOR1",		"gl_SecondaryColor",	0,	AT_PS_IN,		0 },
+	{ "half4",		"hcolor",		"COLOR",		"gles_Color()",				0,	AT_PS_IN,		0 },
+	{ "half4",		"hcolor0",		"COLOR0",		"gles_Color()",				0,	AT_PS_IN,		0 },
+	{ "half4",		"hcolor1",		"COLOR1",		"gles_SecondaryColor()",	0,	AT_PS_IN,		0 },
 
 	{ "float4",		"texcoord0",	"TEXCOORD0",	"vofi_TexCoord0",		0,	AT_VS_OUT | AT_PS_IN,	0 },
 	{ "float4",		"texcoord1",	"TEXCOORD1",	"vofi_TexCoord1",		0,	AT_VS_OUT | AT_PS_IN,	0 },
@@ -168,8 +161,8 @@ attribInfo_t attribsPC[] = {
 	{ "half4",		"htexcoord7",	"TEXCOORD7",	"vofi_TexCoord7",		0,	AT_PS_IN,		0 },
 	{ "half4",		"htexcoord8",	"TEXCOORD8",	"vofi_TexCoord8",		0,	AT_PS_IN,		0 },
 	{ "half4",		"htexcoord9",	"TEXCOORD9",	"vofi_TexCoord9",		0,	AT_PS_IN,		0 },
-	{ "float",		"fog",			"FOG",			"gl_FogFragCoord",		0,	AT_VS_OUT,		0 },
-	{ "float4",		"fog",			"FOG",			"gl_FogFragCoord",		0,	AT_PS_IN,		0 },
+	//{ "float",		"fog",			"FOG",			"gl_FogFragCoord",		0,	AT_VS_OUT,		0 },
+	//{ "float4",		"fog",			"FOG",			"gl_FogFragCoord",		0,	AT_PS_IN,		0 },
 	{ NULL,			NULL,			NULL,			NULL,					0,	0,				0 }
 };
 
@@ -202,17 +195,12 @@ const char * prefixes[] = {
 
 	"sampler",
 
-	"sampler1D",
 	"sampler2D",
 	"sampler3D",
 	"samplerCUBE",
 
-	"sampler1DShadow",		// GLSL
 	"sampler2DShadow",		// GLSL
-	"sampler3DShadow",		// GLSL
 	"samplerCubeShadow",	// GLSL
-
-	"sampler2DMS",			// GLSL
 };
 static const int numPrefixes = sizeof( prefixes ) / sizeof( prefixes[0] );
 
@@ -448,11 +436,10 @@ struct typeConversion_t {
 } typeConversion[] = {
 	{ "void",				"void" },
 
-	{ "float",				"float" }, // make sure when converting from GLSL to Cg, we don't end up with "fixed"
+	{ "float",				"float" },
 
 	{ "fixed",				"float" },
 
-	//{ "float",				"float" },
 	{ "float2",				"vec2" },
 	{ "float3",				"vec3" },
 	{ "float4",				"vec4" },
@@ -472,35 +459,30 @@ struct typeConversion_t {
 	{ "bool3",				"bvec3" },
 	{ "bool4",				"bvec4" },
 
-	{ "float2x2",			"mat2x2" },
+	{ "float2x2",			"mat2" },
 	{ "float2x3",			"mat2x3" },
 	{ "float2x4",			"mat2x4" },
 
 	{ "float3x2",			"mat3x2" },
-	{ "float3x3",			"mat3x3" },
+	{ "float3x3",			"mat3" },
 	{ "float3x4",			"mat3x4" },
 
 	{ "float4x2",			"mat4x2" },
 	{ "float4x3",			"mat4x3" },
-	{ "float4x4",			"mat4x4" },
+	{ "float4x4",			"mat4" },
 
-	{ "sampler1D",			"sampler1D" },
 	{ "sampler2D",			"sampler2D" },
 	{ "sampler3D",			"sampler3D" },
 	{ "samplerCUBE",		"samplerCube" },
 
-	{ "sampler1DShadow",	"sampler1DShadow" },
 	{ "sampler2DShadow",	"sampler2DShadow" },
-	{ "sampler3DShadow",	"sampler3DShadow" },
 	{ "samplerCubeShadow",	"samplerCubeShadow" },
-
-	{ "sampler2DMS",		"sampler2DMS" },
 
 	{ NULL, NULL }
 };
 
 const char * vertexInsert = {
-	"#version 150\n"
+	"#version 300\n"
 	"#define PC\n"
 	"\n"
 	"float saturate( float v ) { return clamp( v, 0.0, 1.0 ); }\n"
@@ -513,8 +495,11 @@ const char * vertexInsert = {
 const int vertexInsertLineCount = 7;
 
 const char * fragmentInsert = {
-	"#version 150\n"
+	"#version 300\n"
 	"#define PC\n"
+	"\n"
+	"in vec4 gles_FrontColor;\n"
+	"in vec4 gles_FrontSecondaryColor;\n"
 	"\n"
 	"void clip( float v ) { if ( v < 0.0 ) { discard; } }\n"
 	"void clip( vec2 v ) { if ( any( lessThan( v, vec2( 0.0 ) ) ) ) { discard; } }\n"
@@ -535,22 +520,22 @@ const char * fragmentInsert = {
 	"vec4 texCUBE( samplerCube sampler, vec3 texcoord ) { return texture( sampler, texcoord.xyz ); }\n"
 	"vec4 texCUBE( samplerCubeShadow sampler, vec4 texcoord ) { return vec4( texture( sampler, texcoord.xyzw ) ); }\n"
 	"\n"
-	"vec4 tex1Dproj( sampler1D sampler, vec2 texcoord ) { return textureProj( sampler, texcoord ); }\n"
 	"vec4 tex2Dproj( sampler2D sampler, vec3 texcoord ) { return textureProj( sampler, texcoord ); }\n"
 	"vec4 tex3Dproj( sampler3D sampler, vec4 texcoord ) { return textureProj( sampler, texcoord ); }\n"
 	"\n"
-	"vec4 tex1Dbias( sampler1D sampler, vec4 texcoord ) { return texture( sampler, texcoord.x, texcoord.w ); }\n"
 	"vec4 tex2Dbias( sampler2D sampler, vec4 texcoord ) { return texture( sampler, texcoord.xy, texcoord.w ); }\n"
 	"vec4 tex3Dbias( sampler3D sampler, vec4 texcoord ) { return texture( sampler, texcoord.xyz, texcoord.w ); }\n"
 	"vec4 texCUBEbias( samplerCube sampler, vec4 texcoord ) { return texture( sampler, texcoord.xyz, texcoord.w ); }\n"
 	"\n"
-	"vec4 tex1Dlod( sampler1D sampler, vec4 texcoord ) { return textureLod( sampler, texcoord.x, texcoord.w ); }\n"
 	"vec4 tex2Dlod( sampler2D sampler, vec4 texcoord ) { return textureLod( sampler, texcoord.xy, texcoord.w ); }\n"
 	"vec4 tex3Dlod( sampler3D sampler, vec4 texcoord ) { return textureLod( sampler, texcoord.xyz, texcoord.w ); }\n"
 	"vec4 texCUBElod( samplerCube sampler, vec4 texcoord ) { return textureLod( sampler, texcoord.xyz, texcoord.w ); }\n"
 	"\n"
+	"vec4 gles_Color() { if ( gl_FrontFacing ) { return gles_FrontColor; } else { return vec4( 0.0 ); } }\n"
+	"vec4 gles_SecondaryColor() { if ( gl_FrontFacing ) { return gles_FrontSecondaryColor; } else { return vec4( 0.0 ); } }\n"
+	"\n"
 };
-const int fragmentInsertLineCount = 27;
+const int fragmentInsertLineCount = 26;
 
 struct builtinConversion_t {
 	const char * nameCG;
@@ -631,83 +616,6 @@ void ParseInOutStruct( idLexer & src, int attribType, idList< inOutVariable_t > 
 	src.ExpectTokenString( ";" );
 }
 
-struct inOutVariableCG_t {
-	idStr	type;
-	idStr	nameCg;
-	idStr	nameGLSL;
-	idStr	semanticCg;
-	bool	declareInOut;
-};
-
-/*
-========================
-ParseInOutVars
-========================
-*/
-void ParseInOutVars( bool isInput, idLexer & src, int attribType, idList< inOutVariableCG_t > & inOutVars ) {
-	const char *prefix = isInput ? "in" : "out";
-
-	do {
-		inOutVariableCG_t var;
-
-		idToken token;
-		src.ReadToken( & token );
-		var.type = token;
-		src.ReadToken( & token );
-		var.nameGLSL = token;
-		
-		// handle gl_ClipDistance
-		if ( var.nameGLSL == "gl_ClipDistance" && src.CheckTokenString( "[" ) ) {
-			src.ReadToken( & token );
-			var.nameGLSL += "[";
-			src.ReadToken( & token );
-			var.nameGLSL += token;
-			src.ReadToken( & token );
-			var.nameGLSL += "]";
-		}
-
-		// verify end of string
-		if ( !src.CheckTokenString( ";" ) ) {
-			src.SkipUntilString( ";" );
-			if ( src.CheckTokenString( prefix ) ) {
-				continue;
-			} else {
-				break;
-			}
-		}
-
-		// convert the type
-		for ( int i = 0; typeConversion[i].typeGLSL != NULL; i++ ) {
-			if ( var.type.Cmp( typeConversion[i].typeGLSL ) == 0 ) {
-				var.type = typeConversion[i].typeCG;
-				break;
-			}
-		}
-
-		// find semantic and Cg name
-		for ( int i = 0; attribsPC[i].semantic != NULL; i++ ) {
-			if ( ( attribsPC[i].flags & attribType ) != 0 ) {
-				if ( var.nameGLSL.Cmp( attribsPC[i].glsl ) == 0 ) {
-					var.nameCg = attribsPC[i].name;
-					var.semanticCg = attribsPC[i].semantic;
-					break;
-				}
-			}
-		}
-
-		// check if it was defined previously
-		var.declareInOut = true;
-		for ( int i = 0; i < inOutVars.Num(); i++ ) {
-			if ( var.nameCg == inOutVars[i].nameCg ) {
-				var.declareInOut = false;
-				break;
-			}
-		}
-
-		inOutVars.Append( var );
-	} while ( src.CheckTokenString( prefix ) );
-}
-
 /*
 ========================
 ConvertCG2GLSL
@@ -771,7 +679,9 @@ idStr ConvertCG2GLSL( const idStr & in, const char * name, bool isVertexProgram,
 				program += "\n\n";
 				for ( int i = 0; i < varsIn.Num(); i++ ) {
 					if ( varsIn[i].declareInOut ) {
-						program += "in " + varsIn[i].type + " " + varsIn[i].nameGLSL + ";\n";
+						if ( varsIn[i].nameGLSL != "gles_Color()" && varsIn[i].nameGLSL != "gles_SecondaryColor()" ) {
+							program += "in " + varsIn[i].type + " " + varsIn[i].nameGLSL + ";\n";
+						}
 					}
 				}
 				inOutVariable_t var;
@@ -785,7 +695,11 @@ idStr ConvertCG2GLSL( const idStr & in, const char * name, bool isVertexProgram,
 				program += "\n";
 				for ( int i = 0; i < varsOut.Num(); i++ ) {
 					if ( varsOut[i].declareInOut ) {
-						program += "out " + varsOut[i].type + " " + varsOut[i].nameGLSL + ";\n";
+						if ( varsOut[i].nameGLSL == "gles_FragColor" ) {
+							program += "layout(location = 0) out " + varsOut[i].type + " gles_FragColor;\n";
+						} else {
+							program += "out " + varsOut[i].type + " " + varsOut[i].nameGLSL + ";\n";
+						}
 					}
 				}
 				continue;
@@ -986,238 +900,6 @@ idStr ConvertCG2GLSL( const idStr & in, const char * name, bool isVertexProgram,
 }
 
 /*
-========================
-ConvertGLSL2CG
-========================
-*/
-idStr ConvertGLSL2CG( const idStr & in, const idStr & uniforms, const char * name, bool isVertexProgram ) {
-	idStr program;
-	program.ReAllocate( in.Length() * 2, false );
-
-	// skip pre-written "insert"
-	idToken token;
-	idLexer src( LEXFL_NOFATALERRORS );
-	src.LoadMemory( in.c_str(), in.Length(), name );
-	const int linesToSkip = isVertexProgram ? vertexInsertLineCount : fragmentInsertLineCount;
-	for ( int i = 0; i < linesToSkip; i++ ) {
-		src.SkipRestOfLine();
-		src.ReadToken( &token );
-	}
-
-	idList< inOutVariableCG_t, TAG_RENDERPROG > varsIn;
-	idList< inOutVariableCG_t, TAG_RENDERPROG > varsOut;
-	idList< idStr > uniformList;
-
-	const char * uniformArrayName = isVertexProgram ? VERTEX_UNIFORM_ARRAY_NAME : FRAGMENT_UNIFORM_ARRAY_NAME;
-	const char * inName = isVertexProgram ? "VS_IN" : "PS_IN";
-	const char * outName = isVertexProgram ? "VS_OUT" : "PS_OUT";
-	const char * mainInputName = isVertexProgram ? "vertex" : "fragment";
-	bool hasUniformArray = false;
-	char newline[128] = { "\n" };
-
-	do {
-
-		// check for uniforms
-		while ( token == "uniform" && src.CheckTokenString( "vec4" ) ) {
-			src.ReadToken( &token );
-			if ( token == uniformArrayName ) {
-				// uniform array
-				idLexer uniformSrc( LEXFL_NOFATALERRORS );
-				uniformSrc.LoadMemory( uniforms.c_str(), uniforms.Length(), name );
-
-				while ( uniformSrc.ReadToken( &token ) ) {
-					uniformList.Append( token );
-				}
-
-				// check uniform count
-				src.ExpectTokenString( "[" );
-				src.ReadToken( & token );
-				int uniformCount = token.GetIntValue();
-				src.SkipUntilString( ";" );
-				if ( uniformCount != uniformList.Num() ) {
-					idLib::Error( "Number of uniforms for %s don't match the number of uniforms that exist in uniform list\n", name );
-				}
-
-				hasUniformArray = true;
-			} else {
-				// individual uniforms
-				uniformList.Append( token );
-				src.ExpectTokenString( ";" );
-			}
-
-			src.ReadToken( & token );
-		}
-
-		// in/out variables
-		if ( token == "in" || token == "out" ) {
-			bool isIn = token == "in";
-			idList< inOutVariableCG_t > & vars = isIn ? varsIn : varsOut;
-			int attrib;
-			if ( isIn ) {
-				attrib = isVertexProgram ? AT_VS_IN : AT_PS_IN;
-			} else {
-				attrib = isVertexProgram ? AT_VS_OUT : AT_PS_OUT;
-			}
-
-			ParseInOutVars( token == "in", src, attrib, vars );
-
-			program += ( token.linesCrossed > 0 ) ? newline : ( token.WhiteSpaceBeforeToken() > 0 ? " " : "" );
-			program += "\nstruct ";
-			program += isIn ? inName : outName;
-			program += " {\n";
-			for ( int i = 0; i < vars.Num(); i++ ) {
-				if ( vars[i].declareInOut ) {
-					program += "\t" + vars[i].type + " " + vars[i].nameCg + "\t: " + vars[i].semanticCg + " ;\n";
-				}
-			}
-			program += "} ;\n";
-			continue;
-		}
-
-		// strip in/program parameters from main
-		if ( token == "void" && src.CheckTokenString( "main" ) ) {
-			src.ExpectTokenString( "(" );
-			while( src.ReadToken( &token ) ) {
-				if ( token == ")" ) {
-					break;
-				}
-			}
-
-			program += "\nvoid main (";
-			if ( varsIn.Num() > 0 ) {
-				program += " const ";
-				program += inName;
-				program += " ";
-				program += mainInputName;
-
-				if ( varsOut.Num() > 0 ) {
-					program += ",";
-				} else {
-					program += " ";
-				}
-			}
-			if ( varsOut.Num() > 0 ) {
-				program += " out ";
-				program += outName;
-				program += " result ";
-			}
-			program += ")";
-			continue;
-		}
-
-		// maintain indentation
-		if ( token == "{" ) {
-			program += ( token.linesCrossed > 0 ) ? newline : ( token.WhiteSpaceBeforeToken() > 0 ? " " : "" );
-			program += "{";
-
-			int len = Min( idStr::Length( newline ) + 1, (int)sizeof( newline ) - 1 );
-			newline[len - 1] = '\t';
-			newline[len - 0] = '\0';
-			continue;
-		}
-		if ( token == "}" ) {
-			int len = Max( idStr::Length( newline ) - 1, 0 );
-			newline[len] = '\0';
-
-			program += ( token.linesCrossed > 0 ) ? newline : ( token.WhiteSpaceBeforeToken() > 0 ? " " : "" );
-			program += "}";
-			continue;
-		}
-
-		// check for a type conversion
-		bool foundType = false;
-		for ( int i = 0; typeConversion[i].typeGLSL != NULL; i++ ) {
-			if ( token.Cmp( typeConversion[i].typeGLSL ) == 0 ) {
-				program += ( token.linesCrossed > 0 ) ? newline : ( token.WhiteSpaceBeforeToken() > 0 ? " " : "" );
-				program += typeConversion[i].typeCG;
-				foundType = true;
-				break;
-			}
-		}
-		if ( foundType ) {
-			continue;
-		}
-
-		// handle uniform variables
-		if ( token == uniformArrayName ) {
-			program += ( token.linesCrossed > 0 ) ? newline : ( token.WhiteSpaceBeforeToken() > 0 ? " " : "" );
-			if ( hasUniformArray ) {
-				// check for uniforms that were used within an array
-				src.ReadToken( & token );
-				src.ReadToken( & token );
-				int uniformIndex = token.GetIntValue();
-				src.SkipUntilString( "]" );
-
-				program += uniformList[uniformIndex];
-			} else {
-				src.Error( "Token is a uniform array, but no uniform arrays are used" );
-				src.SkipUntilString( "*" );
-				src.ReadToken( & token );
-				src.SkipUntilString( "]" );
-
-				program += token;
-			}
-			continue;
-		}
-
-		// check for input/output parameters
-		bool foundInOut = false;
-		for ( int i = 0; i < varsIn.Num(); i++ ) {
-			if ( token.Cmp( varsIn[i].nameGLSL ) == 0 ) {
-				program += ( token.linesCrossed > 0 ) ? newline : ( token.WhiteSpaceBeforeToken() > 0 ? " " : "" );
-				program += mainInputName;
-				program += " . ";
-				program += varsIn[i].nameCg;
-				foundInOut = true;
-				break;
-			}
-		}
-		if ( !foundInOut ) {
-			for ( int i = 0; i < varsOut.Num(); i++ ) {
-				if ( token.Cmp( varsOut[i].nameGLSL ) == 0 ) {
-					program += ( token.linesCrossed > 0 ) ? newline : ( token.WhiteSpaceBeforeToken() > 0 ? " " : "" );
-					program += "result . ";
-					program += varsOut[i].nameCg;
-					foundInOut = true;
-					break;
-				}
-			}
-		}
-		if ( foundInOut ) {
-			continue;
-		}
-
-		// check for a function conversion
-		bool foundFunction = false;
-		for ( int i = 0; builtinConversion[i].nameGLSL != NULL; i++ ) {
-			if ( token.Cmp( builtinConversion[i].nameGLSL ) == 0 ) {
-				program += ( token.linesCrossed > 0 ) ? newline : ( token.WhiteSpaceBeforeToken() > 0 ? " " : "" );
-				program += builtinConversion[i].nameCG;
-				foundFunction = true;
-				break;
-			}
-		}
-		if ( foundFunction ) {
-			continue;
-		}
-
-		program += ( token.linesCrossed > 0 ) ? newline : ( token.WhiteSpaceBeforeToken() > 0 ? " " : "" );
-		program += token;
-	} while ( src.ReadToken( &token ) );
-
-	// write CG
-	idStr out;
-
-	for ( int i = 0; i < uniformList.Num(); i++ ) {
-		out += "uniform float4 " + uniformList[i] + "\n";
-	}
-
-	out += "\n" + program;
-
-	return out;
-}
-
-/*
 ================================================================================================
 idRenderProgManager::LoadGLSLShader
 ================================================================================================
@@ -1387,83 +1069,8 @@ idRenderProgManager::SaveCGShader
 ================================================================================================
 */
 bool idRenderProgManager::SaveCGShader( GLenum target, const char * name ) {
-	idStr inFileGLSL;
-	idStr inFileUniforms;
-	idStr outFileCG;
-	inFileGLSL.Format( "renderprogs\\glsl\\%s", name );
-	inFileGLSL.StripFileExtension();
-	inFileUniforms.Format( "renderprogs\\glsl\\%s", name );
-	inFileUniforms.StripFileExtension();
-	outFileCG.Format( "renderprogs\\%s", name );
-	outFileCG.StripFileExtension();
-	if ( target == GL_FRAGMENT_SHADER ) {
-		inFileGLSL += "_fragment.glsl";
-		inFileUniforms += "_fragment.uniforms";
-		outFileCG += ".pixel";
-	} else {
-		inFileGLSL += "_vertex.glsl";
-		inFileUniforms += "_vertex.uniforms";
-		outFileCG += ".vertex";
-	}
-
-	// first check whether we already have a valid CG file and compare it to the GLSL timestamp;
-	ID_TIME_T glslTimeStamp;
-	int glslFileLength = fileSystem->ReadFile( inFileGLSL.c_str(), NULL, &glslTimeStamp );
-
-	ID_TIME_T cgTimeStamp;
-	int cgFileLength = fileSystem->ReadFile( outFileCG.c_str(), NULL, &cgTimeStamp );
-
-	// if the CG file doesn't exist or we have a newer GLSL file we need to recreate the CG file.
-	idStr programCG;
-	if ( ( cgFileLength <= 0 ) || ( glslTimeStamp > cgTimeStamp ) ) {
-		if ( glslFileLength <= 0 ) {
-			// GLSL file doesn't even exist bail out
-			return false;
-		}
-
-		void * glslFileBuffer = NULL;
-		int len = fileSystem->ReadFile( inFileGLSL.c_str(), &glslFileBuffer );
-		if ( len <= 0 ) {
-			return false;
-		}
-		idStr glslCode( ( const char* ) glslFileBuffer );
-		Mem_Free( glslFileBuffer );
-
-		idStr programUniforms = "";
-
-		ID_TIME_T uniformsTimeStamp;
-		int uniformsFileLength = fileSystem->ReadFile( inFileUniforms.c_str(), NULL, &uniformsTimeStamp );
-		if ( uniformsFileLength > 0 ) {
-			// read in the Uniforms file
-			void * fileBufferUniforms = NULL;
-			int lengthUniforms = fileSystem->ReadFile( inFileUniforms.c_str(), &fileBufferUniforms );
-			if ( lengthUniforms <= 0 ) {
-				return false;
-			}
-			programUniforms = ( const char * ) fileBufferUniforms;
-			Mem_Free( fileBufferUniforms );
-		}
-
-		programCG = ConvertGLSL2CG( glslCode, programUniforms, inFileGLSL, target == GL_VERTEX_SHADER );
-
-#if 0
-		idStr compareUniforms;
-		idStr compareGLSL = ConvertCG2GLSL( programCG, inFileGLSL, target == GL_VERTEX_SHADER, compareUniforms );
-		idLib::WarningIf( compareUniforms != programUniforms, "Uniforms from Cg-2-GLSL don't match uniforms in original GLSL\n" );
-		idLib::WarningIf( compareGLSL != glslCode, "GLSL from Cg-2-GLSL don't match original GLSL\n" );
-#endif
-	} else {
-		// read in the CG file
-		void * fileBufferCG = NULL;
-		int lengthCG = fileSystem->ReadFile( outFileCG.c_str(), &fileBufferCG );
-		if ( lengthCG <= 0 ) {
-			idLib::Error( "CG file %s could not be loaded and may be corrupt", outFileCG.c_str() );
-		}
-		programCG = ( const char * ) fileBufferCG;
-		Mem_Free( fileBufferCG );
-	}
-
-	return fileSystem->WriteFile( outFileCG, programCG.c_str(), programCG.Length(), "fs_basepath" ) != -1;
+	// shaders are already in Cg format and shouldn't need to be resaved
+	return false;
 }
 
 /*
