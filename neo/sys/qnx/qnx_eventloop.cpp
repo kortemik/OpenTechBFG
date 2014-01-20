@@ -463,6 +463,7 @@ void Sys_PumpEvents() {
 					// Acts like pressing ~ to open in-game console //XXX This should be disabled if the key-binding is in use
 					Sys_QueEvent( SE_KEY, K_GRAVE, true, 0, NULL, 0 );
 					Sys_QueEvent( SE_KEY, K_GRAVE, false, 0, NULL, 0 );
+					//TODO: open/close keyboard
 					break;
 
 				case NAVIGATOR_INVOKE_TARGET_RESULT: {

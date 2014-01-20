@@ -38,7 +38,7 @@
     <permission>narrow_landscape_exit</permission>
     
     <asset path="icon.png">icon.png</asset>
-    <asset path="content/shaders">base/renderprogs</asset>
+    <asset path="content/shaders">assets/base/renderprogs</asset>
     
     <configuration name="Device-Debug">
        <platformArchitecture>armle-v7</platformArchitecture>

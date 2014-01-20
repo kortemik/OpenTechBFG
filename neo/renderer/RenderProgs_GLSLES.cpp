@@ -482,8 +482,13 @@ struct typeConversion_t {
 };
 
 const char * vertexInsert = {
-	"#version 300\n"
+	"#version 300 es\n"
 	"#define PC\n"
+#ifdef _DEBUG
+	"#pragma debug(on)\n"
+#else
+	"#pragma debug(off)\n"
+#endif
 	"\n"
 	"float saturate( float v ) { return clamp( v, 0.0, 1.0 ); }\n"
 	"vec2 saturate( vec2 v ) { return clamp( v, 0.0, 1.0 ); }\n"
@@ -492,11 +497,16 @@ const char * vertexInsert = {
 	"vec4 tex2Dlod( sampler2D sampler, vec4 texcoord ) { return textureLod( sampler, texcoord.xy, texcoord.w ); }\n"
 	"\n"
 };
-const int vertexInsertLineCount = 7;
+const int vertexInsertLineCount = 8;
 
 const char * fragmentInsert = {
-	"#version 300\n"
+	"#version 300 es\n"
 	"#define PC\n"
+#ifdef _DEBUG
+	"#pragma debug(on)\n"
+#else
+	"#pragma debug(off)\n"
+#endif
 	"\n"
 	"in vec4 gles_FrontColor;\n"
 	"in vec4 gles_FrontSecondaryColor;\n"
@@ -535,7 +545,7 @@ const char * fragmentInsert = {
 	"vec4 gles_SecondaryColor() { if ( gl_FrontFacing ) { return gles_FrontSecondaryColor; } else { return vec4( 0.0 ); } }\n"
 	"\n"
 };
-const int fragmentInsertLineCount = 26;
+const int fragmentInsertLineCount = 27;
 
 struct builtinConversion_t {
 	const char * nameCG;
@@ -906,17 +916,19 @@ idRenderProgManager::LoadGLSLShader
 */
 GLuint idRenderProgManager::LoadGLSLShader( GLenum target, const char * name, idList<int> & uniforms ) {
 
+	int glslVersion = (int)glConfig.glVersion;
+
 	idStr inFile;
 	idStr outFileHLSL;
 	idStr outFileGLSL;
 	idStr outFileUniforms;
 	inFile.Format( "renderprogs\\%s", name );
 	inFile.StripFileExtension();
-	outFileHLSL.Format( "renderprogs\\glsl\\%s", name );
+	outFileHLSL.Format( "renderprogs\\glsl\\%d\\%s", glslVersion, name );
 	outFileHLSL.StripFileExtension();
-	outFileGLSL.Format( "renderprogs\\glsl\\%s", name );
+	outFileGLSL.Format( "renderprogs\\glsl\\%d\\%s", glslVersion, name );
 	outFileGLSL.StripFileExtension();
-	outFileUniforms.Format( "renderprogs\\glsl\\%s", name );
+	outFileUniforms.Format( "renderprogs\\glsl\\%d\\%s", glslVersion, name );
 	outFileUniforms.StripFileExtension();
 	if ( target == GL_FRAGMENT_SHADER ) {
 		inFile += ".pixel";
@@ -940,8 +952,8 @@ GLuint idRenderProgManager::LoadGLSLShader( GLenum target, const char * name, id
 	// if the glsl file doesn't exist or we have a newer HLSL file we need to recreate the glsl file.
 	idStr programGLSL;
 	idStr programUniforms;
-	if ( ( glslFileLength <= 0 ) || ( hlslTimeStamp > glslTimeStamp ) ) {
-		if ( hlslFileLength <= 0 ) {
+	if ( ( ( glslFileLength <= 0 ) || ( hlslTimeStamp > glslTimeStamp ) ) && ( fileSystem->FindFile( outFileGLSL.c_str() ) == FIND_NO ) ) {
+		if ( ( hlslFileLength <= 0 ) && ( fileSystem->FindFile( inFile.c_str() ) == FIND_NO ) ) {
 			// hlsl file doesn't even exist bail out
 			return false;
 		}
@@ -956,10 +968,10 @@ GLuint idRenderProgManager::LoadGLSLShader( GLenum target, const char * name, id
 		idStr programHLSL = StripDeadCode( hlslCode, inFile );
 		programGLSL = ConvertCG2GLSL( programHLSL, inFile, target == GL_VERTEX_SHADER, programUniforms );
 
-		fileSystem->WriteFile( outFileHLSL, programHLSL.c_str(), programHLSL.Length(), "fs_basepath" );
-		fileSystem->WriteFile( outFileGLSL, programGLSL.c_str(), programGLSL.Length(), "fs_basepath" );
+		fileSystem->WriteFile( outFileHLSL, programHLSL.c_str(), programHLSL.Length(), "fs_shaderSavePath" );
+		fileSystem->WriteFile( outFileGLSL, programGLSL.c_str(), programGLSL.Length(), "fs_shaderSavePath" );
 		if ( r_useUniformArrays.GetBool() ) {
-			fileSystem->WriteFile( outFileUniforms, programUniforms.c_str(), programUniforms.Length(), "fs_basepath" );
+			fileSystem->WriteFile( outFileUniforms, programUniforms.c_str(), programUniforms.Length(), "fs_shaderSavePath" );
 		}
 	} else {
 		// read in the glsl file

@@ -72,6 +72,7 @@ idCVar QNXVars_t::qnx_errorAttachLogs( "qnx_errorAttachLogs", "1", CVAR_SYSTEM |
 #else
 idCVar QNXVars_t::qnx_errorAttachLogs( "qnx_errorAttachLogs", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "attach slog2 logs on error" );
 #endif
+idCVar	fs_shaderSavePath( "fs_shaderSavePath", "", CVAR_SYSTEM | CVAR_ROM | CVAR_CHEAT, "" );
 
 QNXVars_t				qnx;
 
@@ -574,10 +575,12 @@ void Sys_AdditionalSearchPaths( idStrList & paths ) {
 	str += "/shared/misc/appdata/doom3bfg";
 	paths.Append( str );
 
+	/*
 	// Not temp/not backed-up cache (**UNTESTED**)
 	str = Sys_CWD();
 	str += "/cache";
 	paths.Append( str );
+	*/
 
 	// App assets
 	str = Sys_CWD();
@@ -1185,7 +1188,28 @@ Sys_InitPostFilesystem
 ================
 */
 void Sys_InitPostFilesystem() {
-	//TODO
+	extern idCVar fs_savepath;
+	fs_shaderSavePath.SetString( fs_savepath.GetString() );
+#if 0
+	extern idCVar fs_checkFilesIfNotInResource;
+
+	if ( fileSystem->FindFile( "renderprogs/color.vertex" ) != FIND_NO ) {
+		/* TODO:
+		 * extract _common.resources
+		 * remove renderprogs/GLSL folder
+		 * add render shaders
+		 * build new resource file and CRC, replace existing one
+		 * Reload resource file
+		 */
+	} else if ( fileSystem->FindFile( "renderprogs/glsl/3/color_vertex.glsl" ) != FIND_NO ) {
+		/* TODO:
+		 * extract _common.resources
+		 * add converted shaders
+		 * build new resource file and CRC, replace existing one
+		 * Reload resource file
+		 */
+	}
+#endif
 }
 
 /*
