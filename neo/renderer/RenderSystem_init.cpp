@@ -2212,6 +2212,7 @@ void GfxInfo_f( const idCmdArgs &args ) {
 
 	idLib::Printf( "%i multisamples\n", glConfig.multisamples );
 
+	//XXX If screen is not 16x9, this is incorrect
 	common->Printf( "%5.1f cm screen width (%4.1f\" diagonal)\n",
 		glConfig.physicalScreenWidthInCentimeters, glConfig.physicalScreenWidthInCentimeters / 2.54f
 			* sqrt( (float)(16*16 + 9*9) ) / 16.0f );

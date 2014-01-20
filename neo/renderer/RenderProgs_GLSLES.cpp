@@ -64,6 +64,7 @@ struct attribInfo_t {
 	int				bind;
 	int				flags;
 	int				vertexMask;
+	int				builtIn;
 };
 
 /*
@@ -92,78 +93,78 @@ enum vertexMask_t {
 
 attribInfo_t attribsPC[] = {
 	// vertex attributes
-	{ "float4",		"position",		"POSITION",		"in_Position",			PC_ATTRIB_INDEX_VERTEX,			AT_VS_IN,		VERTEX_MASK_XYZ },
-	{ "float2",		"texcoord",		"TEXCOORD0",	"in_TexCoord",			PC_ATTRIB_INDEX_ST,				AT_VS_IN,		VERTEX_MASK_ST },
-	{ "float4",		"normal",		"NORMAL",		"in_Normal",			PC_ATTRIB_INDEX_NORMAL,			AT_VS_IN,		VERTEX_MASK_NORMAL },
-	{ "float4",		"tangent",		"TANGENT",		"in_Tangent",			PC_ATTRIB_INDEX_TANGENT,		AT_VS_IN,		VERTEX_MASK_TANGENT },
-	{ "float4",		"color",		"COLOR0",		"in_Color",				PC_ATTRIB_INDEX_COLOR,			AT_VS_IN,		VERTEX_MASK_COLOR },
-	{ "float4",		"color2",		"COLOR1",		"in_Color2",			PC_ATTRIB_INDEX_COLOR2,			AT_VS_IN,		VERTEX_MASK_COLOR2 },
+	{ "float4",		"position",		"POSITION",		"in_Position",			PC_ATTRIB_INDEX_VERTEX,			AT_VS_IN,		VERTEX_MASK_XYZ, 0 },
+	{ "float2",		"texcoord",		"TEXCOORD0",	"in_TexCoord",			PC_ATTRIB_INDEX_ST,				AT_VS_IN,		VERTEX_MASK_ST, 0 },
+	{ "float4",		"normal",		"NORMAL",		"in_Normal",			PC_ATTRIB_INDEX_NORMAL,			AT_VS_IN,		VERTEX_MASK_NORMAL, 0 },
+	{ "float4",		"tangent",		"TANGENT",		"in_Tangent",			PC_ATTRIB_INDEX_TANGENT,		AT_VS_IN,		VERTEX_MASK_TANGENT, 0 },
+	{ "float4",		"color",		"COLOR0",		"in_Color",				PC_ATTRIB_INDEX_COLOR,			AT_VS_IN,		VERTEX_MASK_COLOR, 0 },
+	{ "float4",		"color2",		"COLOR1",		"in_Color2",			PC_ATTRIB_INDEX_COLOR2,			AT_VS_IN,		VERTEX_MASK_COLOR2, 0 },
 
 	// pre-defined vertex program output
-	{ "float4",		"position",		"POSITION",		"gl_Position",			0,	AT_VS_OUT,		0 },
+	{ "float4",		"position",		"POSITION",		"gl_Position",			0,	AT_VS_OUT,		0, 1 },
 
 	// pre-defined fragment program input
-	{ "float4",		"position",		"WPOS",			"gl_FragCoord",			0,	AT_PS_IN,		0 },
-	{ "half4",		"hposition",	"WPOS",			"gl_FragCoord",			0,	AT_PS_IN,		0 },
-	{ "float",		"facing",		"FACE",			"gl_FrontFacing",		0,	AT_PS_IN,		0 },
+	{ "float4",		"position",		"WPOS",			"gl_FragCoord",			0,	AT_PS_IN,		0, 1 },
+	{ "half4",		"hposition",	"WPOS",			"gl_FragCoord",			0,	AT_PS_IN,		0, 1 },
+	{ "float",		"facing",		"FACE",			"gl_FrontFacing",		0,	AT_PS_IN,		0, 1 },
 
 	// fragment program output
-	{ "float4",		"color",		"COLOR",		"gles_FragColor",	0,	AT_PS_OUT,		0 },
-	{ "half4",		"hcolor",		"COLOR",		"gles_FragColor",	0,	AT_PS_OUT,		0 },
-	{ "float4",		"color0",		"COLOR0",		"gles_FragColor",	0,	AT_PS_OUT,		0 },
-	{ "float4",		"color1",		"COLOR1",		"gles_FragColor",	1,	AT_PS_OUT,		0 },
-	{ "float4",		"color2",		"COLOR2",		"gles_FragColor",	2,	AT_PS_OUT,		0 },
-	{ "float4",		"color3",		"COLOR3",		"gles_FragColor",	3,	AT_PS_OUT,		0 },
-	{ "float",		"depth",		"DEPTH",		"gl_FragDepth",		4,	AT_PS_OUT,		0 },
+	{ "float4",		"color",		"COLOR",		"gles_FragColor",	0,	AT_PS_OUT,		0, 0 },
+	{ "half4",		"hcolor",		"COLOR",		"gles_FragColor",	0,	AT_PS_OUT,		0, 0 },
+	{ "float4",		"color0",		"COLOR0",		"gles_FragColor",	0,	AT_PS_OUT,		0, 0 },
+	{ "float4",		"color1",		"COLOR1",		"gles_FragColor",	1,	AT_PS_OUT,		0, 0 },
+	{ "float4",		"color2",		"COLOR2",		"gles_FragColor",	2,	AT_PS_OUT,		0, 0 },
+	{ "float4",		"color3",		"COLOR3",		"gles_FragColor",	3,	AT_PS_OUT,		0, 0 },
+	{ "float",		"depth",		"DEPTH",		"gl_FragDepth",		4,	AT_PS_OUT,		0, 1 },
 
 	// vertex to fragment program pass through
-	{ "float4",		"color",		"COLOR",		"gles_FrontColor",			0,	AT_VS_OUT,	0 },
-	{ "float4",		"color0",		"COLOR0",		"gles_FrontColor",			0,	AT_VS_OUT,	0 },
-	{ "float4",		"color1",		"COLOR1",		"gles_FrontSecondaryColor",	0,	AT_VS_OUT,	0 },
+	{ "float4",		"color",		"COLOR",		"gles_FrontColor",			0,	AT_VS_OUT,	0, 0 },
+	{ "float4",		"color0",		"COLOR0",		"gles_FrontColor",			0,	AT_VS_OUT,	0, 0 },
+	{ "float4",		"color1",		"COLOR1",		"gles_FrontSecondaryColor",	0,	AT_VS_OUT,	0, 0 },
 
-	{ "float4",		"color",		"COLOR",		"gles_Color()",				0,	AT_PS_IN,	0 },
-	{ "float4",		"color0",		"COLOR0",		"gles_Color()",				0,	AT_PS_IN,	0 },
-	{ "float4",		"color1",		"COLOR1",		"gles_SecondaryColor()",	0,	AT_PS_IN,	0 },
+	{ "float4",		"color",		"COLOR",		"gles_Color()",				0,	AT_PS_IN,	0, 0 },
+	{ "float4",		"color0",		"COLOR0",		"gles_Color()",				0,	AT_PS_IN,	0, 0 },
+	{ "float4",		"color1",		"COLOR1",		"gles_SecondaryColor()",	0,	AT_PS_IN,	0, 0 },
 
-	{ "half4",		"hcolor",		"COLOR",		"gles_Color()",				0,	AT_PS_IN,		0 },
-	{ "half4",		"hcolor0",		"COLOR0",		"gles_Color()",				0,	AT_PS_IN,		0 },
-	{ "half4",		"hcolor1",		"COLOR1",		"gles_SecondaryColor()",	0,	AT_PS_IN,		0 },
+	{ "half4",		"hcolor",		"COLOR",		"gles_Color()",				0,	AT_PS_IN,		0, 0 },
+	{ "half4",		"hcolor0",		"COLOR0",		"gles_Color()",				0,	AT_PS_IN,		0, 0 },
+	{ "half4",		"hcolor1",		"COLOR1",		"gles_SecondaryColor()",	0,	AT_PS_IN,		0, 0 },
 
-	{ "float4",		"texcoord0",	"TEXCOORD0",	"vofi_TexCoord0",		0,	AT_VS_OUT | AT_PS_IN,	0 },
-	{ "float4",		"texcoord1",	"TEXCOORD1",	"vofi_TexCoord1",		0,	AT_VS_OUT | AT_PS_IN,	0 },
-	{ "float4",		"texcoord2",	"TEXCOORD2",	"vofi_TexCoord2",		0,	AT_VS_OUT | AT_PS_IN,	0 },
-	{ "float4",		"texcoord3",	"TEXCOORD3",	"vofi_TexCoord3",		0,	AT_VS_OUT | AT_PS_IN,	0 },
-	{ "float4",		"texcoord4",	"TEXCOORD4",	"vofi_TexCoord4",		0,	AT_VS_OUT | AT_PS_IN,	0 },
-	{ "float4",		"texcoord5",	"TEXCOORD5",	"vofi_TexCoord5",		0,	AT_VS_OUT | AT_PS_IN,	0 },
-	{ "float4",		"texcoord6",	"TEXCOORD6",	"vofi_TexCoord6",		0,	AT_VS_OUT | AT_PS_IN,	0 },
-	{ "float4",		"texcoord7",	"TEXCOORD7",	"vofi_TexCoord7",		0,	AT_VS_OUT | AT_PS_IN,	0 },
-	{ "float4",		"texcoord8",	"TEXCOORD8",	"vofi_TexCoord8",		0,	AT_VS_OUT | AT_PS_IN,	0 },
-	{ "float4",		"texcoord9",	"TEXCOORD9",	"vofi_TexCoord9",		0,	AT_VS_OUT | AT_PS_IN,	0 },
+	{ "float4",		"texcoord0",	"TEXCOORD0",	"vofi_TexCoord0",		0,	AT_VS_OUT | AT_PS_IN,	0, 0 },
+	{ "float4",		"texcoord1",	"TEXCOORD1",	"vofi_TexCoord1",		0,	AT_VS_OUT | AT_PS_IN,	0, 0 },
+	{ "float4",		"texcoord2",	"TEXCOORD2",	"vofi_TexCoord2",		0,	AT_VS_OUT | AT_PS_IN,	0, 0 },
+	{ "float4",		"texcoord3",	"TEXCOORD3",	"vofi_TexCoord3",		0,	AT_VS_OUT | AT_PS_IN,	0, 0 },
+	{ "float4",		"texcoord4",	"TEXCOORD4",	"vofi_TexCoord4",		0,	AT_VS_OUT | AT_PS_IN,	0, 0 },
+	{ "float4",		"texcoord5",	"TEXCOORD5",	"vofi_TexCoord5",		0,	AT_VS_OUT | AT_PS_IN,	0, 0 },
+	{ "float4",		"texcoord6",	"TEXCOORD6",	"vofi_TexCoord6",		0,	AT_VS_OUT | AT_PS_IN,	0, 0 },
+	{ "float4",		"texcoord7",	"TEXCOORD7",	"vofi_TexCoord7",		0,	AT_VS_OUT | AT_PS_IN,	0, 0 },
+	{ "float4",		"texcoord8",	"TEXCOORD8",	"vofi_TexCoord8",		0,	AT_VS_OUT | AT_PS_IN,	0, 0 },
+	{ "float4",		"texcoord9",	"TEXCOORD9",	"vofi_TexCoord9",		0,	AT_VS_OUT | AT_PS_IN,	0, 0 },
 
-	{ "float4",		"texcoord0",	"TEXCOORD0_centroid",	"vofi_TexCoord0",	0,	AT_PS_IN,	0 },
-	{ "float4",		"texcoord1",	"TEXCOORD1_centroid",	"vofi_TexCoord1",	0,	AT_PS_IN,	0 },
-	{ "float4",		"texcoord2",	"TEXCOORD2_centroid",	"vofi_TexCoord2",	0,	AT_PS_IN,	0 },
-	{ "float4",		"texcoord3",	"TEXCOORD3_centroid",	"vofi_TexCoord3",	0,	AT_PS_IN,	0 },
-	{ "float4",		"texcoord4",	"TEXCOORD4_centroid",	"vofi_TexCoord4",	0,	AT_PS_IN,	0 },
-	{ "float4",		"texcoord5",	"TEXCOORD5_centroid",	"vofi_TexCoord5",	0,	AT_PS_IN,	0 },
-	{ "float4",		"texcoord6",	"TEXCOORD6_centroid",	"vofi_TexCoord6",	0,	AT_PS_IN,	0 },
-	{ "float4",		"texcoord7",	"TEXCOORD7_centroid",	"vofi_TexCoord7",	0,	AT_PS_IN,	0 },
-	{ "float4",		"texcoord8",	"TEXCOORD8_centroid",	"vofi_TexCoord8",	0,	AT_PS_IN,	0 },
-	{ "float4",		"texcoord9",	"TEXCOORD9_centroid",	"vofi_TexCoord9",	0,	AT_PS_IN,	0 },
+	{ "float4",		"texcoord0",	"TEXCOORD0_centroid",	"vofi_TexCoord0",	0,	AT_PS_IN,	0, 0 },
+	{ "float4",		"texcoord1",	"TEXCOORD1_centroid",	"vofi_TexCoord1",	0,	AT_PS_IN,	0, 0 },
+	{ "float4",		"texcoord2",	"TEXCOORD2_centroid",	"vofi_TexCoord2",	0,	AT_PS_IN,	0, 0 },
+	{ "float4",		"texcoord3",	"TEXCOORD3_centroid",	"vofi_TexCoord3",	0,	AT_PS_IN,	0, 0 },
+	{ "float4",		"texcoord4",	"TEXCOORD4_centroid",	"vofi_TexCoord4",	0,	AT_PS_IN,	0, 0 },
+	{ "float4",		"texcoord5",	"TEXCOORD5_centroid",	"vofi_TexCoord5",	0,	AT_PS_IN,	0, 0 },
+	{ "float4",		"texcoord6",	"TEXCOORD6_centroid",	"vofi_TexCoord6",	0,	AT_PS_IN,	0, 0 },
+	{ "float4",		"texcoord7",	"TEXCOORD7_centroid",	"vofi_TexCoord7",	0,	AT_PS_IN,	0, 0 },
+	{ "float4",		"texcoord8",	"TEXCOORD8_centroid",	"vofi_TexCoord8",	0,	AT_PS_IN,	0, 0 },
+	{ "float4",		"texcoord9",	"TEXCOORD9_centroid",	"vofi_TexCoord9",	0,	AT_PS_IN,	0, 0 },
 
-	{ "half4",		"htexcoord0",	"TEXCOORD0",	"vofi_TexCoord0",		0,	AT_PS_IN,		0 },
-	{ "half4",		"htexcoord1",	"TEXCOORD1",	"vofi_TexCoord1",		0,	AT_PS_IN,		0 },
-	{ "half4",		"htexcoord2",	"TEXCOORD2",	"vofi_TexCoord2",		0,	AT_PS_IN,		0 },
-	{ "half4",		"htexcoord3",	"TEXCOORD3",	"vofi_TexCoord3",		0,	AT_PS_IN,		0 },
-	{ "half4",		"htexcoord4",	"TEXCOORD4",	"vofi_TexCoord4",		0,	AT_PS_IN,		0 },
-	{ "half4",		"htexcoord5",	"TEXCOORD5",	"vofi_TexCoord5",		0,	AT_PS_IN,		0 },
-	{ "half4",		"htexcoord6",	"TEXCOORD6",	"vofi_TexCoord6",		0,	AT_PS_IN,		0 },
-	{ "half4",		"htexcoord7",	"TEXCOORD7",	"vofi_TexCoord7",		0,	AT_PS_IN,		0 },
-	{ "half4",		"htexcoord8",	"TEXCOORD8",	"vofi_TexCoord8",		0,	AT_PS_IN,		0 },
-	{ "half4",		"htexcoord9",	"TEXCOORD9",	"vofi_TexCoord9",		0,	AT_PS_IN,		0 },
-	//{ "float",		"fog",			"FOG",			"gl_FogFragCoord",		0,	AT_VS_OUT,		0 },
-	//{ "float4",		"fog",			"FOG",			"gl_FogFragCoord",		0,	AT_PS_IN,		0 },
-	{ NULL,			NULL,			NULL,			NULL,					0,	0,				0 }
+	{ "half4",		"htexcoord0",	"TEXCOORD0",	"vofi_TexCoord0",		0,	AT_PS_IN,		0, 0 },
+	{ "half4",		"htexcoord1",	"TEXCOORD1",	"vofi_TexCoord1",		0,	AT_PS_IN,		0, 0 },
+	{ "half4",		"htexcoord2",	"TEXCOORD2",	"vofi_TexCoord2",		0,	AT_PS_IN,		0, 0 },
+	{ "half4",		"htexcoord3",	"TEXCOORD3",	"vofi_TexCoord3",		0,	AT_PS_IN,		0, 0 },
+	{ "half4",		"htexcoord4",	"TEXCOORD4",	"vofi_TexCoord4",		0,	AT_PS_IN,		0, 0 },
+	{ "half4",		"htexcoord5",	"TEXCOORD5",	"vofi_TexCoord5",		0,	AT_PS_IN,		0, 0 },
+	{ "half4",		"htexcoord6",	"TEXCOORD6",	"vofi_TexCoord6",		0,	AT_PS_IN,		0, 0 },
+	{ "half4",		"htexcoord7",	"TEXCOORD7",	"vofi_TexCoord7",		0,	AT_PS_IN,		0, 0 },
+	{ "half4",		"htexcoord8",	"TEXCOORD8",	"vofi_TexCoord8",		0,	AT_PS_IN,		0, 0 },
+	{ "half4",		"htexcoord9",	"TEXCOORD9",	"vofi_TexCoord9",		0,	AT_PS_IN,		0, 0 },
+	//{ "float",		"fog",			"FOG",			"gl_FogFragCoord",		0,	AT_VS_OUT,		0, 0 },
+	//{ "float4",		"fog",			"FOG",			"gl_FogFragCoord",		0,	AT_PS_IN,		0, 0 },
+	{ NULL,			NULL,			NULL,			NULL,					0,	0,				0, 0 }
 };
 
 const char * types[] = {
@@ -545,7 +546,7 @@ const char * fragmentInsert = {
 	"vec4 gles_SecondaryColor() { if ( gl_FrontFacing ) { return gles_FrontSecondaryColor; } else { return vec4( 0.0 ); } }\n"
 	"\n"
 };
-const int fragmentInsertLineCount = 27;
+const int fragmentInsertLineCount = 29;
 
 struct builtinConversion_t {
 	const char * nameCG;
@@ -565,6 +566,7 @@ struct inOutVariable_t {
 	idStr	nameCg;
 	idStr	nameGLSL;
 	bool	declareInOut;
+	int		builtIn;
 };
 
 /*
@@ -606,6 +608,7 @@ void ParseInOutStruct( idLexer & src, int attribType, idList< inOutVariable_t > 
 			if ( ( attribsPC[i].flags & attribType ) != 0 ) {
 				if ( var.nameGLSL.Cmp( attribsPC[i].semantic ) == 0 ) {
 					var.nameGLSL = attribsPC[i].glsl;
+					var.builtIn = attribsPC[i].builtIn;
 					break;
 				}
 			}
@@ -670,7 +673,7 @@ idStr ConvertCG2GLSL( const idStr & in, const char * name, bool isVertexProgram,
 				ParseInOutStruct( src, AT_VS_IN, varsIn );
 				program += "\n\n";
 				for ( int i = 0; i < varsIn.Num(); i++ ) {
-					if ( varsIn[i].declareInOut ) {
+					if ( varsIn[i].declareInOut && !varsIn[i].builtIn ) {
 						program += "in " + varsIn[i].type + " " + varsIn[i].nameGLSL + ";\n";
 					}
 				}
@@ -679,7 +682,7 @@ idStr ConvertCG2GLSL( const idStr & in, const char * name, bool isVertexProgram,
 				ParseInOutStruct( src, AT_VS_OUT, varsOut );
 				program += "\n";
 				for ( int i = 0; i < varsOut.Num(); i++ ) {
-					if ( varsOut[i].declareInOut ) {
+					if ( varsOut[i].declareInOut && !varsOut[i].builtIn ) {
 						program += "out " + varsOut[i].type + " " + varsOut[i].nameGLSL + ";\n";
 					}
 				}
@@ -688,7 +691,7 @@ idStr ConvertCG2GLSL( const idStr & in, const char * name, bool isVertexProgram,
 				ParseInOutStruct( src, AT_PS_IN, varsIn );
 				program += "\n\n";
 				for ( int i = 0; i < varsIn.Num(); i++ ) {
-					if ( varsIn[i].declareInOut ) {
+					if ( varsIn[i].declareInOut && !varsIn[i].builtIn ) {
 						if ( varsIn[i].nameGLSL != "gles_Color()" && varsIn[i].nameGLSL != "gles_SecondaryColor()" ) {
 							program += "in " + varsIn[i].type + " " + varsIn[i].nameGLSL + ";\n";
 						}
@@ -704,7 +707,7 @@ idStr ConvertCG2GLSL( const idStr & in, const char * name, bool isVertexProgram,
 				ParseInOutStruct( src, AT_PS_OUT, varsOut );
 				program += "\n";
 				for ( int i = 0; i < varsOut.Num(); i++ ) {
-					if ( varsOut[i].declareInOut ) {
+					if ( varsOut[i].declareInOut && !varsOut[i].builtIn ) {
 						if ( varsOut[i].nameGLSL == "gles_FragColor" ) {
 							program += "layout(location = 0) out " + varsOut[i].type + " gles_FragColor;\n";
 						} else {
@@ -924,7 +927,7 @@ GLuint idRenderProgManager::LoadGLSLShader( GLenum target, const char * name, id
 	idStr outFileUniforms;
 	inFile.Format( "renderprogs\\%s", name );
 	inFile.StripFileExtension();
-	outFileHLSL.Format( "renderprogs\\glsl\\%d\\%s", glslVersion, name );
+	outFileHLSL.Format( "renderprogs\\hlsl\\%d\\%s", glslVersion, name );
 	outFileHLSL.StripFileExtension();
 	outFileGLSL.Format( "renderprogs\\glsl\\%d\\%s", glslVersion, name );
 	outFileGLSL.StripFileExtension();
@@ -1217,8 +1220,9 @@ void idRenderProgManager::LoadGLSLProgram( const int programIndex, const int ver
 			int charsWritten = 0;
 			qglGetProgramInfoLog( program, infologLength, &charsWritten, infoLog );
 
-			// catch the strings the ATI and Intel drivers output on success
-			if ( strstr( infoLog, "Vertex shader(s) linked, fragment shader(s) linked." ) != NULL || strstr( infoLog, "No errors." ) != NULL ) {
+			// catch the strings the ATI, Intel, and Qualcomm drivers output on success
+			if ( strstr( infoLog, "Vertex shader(s) linked, fragment shader(s) linked." ) != NULL || strstr( infoLog, "No errors." ) != NULL ||
+					strstr( infoLog, "Link was successful." ) != NULL ) {
 				//idLib::Printf( "render prog %s from %s linked\n", GetName(), GetFileName() );
 			} else {
 				idLib::Printf( "While linking GLSL program %d with vertexShader %s and fragmentShader %s\n",
