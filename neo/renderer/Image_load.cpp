@@ -32,6 +32,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+#ifdef GL_ES_VERSION_2_0
+idCVar	r_forceUncompressedImageFormat( "r_forceUncompressedImageFormat", "1", CVAR_RENDERER | CVAR_BOOL, "unless DXT encoding is supported, don't use any compressed formats" );
+#endif
+
 /*
 ================
 BitsForFormat
@@ -128,15 +132,19 @@ ID_INLINE void idImage::DeriveOpts() {
 
 #ifdef GL_ES_VERSION_2_0
 		if ( opts.format == FMT_DXT1 || opts.format == FMT_DXT5 && !glConfig.textureCompressionDXTAvailable ) {
-			// NOTE: con't convert if colorFormat is CFM_NORMAL_DXT5
-			if ( usage == TD_DIFFUSE && glConfig.textureCompressionETC1Available ) {
-				// Diffuse is the only place CFM_YCOCG_DXT5 gets used. CFM_YCOCG_DXT5 effectively eliminates the alpha channel, making ETC1 useful for it
-				opts.format = FMT_ETC1;
+			if ( r_forceUncompressedImageFormat.GetBool() ) {
+				opts.format = FMT_RGBA8;
 			} else {
-				if ( glConfig.textureCompressionETC2Available ) {
-					opts.format = opts.format == FMT_DXT1 ? FMT_ETC2_PUNCH : FMT_ETC2_ALPHA;
+				// NOTE: con't convert if colorFormat is CFM_NORMAL_DXT5
+				if ( usage == TD_DIFFUSE && glConfig.textureCompressionETC1Available ) {
+					// Diffuse is the only place CFM_YCOCG_DXT5 gets used. CFM_YCOCG_DXT5 effectively eliminates the alpha channel, making ETC1 useful for it
+					opts.format = FMT_ETC1;
 				} else {
-					opts.format = FMT_RGBA8;
+					if ( glConfig.textureCompressionETC2Available ) {
+						opts.format = opts.format == FMT_DXT1 ? FMT_ETC2_PUNCH : FMT_ETC2_ALPHA;
+					} else {
+						opts.format = FMT_RGBA8;
+					}
 				}
 			}
 		}

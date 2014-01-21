@@ -176,7 +176,7 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 void* QGL_GetSym( const char *function, bool egl );
 void QGL_Shutdown();
 void OGL_UpdateReplacements( const EGLFunctionReplacements_t & replacements );
-bool R_CheckExtension( char *name );
+bool R_CheckExtension( const char *name );
 
 PFNGLBLITFRAMEBUFFERANGLEPROC					qglBlitFramebufferANGLE;
 PFNGLRENDERBUFFERSTORAGEMULTISAMPLEANGLEPROC	qglRenderbufferStorageMultisampleANGLE;

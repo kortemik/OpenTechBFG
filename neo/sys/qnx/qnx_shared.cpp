@@ -239,7 +239,7 @@ void Sys_GetCurrentMemoryStatus( sysMemoryStats_t &stats ) {
 
 	uint64_t totalPhysical = Sys_GetSystemRamInBytes();
 
-	//XXX Is this correct and/or "complete"?
+	//XXX Is this correct and/or "complete"? Look at http://supportforums.blackberry.com/t5/Native-Development/Headless-Apps-Resource-management-3-MB-RAM/m-p/2746471#M57844
 	uint64_t total = _malloc_stats.m_allocmem + _malloc_stats.m_small_allocmem; //Get to the amount of memory allocated
 
 	stats.memoryLoad = ( int )( ( ( float )total / totalPhysical ) * 100 );

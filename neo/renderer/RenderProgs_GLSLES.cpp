@@ -874,6 +874,15 @@ idStr ConvertCG2GLSL( const idStr & in, const char * name, bool isVertexProgram,
 			continue;
 		}
 
+		// convert ints to floats (only place where they can't be floats are indices, and those are converted to ints anyway), so long as they aren't array declarations
+		// this is only needed for strict compilers, which is nearly every GLSL compiler for mobile...
+		if ( ( token.type == TT_NUMBER ) && ( token.subtype & TT_INTEGER ) && ( glConfig.glVersion <= 3.0f ) && !src.PeekTokenString( "]" ) ) {
+			program += ( token.linesCrossed > 0 ) ? newline : ( token.WhiteSpaceBeforeToken() > 0 ? " " : "" );
+			program += token;
+			program += ".0";
+			continue;
+		}
+
 		program += ( token.linesCrossed > 0 ) ? newline : ( token.WhiteSpaceBeforeToken() > 0 ? " " : "" );
 		program += token;
 	}
@@ -967,7 +976,7 @@ GLuint idRenderProgManager::LoadGLSLShader( GLenum target, const char * name, id
 			return false;
 		}
 		idStr hlslCode( ( const char* ) hlslFileBuffer );
-		Mem_Free( hlslFileBuffer );
+		fileSystem->FreeFile( hlslFileBuffer );
 		idStr programHLSL = StripDeadCode( hlslCode, inFile );
 		programGLSL = ConvertCG2GLSL( programHLSL, inFile, target == GL_VERTEX_SHADER, programUniforms );
 
@@ -984,7 +993,7 @@ GLuint idRenderProgManager::LoadGLSLShader( GLenum target, const char * name, id
 			idLib::Error( "GLSL file %s could not be loaded and may be corrupt", outFileGLSL.c_str() );
 		}
 		programGLSL = ( const char * ) fileBufferGLSL;
-		Mem_Free( fileBufferGLSL );
+		fileSystem->FreeFile( fileBufferGLSL );
 
 		if ( r_useUniformArrays.GetBool() ) {
 			// read in the uniform file
@@ -994,7 +1003,7 @@ GLuint idRenderProgManager::LoadGLSLShader( GLenum target, const char * name, id
 				idLib::Error( "uniform file %s could not be loaded and may be corrupt", outFileUniforms.c_str() );
 			}
 			programUniforms = ( const char* ) fileBufferUniforms;
-			Mem_Free( fileBufferUniforms );
+			fileSystem->FreeFile( fileBufferUniforms );
 		}
 	}
 

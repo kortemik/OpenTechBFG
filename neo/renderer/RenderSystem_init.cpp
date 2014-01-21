@@ -205,7 +205,7 @@ idCVar stereoRender_swapEyes( "stereoRender_swapEyes", "0", CVAR_BOOL | CVAR_ARC
 idCVar stereoRender_deGhost( "stereoRender_deGhost", "0.05", CVAR_FLOAT | CVAR_ARCHIVE, "subtract from opposite eye to reduce ghosting" );
 
 #ifdef GL_ES_VERSION_2_0
-idCVar r_forceDriverTextureCompression( "r_forceDriverTextureCompression", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "force driver-level texture compression is supported" );
+idCVar r_forceDriverTextureCompression( "r_forceDriverTextureCompression", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "force driver-level texture compression is supported" );
 #endif
 
 // GL_ARB_multitexture
@@ -390,7 +390,7 @@ void APIENTRY glDrawElementsBaseVertexImpl( GLenum mode, GLsizei count, GLenum t
 R_CheckExtension
 =================
 */
-bool R_CheckExtension( char *name ) {
+bool R_CheckExtension( const char *name ) {
 	if ( !strstr( glConfig.extensions_string, name ) ) {
 		common->Printf( "X..%s not found\n", name );
 		return false;
@@ -935,6 +935,10 @@ static void R_CheckPortableExtensions() {
 			qglGetQueryObjectui64vEXT = (PFNGLGETQUERYOBJECTUI64VEXTPROC)GLimp_ExtensionPointer( "glGetQueryObjectui64vARB" );
 			if ( qglGetQueryObjectui64vEXT == NULL ) {
 				qglGetQueryObjectui64vEXT = (PFNGLGETQUERYOBJECTUI64VEXTPROC)GLimp_ExtensionPointer( "glGetQueryObjectui64vEXT" );
+				if ( qglGetQueryObjectui64vEXT == NULL ) {
+					// deal with a bug in Qualcomm's graphics driver where it lists an extension as supported, but doesn't actually have the functions
+					glConfig.timerQueryAvailable = false;
+				}
 			}
 		}
 	}

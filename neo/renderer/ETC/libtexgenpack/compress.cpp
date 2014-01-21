@@ -260,7 +260,7 @@ namespace texgen {
 
 	static double calculate_fitness(const FgenPopulation *pop, const unsigned char *bitstring) {
 		unsigned int image_buffer[32];	// 16 required for regular pixels, 32 for 64-bit pixel formats like half floats.
-		BlockUserData *user_data = (BlockUserData *)pop->user_data;
+		BlockUserData *user_data = ((CompressFGenUserData *)pop->user_data)->block;
 		int flags = user_data->flags;
 		int r = user_data->texture->decoding_function(bitstring, image_buffer, flags);
 		if (r == 0) {
@@ -290,7 +290,7 @@ namespace texgen {
 	// Custom seeding function for 128-bit formats for archipelagos where each island is compressing the same block.
 
 	static void seed_128bit(FgenPopulation *pop, unsigned char *bitstring) {
-		BlockUserData *user_data = (BlockUserData *)pop->user_data;
+		BlockUserData *user_data = ((CompressFGenUserData *)pop->user_data)->block;
 		FgenRNG *rng = fgen_get_rng(pop);
 		int r = fgen_random_8(rng);
 		// The chance of seeding with an already calculated neighbour block should be chosen carefully.
@@ -354,7 +354,7 @@ namespace texgen {
 	// Seeding function for archipelagos where each island is compressing the same block.
 
 	static void seed(FgenPopulation *pop, unsigned char *bitstring) {
-		BlockUserData *user_data = (BlockUserData *)pop->user_data;
+		BlockUserData *user_data = ((CompressFGenUserData *)pop->user_data)->block;
 		if (user_data->texture->bits_per_block == 128) {
 			seed_128bit(pop, bitstring);
 			return;
@@ -415,7 +415,7 @@ namespace texgen {
 	// Population size is assumed to be 256.
 
 	static void seed2_128bit(FgenPopulation *pop, unsigned char *bitstring) {
-		BlockUserData *user_data = (BlockUserData *)pop->user_data;
+		BlockUserData *user_data = ((CompressFGenUserData *)pop->user_data)->block;
 		FgenRNG *rng = fgen_get_rng(pop);
 		int r = fgen_random_8(rng);
 		// The chance of seeding with an already calculated neighbour block should be chosen carefully.
@@ -454,7 +454,7 @@ namespace texgen {
 	// Seeding function for archipelagos where each island is compressing a different block (--ultra setting).
 
 	static void seed2(FgenPopulation *pop, unsigned char *bitstring) {
-		BlockUserData *user_data = (BlockUserData *)pop->user_data;
+		BlockUserData *user_data = ((CompressFGenUserData *)pop->user_data)->block;
 		if (user_data->texture->bits_per_block == 128) {
 			seed2_128bit(pop, bitstring);
 			return;
