@@ -80,7 +80,7 @@ struct geoBufferSet_t {
 class idVertexCache {
 public:
 	void			Init( bool restart = false );
-	void			Shutdown();
+	void			Shutdown( bool staticBuffers = false );
 	void			PurgeAll();
 
 	// call on loading a new map

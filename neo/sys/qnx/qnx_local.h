@@ -94,6 +94,7 @@ typedef struct {
 	// System state vars
 	bool						isSimulator;
 	bool						quitStarted;
+	bool						sdExist;
 	bool						errorGraphics;
 	navigator_window_state_t	windowState;
 	bool						permSharedFile;

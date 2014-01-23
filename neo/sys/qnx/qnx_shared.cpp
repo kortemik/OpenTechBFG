@@ -36,7 +36,12 @@ If you have questions concerning this license or the applicable additional terms
 #include <sys/statvfs.h>
 #include <sys/syspage.h>
 #include <sys/resource.h>
+#include <sys/types.h>
+#include <sys/procfs.h>
 #include <malloc.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <devctl.h>
 
 /*
 ================
@@ -120,6 +125,51 @@ int64 Sys_GetSystemRamInBytes() {
 
 	return ramSize;
 #endif
+}
+
+/*
+================
+Sys_GetRamInUseInBytes
+
+From: http://supportforums.blackberry.com/t5/Native-Development/Headless-Apps-Resource-management-3-MB-RAM/m-p/2747591/highlight/true#M57902
+================
+*/
+int64 Sys_GetRamInUseInBytes() {
+	int rc, n, i, num;
+	int64_t memsize = -1LL;
+	procfs_mapinfo *maps = NULL;
+
+	int fd = open( "/proc/self/as", O_RDONLY );
+	if ( fd == -1 ) {
+		return -1LL;
+	}
+	// since we will be doing allocation as part of measurement, try until the count settles
+	do {
+		rc = devctl( fd, DCMD_PROC_PAGEDATA, NULL, 0, &num );
+		if ( rc ) {
+			goto cleanup;
+		}
+		maps = ( procfs_mapinfo* )realloc( maps, num * sizeof( *maps ) );
+		if ( !maps ) {
+			goto cleanup;
+		}
+		// pre-subtract the allocation we just made, rounded up to page size
+		memsize = 0LL - ( ( num * sizeof( *maps ) + __PAGESIZE - 1 ) & ~( __PAGESIZE - 1 ));
+		rc = devctl( fd, DCMD_PROC_PAGEDATA, maps, num * sizeof( *maps ), &n );
+		if ( rc ) {
+			memsize = -1LL;
+			goto cleanup;
+		}
+	} while ( n > num );
+	for ( i = 0; i < n; i++ ) {
+		if ( ( maps[i].flags & ( MAP_ANON | MAP_STACK | MAP_ELF | MAP_TYPE ) ) == ( MAP_ANON | MAP_PRIVATE ) ) {
+			memsize += maps[i].size;
+		}
+	}
+cleanup:
+	close( fd );
+	free( maps );
+	return memsize;
 }
 
 /*
@@ -230,17 +280,17 @@ Sys_GetCurrentMemoryStatus
 ================
 */
 void Sys_GetCurrentMemoryStatus( sysMemoryStats_t &stats ) {
+	uint64_t totalPhysical = Sys_GetSystemRamInBytes();
+
+	int64_t total = Sys_GetRamInUseInBytes();
+	if ( total == -1LL ) {
 #if __SIZEOF_POINTER__ != __SIZEOF_INT__
 #error Pointer is not the same size as a pointer, meaning mallopt won't work
 #endif
-
-	struct malloc_stats _malloc_stats;
-	mallopt( MALLOC_STATS, ( int )( &_malloc_stats ) );
-
-	uint64_t totalPhysical = Sys_GetSystemRamInBytes();
-
-	//XXX Is this correct and/or "complete"? Look at http://supportforums.blackberry.com/t5/Native-Development/Headless-Apps-Resource-management-3-MB-RAM/m-p/2746471#M57844
-	uint64_t total = _malloc_stats.m_allocmem + _malloc_stats.m_small_allocmem; //Get to the amount of memory allocated
+		struct malloc_stats _malloc_stats;
+		mallopt( MALLOC_STATS, ( int )( &_malloc_stats ) );
+		total = _malloc_stats.m_allocmem + _malloc_stats.m_small_allocmem; //Get to the amount of memory allocated
+	}
 
 	stats.memoryLoad = ( int )( ( ( float )total / totalPhysical ) * 100 );
 

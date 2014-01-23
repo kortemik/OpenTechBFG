@@ -2755,7 +2755,7 @@ void idRenderSystemLocal::Shutdown() {
 	UnbindBufferObjects();
 
 	// free the vertex cache, which should have nothing allocated now
-	vertexCache.Shutdown();
+	vertexCache.Shutdown( true );
 
 	RB_ShutdownDebugTools();
 

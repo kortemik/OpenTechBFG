@@ -72,7 +72,8 @@ idCVar QNXVars_t::qnx_errorAttachLogs( "qnx_errorAttachLogs", "1", CVAR_SYSTEM |
 #else
 idCVar QNXVars_t::qnx_errorAttachLogs( "qnx_errorAttachLogs", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "attach slog2 logs on error" );
 #endif
-idCVar	fs_shaderSavePath( "fs_shaderSavePath", "", CVAR_SYSTEM | CVAR_ROM | CVAR_CHEAT, "" );
+
+idCVar fs_shaderSavePath( "fs_shaderSavePath", "", CVAR_SYSTEM | CVAR_ROM | CVAR_CHEAT, "" );
 
 QNXVars_t				qnx;
 
@@ -522,6 +523,7 @@ const char *Sys_DefaultBasePath() {
 	static char basePath[ PATH_MAX ] = { 0 };
 	if ( basePath[0] == '\0' ) {
 		memset( basePath, 0, PATH_MAX );
+		qnx.sdExist = false;
 
 #if BBNDK_VERSION_AT_LEAST(10, 2, 0)
 		removablemedia_info_t *infoMain;
@@ -531,6 +533,7 @@ const char *Sys_DefaultBasePath() {
 			while ( info ) {
 				if ( removablemedia_info_get_presence( info ) == REMOVABLEMEDIA_PRESENCE_INSERTED &&
 						!removablemedia_info_is_read_only( info ) && !removablemedia_info_is_write_protected( info ) ) {
+					qnx.sdExist = true;
 					strcpy( basePath, removablemedia_info_get_mount_path( info ) );
 					strcat( basePath, "/appdata/doom3bfg" );
 					break;
@@ -539,11 +542,27 @@ const char *Sys_DefaultBasePath() {
 			}
 			removablemedia_free_info( &infoMain );
 		}
-#endif
-		if( basePath[0] == '\0' ) {
-			strcpy( basePath, getenv( "PERIMETER_HOME" ) );
-			strcat( basePath, "/removable/sdcard/appdata/doom3bfg" );
+		if ( !qnx.sdExist ) {
+			strcpy( basePath, Sys_CWD() );
+			strcat( basePath, "/shared/misc/appdata/doom3bfg" );
 		}
+#else
+		// generate a test path
+		strcpy( basePath, getenv( "PERIMETER_HOME" ) );
+		strcat( basePath, "/removable/sdcard/camera" );
+
+		// check the SD card exists, then revert back to the full path
+		int index = strstr( basePath, "/camera" ) - basePath;
+		qnx.sdExist = Sys_IsFolder( basePath ) == FOLDER_YES;
+		basePath[index] = '\0';
+		strcat( basePath, "/appdata/doom3bfg" );
+
+		// handle SD card not existing
+		if ( !qnx.sdExist ) {
+			strcpy( basePath, Sys_CWD() );
+			strcat( basePath, "/shared/misc/appdata/doom3bfg" );
+		}
+#endif
 	}
 
 	return basePath;
@@ -570,12 +589,15 @@ Sys_AdditionalSearchPaths
 ==============
 */
 void Sys_AdditionalSearchPaths( idStrList & paths ) {
-	// Shared storage
-	idStr str = Sys_CWD();
-	str += "/shared/misc/appdata/doom3bfg";
-	paths.Append( str );
+	idStr str;
+	if ( qnx.sdExist ) {
+		// Shared storage
+		str = Sys_CWD();
+		str += "/shared/misc/appdata/doom3bfg";
+		paths.Append( str );
+	}
 
-	/*
+	/* Can't create folder, but there might be another way to make it
 	// Not temp/not backed-up cache (**UNTESTED**)
 	str = Sys_CWD();
 	str += "/cache";

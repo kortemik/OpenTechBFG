@@ -127,11 +127,16 @@ void idVertexCache::Init( bool restart ) {
 idVertexCache::Shutdown
 ==============
 */
-void idVertexCache::Shutdown() {
+void idVertexCache::Shutdown( bool staticBuffers ) {
 	for ( int i = 0; i < VERTCACHE_NUM_FRAMES; i++ ) {
 		frameData[i].vertexBuffer.FreeBufferObject();
 		frameData[i].indexBuffer.FreeBufferObject();
 		frameData[i].jointBuffer.FreeBufferObject();
+	}
+	if ( staticBuffers ) {
+		staticData.vertexBuffer.FreeBufferObject();
+		staticData.indexBuffer.FreeBufferObject();
+		staticData.jointBuffer.FreeBufferObject();
 	}
 }
 

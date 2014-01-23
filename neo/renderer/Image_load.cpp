@@ -339,12 +339,6 @@ void idImage::ActuallyLoadImage( bool fromBackEnd ) {
 	idBinaryImage im( generatedName );
 	binaryFileTime = im.LoadFromGeneratedFile( sourceFileTime );
 
-#ifdef GL_ES_VERSION_2_0
-	if ( !im.ConvertFormat( opts.format ) ) {
-		idLib::Warning( "The image \"%s\" could not be converted to the desired format.\n", im.GetName() );
-	}
-#endif
-
 	// BFHACK, do not want to tweak on buildgame so catch these images here
 	if ( binaryFileTime == FILE_NOT_FOUND_TIMESTAMP && fileSystem->UsingResourceFiles() ) {
 		int c = 1;
@@ -381,6 +375,13 @@ void idImage::ActuallyLoadImage( bool fromBackEnd ) {
 			}
 		}
 	}
+
+#ifdef GL_ES_VERSION_2_0
+	if ( binaryFileTime != FILE_NOT_FOUND_TIMESTAMP && !im.ConvertFormat( opts.format ) ) {
+		idLib::Warning( "The image \"%s\" could not be converted to the desired format.\n", im.GetName() );
+	}
+#endif
+
 	const bimageFile_t & header = im.GetFileHeader();
 
 	if ( ( fileSystem->InProductionMode() && binaryFileTime != FILE_NOT_FOUND_TIMESTAMP ) || ( ( binaryFileTime != FILE_NOT_FOUND_TIMESTAMP )
