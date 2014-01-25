@@ -57,9 +57,9 @@ int BitsForFormat( textureFormat_t format ) {
 		case FMT_X16:		return 16;
 		case FMT_Y16_X16:	return 32;
 #ifdef GL_ES_VERSION_2_0
-		case FMT_ETC1:		return 8;
-		case FMT_ETC2_PUNCH:return 8;
-		case FMT_ETC2_ALPHA:return 16;
+		case FMT_ETC1:		return 4;
+		case FMT_ETC2_PUNCH:return 4;
+		case FMT_ETC2_ALPHA:return 8;
 #endif
 		default:
 			assert( 0 );

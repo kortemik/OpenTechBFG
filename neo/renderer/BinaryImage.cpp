@@ -163,7 +163,7 @@ void idBinaryImage::Load2DFromMemory( int width, int height, const byte * pic_co
 			}
 #ifdef GL_ES_VERSION_2_0
 		} else if ( textureFormat == FMT_ETC1 ) {
-			img.Alloc( dxtWidth * dxtHeight );
+			img.Alloc( dxtWidth * dxtHeight / 2 );
 			idEtcEncoder etc;
 			if ( image_highQualityCompression.GetBool() ) {
 				etc.CompressImageETC1HQ( dxtPic, img.data, dxtWidth, dxtHeight );
@@ -171,7 +171,7 @@ void idBinaryImage::Load2DFromMemory( int width, int height, const byte * pic_co
 				etc.CompressImageETC1Fast( dxtPic, img.data, dxtWidth, dxtHeight );
 			}
 		} else if ( textureFormat == FMT_ETC2_PUNCH ) {
-			img.Alloc( dxtWidth * dxtHeight );
+			img.Alloc( dxtWidth * dxtHeight / 2 );
 			idEtcEncoder etc;
 			if ( image_highQualityCompression.GetBool() ) {
 				etc.CompressImageETC2PunchAlphaHQ( dxtPic, img.data, dxtWidth, dxtHeight );
@@ -179,7 +179,7 @@ void idBinaryImage::Load2DFromMemory( int width, int height, const byte * pic_co
 				etc.CompressImageETC2PunchAlphaFast( dxtPic, img.data, dxtWidth, dxtHeight );
 			}
 		} else if ( textureFormat == FMT_ETC2_ALPHA ) {
-			img.Alloc( dxtWidth * dxtHeight * 2 );
+			img.Alloc( dxtWidth * dxtHeight );
 			idEtcEncoder etc;
 			if ( !( colorFormat == CFM_NORMAL_DXT5 || colorFormat == CFM_YCOCG_DXT5 ) ) {
 				// For any non-normal or YCoCg image, set it's format to default
@@ -326,15 +326,15 @@ void idBinaryImage::LoadCubeFromMemory( int width, const byte * pics[6], int num
 				dxt.CompressImageDXT5Fast( padSrc, img.data, padSize, padSize );
 #ifdef GL_ES_VERSION_2_0
 			} else if ( textureFormat == FMT_ETC1 ) {
-				img.Alloc( padSize * padSize );
+				img.Alloc( padSize * padSize / 2 );
 				idEtcEncoder etc;
 				etc.CompressImageETC1Fast( padSrc, img.data, padSize, padSize );
 			} else if ( textureFormat == FMT_ETC2_PUNCH ) {
-				img.Alloc( padSize * padSize );
+				img.Alloc( padSize * padSize / 2 );
 				idEtcEncoder etc;
 				etc.CompressImageETC2PunchAlphaFast( padSrc, img.data, padSize, padSize );
 			} else if ( textureFormat == FMT_ETC2_ALPHA ) {
-				img.Alloc( padSize * padSize * 2 );
+				img.Alloc( padSize * padSize );
 				idEtcEncoder etc;
 				etc.CompressImageETC2AlphaFast( padSrc, img.data, padSize, padSize );
 #endif
@@ -412,7 +412,7 @@ bool idBinaryImage::ConvertFormat( textureFormat_t desiredFormat ) {
 					idBinaryImageData &img = images[ level ];
 
 					if ( desiredFormat == FMT_ETC1 ) {
-						img.Alloc( img.width * img.height );
+						img.Alloc( img.width * img.height / 2 );
 						idEtcEncoder etc;
 						if ( image_highQualityCompression.GetBool() ) {
 							etc.CompressImageETC1HQ( newImgData[level], img.data, img.width, img.height );
@@ -420,7 +420,7 @@ bool idBinaryImage::ConvertFormat( textureFormat_t desiredFormat ) {
 							etc.CompressImageETC1Fast( newImgData[level], img.data, img.width, img.height );
 						}
 					} else if ( desiredFormat == FMT_ETC2_PUNCH ) {
-						img.Alloc( img.width * img.height );
+						img.Alloc( img.width * img.height / 2 );
 						idEtcEncoder etc;
 						if ( image_highQualityCompression.GetBool() ) {
 							etc.CompressImageETC2PunchAlphaHQ( newImgData[level], img.data, img.width, img.height );
@@ -428,7 +428,7 @@ bool idBinaryImage::ConvertFormat( textureFormat_t desiredFormat ) {
 							etc.CompressImageETC2PunchAlphaFast( newImgData[level], img.data, img.width, img.height );
 						}
 					} else if ( desiredFormat == FMT_ETC2_ALPHA ) {
-						img.Alloc( img.width * img.height * 2 );
+						img.Alloc( img.width * img.height );
 						idEtcEncoder etc;
 						if ( image_highQualityCompression.GetBool() ) {
 							etc.CompressImageETC2AlphaHQ( newImgData[level], img.data, img.width, img.height );
