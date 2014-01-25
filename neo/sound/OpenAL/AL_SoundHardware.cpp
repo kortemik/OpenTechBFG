@@ -198,7 +198,7 @@ void idSoundHardware_OpenAL::Init() {
 	common->Printf( "OpenAL version: %s\n", alGetString( AL_VERSION ) );
 	common->Printf( "OpenAL extensions: %s\n", extensions );
 
-#ifdef AL_EXT_IMA4
+#if 0//defined(AL_EXT_IMA4)
 	hasIMA4Support = strstr( extensions, "AL_EXT_IMA4" ) != NULL;
 #else
 	hasIMA4Support = false;

@@ -1613,7 +1613,7 @@ void GLimp_SwapBuffers() {
 	// Only if framebuffers have been init should framebuffer processing be executed
 	if ( qnx.framebuffers[0] != 0 ) {
 #ifdef GL_EXT_discard_framebuffer
-		static const GLenum discardAttachments[3] = { GL_COLOR_EXT, GL_DEPTH_EXT, GL_STENCIL_EXT };
+		static const GLenum discardAttachments[3] = { GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT };
 
 		if ( qnx.discardFramebuffersSupported ) {
 

@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -42,8 +43,12 @@ idDxtDecoder::EmitBlock
 */
 void idDxtDecoder::EmitBlock( byte *outPtr, int x, int y, const byte *colorBlock ) {
 	outPtr += ( y * width + x ) * 4;
+	int pixelCount = ( x + 4 ) > width ? ( width - x ) : 4;
 	for ( int j = 0; j < 4; j++ ) {
-		memcpy( outPtr, &colorBlock[j*4*4], 4*4 );
+		if ( j + y >= height ) {
+			break;
+		}
+		memcpy( outPtr, &colorBlock[j*4*4], 4*pixelCount );
 		outPtr += width * 4;
 	}
 }
@@ -415,7 +420,7 @@ void idDxtDecoder::DecompressNormalMapDXT1( const byte *inBuf, byte *outBuf, int
 			EmitBlock( outBuf, i, j, block );
 		}
 	}
-} 
+}
 
 /*
 ========================
