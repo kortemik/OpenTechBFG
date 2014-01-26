@@ -306,7 +306,9 @@ void idImage::SetTexParameters() {
 		if ( glConfig.textureLODBiasAvailable ) {
 			qglTexParameterf(target, GL_TEXTURE_LOD_BIAS_EXT, r_lodBias.GetFloat() );
 		} else {
-			//TODO: Set a uniform for LOD bias
+			// while potentially problematic for fonts, this can be a uniform as opposed to per-texture since r_logBias is a global CVar
+			idVec4 bias( r_lodBias.GetFloat() );
+			renderProgManager.SetRenderParm( RENDERPARM_TEXBIAS, bias.ToFloatPtr() );
 		}
 	}
 

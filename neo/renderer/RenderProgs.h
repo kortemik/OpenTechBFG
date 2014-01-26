@@ -114,6 +114,8 @@ enum renderParm_t {
 	RENDERPARM_ENABLE_SKINNING,
 	RENDERPARM_ALPHA_TEST,
 
+	RENDERPARM_TEXBIAS,
+
 	RENDERPARM_TOTAL,
 	RENDERPARM_USER = 128,
 };
@@ -283,7 +285,8 @@ protected:
 							vertexShaderIndex( -1 ),
 							fragmentShaderIndex( -1 ),
 							vertexUniformArray( -1 ),
-							fragmentUniformArray( -1 ) {}
+							fragmentUniformArray( -1 ),
+							texBiasUniform( -1 ) {}
 		idStr		name;
 		GLuint		progId;
 		int			vertexShaderIndex;
@@ -291,6 +294,7 @@ protected:
 		GLint		vertexUniformArray;
 		GLint		fragmentUniformArray;
 		idList<glslUniformLocation_t> uniformLocations;
+		int			texBiasUniform;
 	};
 	int	currentRenderProgram;
 	idList<glslProgram_t, TAG_RENDER> glslPrograms;

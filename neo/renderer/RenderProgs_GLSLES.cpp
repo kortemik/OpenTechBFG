@@ -38,6 +38,7 @@ idCVar r_useUniformArrays( "r_useUniformArrays", "1", CVAR_BOOL, "" );
 
 #define VERTEX_UNIFORM_ARRAY_NAME				"_va_"
 #define FRAGMENT_UNIFORM_ARRAY_NAME				"_fa_"
+#define FRAGMENT_UNIFORM_TEXTURE_BIAS_NAME		"rpTexBias"
 
 static const int AT_VS_IN  = BIT( 1 );
 static const int AT_VS_OUT = BIT( 2 );
@@ -275,7 +276,9 @@ static const char * GLSLParmNames[] = {
 
 	"rpOverbright",
 	"rpEnableSkinning",
-	"rpAlphaTest"
+	"rpAlphaTest",
+
+	FRAGMENT_UNIFORM_TEXTURE_BIAS_NAME
 };
 
 /*
@@ -500,6 +503,55 @@ const char * vertexInsert = {
 };
 const int vertexInsertLineCount = 8;
 
+const char * fragmentInsertTexBias = {
+	"#version 300 es\n"
+	"#define PC\n"
+#ifdef _DEBUG
+	"#pragma debug(on)\n"
+#else
+	"#pragma debug(off)\n"
+#endif
+	"\n"
+	"in vec4 gles_FrontColor;\n"
+	"in vec4 gles_FrontSecondaryColor;\n"
+	"uniform vec4 " FRAGMENT_UNIFORM_TEXTURE_BIAS_NAME ";\n"
+	"\n"
+	"void clip( float v ) { if ( v < 0.0 ) { discard; } }\n"
+	"void clip( vec2 v ) { if ( any( lessThan( v, vec2( 0.0 ) ) ) ) { discard; } }\n"
+	"void clip( vec3 v ) { if ( any( lessThan( v, vec3( 0.0 ) ) ) ) { discard; } }\n"
+	"void clip( vec4 v ) { if ( any( lessThan( v, vec4( 0.0 ) ) ) ) { discard; } }\n"
+	"\n"
+	"float saturate( float v ) { return clamp( v, 0.0, 1.0 ); }\n"
+	"vec2 saturate( vec2 v ) { return clamp( v, 0.0, 1.0 ); }\n"
+	"vec3 saturate( vec3 v ) { return clamp( v, 0.0, 1.0 ); }\n"
+	"vec4 saturate( vec4 v ) { return clamp( v, 0.0, 1.0 ); }\n"
+	"\n"
+	"vec4 tex2D( sampler2D sampler, vec2 texcoord ) { return texture( sampler, texcoord.xy, " FRAGMENT_UNIFORM_TEXTURE_BIAS_NAME ".x ); }\n"
+	"vec4 tex2D( sampler2DShadow sampler, vec3 texcoord ) { return vec4( texture( sampler, texcoord.xyz, " FRAGMENT_UNIFORM_TEXTURE_BIAS_NAME ".x ) ); }\n"
+	"\n"
+	"vec4 tex2D( sampler2D sampler, vec2 texcoord, vec2 dx, vec2 dy ) { return textureGrad( sampler, texcoord.xy, dx, dy ); }\n" // textureGrad does not support an additional bias
+	"vec4 tex2D( sampler2DShadow sampler, vec3 texcoord, vec2 dx, vec2 dy ) { return vec4( textureGrad( sampler, texcoord.xyz, dx, dy ) ); }\n"
+	"\n"
+	"vec4 texCUBE( samplerCube sampler, vec3 texcoord ) { return texture( sampler, texcoord.xyz, " FRAGMENT_UNIFORM_TEXTURE_BIAS_NAME ".x ); }\n"
+	"vec4 texCUBE( samplerCubeShadow sampler, vec4 texcoord ) { return vec4( texture( sampler, texcoord.xyzw, " FRAGMENT_UNIFORM_TEXTURE_BIAS_NAME ".x ) ); }\n"
+	"\n"
+	"vec4 tex2Dproj( sampler2D sampler, vec3 texcoord ) { return textureProj( sampler, texcoord, " FRAGMENT_UNIFORM_TEXTURE_BIAS_NAME ".x ); }\n"
+	"vec4 tex3Dproj( sampler3D sampler, vec4 texcoord ) { return textureProj( sampler, texcoord, " FRAGMENT_UNIFORM_TEXTURE_BIAS_NAME ".x ); }\n"
+	"\n"
+	"vec4 tex2Dbias( sampler2D sampler, vec4 texcoord ) { return texture( sampler, texcoord.xy, texcoord.w ); }\n"
+	"vec4 tex3Dbias( sampler3D sampler, vec4 texcoord ) { return texture( sampler, texcoord.xyz, texcoord.w ); }\n"
+	"vec4 texCUBEbias( samplerCube sampler, vec4 texcoord ) { return texture( sampler, texcoord.xyz, texcoord.w ); }\n"
+	"\n"
+	"vec4 tex2Dlod( sampler2D sampler, vec4 texcoord ) { return textureLod( sampler, texcoord.xy, texcoord.w ); }\n"
+	"vec4 tex3Dlod( sampler3D sampler, vec4 texcoord ) { return textureLod( sampler, texcoord.xyz, texcoord.w ); }\n"
+	"vec4 texCUBElod( samplerCube sampler, vec4 texcoord ) { return textureLod( sampler, texcoord.xyz, texcoord.w ); }\n"
+	"\n"
+	"vec4 gles_Color() { if ( gl_FrontFacing ) { return gles_FrontColor; } else { return vec4( 0.0 ); } }\n"
+	"vec4 gles_SecondaryColor() { if ( gl_FrontFacing ) { return gles_FrontSecondaryColor; } else { return vec4( 0.0 ); } }\n"
+	"\n"
+};
+const int fragmentInsertTexBiasLineCount = 30;
+
 const char * fragmentInsert = {
 	"#version 300 es\n"
 	"#define PC\n"
@@ -648,6 +700,12 @@ idStr ConvertCG2GLSL( const idStr & in, const char * name, bool isVertexProgram,
 	bool inMain = false;
 	const char * uniformArrayName = isVertexProgram ? VERTEX_UNIFORM_ARRAY_NAME : FRAGMENT_UNIFORM_ARRAY_NAME;
 	char newline[128] = { "\n" };
+	bool hasTexBias = false;
+
+	if ( !isVertexProgram && !glConfig.textureLODBiasAvailable ) {
+		uniformList.Append( FRAGMENT_UNIFORM_TEXTURE_BIAS_NAME );
+		hasTexBias = true;
+	}
 
 	idToken token;
 	while ( src.ReadToken( &token ) ) {
@@ -792,10 +850,10 @@ idStr ConvertCG2GLSL( const idStr & in, const char * name, bool isVertexProgram,
 		if ( r_useUniformArrays.GetBool() ) {
 			// check for uniforms that need to be converted to the array
 			bool isUniform = false;
-			for ( int i = 0; i < uniformList.Num(); i++ ) {
+			for ( int i = hasTexBias ? 1 : 0; i < uniformList.Num(); i++ ) {
 				if ( token == uniformList[i] ) {
 					program += ( token.linesCrossed > 0 ) ? newline : ( token.WhiteSpaceBeforeToken() > 0 ? " " : "" );
-					program += va( "%s[%d /* %s */]", uniformArrayName, i, uniformList[i].c_str() );
+					program += va( "%s[%d /* %s */]", uniformArrayName, ( i - ( hasTexBias ? 1 : 0 ) ), uniformList[i].c_str() );
 					isUniform = true;
 					break;
 				}
@@ -893,16 +951,24 @@ idStr ConvertCG2GLSL( const idStr & in, const char * name, bool isVertexProgram,
 		out.ReAllocate( idStr::Length( vertexInsert ) + in.Length() * 2, false );
 		out += vertexInsert;
 	} else {
-		out.ReAllocate( idStr::Length( fragmentInsert ) + in.Length() * 2, false );
-		out += fragmentInsert;
+		if ( glConfig.textureLODBiasAvailable ) {
+			out.ReAllocate( idStr::Length( fragmentInsert ) + in.Length() * 2, false );
+			out += fragmentInsert;
+		} else {
+			out.ReAllocate( idStr::Length( fragmentInsertTexBias ) + in.Length() * 2, false );
+			out += fragmentInsertTexBias;
+		}
 	}
 
-	if ( uniformList.Num() > 0 ) {
+	if ( uniformList.Num() > 0 && ( !hasTexBias || ( uniformList.Num() - 1 ) > 0 ) ) {
 		if ( r_useUniformArrays.GetBool() ) {
-			out += va( "\nuniform vec4 %s[%d];\n", uniformArrayName, uniformList.Num() );
+			out += va( "\nuniform vec4 %s[%d];\n", uniformArrayName, uniformList.Num() - ( hasTexBias ? 1 : 0 ) );
 		} else {
 			out += "\n";
 			for ( int i = 0; i < uniformList.Num(); i++ ) {
+				if ( hasTexBias && uniformList[i] == FRAGMENT_UNIFORM_TEXTURE_BIAS_NAME ) {
+					continue;
+				}
 				out += "uniform vec4 ";
 				out += uniformList[i];
 				out += ";\n";
@@ -1014,23 +1080,25 @@ GLuint idRenderProgManager::LoadGLSLShader( GLenum target, const char * name, id
 		idLexer src( programUniforms, programUniforms.Length(), "uniforms" );
 		idToken token;
 		while ( src.ReadToken( &token ) ) {
-			int index = -1;
-			for ( int i = 0; i < RENDERPARM_TOTAL && index == -1; i++ ) {
-				const char * parmName = GetGLSLParmName( i );
-				if ( token == parmName ) {
-					index = i;
+			if ( token != FRAGMENT_UNIFORM_TEXTURE_BIAS_NAME ) {
+				int index = -1;
+				for ( int i = 0; i < RENDERPARM_TOTAL && index == -1; i++ ) {
+					const char * parmName = GetGLSLParmName( i );
+					if ( token == parmName ) {
+						index = i;
+					}
 				}
-			}
-			for ( int i = 0; i < MAX_GLSL_USER_PARMS && index == -1; i++ ) {
-				const char * parmName = GetGLSLParmName( RENDERPARM_USER + i );
-				if ( token == parmName ) {
-					index = RENDERPARM_USER + i;
+				for ( int i = 0; i < MAX_GLSL_USER_PARMS && index == -1; i++ ) {
+					const char * parmName = GetGLSLParmName( RENDERPARM_USER + i );
+					if ( token == parmName ) {
+						index = RENDERPARM_USER + i;
+					}
 				}
+				if ( index == -1 ) {
+					idLib::Error( "couldn't find uniform %s for %s", token.c_str(), outFileGLSL.c_str() );
+				}
+				uniforms.Append( index );
 			}
-			if ( index == -1 ) {
-				idLib::Error( "couldn't find uniform %s for %s", token.c_str(), outFileGLSL.c_str() );
-			}
-			uniforms.Append( index );
 		}
 	}
 
@@ -1173,6 +1241,9 @@ void idRenderProgManager::CommitUniforms() {
 				}
 				qglUniform4fv( prog.fragmentUniformArray, fragmentUniforms.Num(), localVectors->ToFloatPtr() );
 			}
+			if ( prog.texBiasUniform >= 0 ) {
+				qglUniform4fv( prog.texBiasUniform, 1, glslUniforms[RENDERPARM_TEXBIAS].ToFloatPtr() );
+			}
 		}
 	} else {
 		for ( int i = 0; i < prog.uniformLocations.Num(); i++ ) {
@@ -1259,6 +1330,7 @@ void idRenderProgManager::LoadGLSLProgram( const int programIndex, const int ver
 	if ( r_useUniformArrays.GetBool() ) {
 		prog.vertexUniformArray = qglGetUniformLocation( program, VERTEX_UNIFORM_ARRAY_NAME );
 		prog.fragmentUniformArray = qglGetUniformLocation( program, FRAGMENT_UNIFORM_ARRAY_NAME );
+		prog.texBiasUniform = qglGetUniformLocation( program, FRAGMENT_UNIFORM_TEXTURE_BIAS_NAME );
 
 		assert( prog.vertexUniformArray != -1 || vertexShaderIndex < 0 || vertexShaders[vertexShaderIndex].uniforms.Num() == 0 );
 		assert( prog.fragmentUniformArray != -1 || fragmentShaderIndex < 0 || fragmentShaders[fragmentShaderIndex].uniforms.Num() == 0 );

@@ -253,6 +253,9 @@ void idSessionLocalQnx::Shutdown() {
 		delete achievementSystem;
 		achievementSystem = NULL;
 	}
+
+	// prevent a segfault on exit
+	titleStorageVars.Clear();
 }
 
 /*
