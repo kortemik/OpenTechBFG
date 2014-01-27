@@ -1612,7 +1612,7 @@ void GLimp_SwapBuffers() {
 
 	// Only if framebuffers have been init should framebuffer processing be executed
 	if ( qnx.framebuffers[0] != 0 ) {
-#ifdef GL_EXT_discard_framebuffer
+#if 0 //def GL_EXT_discard_framebuffer //XXX Causes nothing to draw even though not discarding left buffers (the ones being drawn to). Figure out why
 		static const GLenum discardAttachments[3] = { GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT };
 
 		if ( qnx.discardFramebuffersSupported ) {

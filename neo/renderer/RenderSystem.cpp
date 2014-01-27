@@ -112,7 +112,7 @@ void idRenderSystemLocal::RenderCommandBuffers( const emptyCommand_t * const cmd
 	// are going to a file, or r_skipBackEnd is later disabled,
 	// usefull data can be received.
 
-	// r_skipRender is usually more usefull, because it will still
+	// r_skipRender is usually more useful, because it will still
 	// draw 2D graphics
 	if ( !r_skipBackEnd.GetBool() ) {
 		if ( glConfig.timerQueryAvailable ) {

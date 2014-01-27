@@ -423,14 +423,14 @@ bool idBinaryImage::ConvertFormat( textureFormat_t desiredFormat ) {
 				for ( level = 0; level < images.Num(); level++ ) {
 					idBinaryImageData &img = images[ level ];
 					int	etcWidth = img.width;
-					int	etcHeight = img.width;
+					int	etcHeight = img.height;
 					if ( desiredFormat == FMT_ETC1 || desiredFormat == FMT_ETC2_PUNCH || desiredFormat == FMT_ETC2_ALPHA ) {
 						if ( ( img.width & 3 ) || ( img.height & 3 ) ) {
 							etcWidth = ( img.width + 3 ) & ~3;
 							etcHeight = ( img.height + 3 ) & ~3;
 						} else {
 							etcWidth = img.width;
-							etcHeight = img.width;
+							etcHeight = img.height;
 						}
 					}
 
@@ -463,7 +463,7 @@ bool idBinaryImage::ConvertFormat( textureFormat_t desiredFormat ) {
 						img.Alloc( img.width * img.height * 4 );
 						memcpy( img.data, newImgData[level], img.width * img.height * 4 );
 					}
-					delete newImgData[level];
+					delete[] newImgData[level];
 					newImgData[level] = NULL;
 				}
 				delete[] newImgData;

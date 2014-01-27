@@ -592,13 +592,8 @@ static void R_CheckPortableExtensions() {
 	glConfig.textureLODBiasAvailable = R_CheckExtension( "GL_EXT_texture_lod_bias" );
 	glConfig.textureLODBiasShaderOnlyAvailable = !glConfig.textureLODBiasAvailable; // Shaders support a bias value, so use that if GL_EXT_texture_lod_bias isn't supported
 #endif
-	if ( glConfig.textureLODBiasAvailable ) {
-		common->Printf( "...using %s\n", "GL_EXT_texture_lod_bias" );
-	} else {
-		common->Printf( "X..%s not found\n", "GL_EXT_texture_lod_bias" );
-		if ( glConfig.textureLODBiasShaderOnlyAvailable ) {
-			common->Printf( "...but shaders support LOD bias\n" );
-		}
+	if ( !glConfig.textureLODBiasAvailable && glConfig.textureLODBiasShaderOnlyAvailable ) {
+		common->Printf( "...but shaders support LOD bias\n" );
 	}
 
 #ifndef GL_ES_VERSION_3_0

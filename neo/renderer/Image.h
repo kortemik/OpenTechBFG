@@ -153,7 +153,7 @@ public:
 
 	bool		IsLoaded() const { return texnum != TEXTURE_NOT_LOADED; }
 
-	static void			GetGeneratedName( idStr &_name, const textureUsage_t &_usage, const cubeFiles_t &_cube );
+	static void	GetGeneratedName( idStr &_name, const textureUsage_t &_usage, const cubeFiles_t &_cube );
 
 private:
 	friend class idImageManager;

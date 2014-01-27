@@ -52,9 +52,9 @@ public:
 	ID_TIME_T			LoadFromGeneratedFile( ID_TIME_T sourceFileTime );
 	ID_TIME_T			WriteGeneratedFile( ID_TIME_T sourceFileTime );
 
-	const bimageFile_t &	GetFileHeader() { return fileData; }
+	const bimageFile_t &	GetFileHeader() const { return fileData; }
 
-	int					NumImages() { return images.Num(); }
+	int					NumImages() const { return images.Num(); }
 	const bimageImage_t &	GetImageHeader( int i ) const { return images[i]; }
 	const byte *			GetImageData( int i ) const { return images[i].data; }
 	static void			GetGeneratedFileName( idStr & gfn, const char *imageName );
