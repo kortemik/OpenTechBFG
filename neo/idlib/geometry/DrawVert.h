@@ -680,7 +680,7 @@ ID_INLINE void WriteDrawVerts16( idDrawVert * destVerts, const idDrawVert * loca
 
 	for ( int i = 0; i < numVerts; i++ ) {
 		__asm__ __volatile__(
-				"MOV r1, #32\n"
+				"MOV r1, #32\n" // 32 bytes at a time
 				"MLA r0, %[i], r1, %[s]\n"
 				"MLA r1, %[i], r1, %[d]\n"
 				"VLD1.8 {q0, q1}, [r0]\n"

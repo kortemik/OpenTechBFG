@@ -122,25 +122,25 @@ void R_MatrixMultiply( const float a[16], const float b[16], float out[16] ) {
 	float32x4_t b2 = vld1q_f32( (float32_t *)( b + 2*4 ) );
 	float32x4_t b3 = vld1q_f32( (float32_t *)( b + 3*4 ) );
 
-	float32x4_t t0 = vmulq_f32( neon_splatq_f32( a0, 0 ), b0 );
-	float32x4_t t1 = vmulq_f32( neon_splatq_f32( a1, 0 ), b0 );
-	float32x4_t t2 = vmulq_f32( neon_splatq_f32( a2, 0 ), b0 );
-	float32x4_t t3 = vmulq_f32( neon_splatq_f32( a3, 0 ), b0 );
+	float32x4_t t0 = vmulq_lane_f32( b0, vget_low_f32( a0 ), 0 );
+	float32x4_t t1 = vmulq_lane_f32( b0, vget_low_f32( a1 ), 0 );
+	float32x4_t t2 = vmulq_lane_f32( b0, vget_low_f32( a2 ), 0 );
+	float32x4_t t3 = vmulq_lane_f32( b0, vget_low_f32( a3 ), 0 );
 
-	t0 = vmlaq_f32( t0, neon_splatq_f32( a0, 1 ), b1 );
-	t1 = vmlaq_f32( t1, neon_splatq_f32( a1, 1 ), b1 );
-	t2 = vmlaq_f32( t2, neon_splatq_f32( a2, 1 ), b1 );
-	t3 = vmlaq_f32( t3, neon_splatq_f32( a3, 1 ), b1 );
+	t0 = vmlaq_lane_f32( t0, b1, vget_low_f32( a0 ), 1 );
+	t1 = vmlaq_lane_f32( t1, b1, vget_low_f32( a1 ), 1 );
+	t2 = vmlaq_lane_f32( t2, b1, vget_low_f32( a2 ), 1 );
+	t3 = vmlaq_lane_f32( t3, b1, vget_low_f32( a3 ), 1 );
 
-	t0 = vmlaq_f32( t0, neon_splatq_f32( a0, 2 ), b2 );
-	t1 = vmlaq_f32( t1, neon_splatq_f32( a1, 2 ), b2 );
-	t2 = vmlaq_f32( t2, neon_splatq_f32( a2, 2 ), b2 );
-	t3 = vmlaq_f32( t3, neon_splatq_f32( a3, 2 ), b2 );
+	t0 = vmlaq_lane_f32( t0, b2, vget_high_f32( a0 ), 0 );
+	t1 = vmlaq_lane_f32( t1, b2, vget_high_f32( a1 ), 0 );
+	t2 = vmlaq_lane_f32( t2, b2, vget_high_f32( a2 ), 0 );
+	t3 = vmlaq_lane_f32( t3, b2, vget_high_f32( a3 ), 0 );
 
-	t0 = vmlaq_f32( t0, neon_splatq_f32( a0, 3 ), b3 );
-	t1 = vmlaq_f32( t1, neon_splatq_f32( a1, 3 ), b3 );
-	t2 = vmlaq_f32( t2, neon_splatq_f32( a2, 3 ), b3 );
-	t3 = vmlaq_f32( t3, neon_splatq_f32( a3, 3 ), b3 );
+	t0 = vmlaq_lane_f32( t0, b3, vget_high_f32( a0 ), 1 );
+	t1 = vmlaq_lane_f32( t1, b3, vget_high_f32( a1 ), 1 );
+	t2 = vmlaq_lane_f32( t2, b3, vget_high_f32( a2 ), 1 );
+	t3 = vmlaq_lane_f32( t3, b3, vget_high_f32( a3 ), 1 );
 
 	vst1q_f32( (float32_t *)( out + 0*4 ), t0 );
 	vst1q_f32( (float32_t *)( out + 1*4 ), t1 );
@@ -155,51 +155,31 @@ void R_MatrixMultiply( const float a[16], const float b[16], float out[16] ) {
 			"VLD1.32 {q4,q5}, [%[b]]!\n"
 			"VLD1.32 {q6,q7}, [%[b]]\n"
 
-			"VDUP.32 q12, d1[1]\n"
-			"VDUP.32 q13, d3[1]\n"
-			"VDUP.32 q14, d5[1]\n"
-			"VDUP.32 q15, d7[1]\n"
+			"VMUL.F32 q8, q4, d0[0]\n"
+			"VMUL.F32 q9, q4, d2[0]\n"
+			"VMUL.F32 q10, q4, d4[0]\n"
+			"VMUL.F32 q11, q4, d6[0]\n"
 
-			"VMUL.F32 q8, q12, q4\n"
-			"VMUL.F32 q9, q13, q4\n"
-			"VMUL.F32 q10, q14, q4\n"
-			"VMUL.F32 q11, q15, q4\n"
+			"VMLA.F32 q8, q5, d0[1]\n"
+			"VMLA.F32 q9, q5, d2[1]\n"
+			"VMLA.F32 q10, q5, d4[1]\n"
+			"VMLA.F32 q11, q5, d6[1]\n"
 
-			"VDUP.32 q12, d1[0]\n"
-			"VDUP.32 q13, d3[0]\n"
-			"VDUP.32 q14, d5[0]\n"
-			"VDUP.32 q15, d7[0]\n"
+			"VMLA.F32 q8, q6, d1[0]\n"
+			"VMLA.F32 q9, q6, d3[0]\n"
+			"VMLA.F32 q10, q6, d5[0]\n"
+			"VMLA.F32 q11, q6, d7[0]\n"
 
-			"VMLA.F32 q8, q12, q5\n"
-			"VMLA.F32 q9, q13, q5\n"
-			"VMLA.F32 q10, q14, q5\n"
-			"VMLA.F32 q11, q15, q5\n"
-
-			"VDUP.32 q12, d0[1]\n"
-			"VDUP.32 q13, d2[1]\n"
-			"VDUP.32 q14, d4[1]\n"
-			"VDUP.32 q15, d6[1]\n"
-
-			"VMLA.F32 q8, q12, q6\n"
-			"VMLA.F32 q9, q13, q6\n"
-			"VMLA.F32 q10, q14, q6\n"
-			"VMLA.F32 q11, q15, q6\n"
-
-			"VDUP.32 q12, d0[0]\n"
-			"VDUP.32 q13, d2[0]\n"
-			"VDUP.32 q14, d4[0]\n"
-			"VDUP.32 q15, d6[0]\n"
-
-			"VMLA.F32 q8, q12, q7\n"
-			"VMLA.F32 q9, q13, q7\n"
-			"VMLA.F32 q10, q14, q7\n"
-			"VMLA.F32 q11, q15, q7\n"
+			"VMLA.F32 q8, q7, d1[1]\n"
+			"VMLA.F32 q9, q7, d3[1]\n"
+			"VMLA.F32 q10, q7, d5[1]\n"
+			"VMLA.F32 q11, q7, d7[1]\n"
 
 			"VST1.32 {q8,q9}, [%[d]]!\n"
 			"VST1.32 {q10,q11}, [%[d]]"
 			: [d] "+r" (out)
 			: [a] "r" (a), [b] "r" (b)
-			: "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12", "q13", "q14", "q15", "memory");
+			: "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "memory");
 
 #else
 

@@ -537,7 +537,7 @@ void idMatX::CopyLowerToUpperTriangle() {
 
 				"VMOV q9, q5\n"
 				"VMOV q10, q7\n"
-				"VMOV q11, q6\n"
+				"VMOV q11, q6\n" // note the reversed elements...
 				"VMOV q12, q8\n"
 
 				// Q9: x0, z0, x1, z1
@@ -556,7 +556,7 @@ void idMatX::CopyLowerToUpperTriangle() {
 				//OR vectors and masks
 				"VORR q5, q5, q9\n"
 				"VORR q6, q6, q11\n"
-				"VORR q7, q7, q10\n"
+				"VORR q7, q7, q10\n" //...so using them will be reversed too
 				"VORR q8, q8, q12\n"
 
 				//Store vectors

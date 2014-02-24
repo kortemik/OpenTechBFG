@@ -285,7 +285,39 @@ ID_FORCE_INLINE_EXTERN __m128 _mm_div16_ps( __m128 x, __m128 y ) {
 
 #ifdef ID_QNX_ARM_NEON_INTRIN
 
-#define neon_splatq_f32( x, i )		vdupq_n_f32( vgetq_lane_f32( x, 3 - ( i ) ) )
+#define neon_swapq_sub_f32(x)		vcombine_f32( vget_high_f32( x ), vget_low_f32( x ) )
+#define neon_selq_u32( a, b, c )	vorrq_u32( vbicq_u32( c, a ), vandq_u32( c, b ) )
+
+// floating-point mask creation from most significant bits
+ID_FORCE_INLINE_EXTERN int32_t neon_movemaskq_u32( uint32x4_t input ) {
+	// Based off concepts presented: http://stackoverflow.com/questions/11870910/sse-mm-movemask-epi8-equivalent-method-for-arm-neon
+	// XXX Might be able to be merged info one chain instead of of getting the high and low pair and working on them separate
+
+	static const int32_t __attribute__((aligned (16))) xr[2] = { -31,-30 };
+	uint32x2_t mask_and = vdup_n_u32( 0x80000000 );
+	int32x2_t mask_shift = vld1_s32( xr );
+
+	return ( vpaddl_u32( vshl_u32( vand_u32( vget_high_u32( input ), mask_and ), mask_shift ) ) << 2 ) |
+			 vpaddl_u32( vshl_u32( vand_u32( vget_low_u32(  input ), mask_and ), mask_shift ) );
+}
+#define neon_movemaskq_f32( i ) neon_movemaskq_u32( vreinterpretq_u32_f32( i ) )
+
+// floating-point reciprocal with close to full precision
+ID_FORCE_INLINE_EXTERN float32x4_t neon_rcp32q_f32( float32x4_t x ) {
+	float32x4_t r = vrecpeq_f32( x );
+	r = vsubq_f32( vaddq_f32( r, r ), vmulq_f32( vmulq_f32( x, r ), r ) );
+	r = vsubq_f32( vaddq_f32( r, r ), vmulq_f32( vmulq_f32( x, r ), r ) );
+	return r;
+}
+// floating-point divide with close to full precision
+ID_FORCE_INLINE_EXTERN float32x4_t _mm_div32_ps( float32x4_t x, float32x2_t y ) {
+	return vmulq_f32( x, neon_rcp32q_f32( y ) );
+}
+
+// load idBounds::GetMins()
+#define neon_load_bounds_0_f32( bounds )	vsetq_lane_f32( bounds[0].z, vcombine_f32( vld1_f32( & bounds[0].x ), vdup_n_f32( 0.0f ) ), 2 )
+// load idBounds::GetMaxs()
+#define neon_load_bounds_1_f32( bounds )	vsetq_lane_f32( bounds[1].z, vcombine_f32( vld1_f32( & bounds[1].x ), vdup_n_f32( 0.0f ) ), 2 )
 
 #endif
 
