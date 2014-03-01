@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -109,7 +109,7 @@ void P_LoadVertexes (int lump)
 	::g->numvertexes = W_LumpLength (lump) / sizeof(mapvertex_t);
 
 	// Allocate zone memory for buffer.
-//	::g->vertexes = (vertex_t*)Z_Malloc (::g->numvertexes*sizeof(vertex_t),PU_LEVEL,0);	
+//	::g->vertexes = (vertex_t*)Z_Malloc (::g->numvertexes*sizeof(vertex_t),PU_LEVEL,0);
 	if (MallocForLump( lump, ::g->numvertexes*sizeof(vertex_t ), ::g->vertexes, PU_LEVEL_SHARED ))
 	{
 		// Load data into cache.
@@ -147,7 +147,7 @@ void P_LoadSegs (int lump)
 	int			side;
 
 	::g->numsegs = W_LumpLength (lump) / sizeof(mapseg_t);
-//	::g->segs = (seg_t*)Z_Malloc (::g->numsegs*sizeof(seg_t),PU_LEVEL,0);	
+//	::g->segs = (seg_t*)Z_Malloc (::g->numsegs*sizeof(seg_t),PU_LEVEL,0);
 
 	if (MallocForLump( lump, ::g->numsegs*sizeof(seg_t), ::g->segs, PU_LEVEL_SHARED ))
 	{
@@ -223,7 +223,7 @@ void P_LoadSectors (int lump)
 	sector_t*		ss;
 
 	::g->numsectors = W_LumpLength (lump) / sizeof(mapsector_t);
-	
+
 	::g->sectors = (sector_t*)Z_Malloc( ::g->numsectors*sizeof(sector_t), PU_LEVEL, NULL );
 	memset (::g->sectors, 0, ::g->numsectors*sizeof(sector_t));
 	data = (byte*)W_CacheLumpNum (lump,PU_CACHE_SHARED); // ALAN: LOADTIME
@@ -266,7 +266,7 @@ void P_LoadSectors (int lump)
 
 		DoomLib::Z_Free(data);
 	}
-*/	
+*/
 }
 
 
@@ -350,7 +350,7 @@ void P_LoadThings (int lump)
 		if (spawn == false)
 			break;
 
-		// Do spawn all other stuff. 
+		// Do spawn all other stuff.
 		mt->x = SHORT(mt->x);
 		mt->y = SHORT(mt->y);
 		mt->angle = SHORT(mt->angle);
@@ -534,7 +534,7 @@ void P_GroupLines (void)
 	fixed_t		bbox[4];
 	int			block;
 
-	
+
 	// look up sector number for each subsector
 	ss = ::g->subsectors;
 	for (i=0 ; i < ::g->numsubsectors ; i++, ss++)
@@ -558,7 +558,7 @@ void P_GroupLines (void)
 		}
 	}
 
-	// build line tables for each sector	
+	// build line tables for each sector
 	linebuffer = (line_t**)Z_Malloc (total*4, PU_LEVEL, 0);
 	sector = ::g->sectors;
 	for (i=0 ; i < ::g->numsectors ; i++, sector++)
@@ -621,7 +621,7 @@ P_SetupLevel
 	::g->wminfo.partime = 180;
 	for (i=0 ; i<MAXPLAYERS ; i++)
 	{
-		::g->players[i].killcount = ::g->players[i].secretcount 
+		::g->players[i].killcount = ::g->players[i].secretcount
 			= ::g->players[i].itemcount = 0;
 
 		::g->players[i].chainsawKills = 0;
@@ -630,10 +630,10 @@ P_SetupLevel
 
 	// Initial height of PointOfView
 	// will be set by player think.
-	::g->players[::g->consoleplayer].viewz = 1; 
+	::g->players[::g->consoleplayer].viewz = 1;
 
 	// Make sure all sounds are stopped before Z_FreeTags.
-	S_Start ();			
+	S_Start ();
 
 	Z_FreeTags( PU_LEVEL, PU_PURGELEVEL-1 );
 
@@ -673,7 +673,7 @@ P_SetupLevel
 
 	::g->leveltime = 0;
 
-	// note: most of this ordering is important	
+	// note: most of this ordering is important
 	P_LoadBlockMap (lumpnum+ML_BLOCKMAP);
 	P_LoadVertexes (lumpnum+ML_VERTEXES);
 	P_LoadSectors (lumpnum+ML_SECTORS);
@@ -708,7 +708,7 @@ P_SetupLevel
 	}
 
 	// clear special respawning que
-	::g->iquehead = ::g->iquetail = 0;		
+	::g->iquehead = ::g->iquetail = 0;
 
 	// set up world state
 	P_SpawnSpecials ();

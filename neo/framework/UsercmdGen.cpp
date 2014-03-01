@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -46,8 +47,13 @@ idCVar joy_deltaPerMSLook( "joy_deltaPerMSLook", "0.003", CVAR_FLOAT | CVAR_ARCH
 idCVar in_mouseSpeed( "in_mouseSpeed", "1",	CVAR_ARCHIVE | CVAR_FLOAT, "speed at which the mouse moves", 0.25f, 4.0f );
 idCVar in_alwaysRun( "in_alwaysRun", "1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "always run (reverse _speed button) - only in MP" );
 
+#ifdef ID_QNX
+idCVar in_useJoystick( "in_useJoystick", "1", CVAR_ARCHIVE | CVAR_BOOL, "enables/disables the gamepad for PC use" );
+idCVar in_joystickRumble( "in_joystickRumble", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "enable joystick rumble" );
+#else
 idCVar in_useJoystick( "in_useJoystick", "0", CVAR_ARCHIVE | CVAR_BOOL, "enables/disables the gamepad for PC use" );
 idCVar in_joystickRumble( "in_joystickRumble", "1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "enable joystick rumble" );
+#endif
 idCVar in_invertLook( "in_invertLook", "0", CVAR_ARCHIVE | CVAR_BOOL, "inverts the look controls so the forward looks up (flight controls) - the proper way to play games!" );
 idCVar in_mouseInvertLook( "in_mouseInvertLook", "0", CVAR_ARCHIVE | CVAR_BOOL, "inverts the look controls so the forward looks up (flight controls) - the proper way to play games!" );
 
@@ -90,7 +96,7 @@ void usercmd_t::Serialize( idSerializer & ser, const usercmd_t & base ) {
 usercmd_t::operator==
 ================
 */
-bool usercmd_t::operator==( const usercmd_t &rhs ) const { 
+bool usercmd_t::operator==( const usercmd_t &rhs ) const {
 	return ( buttons == rhs.buttons &&
 			forwardmove == rhs.forwardmove &&
 			rightmove == rhs.rightmove &&
@@ -207,7 +213,7 @@ const int MAX_CHAT_BUFFER = 127;
 class idUsercmdGenLocal : public idUsercmdGen {
 public:
 					idUsercmdGenLocal();
-	
+
 	void			Init();
 
 	void			InitForNewMap();
@@ -400,7 +406,7 @@ Moves the local angle positions
 */
 void idUsercmdGenLocal::AdjustAngles() {
 	float speed = MS2SEC( 16 );
-	
+
 	if ( toggled_run.on || ( in_alwaysRun.GetBool() && common->IsMultiplayer() ) ) {
 		speed *= in_angleSpeedKey.GetFloat();
 	}
@@ -446,7 +452,7 @@ void idUsercmdGenLocal::MouseMove() {
 
 	history[historyCounter&7][0] = mouseDx;
 	history[historyCounter&7][1] = mouseDy;
-	
+
 	// allow mouse movement to be smoothed together
 	int smooth = m_smooth.GetInteger();
 	if ( smooth < 1 ) {
@@ -744,7 +750,7 @@ idVec2 JoypadFunction(
 
 	// apply the acceleration
 	float accelerated;
-	
+
 	if ( shape == FUNC_EXPONENTIAL ) {
 		accelerated = idMath::Pow( 1.04712854805f, rescaledLen * 100.0f ) * 0.01f;
 	} else if ( shape == FUNC_LOGARITHMIC ) {
@@ -1002,7 +1008,7 @@ creates the current command for this frame
 */
 void idUsercmdGenLocal::MakeCurrent() {
 	idVec3 oldAngles = viewangles;
-	
+
 	if ( !Inhibited() ) {
 		// update toggled key states
 		toggled_crouch.SetKeyState( ButtonState( UB_MOVEDOWN ), in_toggleCrouch.GetBool() );
@@ -1037,7 +1043,7 @@ void idUsercmdGenLocal::MakeCurrent() {
 			viewangles[PITCH] = oldAngles[PITCH] + 90;
 		} else if ( oldAngles[PITCH] - viewangles[PITCH] > 90 ) {
 			viewangles[PITCH] = oldAngles[PITCH] - 90;
-		} 
+		}
 	} else {
 		mouseDx = 0;
 		mouseDy = 0;
@@ -1135,7 +1141,7 @@ idUsercmdGenLocal::Clear
 ================
 */
 void idUsercmdGenLocal::Clear() {
-	// clears all key states 
+	// clears all key states
 	memset( buttonState, 0, sizeof( buttonState ) );
 	memset( keyState, false, sizeof( keyState ) );
 	memset( joystickAxis, 0, sizeof( joystickAxis ) );

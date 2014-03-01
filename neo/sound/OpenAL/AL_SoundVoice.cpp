@@ -344,37 +344,56 @@ idSoundVoice_OpenAL::FlushSourceBuffers
 ========================
 */
 void idSoundVoice_OpenAL::FlushSourceBuffers() {
-	/*
-	if ( alIsSource( openalSource ) ) {
-
-		ALint processed;
-		ALsizei total;
-		ALuint* buffers;
-
-		//Get total buffers
-		alGetSourceiv( openalSource, AL_BUFFERS_QUEUED, ( ALint* )&total );
-		alGetSourceiv( openalSource, AL_BUFFERS_PROCESSED, &processed );
-		total += processed;
-
-		if( total > 0 )
-		{
-			//Allocate buffer storage
-			buffers = ( ALuint* )Mem_Alloc( total * sizeof( ALuint ), TAG_AUDIO );
-			if( buffers == NULL )
-			{
-				//Just don't try
-				return;
-			}
-
-			//Get buffers
-			alSourceUnqueueBuffers( openalSource, total, buffers );
-
-			//Free buffers and cleanup
-			alDeleteBuffers( total, buffers );
-			Mem_Free( ( void* )buffers );
-		}
+	if ( !alIsSource( openalSource ) ) {
+		return;
 	}
-	*/
+
+	ALint processed = 0;
+	ALint tmp;
+	ALuint* buffers;
+
+	alGetSourcei( openalSource, AL_SOURCE_TYPE, &tmp );
+	if( tmp != AL_STREAMING ) {
+		return;
+	}
+	alGetSourcei( openalSource, AL_LOOPING, &tmp );
+	if( tmp == AL_TRUE ) {
+		return;
+	}
+	alGetSourcei( openalSource, AL_SOURCE_STATE, &tmp );
+	if ( tmp != AL_STOPPED ) {
+		// This will move all buffers to processed, allowing them to be freed
+		alSourceStop( openalSource );
+	}
+
+	//Get processed buffers
+	alGetSourceiv( openalSource, AL_BUFFERS_PROCESSED, &processed );
+
+	if( processed > 0 )
+	{
+		//Allocate buffer storage
+		buffers = ( ALuint* )malloc( processed * sizeof( ALuint ) );
+		if( buffers == NULL )
+		{
+			//Just don't try
+			if ( tmp == AL_PLAYING ) {
+				alSourcePlay( openalSource );
+			}
+			return;
+		}
+
+		//Get buffers
+		alSourceUnqueueBuffers( openalSource, processed, buffers );
+
+		//Free buffers and cleanup
+		alDeleteBuffers( processed, buffers );
+		free( ( void* )buffers );
+	}
+
+	if ( tmp == AL_PLAYING ) {
+		// Since this is based of IXAudio2SourceVoice::FlushSourceBuffers which removes buffers to be played without changing state, return to the original state
+		alSourcePlay( openalSource );
+	}
 }
 
 /*

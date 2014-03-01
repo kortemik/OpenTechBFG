@@ -232,31 +232,51 @@ I_FlushALQueue
 */
 void I_FlushALQueue(ALuint source)
 {
-	ALint processed;
-	ALsizei total;
+	ALint processed = 0;
+	ALint tmp;
 	ALuint* buffers;
 
-	//Get total buffers
-	alGetSourceiv( source, AL_BUFFERS_QUEUED, ( ALint* )&total );
-	alGetSourceiv( source, AL_BUFFERS_PROCESSED, &processed );
-	total += processed;
+	alGetSourcei( source, AL_SOURCE_TYPE, &tmp );
+	if( tmp != AL_STREAMING ) {
+		return;
+	}
+	alGetSourcei( source, AL_LOOPING, &tmp );
+	if( tmp == AL_TRUE ) {
+		return;
+	}
+	alGetSourcei( source, AL_SOURCE_STATE, &tmp );
+	if ( tmp != AL_STOPPED ) {
+		// This will move all buffers to processed, allowing them to be freed
+		alSourceStop( source );
+	}
 
-	if( total > 0 )
+	//Get processed buffers
+	alGetSourceiv( source, AL_BUFFERS_PROCESSED, &processed );
+
+	if( processed > 0 )
 	{
 		//Allocate buffer storage
-		buffers = ( ALuint* )malloc( total * sizeof( ALuint ) );
+		buffers = ( ALuint* )malloc( processed * sizeof( ALuint ) );
 		if( buffers == NULL )
 		{
 			//Just don't try
+			if ( tmp == AL_PLAYING ) {
+				alSourcePlay( source );
+			}
 			return;
 		}
 
 		//Get buffers
-		alSourceUnqueueBuffers( source, total, buffers );
+		alSourceUnqueueBuffers( source, processed, buffers );
 
 		//Free buffers and cleanup
-		alDeleteBuffers( total, buffers );
+		alDeleteBuffers( processed, buffers );
 		free( ( void* )buffers );
+	}
+
+	if ( tmp == AL_PLAYING ) {
+		// Since this is based of IXAudio2SourceVoice::FlushSourceBuffers which removes buffers to be played without changing state, return to the original state
+		alSourcePlay( source );
 	}
 }
 
@@ -907,6 +927,7 @@ void I_PlaySong( const char *songname, int looping)
 		I_FlushALQueue( musicSource );
 	}
 
+	/* XXX might be a good safety feature, but not sure it's needed (at least not for non-streaming sources)
 	// Make sure voice is stopped before we free the buffer
 	bool isStopped = false;
 	int d = 0;
@@ -915,6 +936,7 @@ void I_PlaySong( const char *songname, int looping)
 
 		if ( musicSource != 0 ) {
 			alGetSourceiv( musicSource, AL_BUFFERS_QUEUED, &queued );
+			e4 = alGetError();
 		}
 
 		if ( queued == 0 ) {
@@ -922,6 +944,7 @@ void I_PlaySong( const char *songname, int looping)
 		}
 		//I_Printf( "waiting to stop (%d)\n", d++ );
 	}
+	*/
 
 	// Clear old state
 	if ( musicBuffer != NULL ) {
