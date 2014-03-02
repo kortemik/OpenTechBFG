@@ -1198,7 +1198,7 @@ void Sys_Init() {
 	if ( fd >= 0 ) {
 		char tmp;
 		if ( read( fd, &tmp, sizeof( char ) ) > 0 ) {
-			qnx.dontShowRelaunchDialog = tmp == 'T';
+			qnx.dontShowRelaunchDialog = tmp == '1';
 		}
 		close( fd );
 	}

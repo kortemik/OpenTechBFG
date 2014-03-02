@@ -123,13 +123,13 @@ attribInfo_t attribsPC[] = {
 	{ "float4",		"color0",		"COLOR0",		"gles_FrontColor",			0,	AT_VS_OUT,	0, 0 },
 	{ "float4",		"color1",		"COLOR1",		"gles_FrontSecondaryColor",	0,	AT_VS_OUT,	0, 0 },
 
-	{ "float4",		"color",		"COLOR",		"gles_Color()",				0,	AT_PS_IN,	0, 0 },
-	{ "float4",		"color0",		"COLOR0",		"gles_Color()",				0,	AT_PS_IN,	0, 0 },
-	{ "float4",		"color1",		"COLOR1",		"gles_SecondaryColor()",	0,	AT_PS_IN,	0, 0 },
+	{ "float4",		"color",		"COLOR",		"gles_FrontColor",				0,	AT_PS_IN,	0, 0 },
+	{ "float4",		"color0",		"COLOR0",		"gles_FrontColor",				0,	AT_PS_IN,	0, 0 },
+	{ "float4",		"color1",		"COLOR1",		"gles_FrontSecondaryColor",	0,	AT_PS_IN,	0, 0 },
 
-	{ "half4",		"hcolor",		"COLOR",		"gles_Color()",				0,	AT_PS_IN,		0, 0 },
-	{ "half4",		"hcolor0",		"COLOR0",		"gles_Color()",				0,	AT_PS_IN,		0, 0 },
-	{ "half4",		"hcolor1",		"COLOR1",		"gles_SecondaryColor()",	0,	AT_PS_IN,		0, 0 },
+	{ "half4",		"hcolor",		"COLOR",		"gles_FrontColor",				0,	AT_PS_IN,		0, 0 },
+	{ "half4",		"hcolor0",		"COLOR0",		"gles_FrontColor",				0,	AT_PS_IN,		0, 0 },
+	{ "half4",		"hcolor1",		"COLOR1",		"gles_FrontSecondaryColor",	0,	AT_PS_IN,		0, 0 },
 
 	{ "float4",		"texcoord0",	"TEXCOORD0",	"vofi_TexCoord0",		0,	AT_VS_OUT | AT_PS_IN,	0, 0 },
 	{ "float4",		"texcoord1",	"TEXCOORD1",	"vofi_TexCoord1",		0,	AT_VS_OUT | AT_PS_IN,	0, 0 },
@@ -512,8 +512,6 @@ const char * fragmentInsertTexBias = {
 	"#pragma debug(off)\n"
 #endif
 	"\n"
-	"in vec4 gles_FrontColor;\n"
-	"in vec4 gles_FrontSecondaryColor;\n"
 	"uniform vec4 " FRAGMENT_UNIFORM_TEXTURE_BIAS_NAME ";\n"
 	"\n"
 	"void clip( float v ) { if ( v < 0.0 ) { discard; } }\n"
@@ -546,11 +544,8 @@ const char * fragmentInsertTexBias = {
 	"vec4 tex3Dlod( sampler3D sampler, vec4 texcoord ) { return textureLod( sampler, texcoord.xyz, texcoord.w ); }\n"
 	"vec4 texCUBElod( samplerCube sampler, vec4 texcoord ) { return textureLod( sampler, texcoord.xyz, texcoord.w ); }\n"
 	"\n"
-	"vec4 gles_Color() { if ( gl_FrontFacing ) { return gles_FrontColor; } else { return vec4( 0.0 ); } }\n"
-	"vec4 gles_SecondaryColor() { if ( gl_FrontFacing ) { return gles_FrontSecondaryColor; } else { return vec4( 0.0 ); } }\n"
-	"\n"
 };
-const int fragmentInsertTexBiasLineCount = 30;
+const int fragmentInsertTexBiasLineCount = 26;
 
 const char * fragmentInsert = {
 	"#version 300 es\n"
@@ -560,9 +555,6 @@ const char * fragmentInsert = {
 #else
 	"#pragma debug(off)\n"
 #endif
-	"\n"
-	"in vec4 gles_FrontColor;\n"
-	"in vec4 gles_FrontSecondaryColor;\n"
 	"\n"
 	"void clip( float v ) { if ( v < 0.0 ) { discard; } }\n"
 	"void clip( vec2 v ) { if ( any( lessThan( v, vec2( 0.0 ) ) ) ) { discard; } }\n"
@@ -594,11 +586,8 @@ const char * fragmentInsert = {
 	"vec4 tex3Dlod( sampler3D sampler, vec4 texcoord ) { return textureLod( sampler, texcoord.xyz, texcoord.w ); }\n"
 	"vec4 texCUBElod( samplerCube sampler, vec4 texcoord ) { return textureLod( sampler, texcoord.xyz, texcoord.w ); }\n"
 	"\n"
-	"vec4 gles_Color() { if ( gl_FrontFacing ) { return gles_FrontColor; } else { return vec4( 0.0 ); } }\n"
-	"vec4 gles_SecondaryColor() { if ( gl_FrontFacing ) { return gles_FrontSecondaryColor; } else { return vec4( 0.0 ); } }\n"
-	"\n"
 };
-const int fragmentInsertLineCount = 29;
+const int fragmentInsertLineCount = 25;
 
 struct builtinConversion_t {
 	const char * nameCG;

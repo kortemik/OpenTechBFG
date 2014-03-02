@@ -238,6 +238,7 @@ void I_FlushALQueue(ALuint source)
 
 	alGetSourcei( source, AL_SOURCE_TYPE, &tmp );
 	if( tmp != AL_STREAMING ) {
+		alSourcei( source, AL_BUFFER, 0 ); // Removes the buffer from reference
 		return;
 	}
 	alGetSourcei( source, AL_LOOPING, &tmp );

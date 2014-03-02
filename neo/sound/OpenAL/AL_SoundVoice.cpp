@@ -354,6 +354,7 @@ void idSoundVoice_OpenAL::FlushSourceBuffers() {
 
 	alGetSourcei( openalSource, AL_SOURCE_TYPE, &tmp );
 	if( tmp != AL_STREAMING ) {
+		alSourcei( openalSource, AL_BUFFER, 0 ); // Removes the buffer from reference
 		return;
 	}
 	alGetSourcei( openalSource, AL_LOOPING, &tmp );
