@@ -168,7 +168,7 @@ public:
 	virtual void			EnableBackgroundCache( bool enable );
 	virtual void			BeginLevelLoad( const char *name, char *_blockBuffer, int _blockBufferSize );
 	virtual void			EndLevelLoad();
-	virtual bool			InProductionMode() { return ( resourceFiles.Num() > 0 ) |  ( com_productionMode.GetInteger() != 0 ); }
+	virtual bool			InProductionMode() { return ( resourceFiles.Num() > 0 ) | ( com_productionMode.GetInteger() != 0 ); }
 	virtual bool			UsingResourceFiles() { return resourceFiles.Num() > 0; }
 	virtual void			UnloadMapResources( const char *name );
 	virtual void			UnloadResourceContainer( const char *name );

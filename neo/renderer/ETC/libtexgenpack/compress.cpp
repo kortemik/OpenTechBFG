@@ -42,6 +42,7 @@ namespace texgen {
 		float mutation_probability;
 		float crossover_probability;
 		CompressCallbackFunction compress_callback_func;
+		ProgressCallbackFunction progress_callback_func;
 		double rmse_threshold;
 	} CompressOptions;
 
@@ -97,6 +98,7 @@ namespace texgen {
 		CompressOptions compOpt;
 		memset(&compOpt, 0, sizeof(CompressOptions));
 		compOpt.rmse_threshold = get_rmse_threshold(texture, opt->speed, image, opt);
+		compOpt.progress_callback_func = opt->progress_callback;
 
 		compOpt.compress_callback_func = callback_func;
 		if (genetic_parameters) {
@@ -532,6 +534,17 @@ namespace texgen {
 			texture->pixels[compressed_block_index * 4 + 1] = *(unsigned int *)&best->bitstring[4];
 			texture->pixels[compressed_block_index * 4 + 2] = *(unsigned int *)&best->bitstring[8];
 			texture->pixels[compressed_block_index * 4 + 3] = *(unsigned int *)&best->bitstring[12];
+		}
+		if (user_data->compOpt->progress_callback_func) {
+			int n = (texture->extended_width / texture->block_width) * (texture->extended_height / texture->block_height);
+			int old_percentage = (compressed_block_index - 1) * 100 / n;
+			int new_percentage = compressed_block_index * 100 / n;
+			if (new_percentage == 99 && old_percentage == 98) {
+				user_data->compOpt->progress_callback_func(99.0);
+			}
+			else if (new_percentage != old_percentage) {
+				user_data->compOpt->progress_callback_func(new_percentage);
+			}
 		}
 		user_data->compOpt->compress_callback_func(user_data->block);
 	}

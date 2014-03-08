@@ -42,6 +42,7 @@ namespace texgen {
 			opt->half_float = 0;
 			opt->deterministic = 0;
 			opt->hdr = 0;
+			opt->progress_callback = NULL;
 		}
 	}
 

@@ -173,6 +173,7 @@ namespace texgen {
 	};
 
 	typedef void(*CompressCallbackFunction)(BlockUserData *user_data);
+	typedef void(*ProgressCallbackFunction)(int progress);
 
 	typedef struct {
 		int max_threads;
@@ -190,6 +191,7 @@ namespace texgen {
 		int half_float;
 		int deterministic;
 		int hdr;
+		ProgressCallbackFunction progress_callback;
 	} Options;
 
 	// Options defined in texgenpack.cpp

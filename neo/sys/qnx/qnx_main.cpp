@@ -1346,22 +1346,22 @@ showRelaunchDialog_f
 */
 CONSOLE_COMMAND_SHIP( showRelaunchDialog, "Enable or disable game relaunch dialog", NULL ) {
 	if ( args.Argc() < 2 || args.Argc() > 3 ) {
-		common->Printf( "usage: showRelaunchDialog <show> [current value]\n" );
+		common->Printf( "usage: showRelaunchDialog <show> [show current value]\n" );
 		return;
 	}
 
 	const char *arg = args.Argv( 1 );
-	char show = arg && arg[0] == '1' ? 'F' : 'T';
+	char show = arg && arg[0] == '1' ? '0' : '1';
 
 	bool returnCurrentValue = args.Argc() > 2;
 
 	int fd = open( "data/relaunch_dialog.txt", O_RDWR | O_CREAT, S_IRWXU );
 	if ( fd >= 0 ) {
-		qnx.dontShowRelaunchDialog = show == 'T';
+		qnx.dontShowRelaunchDialog = show == '1';
 		if ( returnCurrentValue ) {
 			char tmp;
 			if ( read( fd, &tmp, sizeof( char ) ) > 0 ) {
-				common->Printf( "Show relaunch dialog: %s\n", ( tmp == 'F' ? "1" : "0" ) );
+				common->Printf( "Show relaunch dialog: %s\n", ( tmp == '0' ? "1" : "0" ) );
 			} else {
 				common->Warning( "Could not read relaunch dialog setting" );
 			}

@@ -380,6 +380,8 @@ bool idBinaryImage::ConvertFormat( textureFormat_t desiredFormat ) {
 				( ( fileData.format == FMT_ETC2_PUNCH || fileData.format == FMT_ETC2_ALPHA ) && !glConfig.textureCompressionETC2Available ) ) {
 			if ( desiredFormat == FMT_ETC1 || desiredFormat == FMT_ETC2_PUNCH || desiredFormat == FMT_ETC2_ALPHA || desiredFormat == FMT_RGBA8 ) {
 
+				idLib::Printf( "Image (%s) is being converted to a different format. Size: %dx%d.\n", GetName(), fileData.width, fileData.height );
+
 				byte **newImgData = new (TAG_TEMP) byte *[images.Num()];
 
 				// decode

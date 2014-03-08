@@ -36,6 +36,8 @@ Contains the EtcEncoder implementation.
 #include "ETCCodec_local.h"
 #include "ETCCodec.h"
 
+idCVar	r_etcCompressionProgress( "r_etcCompressionProgress", "0", CVAR_RENDERER | CVAR_BOOL, "display compression progress when compressing ETC images" );
+
 /*
 ========================
 idEtcEncoder::IsAlphaSignificant
@@ -64,8 +66,12 @@ idEtcEncoder::AlphaSignificance idEtcEncoder::IsAlphaSignificant( const byte *in
 	return ret;
 }
 
-static void compress_callback(texgen::BlockUserData *user_data) {
+static void compress_callback( texgen::BlockUserData *user_data ) {
 	// Do nothing.
+}
+
+static void progress_callback( int progress ) {
+	idLib::Printf( "%d%% Complete\n", progress );
 }
 
 /*
@@ -102,6 +108,9 @@ void idEtcEncoder::GenericCompress( const byte *inBuf, byte *outBuf, int width, 
 	texgen::Options opt;
 	texgen::init_options( &opt );
 	opt.speed = quality;
+	if ( r_etcCompressionProgress.GetBool() ) {
+		opt.progress_callback = progress_callback;
+	}
 
 	texgen::Texture destTexture;
 	texgen::compress_image( &opt, &sourceImage, type, compress_callback, &destTexture, 0, 0, 0 );
