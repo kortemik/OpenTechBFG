@@ -508,7 +508,7 @@ int I_SoundIsPlaying(int handle) {
 			continue;
 
 		alGetSourceiv( sound->m_Source, AL_BUFFERS_QUEUED, &queued );
-		if ( queued == 0 ) {
+		if ( queued > 0 ) {
 			return 1;
 		}
 	}
@@ -714,7 +714,7 @@ void I_InitSoundChannel( int channel, int numOutputChannels_ ) {
 	alSourcei( soundchannel->m_Source, AL_CONE_OUTER_ANGLE, 0 ); // Setting the outer cone angles to zero causes
 	// the emitter to act like a point emitter using the
 	// OUTER cone settings only. //XXX Does this apply to OpenAL?
-	alSourcei( soundchannel->m_Source, AL_CONE_OUTER_GAIN, 1 );
+	alSourcef( soundchannel->m_Source, AL_CONE_OUTER_GAIN, 1.0f );
 }
 
 /*

@@ -488,7 +488,16 @@ idBinaryImage::OptimizeDesiredImageFormat2D
 */
 bool idBinaryImage::OptimizeDesiredImageFormat2D( int width, int height, const byte * pic_const, textureFormat_t & currentFormat, const textureColor_t & colorFormat ) {
 #ifdef GL_ES_VERSION_2_0
-	if ( colorFormat != CFM_NORMAL_DXT5 ) {
+	if ( currentFormat == FMT_ETC1 && ( width * height * 4 <= 8 ) ) {
+		currentFormat = FMT_XRGB8;
+		return true;
+	} else if ( currentFormat == FMT_ETC2_PUNCH && ( width * height * 4 <= 8 ) ) {
+		currentFormat = FMT_RGBA8;
+		return true;
+	} else if ( currentFormat == FMT_ETC2_ALPHA && ( width * height * 4 <= 16 ) ) {
+		currentFormat = FMT_RGBA8;
+		return true;
+	} else if ( colorFormat != CFM_NORMAL_DXT5 ) {
 		if ( currentFormat != FMT_ETC1 && image_attemptETC1Encoding.GetBool() ) {
 			if ( idEtcEncoder::CanEncodeAsETC1( pic_const, width, height ) ) {
 				currentFormat = FMT_ETC1;

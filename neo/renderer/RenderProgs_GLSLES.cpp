@@ -125,11 +125,11 @@ attribInfo_t attribsPC[] = {
 
 	{ "float4",		"color",		"COLOR",		"gles_FrontColor",				0,	AT_PS_IN,	0, 0 },
 	{ "float4",		"color0",		"COLOR0",		"gles_FrontColor",				0,	AT_PS_IN,	0, 0 },
-	{ "float4",		"color1",		"COLOR1",		"gles_FrontSecondaryColor",	0,	AT_PS_IN,	0, 0 },
+	{ "float4",		"color1",		"COLOR1",		"gles_FrontSecondaryColor",		0,	AT_PS_IN,	0, 0 },
 
 	{ "half4",		"hcolor",		"COLOR",		"gles_FrontColor",				0,	AT_PS_IN,		0, 0 },
 	{ "half4",		"hcolor0",		"COLOR0",		"gles_FrontColor",				0,	AT_PS_IN,		0, 0 },
-	{ "half4",		"hcolor1",		"COLOR1",		"gles_FrontSecondaryColor",	0,	AT_PS_IN,		0, 0 },
+	{ "half4",		"hcolor1",		"COLOR1",		"gles_FrontSecondaryColor",		0,	AT_PS_IN,		0, 0 },
 
 	{ "float4",		"texcoord0",	"TEXCOORD0",	"vofi_TexCoord0",		0,	AT_VS_OUT | AT_PS_IN,	0, 0 },
 	{ "float4",		"texcoord1",	"TEXCOORD1",	"vofi_TexCoord1",		0,	AT_VS_OUT | AT_PS_IN,	0, 0 },

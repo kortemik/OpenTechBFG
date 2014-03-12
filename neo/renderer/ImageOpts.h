@@ -93,9 +93,9 @@ enum textureFormat_t {
 	//------------------------
 	// Mobile texture formats
 	//------------------------
-	FMT_ETC1,			// 8 bpp
-	FMT_ETC2_PUNCH,		// 8 bpp
-	FMT_ETC2_ALPHA,		// 16 bpp
+	FMT_ETC1,			// 4 bpp
+	FMT_ETC2_PUNCH,		// 4 bpp
+	FMT_ETC2_ALPHA,		// 8 bpp
 #endif
 };
 
