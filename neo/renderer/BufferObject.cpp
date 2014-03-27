@@ -53,7 +53,7 @@ bool IsWriteCombined( void * base ) {
 	bool isWriteCombined = ( ( info.AllocationProtect & PAGE_WRITECOMBINE ) != 0 );
 	return isWriteCombined;
 #else
-	return true; // Doesn't really matter
+	return true; // XXX Doesn't really matter?
 #endif
 }
 

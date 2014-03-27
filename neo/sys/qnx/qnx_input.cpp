@@ -259,19 +259,22 @@ static struct {
 	const char *vendor;
 	const char *name;
 	bool hasAnalogTriggers;
+	bool hasVibrate;
+	bool hasPlayerIndexLed;
 } knownJoysticks[] = {
-	// VID		 DID	 Vendor			 Name			 Analog Triggers?
-	{ 0x057E,	0x0306,	"Nintendo",		"Wii Remote",			false },
-	{ 0x20D6,	0x0DAD,	"MOGA",			"Pro",					true },
-	//{ 0x20D6,	?,		"MOGA",			"Hero Power",			true },
-	//{ 0x20D6,	?,		"MOGA",			"Pro Power",			true },
-	{ 0x1038,	0x1412,"SteelSeries",	"FREE",					false },
-	//{ ?,		?,		"Gametel",		"Controller",			false },
-	//{ ?,		?,		"Logitech",		"F310",					true },
-	//{ ?,		?,		"Logitech",		"F710",					true },
-	//{ ?,		?,		"Microsoft",	"Xbox 360 Controller",	true },
-	//{ ?,		?,		"Razer",		"Sabertooth",			true },
-	{ 0,		0,		NULL,			NULL,					false }
+	// VID		 DID	 Vendor			 Name			 	Analog Triggers?	Has Vibrate?	Has Index LED
+	{ 0x057E,	0x0306,	"Nintendo",		"Wii Remote",					false,		true,			true },
+	{ 0x20D6,	0x0DAD,	"MOGA",			"Pro",							true,		false,			false },
+	//{ 0x20D6,	?,		"MOGA",			"Hero Power",					true,		true,			true },
+	{ 0x20D6,	0x6271,	"MOGA",			"Pro Power",					true,		true,			true },	// Seems to have different mappings from MOGA Pro for Select and analog triggers
+	{ 0x1038,	0x1412,	"SteelSeries",	"FREE",							false,		false,			false },
+	{ 0x25B6,	0x0001,	"Fructel",		"Gametel",						false,		false,			false },
+	{ 0x046D,	0xC21D,	"Logitech",		"F310",							true,		false,			false },
+	//{ 0x046D,	?,		"Logitech",		"F710",							true,		true,			false },
+	{ 0x045E,	0x028E,	"Microsoft",	"Xbox 360 Controller",			true,		true,			true },
+	{ 0x045E,	0x0291,	"Microsoft",	"Xbox 360 Controller Wireless",	true,		true,			true },
+	{ 0x1689,	0xFD01,	"Razer",		"Sabertooth",					true,		true,			true },
+	{ 0,		0,		NULL,			NULL,							false,		false,			false }
 };
 
 /*
@@ -362,7 +365,7 @@ bool idJoystickQnx::Init() {
 
 /*
 ========================
-idJoystickQnx::SetRumble
+idJoystickQnx::UpdateDevice
 ========================
 */
 void idJoystickQnx::UpdateDevice( bool attached, screen_device_t device ) {
@@ -418,6 +421,8 @@ void idJoystickQnx::UpdateDevice( bool attached, screen_device_t device ) {
 
 			if ( controllers[i].infoIndex == -1 ) {
 				common->Printf( "Unknown gamepad/joystick ID: %s\n", controllers[i].id );
+			} else if ( knownJoysticks[ controllers[i].infoIndex ].hasPlayerIndexLed ) {
+				//TODO: set controller index LED (which is "i") on controller
 			}
 			break;
 		} else if ( controllers[i].handle == device ) {
@@ -444,7 +449,7 @@ int idJoystickQnx::IsKnownDevice( int inputDeviceNum ) {
 
 /*
 ========================
-idJoystickQnx::IsKnownDevice
+idJoystickQnx::HasTriggers
 ========================
 */
 int idJoystickQnx::HasTriggers( int inputDeviceNum ) {
@@ -466,6 +471,9 @@ void idJoystickQnx::SetRumble( int inputDeviceNum, int rumbleLow, int rumbleHigh
 		return;
 	}
 	if ( controllers[inputDeviceNum].handle == NULL ) {
+		return;
+	}
+	if ( controllers[inputDeviceNum].infoIndex < 0 || !knownJoysticks[ controllers[inputDeviceNum].infoIndex ].hasVibrate ) {
 		return;
 	}
 	//TODO: there is no way to set rumble right now on QNX

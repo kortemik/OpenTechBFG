@@ -50,7 +50,7 @@ If you have questions concerning this license or the applicable additional terms
 //lint -e550
 
 #define RENDER_MATRIX_INVERSE_EPSILON		1e-16f	// JDC: changed from 1e-14f to allow full wasteland parallel light projections to invert
-#define RENDER_MATRIX_INFINITY				1e30f	// NOTE: cannot initiaize a vec_float4 with idMath::INFINITY on the SPU
+#define RENDER_MATRIX_INFINITY				1e30f	// NOTE: cannot initialize a vec_float4 with idMath::INFINITY on the SPU
 #define RENDER_MATRIX_PROJECTION_EPSILON	0.1f
 
 #define CLIP_SPACE_OGL		// the OpenGL clip space Z is in the range [-1, 1]
@@ -95,7 +95,7 @@ SIMD constants
 ================================================================================================
 */
 
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 static const __m128i vector_int_1							= _mm_set1_epi32( 1 );
 static const __m128i vector_int_4							= _mm_set1_epi32( 4 );
@@ -120,6 +120,34 @@ static const __m128 vector_float_one						= { 1.0f, 1.0f, 1.0f, 1.0f };
 static const __m128 vector_float_pos_one					= { +1.0f, +1.0f, +1.0f, +1.0f };
 static const __m128 vector_float_neg_one					= { -1.0f, -1.0f, -1.0f, -1.0f };
 static const __m128 vector_float_last_one					= { 0.0f, 0.0f, 0.0f, 1.0f };
+
+#elif defined(ID_QNX_ARM_NEON)
+
+static const int32x4_t vector_int_1							= { 1, 1, 1, 1 };
+static const int32x4_t vector_int_4							= { 4, 4, 4, 4 };
+static const int32x4_t vector_int_0123						= { 3, 2, 1, 0 };
+static const int32x4_t vector_float_mask0					= { 1<<0, 1<<0, 1<<0, 1<<0 };
+static const int32x4_t vector_float_mask1					= { 1<<1, 1<<1, 1<<1, 1<<1 };
+static const int32x4_t vector_float_mask2					= { 1<<2, 1<<2, 1<<2, 1<<2 };
+static const int32x4_t vector_float_mask3					= { 1<<3, 1<<3, 1<<3, 1<<3 };
+static const int32x4_t vector_float_mask4					= { 1<<4, 1<<4, 1<<4, 1<<4 };
+static const int32x4_t vector_float_mask5					= { 1<<5, 1<<5, 1<<5, 1<<5 };
+static const int32x4_t vector_float_sign_bit				= { IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK };
+static const int32x4_t vector_float_abs_mask				= { ~IEEE_FLT_SIGN_MASK, ~IEEE_FLT_SIGN_MASK, ~IEEE_FLT_SIGN_MASK, ~IEEE_FLT_SIGN_MASK };
+static const int32x4_t vector_float_keep_last				= { -1, 0, 0, 0 };
+static const float32x4_t vector_float_inverse_epsilon		= { RENDER_MATRIX_INVERSE_EPSILON, RENDER_MATRIX_INVERSE_EPSILON, RENDER_MATRIX_INVERSE_EPSILON, RENDER_MATRIX_INVERSE_EPSILON };
+static const float32x4_t vector_float_smallest_non_denorm	= { 1.1754944e-038f, 1.1754944e-038f, 1.1754944e-038f, 1.1754944e-038f };
+static const float32x4_t vector_float_pos_infinity			= { RENDER_MATRIX_INFINITY, RENDER_MATRIX_INFINITY, RENDER_MATRIX_INFINITY, RENDER_MATRIX_INFINITY };
+static const float32x4_t vector_float_neg_infinity			= { -RENDER_MATRIX_INFINITY, -RENDER_MATRIX_INFINITY, -RENDER_MATRIX_INFINITY, -RENDER_MATRIX_INFINITY };
+static const float32x4_t vector_float_zero					= { 0.0f, 0.0f, 0.0f, 0.0f };
+static const float32x4_t vector_float_half					= { 0.5f, 0.5f, 0.5f, 0.5f };
+static const float32x4_t vector_float_neg_half				= { -0.5f, -0.5f, -0.5f, -0.5f };
+static const float32x4_t vector_float_one					= { 1.0f, 1.0f, 1.0f, 1.0f };
+static const float32x4_t vector_float_pos_one				= { +1.0f, +1.0f, +1.0f, +1.0f };
+static const float32x4_t vector_float_neg_one				= { -1.0f, -1.0f, -1.0f, -1.0f };
+static const float32x4_t vector_float_last_one				= { 0.0f, 0.0f, 0.0f, 1.0f };
+static const uint32x4_t vector_movemask_mask_and			= { 0x80000000, 0x80000000, 0x80000000, 0x80000000 };
+static const int32x4_t vector_movemask_mask_shift			= { -31, -30, -29, -28 };
 
 #endif
 
@@ -536,7 +564,7 @@ front bits:
   bit 5 = pos-Z is front facing
 ========================
 */
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 static int GetBoxFrontBits_SSE2( const __m128 & b0, const __m128 & b1, const __m128 & viewOrigin ) {
 	const __m128 dir0 = _mm_sub_ps( viewOrigin, b0 );
@@ -547,6 +575,50 @@ static int GetBoxFrontBits_SSE2( const __m128 & b0, const __m128 & b1, const __m
 	int frontBits = _mm_movemask_ps( d0 ) | ( _mm_movemask_ps( d1 ) << 3 );
 	return frontBits;
 }
+
+/* XXX #elif defined(ID_QNX_ARM_NEON_INTRIN)
+
+static int GetBoxFrontBits_NEON( const float32x4_t & b0, const float32x4_t & b1, const float32x4_t & viewOrigin ) {
+	const float32x4_t dir0 = vsubq_f32( viewOrigin, b0 );
+	const float32x4_t dir1 = vsubq_f32( b1, viewOrigin );
+	const uint32x4_t d0 = vcltq_f32( dir0, vdupq_n_f32( 0.0f ) );
+	const uint32x4_t d1 = vcltq_f32( dir1, vdupq_n_f32( 0.0f ) );
+
+	int frontBits = neon_movemaskq_u32( d0 ) | ( neon_movemaskq_u32( d1 ) << 3 );
+	return frontBits;
+}
+
+#elif defined(ID_QNX_ARM_NEON_ASM)
+
+static int GetBoxFrontBits_NEON( const float * b0, const float * b1, const float * viewOrigin ) {
+	int ret;
+	__asm__("VLD1.32 {Q0}, [%[vo]]\n"
+			"VLD1.32 {Q1}, [%[b0]]\n"
+			"VLD1.32 {Q2}, [%[b1]]\n"
+			"VSUB.F32 Q1, Q0, Q1\n"
+			"VSUB.F32 Q2, Q2, Q0\n"
+			"VBIC.I32 Q0, #0\n"
+			"VCLT.F32 Q1, Q1, Q0\n"
+			"VCLT.F32 Q2, Q2, Q0\n"
+
+			"VLD1.32 {Q0}, [%[mask]]\n"
+			"VAND Q1, Q1, Q0\n"
+			"VAND Q2, Q2, Q0\n"
+			"VLD1.32 {Q0}, [%[shift]]\n"
+			"VSHL.U32 Q1, Q1, Q0\n"
+			"VSHL.U32 Q2, Q2, Q0\n"
+			"VPADDL.U32 Q0, Q1\n"
+			"VPADD.I32 D0, D0, D1\n"
+			"VPADDL.U32 Q0, Q0\n"
+			"VPADDL.U32 Q1, Q2\n"
+			"VPADD.I32 D2, D2, D3\n"
+			"VPADDL.U32 Q1, Q1\n"
+			"VSHL.I32 Q1, Q1, #3\n"
+			"VADD.I32 Q0, Q0, Q1\n"
+			"VST1.32 {D0[0]}, [%[ret]]"
+			:: [ret] "r" (&ret), [b0] "r" (b0), [b1] "r" (b1), [vo] "r" (viewOrigin), [mask] "r" (&vector_movemask_mask_and), [shift] "r" (&vector_movemask_mask_shift) : "q0", "q1", "q2");
+	return ret;
+}*/
 
 #else
 
@@ -742,7 +814,7 @@ The result matrix will transform the unit-cube to exactly cover the bounds.
 void idRenderMatrix::OffsetScaleForBounds( const idRenderMatrix & src, const idBounds & bounds, idRenderMatrix & out ) {
 	assert( &src != &out );
 
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 	__m128 b0 = _mm_loadu_bounds_0( bounds );
 	__m128 b1 = _mm_loadu_bounds_1( bounds );
@@ -789,6 +861,115 @@ void idRenderMatrix::OffsetScaleForBounds( const idRenderMatrix & src, const idB
 	_mm_storeu_ps( out.m + 2*4, a2 );
 	_mm_storeu_ps( out.m + 3*4, a3 );
 
+#elif defined(ID_QNX_ARM_NEON_INTRIN)
+
+	float32x4_t b0 = neon_load_bounds_0_f32( bounds );
+	float32x4_t b1 = neon_load_bounds_1_f32( bounds );
+
+	float32x4_t offset = vmulq_f32( vaddq_f32( b1, b0 ), vector_float_half );
+	float32x4_t scale = vmulq_f32( vsubq_f32( b1, b0 ), vector_float_half );
+
+	scale = vreinterpretq_f32_u32( vorrq_u32( vreinterpretq_u32_f32( scale ), vreinterpretq_u32_f32( vector_float_last_one ) ) );
+
+	float32x4_t a0 = vld1q_f32( (float32_t *)( src.m + 0*4 ) );
+	float32x4_t a1 = vld1q_f32( (float32_t *)( src.m + 1*4 ) );
+	float32x4_t a2 = vld1q_f32( (float32_t *)( src.m + 2*4 ) );
+	float32x4_t a3 = vld1q_f32( (float32_t *)( src.m + 3*4 ) );
+
+	float32x4_t d0 = vmulq_f32( a0, offset );
+	float32x4_t d1 = vmulq_f32( a1, offset );
+	float32x4_t d2 = vmulq_f32( a2, offset );
+	float32x4_t d3 = vmulq_f32( a3, offset );
+
+	float32x4x2_t s01 = vzipq_f32( d0, d2 );	// [0] a0, c0, a1, c1
+												// [1] a2, c2, a3, c3
+	float32x4x2_t s23 = vzipq_f32( d1, d3 );	// [0] b0, d0, b1, d1
+												// [1] b2, d2, b3, d3
+
+	float32x4x2_t t01 = vzipq_f32( s01.val[0], s23.val[0] );	// [0] a0, b0, c0, d0
+																// [1] a1, b1, c1, d1
+	float32x4x2_t t23 = vzipq_f32( s01.val[1], s23.val[1] );	// [0] a2, b2, c2, d2
+
+	float32x4_t t0 = vaddq_f32( t01.val[0], t01.val[1] );
+	uint32x4_t t0u = vreinterpretq_u32_f32( vaddq_f32( t0, t23.val[0] ) );
+
+	uint32x4_t keep_last = vreinterpretq_u32_f32( vector_float_keep_last );
+	float32x4_t n0 = vreinterpretq_f32_u32( vandq_u32( vdupq_lane_u32( vget_low_u32( t0u ), 0 ), keep_last ) );
+	float32x4_t n1 = vreinterpretq_f32_u32( vandq_u32( vdupq_lane_u32( vget_low_u32( t0u ), 1 ), keep_last ) );
+	float32x4_t n2 = vreinterpretq_f32_u32( vandq_u32( vdupq_lane_u32( vget_high_u32( t0u ), 0 ), keep_last ) );
+	float32x4_t n3 = vreinterpretq_f32_u32( vandq_u32( vdupq_lane_u32( vget_high_u32( t0u ), 1 ), keep_last ) );
+
+	a0 = vmlaq_f32( n0, a0, scale );
+	a1 = vmlaq_f32( n1, a1, scale );
+	a2 = vmlaq_f32( n2, a2, scale );
+	a3 = vmlaq_f32( n3, a3, scale );
+
+	vst1q_f32( (float32_t *)( out.m + 0*4 ), a0 );
+	vst1q_f32( (float32_t *)( out.m + 1*4 ), a1 );
+	vst1q_f32( (float32_t *)( out.m + 2*4 ), a2 );
+	vst1q_f32( (float32_t *)( out.m + 3*4 ), a3 );
+
+#elif defined(ID_QNX_ARM_NEON_ASM)
+
+	const float * bo = bounds.ToFloatPtr();
+	__asm__ __volatile__(
+			"MOV r0, #0\n"
+			"VLD1.32 {Q0}, [%[b]]!\n"
+			"VLD1.32 {D2}, [%[b]]\n"
+			"VMOV D3, D1\n"
+			"VEXT.32 Q1, Q1, Q1, 3\n"
+			"VMOV S3, r0\n"			//min X, min Y, min Z
+			"VMOV S7, r0\n"			//max X, max Y, max Z
+
+			"VLD1.32 {Q2}, [%[half]]\n"
+			"VADD.F32 Q3, Q1, Q0\n"
+			"VMUL.F32 Q3, Q3, Q2\n"
+			"VSUB.F32 Q4, Q1, Q0\n"
+			"VMUL.F32 Q4, Q4, Q2\n"
+
+			"VLD1.32 {Q2}, [%[last_one]]\n"
+			"VORR Q4, Q4, Q2\n"
+
+			"VLD1.32 {Q5-Q6}, [%[s]]!\n"
+			"VLD1.32 {Q7-Q8}, [%[s]]\n"
+
+			"VMUL.F32 Q9, Q5, Q3\n"
+			"VMUL.F32 Q10, Q6, Q3\n"
+			"VMUL.F32 Q11, Q7, Q3\n"
+			"VMUL.F32 Q12, Q8, Q3\n"
+
+			"VZIP.32 Q9, Q11\n"		// [Q9] a0, c0, a1, c1
+									// [Q11] a2, c2, a3, c3
+			"VZIP.32 Q10, Q12\n"	// [Q10] b0, d0, b1, d1
+									// [Q12] b2, d2, b3, d3
+
+			"VZIP.32 Q9, Q10\n"		// [Q9] a0, b0, c0, d0
+									// [Q10] a1, b1, c1, d1
+			"VZIP.32 Q11, Q12\n"	// [Q11] a2, b2, c2, d2
+
+			"VADD.F32 Q0, Q9, Q10\n"
+			"VADD.F32 Q0, Q0, Q11\n"
+
+			"VLD1.32 {Q1}, [%[keep_last]]\n"
+			"VDUP.32 Q9, D0[0]\n"
+			"VAND Q9, Q9, Q1\n"
+			"VDUP.32 Q10, D0[1]\n"
+			"VAND Q10, Q10, Q1\n"
+			"VDUP.32 Q11, D1[0]\n"
+			"VAND Q11, Q11, Q1\n"
+			"VDUP.32 Q12, D1[1]\n"
+			"VAND Q12, Q12, Q1\n"
+
+			"VMLA.F32 Q9, Q5, Q4\n"
+			"VMLA.F32 Q10, Q6, Q4\n"
+			"VMLA.F32 Q11, Q7, Q4\n"
+			"VMLA.F32 Q12, Q8, Q4\n"
+
+			"VST1.32 {Q9-Q10}, [%[d]]!\n"
+			"VST1.32 {Q11-Q12}, [%[d]]\n"
+			:: [d] "r" (out.m), [s] "r" (src.m), [b] "r" (bo), [half] "r" (&vector_float_half), [last_one] "r" (&vector_float_last_one), [keep_last] "r" (&vector_float_keep_last)
+			 : "r0", "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12", "memory");
+
 #else
 
 	const idVec3 offset = ( bounds[1] + bounds[0] ) * 0.5f;
@@ -828,7 +1009,7 @@ The result matrix will transform the bounds to exactly cover the unit-cube.
 void idRenderMatrix::InverseOffsetScaleForBounds( const idRenderMatrix & src, const idBounds & bounds, idRenderMatrix & out ) {
 	assert( &src != &out );
 
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 	__m128 b0 = _mm_loadu_bounds_0( bounds );
 	__m128 b1 = _mm_loadu_bounds_1( bounds );
@@ -859,6 +1040,94 @@ void idRenderMatrix::InverseOffsetScaleForBounds( const idRenderMatrix & src, co
 	_mm_storeu_ps( out.m + 1*4, a1 );
 	_mm_storeu_ps( out.m + 2*4, a2 );
 	_mm_storeu_ps( out.m + 3*4, a3 );
+
+#elif defined(ID_QNX_ARM_NEON_INTRIN)
+
+	float32x4_t b0 = neon_load_bounds_0_f32( bounds );
+	float32x4_t b1 = neon_load_bounds_1_f32( bounds );
+
+	float32x4_t offset = vmulq_f32( vaddq_f32( b1, b0 ), vector_float_neg_half );
+	float32x4_t scale = vmulq_f32( vsubq_f32( b0, b1 ), vector_float_neg_half );
+
+	scale = vmaxq_f32( scale, vector_float_smallest_non_denorm );
+
+	float32x4_t rscale = neon_rcp32q_f32( scale );
+
+	uint32x4_t offsetu = vreinterpretq_u32_f32( vmulq_f32( offset, rscale ) );
+
+	uint32x4_t keep_last = vreinterpretq_u32_f32( vector_float_keep_last );
+	float32x4_t d0 = vreinterpretq_f32_u32( vandq_u32( vdupq_lane_u32( vget_low_u32( offsetu ), 0 ), keep_last ) );
+	float32x4_t d1 = vreinterpretq_f32_u32( vandq_u32( vdupq_lane_u32( vget_low_u32( offsetu ), 1 ), keep_last ) );
+	float32x4_t d2 = vreinterpretq_f32_u32( vandq_u32( vdupq_lane_u32( vget_high_u32( offsetu ), 0 ), keep_last ) );
+
+	float32x4_t a0 = vld1q_f32( (float32_t *)( src.m + 0*4 ) );
+	float32x4_t a1 = vld1q_f32( (float32_t *)( src.m + 1*4 ) );
+	float32x4_t a2 = vld1q_f32( (float32_t *)( src.m + 2*4 ) );
+	float32x4_t a3 = vld1q_f32( (float32_t *)( src.m + 3*4 ) );
+
+	a0 = vmlaq_f32( d0, a0, vdupq_lane_f32( vget_low_f32( rscale ), 0 ) );
+	a1 = vmlaq_f32( d1, a1, vdupq_lane_f32( vget_low_f32( rscale ), 1 ) );
+	a2 = vmlaq_f32( d2, a2, vdupq_lane_f32( vget_high_f32( rscale ), 0 ) );
+
+	vst1q_f32( (float32_t *)( out.m + 0*4 ), a0 );
+	vst1q_f32( (float32_t *)( out.m + 1*4 ), a1 );
+	vst1q_f32( (float32_t *)( out.m + 2*4 ), a2 );
+	vst1q_f32( (float32_t *)( out.m + 3*4 ), a3 );
+
+#elif defined(ID_QNX_ARM_NEON_ASM)
+
+	const float * bo = bounds.ToFloatPtr();
+	__asm__ __volatile__(
+			"MOV r0, #0\n"
+			"VLD1.32 {Q0}, [%[b]]!\n"
+			"VLD1.32 {D2}, [%[b]]\n"
+			"VMOV D3, D1\n"
+			"VEXT.32 Q1, Q1, Q1, 3\n"
+			"VMOV S3, r0\n"			//min X, min Y, min Z
+			"VMOV S7, r0\n"			//max X, max Y, max Z
+
+			"VLD1.32 {Q2}, [%[neg_half]]\n"
+			"VADD.F32 Q3, Q1, Q0\n"
+			"VMUL.F32 Q3, Q3, Q2\n"
+			"VSUB.F32 Q4, Q0, Q1\n"
+			"VMUL.F32 Q4, Q4, Q2\n"
+
+			"VLD1.32 {Q2}, [%[snd]]\n"
+			"VMAX.F32 Q4, Q4, Q2\n"
+
+			// rcp32 ( Q4 )
+			"VRECPE.F32 Q5, Q4\n"
+			"VADD.F32 Q6, Q5, Q5\n"
+			"VMUL.F32 Q7, Q4, Q5\n"
+			"VMUL.F32 Q7, Q7, Q5\n"
+			"VSUB.F32 Q5, Q6, Q7\n"
+			"VADD.F32 Q6, Q5, Q5\n"
+			"VMUL.F32 Q7, Q4, Q5\n"
+			"VMUL.F32 Q7, Q7, Q5\n"
+			"VSUB.F32 Q4, Q6, Q7\n"	//rscale
+
+			"VMUL.F32 Q5, Q3, Q4\n"
+
+			"VLD1.32 {Q6}, [%[last]]\n"
+			"VDUP.32 Q0, D10[0]\n"
+			"VAND Q0, Q6\n"	//d0
+			"VDUP.32 Q1, D10[1]\n"
+			"VAND Q1, Q6\n"	//d1
+			"VDUP.32 Q2, D11[0]\n"
+			"VAND Q2, Q6\n"	//d2
+
+			"VLD1.32 {Q5-Q6}, [%[s]]!\n"
+			"VLD1.32 {Q7-Q8}, [%[s]]\n"
+			"VMOV Q3, Q8\n"
+
+			"VMLA.F32 Q0, Q5, D8[0]\n"
+			"VMLA.F32 Q1, Q6, D8[1]\n"
+			"VMLA.F32 Q2, Q7, D9[0]\n"
+
+			"VST1.32 {Q0-Q1}, [%[d]]!\n"
+			"VST1.32 {Q2-Q3}, [%[d]]\n"
+			:: [d] "r" (out.m), [s] "r" (src.m), [b] "r" (bo), [neg_half] "r" (&vector_float_neg_half), [snd] "r" (&vector_float_smallest_non_denorm), [last] "r" (&vector_float_keep_last)
+			 : "r0", "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "memory");
 
 #else
 
@@ -896,7 +1165,7 @@ idRenderMatrix::Transpose
 void idRenderMatrix::Transpose( const idRenderMatrix & src, idRenderMatrix & out ) {
 	assert( &src != &out );
 
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 	const __m128 a0 = _mm_loadu_ps( src.m + 0*4 );
 	const __m128 a1 = _mm_loadu_ps( src.m + 1*4 );
@@ -918,6 +1187,40 @@ void idRenderMatrix::Transpose( const idRenderMatrix & src, idRenderMatrix & out
 	_mm_storeu_ps( out.m + 2*4, t2 );
 	_mm_storeu_ps( out.m + 3*4, t3 );
 
+#elif defined(ID_QNX_ARM_NEON_INTRIN)
+
+	const float32x4_t a0 = vld1q_f32( (float32_t *)( src.m + 0*4 ) );
+	const float32x4_t a1 = vld1q_f32( (float32_t *)( src.m + 1*4 ) );
+	const float32x4_t a2 = vld1q_f32( (float32_t *)( src.m + 2*4 ) );
+	const float32x4_t a3 = vld1q_f32( (float32_t *)( src.m + 3*4 ) );
+
+	const float32x4x2_t r0 = vzipq_f32( a0, a2 );
+	const float32x4x2_t r1 = vzipq_f32( a1, a3 );
+
+	const float32x4x2_t t0 = vzipq_f32( r0.val[0], r1.val[0] );
+	const float32x4x2_t t1 = vzipq_f32( r0.val[1], r1.val[1] );
+
+	vst1q_f32( (float32_t *)( out.m + 0*4 ), t0.val[0] );
+	vst1q_f32( (float32_t *)( out.m + 1*4 ), t0.val[1] );
+	vst1q_f32( (float32_t *)( out.m + 2*4 ), t1.val[0] );
+	vst1q_f32( (float32_t *)( out.m + 3*4 ), t1.val[1] );
+
+#elif defined(ID_QNX_ARM_NEON_ASM)
+
+	__asm__ __volatile__(
+			"VLD1.32 {Q0-Q1}, [%[s]]!\n"
+			"VLD1.32 {Q2-Q3}, [%[s]]\n"
+
+			"VZIP.32 Q0, Q2\n"
+			"VZIP.32 Q1, Q3\n"
+
+			"VZIP.32 Q0, Q1\n"
+			"VZIP.32 Q2, Q3\n"
+
+			"VST1.32 {Q0-Q1}, [%[d]]!\n"
+			"VST1.32 {Q2-Q3}, [%[d]]\n"
+			:: [d] "r" (out.m), [s] "r" (src.m) : "q0", "q1", "q2", "q3", "memory");
+
 #else
 
 	for ( int i = 0; i < 4; i++ ) {
@@ -936,7 +1239,7 @@ idRenderMatrix::Multiply
 */
 void idRenderMatrix::Multiply( const idRenderMatrix & a, const idRenderMatrix & b, idRenderMatrix & out ) {
 
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 	__m128 a0 = _mm_loadu_ps( a.m + 0*4 );
 	__m128 a1 = _mm_loadu_ps( a.m + 1*4 );
@@ -972,6 +1275,76 @@ void idRenderMatrix::Multiply( const idRenderMatrix & a, const idRenderMatrix & 
 	_mm_storeu_ps( out.m + 1*4, t1 );
 	_mm_storeu_ps( out.m + 2*4, t2 );
 	_mm_storeu_ps( out.m + 3*4, t3 );
+
+#elif defined(ID_QNX_ARM_NEON_INTRIN)
+
+	float32x4_t a0 = vld1q_f32( (float32_t *)( a.m + 0*4 ) );
+	float32x4_t a1 = vld1q_f32( (float32_t *)( a.m + 1*4 ) );
+	float32x4_t a2 = vld1q_f32( (float32_t *)( a.m + 2*4 ) );
+	float32x4_t a3 = vld1q_f32( (float32_t *)( a.m + 3*4 ) );
+
+	float32x4_t b0 = vld1q_f32( (float32_t *)( b.m + 0*4 ) );
+	float32x4_t b1 = vld1q_f32( (float32_t *)( b.m + 1*4 ) );
+	float32x4_t b2 = vld1q_f32( (float32_t *)( b.m + 2*4 ) );
+	float32x4_t b3 = vld1q_f32( (float32_t *)( b.m + 3*4 ) );
+
+	float32x4_t t0 = vmulq_lane_f32( b0, vget_low_f32( a0 ), 0 );
+	float32x4_t t1 = vmulq_lane_f32( b0, vget_low_f32( a1 ), 0 );
+	float32x4_t t2 = vmulq_lane_f32( b0, vget_low_f32( a2 ), 0 );
+	float32x4_t t3 = vmulq_lane_f32( b0, vget_low_f32( a3 ), 0 );
+
+	t0 = vmlaq_lane_f32( t0, b1, vget_low_f32( a0 ), 1 );
+	t1 = vmlaq_lane_f32( t1, b1, vget_low_f32( a1 ), 1 );
+	t2 = vmlaq_lane_f32( t2, b1, vget_low_f32( a2 ), 1 );
+	t3 = vmlaq_lane_f32( t3, b1, vget_low_f32( a3 ), 1 );
+
+	t0 = vmlaq_lane_f32( t0, b2, vget_high_f32( a0 ), 0 );
+	t1 = vmlaq_lane_f32( t1, b2, vget_high_f32( a1 ), 0 );
+	t2 = vmlaq_lane_f32( t2, b2, vget_high_f32( a2 ), 0 );
+	t3 = vmlaq_lane_f32( t3, b2, vget_high_f32( a3 ), 0 );
+
+	t0 = vmlaq_lane_f32( t0, b3, vget_high_f32( a0 ), 1 );
+	t1 = vmlaq_lane_f32( t1, b3, vget_high_f32( a1 ), 1 );
+	t2 = vmlaq_lane_f32( t2, b3, vget_high_f32( a2 ), 1 );
+	t3 = vmlaq_lane_f32( t3, b3, vget_high_f32( a3 ), 1 );
+
+	vst1q_f32( (float32_t *)( out.m + 0*4 ), t0 );
+	vst1q_f32( (float32_t *)( out.m + 1*4 ), t1 );
+	vst1q_f32( (float32_t *)( out.m + 2*4 ), t2 );
+	vst1q_f32( (float32_t *)( out.m + 3*4 ), t3 );
+
+#elif defined(ID_QNX_ARM_NEON_ASM)
+
+	__asm__ __volatile__(
+			"VLD1.32 {Q0-Q1}, [%[s1]]!\n"
+			"VLD1.32 {Q2-Q3}, [%[s1]]\n"
+
+			"VLD1.32 {Q4-Q5}, [%[s2]]!\n"
+			"VLD1.32 {Q6-Q7}, [%[s2]]\n"
+
+			"VMUL.F32 Q8, Q4, D0[0]\n"
+			"VMUL.F32 Q9, Q4, D2[0]\n"
+			"VMUL.F32 Q10, Q4, D4[0]\n"
+			"VMUL.F32 Q11, Q4, D6[0]\n"
+
+			"VMLA.F32 Q8, Q5, D0[1]\n"
+			"VMLA.F32 Q9, Q5, D2[1]\n"
+			"VMLA.F32 Q10, Q5, D4[1]\n"
+			"VMLA.F32 Q11, Q5, D6[1]\n"
+
+			"VMLA.F32 Q8, Q6, D1[0]\n"
+			"VMLA.F32 Q9, Q6, D3[0]\n"
+			"VMLA.F32 Q10, Q6, D5[0]\n"
+			"VMLA.F32 Q11, Q6, D7[0]\n"
+
+			"VMLA.F32 Q8, Q7, D1[1]\n"
+			"VMLA.F32 Q9, Q7, D3[1]\n"
+			"VMLA.F32 Q10, Q7, D5[1]\n"
+			"VMLA.F32 Q11, Q7, D7[1]\n"
+
+			"VST1.32 {Q8-Q9}, [%[d]]!\n"
+			"VST1.32 {Q10-Q11}, [%[d]]\n"
+			:: [d] "r" (out.m), [s1] "r" (a.m), [s2] "r" (b.m) : "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "memory");
 
 #else
 
@@ -1027,7 +1400,7 @@ can get really, really small.
 */
 bool idRenderMatrix::Inverse( const idRenderMatrix & src, idRenderMatrix & out ) {
 
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 	const __m128 r0 = _mm_loadu_ps( src.m + 0 * 4 );
 	const __m128 r1 = _mm_loadu_ps( src.m + 1 * 4 );
@@ -1131,6 +1504,280 @@ bool idRenderMatrix::Inverse( const idRenderMatrix & src, idRenderMatrix & out )
 	_mm_storeu_ps( out.m + 1 * 4, _mm_mul_ps( adjoint_r1, rcpDet ) );
 	_mm_storeu_ps( out.m + 2 * 4, _mm_mul_ps( adjoint_r2, rcpDet ) );
 	_mm_storeu_ps( out.m + 3 * 4, _mm_mul_ps( adjoint_r3, rcpDet ) );
+
+#elif defined(ID_QNX_ARM_NEON_INTRIN)
+
+	const float32x4_t r0 = vld1q_f32( (float32_t *)(src.m + 0 * 4) );
+	const float32x4_t r1 = vld1q_f32( (float32_t *)(src.m + 1 * 4) );
+	const float32x4_t r2 = vld1q_f32( (float32_t *)(src.m + 2 * 4) );
+	const float32x4_t r3 = vld1q_f32( (float32_t *)(src.m + 3 * 4) );
+
+	// rXuY = row X rotated up by Y floats.
+	const float32x4_t r0u1 = vextq_f32( r0, r0, 3 );
+	const float32x4_t r0u2 = neon_swapq_sub_f32( r0 );
+	const float32x4_t r0u3 = vextq_f32( r0, r0, 1 );
+
+	const float32x4_t r1u1 = vextq_f32( r1, r1, 3 );
+	const float32x4_t r1u2 = neon_swapq_sub_f32( r1 );
+	const float32x4_t r1u3 = vextq_f32( r1, r1, 1 );
+
+	const float32x4_t r2u1 = vextq_f32( r2, r2, 3 );
+	const float32x4_t r2u2 = neon_swapq_sub_f32( r2 );
+	const float32x4_t r2u3 = vextq_f32( r2, r2, 1 );
+
+	const float32x4_t r3u1 = vextq_f32( r3, r3, 3 );
+	const float32x4_t r3u2 = neon_swapq_sub_f32( r3 );
+	const float32x4_t r3u3 = vextq_f32( r3, r3, 1 );
+
+	const float32x4_t m_r2u2_r3u3      						= vmulq_f32( r2u2, r3u3 );
+	const float32x4_t m_r1u1_r2u2_r3u3 						= vmulq_f32( r1u1, m_r2u2_r3u3 );
+	const float32x4_t m_r2u3_r3u1							= vmulq_f32( r2u3, r3u1 );
+	const float32x4_t a_m_r1u2_r2u3_r3u1_m_r1u1_r2u2_r3u3	= vmlaq_f32( m_r1u1_r2u2_r3u3, r1u2, m_r2u3_r3u1 );
+	const float32x4_t m_r2u1_r3u2							= vextq_f32( m_r2u2_r3u3, m_r2u2_r3u3, 1 );
+	const float32x4_t pos_part_det3x3_r0					= vmlaq_f32( a_m_r1u2_r2u3_r3u1_m_r1u1_r2u2_r3u3, r1u3, m_r2u1_r3u2 );
+	const float32x4_t m_r2u3_r3u2							= vmulq_f32( r2u3, r3u2 );
+	const float32x4_t m_r1u1_r2u3_r3u2						= vmulq_f32( r1u1, m_r2u3_r3u2 );
+	const float32x4_t m_r2u1_r3u3							= neon_swapq_sub_f32( m_r2u3_r3u1 );
+	const float32x4_t a_m_r1u2_r2u1_r3u3_m_r1u1_r2u3_r3u2	= vmlaq_f32( m_r1u1_r2u3_r3u2, r1u2, m_r2u1_r3u3 );
+	const float32x4_t m_r2u2_r3u1							= vextq_f32( m_r2u3_r3u2, m_r2u3_r3u2, 1 );
+	const float32x4_t neg_part_det3x3_r0					= vmlaq_f32( a_m_r1u2_r2u1_r3u3_m_r1u1_r2u3_r3u2, r1u3, m_r2u2_r3u1 );
+	const float32x4_t det3x3_r0 							= vsubq_f32( pos_part_det3x3_r0, neg_part_det3x3_r0 );
+
+	const float32x4_t m_r0u1_r2u2_r3u3 						= vmulq_f32( r0u1, m_r2u2_r3u3 );
+	const float32x4_t a_m_r0u2_r2u3_r3u1_m_r0u1_r2u2_r3u3	= vmlaq_f32( m_r0u1_r2u2_r3u3, r0u2, m_r2u3_r3u1 );
+	const float32x4_t pos_part_det3x3_r1					= vmlaq_f32( a_m_r0u2_r2u3_r3u1_m_r0u1_r2u2_r3u3, r0u3, m_r2u1_r3u2 );
+	const float32x4_t m_r0u1_r2u3_r3u2						= vmulq_f32( r0u1, m_r2u3_r3u2 );
+	const float32x4_t a_m_r0u2_r2u1_r3u3_m_r0u1_r2u3_r3u2	= vmlaq_f32( m_r0u1_r2u3_r3u2, r0u2, m_r2u1_r3u3 );
+	const float32x4_t neg_part_det3x3_r1					= vmlaq_f32( a_m_r0u2_r2u1_r3u3_m_r0u1_r2u3_r3u2, r0u3, m_r2u2_r3u1 );
+	const float32x4_t det3x3_r1 							= vsubq_f32( pos_part_det3x3_r1, neg_part_det3x3_r1 );
+
+	const float32x4_t m_r0u1_r1u2      						= vmulq_f32( r0u1, r1u2 );
+	const float32x4_t m_r0u1_r1u2_r2u3 						= vmulq_f32( m_r0u1_r1u2, r2u3 );
+	const float32x4_t m_r0u2_r1u3							= vextq_f32( m_r0u1_r1u2, m_r0u1_r1u2, 3 );
+	const float32x4_t a_m_r0u2_r1u3_r2u1_m_r0u1_r1u2_r2u3	= vmlaq_f32( m_r0u1_r1u2_r2u3, m_r0u2_r1u3, r2u1 );
+	const float32x4_t m_r0u3_r1u1							= vmulq_f32( r0u3, r1u1 );
+	const float32x4_t pos_part_det3x3_r3					= vmlaq_f32( a_m_r0u2_r1u3_r2u1_m_r0u1_r1u2_r2u3, m_r0u3_r1u1, r2u2 );
+	const float32x4_t m_r0u1_r1u3							= neon_swapq_sub_f32( m_r0u3_r1u1 );
+	const float32x4_t m_r0u1_r1u3_r2u2						= vmulq_f32( m_r0u1_r1u3, r2u2 );
+	const float32x4_t m_r0u2_r1u1							= vmulq_f32( r0u2, r1u1 );
+	const float32x4_t a_m_r0u2_r1u1_r2u3_m_r0u1_r1u3_r2u2	= vmlaq_f32( m_r0u1_r1u3_r2u2, m_r0u2_r1u1, r2u3 );
+	const float32x4_t m_r0u3_r1u2							= vextq_f32( m_r0u2_r1u1, m_r0u2_r1u1, 3 );
+	const float32x4_t neg_part_det3x3_r3					= vmlaq_f32( a_m_r0u2_r1u1_r2u3_m_r0u1_r1u3_r2u2, m_r0u3_r1u2, r2u1 );
+	const float32x4_t det3x3_r3 							= vsubq_f32( pos_part_det3x3_r3, neg_part_det3x3_r3 );
+
+	const float32x4_t m_r0u1_r1u2_r3u3 						= vmulq_f32( m_r0u1_r1u2, r3u3 );
+	const float32x4_t a_m_r0u2_r1u3_r3u1_m_r0u1_r1u2_r3u3	= vmlaq_f32( m_r0u1_r1u2_r3u3, m_r0u2_r1u3, r3u1 );
+	const float32x4_t pos_part_det3x3_r2					= vmlaq_f32( a_m_r0u2_r1u3_r3u1_m_r0u1_r1u2_r3u3, m_r0u3_r1u1, r3u2 );
+	const float32x4_t m_r0u1_r1u3_r3u2						= vmulq_f32( m_r0u1_r1u3, r3u2 );
+	const float32x4_t a_m_r0u2_r1u1_r3u3_m_r0u1_r1u3_r3u2	= vmlaq_f32( m_r0u1_r1u3_r3u2, m_r0u2_r1u1, r3u3 );
+	const float32x4_t neg_part_det3x3_r2					= vmlaq_f32( a_m_r0u2_r1u1_r3u3_m_r0u1_r1u3_r3u2, m_r0u3_r1u2, r3u1 );
+	const float32x4_t det3x3_r2 							= vsubq_f32( pos_part_det3x3_r2, neg_part_det3x3_r2 );
+
+	const uint32x4_t c_signmask	= vdupq_n_u32( 1u << 31 );
+	uint32x4x2_t c_mask			= vzipq_u32( vdupq_n_u32( 0 ), c_signmask ); //[0] c_znzn, [1] c_nznz
+	c_mask.val[1]				= vextq_u32( c_mask.val[1], c_mask.val[1], 1 );
+
+	const float32x4_t cofactor_r0 = vreinterpretq_f32_u32( veorq_u32( vreinterpretq_u32_f32( det3x3_r0 ), c_mask.val[0] ) );
+	const float32x4_t cofactor_r1 = vreinterpretq_f32_u32( veorq_u32( vreinterpretq_u32_f32( det3x3_r1 ), c_mask.val[1] ) );
+	const float32x4_t cofactor_r2 = vreinterpretq_f32_u32( veorq_u32( vreinterpretq_u32_f32( det3x3_r2 ), c_mask.val[0] ) );
+	const float32x4_t cofactor_r3 = vreinterpretq_f32_u32( veorq_u32( vreinterpretq_u32_f32( det3x3_r3 ), c_mask.val[1] ) );
+
+	const float32x4_t dot0		= vmulq_f32( r0, cofactor_r0 );
+	const float32x4_t dot1		= vaddq_f32( dot0, vextq_f32( dot0, dot0, 3 ) );
+	const float32x4_t det		= vaddq_f32( dot1, neon_swapq_sub_f32( dot1 ) );
+
+	const float32x4_t absDet	= vabsq_f32( det );
+	if ( neon_movemaskq_u32( vcltq_f32( absDet, vector_float_inverse_epsilon ) ) & 15 ) {
+		return false;
+	}
+
+	const float32x4_t rcpDet	= neon_rcp32q_f32( det );
+
+	const float32x4x2_t part_r0_r2	= vzipq_f32( cofactor_r0, cofactor_r2 );
+	const float32x4x2_t part_r1_r3	= vzipq_f32( cofactor_r1, cofactor_r3 );
+
+	const float32x4x2_t adjoint_r0_r1	= vzipq_f32( part_r0_r2.val[0], part_r1_r3.val[0] );
+	const float32x4x2_t adjoint_r2_r3	= vzipq_f32( part_r0_r2.val[1], part_r1_r3.val[1] );
+
+	vst1q_f32( (float32_t *)(out.m + 0 * 4), vmulq_f32( adjoint_r0_r1.val[0], rcpDet ) );
+	vst1q_f32( (float32_t *)(out.m + 1 * 4), vmulq_f32( adjoint_r0_r1.val[1], rcpDet ) );
+	vst1q_f32( (float32_t *)(out.m + 2 * 4), vmulq_f32( adjoint_r2_r3.val[0], rcpDet ) );
+	vst1q_f32( (float32_t *)(out.m + 3 * 4), vmulq_f32( adjoint_r2_r3.val[1], rcpDet ) );
+
+#elif defined(ID_QNX_ARM_NEON_ASM)
+
+	int maskRet;
+	__asm__ __volatile__(
+			"VLD1.32 {Q0}, [%[s]]!\n"	//r0
+			"VLD1.32 {Q6}, [%[s]]!\n"	//r1
+			"VLD1.32 {Q9}, [%[s]]!\n"	//r2
+			"VLD1.32 {Q12}, [%[s]]\n"	//r3
+			"VPUSH {Q0}\n"
+
+			// rXuY = row X rotated up by Y floats.
+			"VEXT.32 Q1, Q0, Q0, 3\n"	//r0u1
+			"VMOV Q2, Q0\n"				//r0u2
+			"VSWP D4, D5\n"
+			"VEXT.32 Q3, Q0, Q0, 1\n"	//r0u3
+
+			"VEXT.32 Q4, Q6, Q6, 3\n"	//r1u1
+			"VMOV Q5, Q6\n"				//r1u2
+			"VSWP D10, D11\n"
+			"VEXT.32 Q6, Q6, Q6, 1\n"	//r1u3
+			"VPUSH {Q4}\n"
+
+			"VEXT.32 Q7, Q9, Q9, 3\n"	//r2u1
+			"VMOV Q8, Q9\n"				//r2u2
+			"VSWP D16, D17\n"
+			"VEXT.32 Q9, Q9, Q9, 1\n"	//r2u3
+
+			"VEXT.32 Q10, Q12, Q12, 3\n"//r3u1
+			"VMOV Q11, Q12\n"			//r3u2
+			"VSWP D22, D23\n"
+			"VEXT.32 Q12, Q12, Q12, 1\n"//r3u3
+
+			"VMUL.F32 Q13, Q8, Q12\n"	//m_r2u2_r3u3
+			"VPUSH {Q12}\n"
+			"VPUSH {Q11}\n"
+			"VPUSH {Q13}\n"
+			"VPUSH {Q13}\n"
+			"VMUL.F32 Q14, Q4, Q13\n"	//m_r1u1_r2u2_r3u3
+			"VMUL.F32 Q15, Q9, Q10\n"	//m_r2u3_r3u1
+			"VMLA.F32 Q14, Q5, Q15\n"	//a_m_r1u2_r2u3_r3u1_m_r1u1_r2u2_r3u3
+			"VEXT.32 Q13, Q13, Q13, 1\n"//m_r2u1_r3u2
+			"VMLA.F32 Q14, Q6, Q13\n"	//pos_part_det3x3_r0
+			"VPUSH {Q14}\n"
+			"VMUL.F32 Q0, Q9, Q11\n"	//m_r2u3_r3u2
+			"VMUL.F32 Q4, Q4, Q0\n"		//m_r1u1_r2u3_r3u2
+			"VMOV Q12, Q15\n"			//m_r2u1_r3u3
+			"VSWP D24, D25\n"
+			"VMLA.F32 Q4, Q5, Q12\n"	//a_m_r1u2_r2u1_r3u3_m_r1u1_r2u3_r3u2
+			"VEXT.32 Q11, Q0, Q0, 1\n"	//m_r2u2_r3u1
+			"VSWP Q4, Q6\n"
+			"VMLA.F32 Q6, Q4, Q11\n"	//neg_part_det3x3_r0
+			"VPOP {Q14}\n"				//pos_part_det3x3_r0
+			"VSUB.F32 Q14, Q14, Q6\n"	//det3x3_r0
+
+			"VPOP {Q13}\n"				//m_r2u2_r3u3
+			"VMUL.F32 Q13, Q1, Q13\n"	//m_r0u1_r2u2_r3u3
+			"VSWP Q13, Q15\n"
+			"VMLA.F32 Q15, Q2, Q13\n"	//a_m_r0u2_r2u3_r3u1_m_r0u1_r2u2_r3u3
+			"VPOP {Q13}\n"
+			"VEXT.32 Q13, Q13, Q13, 1\n"//m_r2u1_r3u2
+			"VSWP Q13, Q15\n"
+			"VMLA.F32 Q13, Q3, Q15\n"	//pos_part_det3x3_r1
+			"VMUL.F32 Q15, Q1, Q0\n"	//m_r0u1_r2u3_r3u2
+			"VMLA.F32 Q15, Q2, Q12\n"	//a_m_r0u2_r2u1_r3u3_m_r0u1_r2u3_r3u2
+			"VMLA.F32 Q15, Q3, Q11\n"	//neg_part_det3x3_r1
+			"VSUB.F32 Q13, Q13, Q15\n"	//det3x3_r1
+
+			"VPOP {Q11}\n"				//r3u2
+			"VPOP {Q12}\n"				//r3u3
+			"VMUL.F32 Q1, Q1, Q5\n"		//m_r0u1_r1u2
+			"VMUL.F32 Q5, Q1, Q9\n"		//m_r0u1_r1u2_r2u3
+			"VEXT.32 Q15, Q1, Q1, 3\n"	//m_r0u2_r1u3
+			"VMLA.F32 Q5, Q15, Q7\n"	//a_m_r0u2_r1u3_r2u1_m_r0u1_r1u2_r2u3
+			"VPOP {Q4}\n"				//r1u1
+			"VMUL.F32 Q3, Q3, Q4\n"		//m_r0u3_r1u1
+			"VMLA.F32 Q5, Q3, Q8\n"		//pos_part_det3x3_r3
+			"VMOV Q6, Q3\n"				//m_r0u1_r1u3
+			"VSWP D12, D13\n"
+			"VMUL.F32 Q8, Q6, Q8\n"		//m_r0u1_r1u3_r2u2
+			"VMUL.F32 Q2, Q2, Q4\n"		//m_r0u2_r1u1
+			"VMOV Q4, Q8\n"
+			"VMLA.F32 Q4, Q2, Q9\n"		//a_m_r0u2_r1u1_r2u3_m_r0u1_r1u3_r2u2
+			"VEXT.32 Q9, Q2, Q2, 3\n"	//m_r0u3_r1u2
+			"VSWP Q7, Q4\n"
+			"VMLA.F32 Q7, Q9, Q4\n"		//neg_part_det3x3_r3
+			"VSUB.F32 Q4, Q5, Q7\n"		//det3x3_r3
+
+			"VMUL.F32 Q1, Q1, Q12\n"	//m_r0u1_r1u2_r3u3
+			"VSWP Q1, Q15\n"
+			"VMLA.F32 Q15, Q1, Q10\n"	//a_m_r0u2_r1u3_r3u1_m_r0u1_r1u2_r3u3
+			"VMLA.F32 Q15, Q3, Q11\n"	//pos_part_det3x3_r2
+			"VMUL.F32 Q11, Q6, Q11\n"	//m_r0u1_r1u3_r3u2
+			"VSWP Q11, Q12\n"
+			"VMLA.F32 Q12, Q2, Q11\n"	//a_m_r0u2_r1u1_r3u3_m_r0u1_r1u3_r3u2
+			"VSWP Q10, Q12\n"
+			"VMLA.F32 Q10, Q9, Q12\n"	//neg_part_det3x3_r2
+			"VSUB.F32 Q15, Q15, Q10\n"	//det3x3_r2
+
+			"MOV r0, #(1<<31)\n"
+			"VDUP.32 Q1, r0\n"			//c_signmask
+			"VMOV.I32 Q2, #0\n"
+			"VZIP.32 Q2, Q1\n"			//c_mask
+			"VEXT.32 Q1, Q1, Q1, 1\n"
+
+			"VEOR Q14, Q14, Q2\n"		//cofactor_r0
+			"VEOR Q13, Q13, Q1\n"		//cofactor_r1
+			"VEOR Q15, Q15, Q2\n"		//cofactor_r2
+			"VEOR Q4, Q4, Q1\n"			//cofactor_r3
+
+			"VPOP {Q0}\n"				//r0
+			"VMUL.F32 Q0, Q0, Q14\n"	//dot0
+			"VEXT.32 Q1, Q0, Q0, 3\n"
+			"VADD.F32 Q0, Q0, Q1\n"		//dot1
+			"VMOV Q2, Q0\n"
+			"VSWP D4, D5\n"
+			"VADD.F32 Q0, Q0, Q2\n"		//det
+
+			"VABS.F32 Q1, Q0\n"			//absDet
+			"VLD1.32 {Q2}, [%[in_ep]]\n"
+			"VCLT.F32 Q1, Q1, Q2\n"
+
+			// neon_movemaskq_u32( Q1 )
+			"VLD1.32 {Q5}, [%[mask]]\n"
+			"VAND Q1, Q1, Q5\n"
+			"VLD1.32 {Q5}, [%[shift]]\n"
+			"VSHL.U32 Q1, Q1, Q5\n"
+			"VPADDL.U32 Q1, Q1\n"
+			"VPADD.I32 D2, D2, D3\n"
+			"VPADDL.U32 Q1, Q1\n"
+			"VMOV.32 r0, D2[0]\n"
+			"VST1.32 {D2[0]}, [%[dc]]\n"
+			"CMP r0, #0\n"
+
+			// Only run the following instructions if r0 == #0
+
+			// The "IT" blocks will be a pain in the butt...
+			// a simple branch would save the trouble of doing this, but as covered in http://www.lighterra.com/papers/modernmicroprocessors/
+			// it is faster to do it this way as branch prediction doesn't need to play any part
+
+			// rcp32 ( Q0 )
+			"ITTTT EQ\n"
+			"VRECPEEQ.F32 Q5, Q0\n"
+			"VADDEQ.F32 Q6, Q5, Q5\n"
+			"VMULEQ.F32 Q7, Q0, Q5\n"
+			"VMULEQ.F32 Q7, Q7, Q5\n"
+			"ITTTT EQ\n"
+			"VSUBEQ.F32 Q5, Q6, Q7\n"
+			"VADDEQ.F32 Q6, Q5, Q5\n"
+			"VMULEQ.F32 Q7, Q0, Q5\n"
+			"VMULEQ.F32 Q7, Q7, Q5\n"
+			"IT EQ\n"
+			"VSUBEQ.F32 Q0, Q6, Q7\n"	//rcpDet
+
+			"ITT EQ\n"
+			"VZIPEQ.32 Q14, Q15\n"		//part_r0_r2 ([0] Q14, [1] Q15)
+			"VZIPEQ.32 Q13, Q4\n"		//part_r1_r3 ([0] Q13, [1] Q4)
+
+			"ITTTT EQ\n"
+			"VZIPEQ.32 Q14, Q13\n"		//adjoint_r0_r1 ([0] Q14, [1] Q13)
+			"VZIPEQ.32 Q15, Q4\n"		//adjoint_r2_r3 ([0] Q15, [1] Q4)
+			"VMULEQ.F32 Q12, Q14, Q0\n"
+			"VMULEQ.F32 Q13, Q13, Q0\n"
+
+			"ITTTT EQ\n"
+			"VMULEQ.F32 Q14, Q15, Q0\n"
+			"VMULEQ.F32 Q15, Q4, Q0\n"
+			"VST1EQ.32 {Q12-Q13}, [%[d]]!\n"
+			"VST1EQ.32 {Q14-Q15}, [%[d]]"
+			:: [d] "r" (out.m), [s] "r" (src.m), [dc] "r" (&maskRet), [in_ep] "r" (&vector_float_inverse_epsilon), [mask] "r" (&vector_movemask_mask_and), [shift] "r" (&vector_movemask_mask_shift)
+			 : "r0", "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12", "q13", "q14", "q15", "memory");
+
+	if ( maskRet & 15 ) {
+		return false;
+	}
 
 #else
 
@@ -1337,7 +1984,7 @@ bool idRenderMatrix::InverseByDoubles( const idRenderMatrix & src, idRenderMatri
 DeterminantIsNegative
 ========================
 */
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 void DeterminantIsNegative( bool & negativeDeterminant, const __m128 & r0, const __m128 & r1, const __m128 & r2, const __m128 & r3 ) {
 
@@ -1418,7 +2065,7 @@ void idRenderMatrix::CopyMatrix( const idRenderMatrix & matrix, idVec4 & row0, i
 	assert_16_byte_aligned( row2.ToFloatPtr() );
 	assert_16_byte_aligned( row3.ToFloatPtr() );
 
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 	const __m128 r0 = _mm_loadu_ps( matrix.m + 0 * 4 );
 	const __m128 r1 = _mm_loadu_ps( matrix.m + 1 * 4 );
@@ -1429,6 +2076,35 @@ void idRenderMatrix::CopyMatrix( const idRenderMatrix & matrix, idVec4 & row0, i
 	_mm_store_ps( row1.ToFloatPtr(), r1 );
 	_mm_store_ps( row2.ToFloatPtr(), r2 );
 	_mm_store_ps( row3.ToFloatPtr(), r3 );
+
+#elif defined(ID_QNX_ARM_NEON_INTRIN)
+
+	const float32x4_t r0 = vld1q_f32( (float32_t *)(matrix.m + 0 * 4) );
+	const float32x4_t r1 = vld1q_f32( (float32_t *)(matrix.m + 1 * 4) );
+	const float32x4_t r2 = vld1q_f32( (float32_t *)(matrix.m + 2 * 4) );
+	const float32x4_t r3 = vld1q_f32( (float32_t *)(matrix.m + 3 * 4) );
+
+	vst1q_f32( (float32_t *)row0.ToFloatPtr(), r0 );
+	vst1q_f32( (float32_t *)row1.ToFloatPtr(), r1 );
+	vst1q_f32( (float32_t *)row2.ToFloatPtr(), r2 );
+	vst1q_f32( (float32_t *)row3.ToFloatPtr(), r3 );
+
+#elif defined(ID_QNX_ARM_NEON_ASM)
+
+	float * r0 = row0.ToFloatPtr();
+	float * r1 = row1.ToFloatPtr();
+	float * r2 = row2.ToFloatPtr();
+	float * r3 = row3.ToFloatPtr();
+	__asm__ __volatile__(
+			"VLD1.32 {Q0-Q1}, [%[s]]!\n"
+			"VLD1.32 {Q2-Q3}, [%[s]]\n"
+			"VST1.32 {Q0}, [%[r0]]\n"
+			"VST1.32 {Q1}, [%[r1]]\n"
+			"VST1.32 {Q2}, [%[r2]]\n"
+			"VST1.32 {Q3}, [%[r3]]\n"
+			: [r0] "=r" (r0), [r1] "=r" (r1), [r2] "=r" (r2), [r3] "=r" (r3)
+			: [s] "r" (matrix.m)
+			: "q0", "q1", "q2", "q3", "memory");
 
 #else
 
@@ -1451,7 +2127,7 @@ void idRenderMatrix::SetMVP( const idRenderMatrix & mvp, idVec4 & row0, idVec4 &
 	assert_16_byte_aligned( row2.ToFloatPtr() );
 	assert_16_byte_aligned( row3.ToFloatPtr() );
 
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 	const __m128 r0 = _mm_loadu_ps( mvp.m + 0 * 4 );
 	const __m128 r1 = _mm_loadu_ps( mvp.m + 1 * 4 );
@@ -1488,7 +2164,7 @@ void idRenderMatrix::SetMVPForBounds( const idRenderMatrix & mvp, const idBounds
 	assert_16_byte_aligned( row2.ToFloatPtr() );
 	assert_16_byte_aligned( row3.ToFloatPtr() );
 
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 	__m128 b0 = _mm_loadu_bounds_0( bounds );
 	__m128 b1 = _mm_loadu_bounds_1( bounds );
@@ -1578,7 +2254,7 @@ void idRenderMatrix::SetMVPForInverseProject( const idRenderMatrix & mvp, const 
 	assert_16_byte_aligned( row2.ToFloatPtr() );
 	assert_16_byte_aligned( row3.ToFloatPtr() );
 
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 	__m128 r0 = _mm_loadu_ps( mvp.m + 0 * 4 );
 	__m128 r1 = _mm_loadu_ps( mvp.m + 1 * 4 );
@@ -1702,7 +2378,7 @@ frustum plane, but only while also being behind another one.
 */
 bool idRenderMatrix::CullBoundsToMVPbits( const idRenderMatrix & mvp, const idBounds & bounds, byte * outBits, bool zeroToOne ) {
 
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 	__m128 mvp0 = _mm_loadu_ps( mvp[0] );
 	__m128 mvp1 = _mm_loadu_ps( mvp[1] );
@@ -1866,7 +2542,7 @@ frustum plane, but only while also being behind another one.
 bool idRenderMatrix::CullExtrudedBoundsToMVPbits( const idRenderMatrix & mvp, const idBounds & bounds, const idVec3 & extrudeDirection, const idPlane & clipPlane, byte * outBits, bool zeroToOne ) {
 	assert( idMath::Fabs( extrudeDirection * clipPlane.Normal() ) >= idMath::FLT_SMALLEST_NON_DENORMAL );
 
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 	__m128 mvp0 = _mm_loadu_ps( mvp[0] );
 	__m128 mvp1 = _mm_loadu_ps( mvp[1] );
@@ -2157,7 +2833,7 @@ is W=0 clipped.
 ========================
 */
 void idRenderMatrix::ProjectedBounds( idBounds & projected, const idRenderMatrix & mvp, const idBounds & bounds, bool windowSpace ) {
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 	__m128 mvp0 = _mm_loadu_ps( mvp[0] );
 	__m128 mvp1 = _mm_loadu_ps( mvp[1] );
@@ -2397,7 +3073,7 @@ void idRenderMatrix::ProjectedNearClippedBounds( idBounds & projected, const idR
 	    - X +
 */
 
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 	const __m128 mvp0 = _mm_loadu_ps( mvp[0] );
 	const __m128 mvp1 = _mm_loadu_ps( mvp[1] );
@@ -3011,7 +3687,7 @@ static idVec3 LocalNearClipCenterFromMVP( const idRenderMatrix & mvp ) {
 	return idVec3( x * invW, y * invW, z * invW );
 }
 
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 /*
 ========================
@@ -3162,6 +3838,8 @@ static int ClipHomogeneousPolygonToUnitCube_SSE2( idVec4 * points, int numPoints
 	return numPoints;
 }
 
+//TODO: _mm_sld_ps == vextq_u8
+
 #else
 
 /*
@@ -3264,7 +3942,7 @@ the given bounds in which case the projected bounds should be set to fully cover
 ========================
 */
 void idRenderMatrix::ProjectedFullyClippedBounds( idBounds & projected, const idRenderMatrix & mvp, const idBounds & bounds, bool windowSpace ) {
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 	const __m128 mvp0 = _mm_loadu_ps( mvp[0] );
 	const __m128 mvp1 = _mm_loadu_ps( mvp[1] );
@@ -3517,7 +4195,7 @@ The given bounding box is not clipped to the MVP so the depth bounds may not be 
 ========================
 */
 void idRenderMatrix::DepthBoundsForBounds( float & min, float & max, const idRenderMatrix & mvp, const idBounds & bounds, bool windowSpace ) {
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 	__m128 mvp2 = _mm_loadu_ps( mvp[2] );
 	__m128 mvp3 = _mm_loadu_ps( mvp[3] );
@@ -3640,7 +4318,7 @@ The extruded bounding box is not clipped to the MVP so the depth bounds may not 
 void idRenderMatrix::DepthBoundsForExtrudedBounds( float & min, float & max, const idRenderMatrix & mvp, const idBounds & bounds, const idVec3 & extrudeDirection, const idPlane & clipPlane, bool windowSpace ) {
 	assert( idMath::Fabs( extrudeDirection * clipPlane.Normal() ) >= idMath::FLT_SMALLEST_NON_DENORMAL );
 
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
  	__m128 mvp2 = _mm_loadu_ps( mvp[2] );
 	__m128 mvp3 = _mm_loadu_ps( mvp[3] );
@@ -3904,7 +4582,7 @@ testing if the center of the far clipping plane is contained inside the shadow v
 ========================
 */
 void idRenderMatrix::DepthBoundsForShadowBounds( float & min, float & max, const idRenderMatrix & mvp, const idBounds & bounds, const idVec3 & localLightOrigin, bool windowSpace ) {
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 	const __m128 mvp0 = _mm_loadu_ps( mvp[0] );
 	const __m128 mvp1 = _mm_loadu_ps( mvp[1] );
@@ -4274,7 +4952,7 @@ idRenderMatrix::GetFrustumCorners
 void idRenderMatrix::GetFrustumCorners( frustumCorners_t & corners, const idRenderMatrix & frustumTransform, const idBounds & frustumBounds ) {
 	assert_16_byte_aligned( &corners );
 
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 	__m128 mvp0 = _mm_loadu_ps( frustumTransform[0] );
 	__m128 mvp1 = _mm_loadu_ps( frustumTransform[1] );
@@ -4347,6 +5025,187 @@ void idRenderMatrix::GetFrustumCorners( frustumCorners_t & corners, const idRend
 	_mm_store_ps( corners.z + 0, z0 );
 	_mm_store_ps( corners.z + 4, z1 );
 
+#elif defined(ID_QNX_ARM_NEON_INTRIN)
+
+	float32x4_t mvp0 = vld1q_f32( (float32_t *)frustumTransform[0] );
+	float32x4_t mvp1 = vld1q_f32( (float32_t *)frustumTransform[1] );
+	float32x4_t mvp2 = vld1q_f32( (float32_t *)frustumTransform[2] );
+	float32x4_t mvp3 = vld1q_f32( (float32_t *)frustumTransform[3] );
+
+	float32x4_t b0 = neon_load_bounds_0_f32( frustumBounds );
+	float32x4_t b1 = neon_load_bounds_1_f32( frustumBounds );
+
+	// take the four points on the X-Y plane
+	float32x4_t vxy = vzipq_f32( b0, b1 ).val[0];									// min X, max X, min Y, max Y
+	float32x2_t v = vget_low_f32( vxy );											// min X, max X
+	float32x4_t vx = vcombine_f32( v, v );											// min X, max X, min X, max X
+	v = vget_high_f32( vxy );														// min Y, max Y
+	float32x4_t vy = vcombine_f32( vdup_lane_f32( v, 0 ), vdup_lane_f32( v, 1 ) );	// min Y, min Y, max Y, max Y
+
+	float32x4_t vz0 = vdupq_lane_f32( vget_high_f32( b0 ), 0 );						// min Z, min Z, min Z, min Z
+	float32x4_t vz1 = vdupq_lane_f32( vget_high_f32( b1 ), 0 );						// max Z, max Z, max Z, max Z
+
+	// compute four partial X,Y,Z,W values
+	float32x4_t parx = vdupq_lane_f32( vget_high_f32( mvp0 ), 1 );
+	float32x4_t pary = vdupq_lane_f32( vget_high_f32( mvp1 ), 1 );
+	float32x4_t parz = vdupq_lane_f32( vget_high_f32( mvp2 ), 1 );
+	float32x4_t parw = vdupq_lane_f32( vget_high_f32( mvp3 ), 1 );
+
+	parx = vmlaq_lane_f32( parx, vx, vget_low_f32( mvp0 ), 0 );
+	pary = vmlaq_lane_f32( pary, vx, vget_low_f32( mvp1 ), 0 );
+	parz = vmlaq_lane_f32( parz, vx, vget_low_f32( mvp2 ), 0 );
+	parw = vmlaq_lane_f32( parw, vx, vget_low_f32( mvp3 ), 0 );
+
+	parx = vmlaq_lane_f32( parx, vy, vget_low_f32( mvp0 ), 1 );
+	pary = vmlaq_lane_f32( pary, vy, vget_low_f32( mvp1 ), 1 );
+	parz = vmlaq_lane_f32( parz, vy, vget_low_f32( mvp2 ), 1 );
+	parw = vmlaq_lane_f32( parw, vy, vget_low_f32( mvp3 ), 1 );
+
+	float32x4_t mvp0Z = vdupq_lane_f32( vget_high_f32( mvp0 ), 0 );
+	float32x4_t mvp1Z = vdupq_lane_f32( vget_high_f32( mvp1 ), 0 );
+	float32x4_t mvp2Z = vdupq_lane_f32( vget_high_f32( mvp2 ), 0 );
+	float32x4_t mvp3Z = vdupq_lane_f32( vget_high_f32( mvp3 ), 0 );
+
+	float32x4_t x0 = vmlaq_f32( parx, vz0, mvp0Z );
+	float32x4_t y0 = vmlaq_f32( pary, vz0, mvp1Z );
+	float32x4_t z0 = vmlaq_f32( parz, vz0, mvp2Z );
+	float32x4_t w0 = vmlaq_f32( parw, vz0, mvp3Z );
+
+	float32x4_t x1 = vmlaq_f32( parx, vz1, mvp0Z );
+	float32x4_t y1 = vmlaq_f32( pary, vz1, mvp1Z );
+	float32x4_t z1 = vmlaq_f32( parz, vz1, mvp2Z );
+	float32x4_t w1 = vmlaq_f32( parw, vz1, mvp3Z );
+
+	uint32x4_t s0 = vcgtq_f32( vector_float_smallest_non_denorm, w0 );
+	uint32x4_t s1 = vcgtq_f32( vector_float_smallest_non_denorm, w1 );
+
+	w0 = vreinterpretq_f32_u32( neon_selq_u32( vreinterpretq_u32_f32( w0 ), vreinterpretq_u32_f32( vector_float_one ), s0 ) );
+	w1 = vreinterpretq_f32_u32( neon_selq_u32( vreinterpretq_u32_f32( w1 ), vreinterpretq_u32_f32( vector_float_one ), s1 ) );
+
+	float32x4_t rw0 = neon_rcp32q_f32( w0 );
+	float32x4_t rw1 = neon_rcp32q_f32( w1 );
+
+	x0 = vmulq_f32( x0, rw0 );
+	y0 = vmulq_f32( y0, rw0 );
+	z0 = vmulq_f32( z0, rw0 );
+
+	x1 = vmulq_f32( x1, rw1 );
+	y1 = vmulq_f32( y1, rw1 );
+	z1 = vmulq_f32( z1, rw1 );
+
+	vst1q_f32( (float32_t *)( corners.x + 0 ), x0 );
+	vst1q_f32( (float32_t *)( corners.x + 4 ), x1 );
+	vst1q_f32( (float32_t *)( corners.y + 0 ), y0 );
+	vst1q_f32( (float32_t *)( corners.y + 4 ), y1 );
+	vst1q_f32( (float32_t *)( corners.z + 0 ), z0 );
+	vst1q_f32( (float32_t *)( corners.z + 4 ), z1 );
+
+#elif defined(ID_QNX_ARM_NEON_ASM)
+
+	const float * ft = frustumTransform[0];
+	const float * bounds = frustumBounds.ToFloatPtr();
+	__asm__ __volatile__(
+			"VLD1.32 {Q0-Q1}, [%[ft]]!\n"
+			"VLD1.32 {Q2-Q3}, [%[ft]]\n"
+
+			"VLD1.32 {Q4}, [%[b]]!\n"
+			"VLD1.32 {D10}, [%[b]]\n"
+			"VDUP.32 Q6, D8[0]\n"
+			"VDUP.32 Q7, D9[1]\n"
+			"VZIP.32 Q6, Q7\n"			// min X, max X, min X, max X
+			"VDUP.32 Q7, D9[0]\n"		// min Z, min Z, min Z, min Z
+			"VDUP.32 Q4, D8[1]\n"
+			"VDUP.32 D9, D10[0]\n"		// min Y, min Y, max Y, max Y
+			"VDUP.32 Q5, D10[1]\n"		// max Z, max Z, max Z, max Z
+
+			// compute four partial X,Y,Z,W values
+			"VDUP.32 Q8, D1[1]\n"
+			"VDUP.32 Q9, D3[1]\n"
+			"VDUP.32 Q10, D5[1]\n"
+			"VDUP.32 Q11, D7[1]\n"
+
+			"VMLA.F32 Q8, Q6, D0[0]\n"
+			"VMLA.F32 Q9, Q6, D2[0]\n"
+			"VMLA.F32 Q10, Q6, D4[0]\n"
+			"VMLA.F32 Q11, Q6, D6[0]\n"
+
+			"VMLA.F32 Q8, Q4, D0[1]\n"
+			"VMLA.F32 Q9, Q4, D2[1]\n"
+			"VMLA.F32 Q10, Q4, D4[1]\n"
+			"VMLA.F32 Q11, Q4, D6[1]\n"
+
+			"VDUP.32 Q12, D1[0]\n"
+			"VDUP.32 Q13, D3[0]\n"
+			"VDUP.32 Q14, D5[0]\n"
+			"VDUP.32 Q15, D7[0]\n"
+
+			"VMOV Q0, Q8\n"
+			"VMOV Q1, Q9\n"
+			"VMOV Q2, Q10\n"
+			"VMOV Q3, Q11\n"
+
+			"VMLA.F32 Q0, Q7, Q12\n"
+			"VMLA.F32 Q1, Q7, Q13\n"
+			"VMLA.F32 Q2, Q7, Q14\n"
+			"VMLA.F32 Q3, Q7, Q15\n"
+
+			"VMLA.F32 Q8, Q5, Q12\n"
+			"VMLA.F32 Q9, Q5, Q13\n"
+			"VMLA.F32 Q10, Q5, Q14\n"
+			"VMLA.F32 Q11, Q5, Q15\n"
+
+			"VLD1.32 {Q5}, [%[snd]]\n"
+			"VCGT.F32 Q4, Q5, Q3\n"
+			"VCGT.F32 Q5, Q5, Q11\n"
+			"VMOV.F32 Q6, 1.0\n"
+
+			"VBIC Q3, Q4, Q3\n"
+			"VAND Q7, Q4, Q6\n"
+			"VORR Q3, Q3, Q7\n"
+
+			"VBIC Q11, Q5, Q11\n"
+			"VAND Q12, Q5, Q6\n"
+			"VORR Q11, Q11, Q12\n"
+
+			// rcp32 ( Q3 )
+			"VRECPE.F32 Q4, Q3\n"
+			"VADD.F32 Q5, Q4, Q4\n"
+			"VMUL.F32 Q6, Q3, Q4\n"
+			"VMUL.F32 Q6, Q6, Q4\n"
+			"VSUB.F32 Q4, Q5, Q6\n"
+			"VADD.F32 Q5, Q4, Q4\n"
+			"VMUL.F32 Q6, Q3, Q4\n"
+			"VMUL.F32 Q6, Q6, Q4\n"
+			"VSUB.F32 Q3, Q5, Q6\n"
+
+			// rcp32 ( Q11 )
+			"VRECPE.F32 Q4, Q11\n"
+			"VADD.F32 Q5, Q4, Q4\n"
+			"VMUL.F32 Q6, Q11, Q4\n"
+			"VMUL.F32 Q6, Q6, Q4\n"
+			"VSUB.F32 Q4, Q5, Q6\n"
+			"VADD.F32 Q5, Q4, Q4\n"
+			"VMUL.F32 Q6, Q11, Q4\n"
+			"VMUL.F32 Q6, Q6, Q4\n"
+			"VSUB.F32 Q11, Q5, Q6\n"
+
+			"VMUL.F32 Q0, Q0, Q3\n"
+			"VMUL.F32 Q1, Q1, Q3\n"
+			"VMUL.F32 Q2, Q2, Q3\n"
+
+			"VMUL.F32 Q8, Q8, Q11\n"
+			"VMUL.F32 Q9, Q9, Q11\n"
+			"VMUL.F32 Q10, Q10, Q11\n"
+
+			"VST1.32 {Q0}, [%[dx]]!\n"
+			"VST1.32 {Q8}, [%[dx]]\n"
+			"VST1.32 {Q1}, [%[dy]]!\n"
+			"VST1.32 {Q9}, [%[dy]]\n"
+			"VST1.32 {Q2}, [%[dz]]!\n"
+			"VST1.32 {Q10}, [%[dz]]\n"
+			:: [ft] "r" (ft), [b] "r" (bounds), [dx] "r" (corners.x), [dy] "r" (corners.y), [dz] "r" (corners.z), [snd] "r" (&vector_float_smallest_non_denorm)
+			 : "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12", "q13", "q14", "q15");
+
 #else
 
 	idVec3 v;
@@ -4384,7 +5243,7 @@ idRenderMatrix::CullFrustumCornersToPlane
 frustumCull_t idRenderMatrix::CullFrustumCornersToPlane( const frustumCorners_t & corners, const idPlane & plane ) {
 	assert_16_byte_aligned( &corners );
 
-#ifdef ID_WIN_X86_SSE2_INTRIN
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 
 	__m128 vp = _mm_loadu_ps( plane.ToFloatPtr() );
 
@@ -4415,6 +5274,97 @@ frustumCull_t idRenderMatrix::CullFrustumCornersToPlane( const frustumCorners_t 
 	compile_time_assert( FRUSTUM_CULL_CROSS == 3 );
 
 	return (frustumCull_t) ( front | ( back << 1 ) );
+
+#elif defined(ID_QNX_ARM_NEON_INTRIN)
+
+	float32x4_t vp = vld1q_f32( (float32_t *)plane.ToFloatPtr() );
+
+	float32x4_t x0 = vld1q_f32( (float32_t *)(corners.x + 0) );
+	float32x4_t y0 = vld1q_f32( (float32_t *)(corners.y + 0) );
+	float32x4_t z0 = vld1q_f32( (float32_t *)(corners.z + 0) );
+
+	float32x4_t x1 = vld1q_f32( (float32_t *)(corners.x + 4) );
+	float32x4_t y1 = vld1q_f32( (float32_t *)(corners.y + 4) );
+	float32x4_t z1 = vld1q_f32( (float32_t *)(corners.z + 4) );
+
+	float32x4_t p0 = vdupq_lane_f32( vp, 0 );
+	float32x4_t p1 = vdupq_lane_f32( vp, 1 );
+	float32x4_t p2 = vdupq_lane_f32( vp, 2 );
+	float32x4_t p3 = vdupq_lane_f32( vp, 3 );
+
+	float32x4_t d0 = vmlaq_f32( vmlaq_f32( vmlaq_f32( p3, z0, p2 ), y0, p1 ), x0, p0 );
+	float32x4_t d1 = vmlaq_f32( vmlaq_f32( vmlaq_f32( p3, z1, p2 ), y1, p1 ), x1, p0 );
+
+	int b0 = neon_movemaskq_f32( d0 );
+	int b1 = neon_movemaskq_f32( d1 );
+
+	unsigned int front = ( (unsigned int) -( ( b0 & b1 ) ^ 15 ) ) >> 31;
+	unsigned int back = ( (unsigned int) -( b0 | b1 ) ) >> 31;
+
+	compile_time_assert( FRUSTUM_CULL_FRONT == 1 );
+	compile_time_assert( FRUSTUM_CULL_BACK == 2 );
+	compile_time_assert( FRUSTUM_CULL_CROSS == 3 );
+
+	return (frustumCull_t) ( front | ( back << 1 ) );
+
+#elif defined(ID_QNX_ARM_NEON_ASM)
+
+	compile_time_assert( FRUSTUM_CULL_FRONT == 1 );
+	compile_time_assert( FRUSTUM_CULL_BACK == 2 );
+	compile_time_assert( FRUSTUM_CULL_CROSS == 3 );
+
+	int ret;
+	const float * pl = plane.ToFloatPtr();
+	__asm__("VLD1.32 {Q0}, [%[p]]\n"
+			"VLD1.32 {Q1-Q2}, [%[x]]\n"
+			"VLD1.32 {Q3-Q4}, [%[y]]\n"
+			"VLD1.32 {Q5-Q6}, [%[z]]\n"
+
+			"VDUP.32 Q7, D0[0]\n"
+			"VDUP.32 Q8, D0[1]\n"
+			"VDUP.32 Q9, D1[0]\n"
+			"VDUP.32 Q10, D1[1]\n"
+			"VMOV Q11, Q10\n"
+
+			"VMLA.F32 Q10, Q5, Q9\n"
+			"VMLA.F32 Q10, Q3, Q8\n"
+			"VMLA.F32 Q10, Q1, Q7\n"
+
+			"VMLA.F32 Q11, Q6, Q9\n"
+			"VMLA.F32 Q11, Q4, Q8\n"
+			"VMLA.F32 Q11, Q2, Q7\n"
+
+			"VLD1.32 {Q0}, [%[mask]]\n"
+			"VAND Q10, Q10, Q0\n"
+			"VAND Q11, Q11, Q0\n"
+			"VLD1.32 {Q0}, [%[shift]]\n"
+			"VSHL.U32 Q10, Q10, Q0\n"
+			"VSHL.U32 Q11, Q11, Q0\n"
+			"VPADDL.U32 Q0, Q10\n"
+			"VPADD.I32 D0, D0, D1\n"
+			"VPADDL.U32 Q0, Q0\n"
+			"VPADDL.U32 Q1, Q11\n"
+			"VPADD.I32 D2, D2, D3\n"
+			"VPADDL.U32 Q1, Q1\n"
+
+			// kinda nasty, but prevents compiler from using IP register for data...
+			"VMOV.32 %[x], D0[0]\n"
+			"VMOV.32 %[y], D2[0]\n"
+			"AND %[z], %[x], %[y]\n"
+			"EOR %[z], %[z], #15\n"
+			"NEG %[z], %[z]\n"
+			"ORR %[x], %[x], %[y]\n"
+			"LSR %[y], %[z], #31\n"
+			"NEG %[x], %[x]\n"
+			"LSR %[x], %[x], #31\n"
+
+			"LSL %[x], %[x], #1\n"
+			"ORR %[x], %[y], %[x]\n"
+			"STRT %[x], [%[d]]"
+			:: [d] "r" (&ret), [p] "r" (pl), [x] "r" (corners.x), [y] "r" (corners.y), [z] "r" (corners.z), [mask] "r" (&vector_movemask_mask_and), [shift] "r" (&vector_movemask_mask_shift)
+			 : "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "memory");
+
+	return (frustumCull_t)( ret );
 
 #else
 

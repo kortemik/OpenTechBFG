@@ -48,8 +48,8 @@ idCVar in_mouseSpeed( "in_mouseSpeed", "1",	CVAR_ARCHIVE | CVAR_FLOAT, "speed at
 idCVar in_alwaysRun( "in_alwaysRun", "1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "always run (reverse _speed button) - only in MP" );
 
 #ifdef ID_QNX
-idCVar in_useJoystick( "in_useJoystick", "1", CVAR_ARCHIVE | CVAR_BOOL, "enables/disables the gamepad for PC use" );
-idCVar in_joystickRumble( "in_joystickRumble", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "enable joystick rumble" );
+idCVar in_useJoystick( "in_useJoystick", "1", CVAR_BOOL | CVAR_ROM, "enables/disables the gamepad for mobile use" );
+idCVar in_joystickRumble( "in_joystickRumble", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "enable gamepad rumble" );
 #else
 idCVar in_useJoystick( "in_useJoystick", "0", CVAR_ARCHIVE | CVAR_BOOL, "enables/disables the gamepad for PC use" );
 idCVar in_joystickRumble( "in_joystickRumble", "1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "enable joystick rumble" );

@@ -115,10 +115,10 @@ ID_FORCE_INLINE void ZeroCacheLine( void * ptr, int offset ) {
 		"ADD %[ptr], %[ptr], %[off]\n"
 		"VBIC.I32 q0, #0\n"
 		"VMOV q1, q0\n"
-		"VST1.32 {d0,d1,d2,d3}, [%[ptr]]!\n"
-		"VST1.32 {d0,d1,d2,d3}, [%[ptr]]!\n"
-		"VST1.32 {d0,d1,d2,d3}, [%[ptr]]!\n"
-		"VST1.32 {d0,d1,d2,d3}, [%[ptr]]"
+		"VST1.32 {q0-q1}, [%[ptr]]!\n"
+		"VST1.32 {q0-q1}, [%[ptr]]!\n"
+		"VST1.32 {q0-q1}, [%[ptr]]!\n"
+		"VST1.32 {q0-q1}, [%[ptr]]"
 		: [ptr] "+&r" (ptr) : [off] "r" (offset) : "q0", "q1", "memory");
 #else
 	char * bytePtr = ( (char *) ptr ) + offset;

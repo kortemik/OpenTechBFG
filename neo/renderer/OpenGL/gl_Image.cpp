@@ -507,6 +507,14 @@ void idImage::AllocImage() {
 
 	qglBindTexture( target, texnum );
 
+#ifdef GL_ES_VERSION_3_0
+	if ( glConfig.glVersion >= 3.0 ) {
+		// Faster, handles all sides and levels, and makes the texture immutable to size changes which potentially has a performance improvement and doesn't effect
+		// how we work with textures, since we purge it before we resize it anyway. It also handles both compressed and uncompressed images textures for us.
+		qglTexStorage2D( target, opts.numLevels, internalFormat, opts.width, ( opts.textureType == TT_CUBIC ? opts.width : opts.height ) );
+		GL_CheckErrors();
+	} else {
+#endif
 	for ( int side = 0; side < numSides; side++ ) {
 		int w = opts.width;
 		int h = opts.height;
@@ -548,6 +556,9 @@ void idImage::AllocImage() {
 			h = Max( 1, h >> 1 );
 		}
 	}
+#ifdef GL_ES_VERSION_3_0
+	}
+#endif
 
 	if ( glConfig.textureMaxLevelAvailable ) {
 		qglTexParameteri( target, GL_TEXTURE_MAX_LEVEL, opts.numLevels - 1 );

@@ -328,6 +328,7 @@ PFNGLDISABLEDRIVERCONTROLQCOMPROC		qglDisableDriverControlQCOM;
 glBindMultiTextureEXT
 
 As of 2011/09/16 the Intel drivers for "Sandy Bridge" and "Ivy Bridge" integrated graphics do not support this extension.
+As of 2014, OpenGL ES does not support this extension.
 ========================
 */
 void APIENTRY glBindMultiTextureEXT( GLenum texunit, GLenum target, GLuint texture ) {
@@ -383,6 +384,9 @@ void APIENTRY glDrawElementsBaseVertexImpl( GLenum mode, GLsizei count, GLenum t
 	// without unmapping the buffers, moving them, then remapping them and saving the offset so the smp
 	// functions don't break... every draw call...
 	qglDrawElements( mode, count, type, indices );
+
+	// OpenGL ES 3.1 adds glDrawElementsIndirect which has a field that would be for baseVertex... except it's reserved and
+	// potentially not even implemented :(
 }
 
 /*
