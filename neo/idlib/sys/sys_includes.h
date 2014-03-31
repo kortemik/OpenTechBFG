@@ -124,7 +124,7 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 #if BBNDK_VERSION_AT_LEAST(10, 2, 0)
-#define ID_OPENGL_ES_3
+#define ID_OPENGL_ES_3 0 //XXX make sure versions determine what this actually is
 #else
 #define ID_OPENGL_ES_2
 #endif

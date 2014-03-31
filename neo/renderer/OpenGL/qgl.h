@@ -185,7 +185,7 @@ extern  void ( APIENTRY * qglCopyTexSubImage3D )(GLenum target, GLint level, GLi
 
 #endif
 
-#endif
+#endif // GL_ES_VERSION_2_0
 
 //===========================================================================
 
@@ -789,9 +789,82 @@ extern  void ( APIENTRY * qglTexStorage2D )(GLenum target, GLsizei levels, GLenu
 extern  void ( APIENTRY * qglTexStorage3D )(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth);
 extern  void ( APIENTRY * qglGetInternalformativ )(GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint* params);
 
-#endif
+#ifdef GL_ES_VERSION_3_1
+
+extern  void ( APIENTRY * qglDispatchCompute )(GLuint num_groups_x, GLuint num_groups_y, GLuint num_groups_z);
+extern  void ( APIENTRY * qglDispatchComputeIndirect )(GLintptr indirect);
+extern  void ( APIENTRY * qglDrawArraysIndirect )(GLenum mode, const void *indirect);
+extern  void ( APIENTRY * qglDrawElementsIndirect )(GLenum mode, GLenum type, const void *indirect);
+extern  void ( APIENTRY * qglFramebufferParameteri )(GLenum target, GLenum pname, GLint param);
+extern  void ( APIENTRY * qglGetFramebufferParameteriv )(GLenum target, GLenum pname, GLint *params);
+extern  void ( APIENTRY * qglGetProgramInterfaceiv )(GLuint program, GLenum programInterface, GLenum pname, GLint *params);
+extern  GLuint ( APIENTRY * qglGetProgramResourceIndex )(GLuint program, GLenum programInterface, const GLchar *name);
+extern  void ( APIENTRY * qglGetProgramResourceName )(GLuint program, GLenum programInterface, GLuint index, GLsizei bufSize, GLsizei *length, GLchar *name);
+extern  void ( APIENTRY * qglGetProgramResourceiv )(GLuint program, GLenum programInterface, GLuint index, GLsizei propCount, const GLenum *props, GLsizei bufSize, GLsizei *length, GLint *params);
+extern  GLint ( APIENTRY * qglGetProgramResourceLocation )(GLuint program, GLenum programInterface, const GLchar *name);
+extern  void ( APIENTRY * qglUseProgramStages )(GLuint pipeline, GLbitfield stages, GLuint program);
+extern  void ( APIENTRY * qglActiveShaderProgram )(GLuint pipeline, GLuint program);
+extern  GLuint ( APIENTRY * qglCreateShaderProgramv )(GLenum type, GLsizei count, const GLchar *const*strings);
+extern  void ( APIENTRY * qglBindProgramPipeline )(GLuint pipeline);
+extern  void ( APIENTRY * qglDeleteProgramPipelines )(GLsizei n, const GLuint *pipelines);
+extern  void ( APIENTRY * qglGenProgramPipelines )(GLsizei n, GLuint *pipelines);
+extern  GLboolean ( APIENTRY * qglIsProgramPipeline )(GLuint pipeline);
+extern  void ( APIENTRY * qglGetProgramPipelineiv )(GLuint pipeline, GLenum pname, GLint *params);
+extern  void ( APIENTRY * qglProgramUniform1i )(GLuint program, GLint location, GLint v0);
+extern  void ( APIENTRY * qglProgramUniform2i )(GLuint program, GLint location, GLint v0, GLint v1);
+extern  void ( APIENTRY * qglProgramUniform3i )(GLuint program, GLint location, GLint v0, GLint v1, GLint v2);
+extern  void ( APIENTRY * qglProgramUniform4i )(GLuint program, GLint location, GLint v0, GLint v1, GLint v2, GLint v3);
+extern  void ( APIENTRY * qglProgramUniform1ui )(GLuint program, GLint location, GLuint v0);
+extern  void ( APIENTRY * qglProgramUniform2ui )(GLuint program, GLint location, GLuint v0, GLuint v1);
+extern  void ( APIENTRY * qglProgramUniform3ui )(GLuint program, GLint location, GLuint v0, GLuint v1, GLuint v2);
+extern  void ( APIENTRY * qglProgramUniform4ui )(GLuint program, GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3);
+extern  void ( APIENTRY * qglProgramUniform1f )(GLuint program, GLint location, GLfloat v0);
+extern  void ( APIENTRY * qglProgramUniform2f )(GLuint program, GLint location, GLfloat v0, GLfloat v1);
+extern  void ( APIENTRY * qglProgramUniform3f )(GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
+extern  void ( APIENTRY * qglProgramUniform4f )(GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
+extern  void ( APIENTRY * qglProgramUniform1iv )(GLuint program, GLint location, GLsizei count, const GLint *value);
+extern  void ( APIENTRY * qglProgramUniform2iv )(GLuint program, GLint location, GLsizei count, const GLint *value);
+extern  void ( APIENTRY * qglProgramUniform3iv )(GLuint program, GLint location, GLsizei count, const GLint *value);
+extern  void ( APIENTRY * qglProgramUniform4iv )(GLuint program, GLint location, GLsizei count, const GLint *value);
+extern  void ( APIENTRY * qglProgramUniform1uiv )(GLuint program, GLint location, GLsizei count, const GLuint *value);
+extern  void ( APIENTRY * qglProgramUniform2uiv )(GLuint program, GLint location, GLsizei count, const GLuint *value);
+extern  void ( APIENTRY * qglProgramUniform3uiv )(GLuint program, GLint location, GLsizei count, const GLuint *value);
+extern  void ( APIENTRY * qglProgramUniform4uiv )(GLuint program, GLint location, GLsizei count, const GLuint *value);
+extern  void ( APIENTRY * qglProgramUniform1fv )(GLuint program, GLint location, GLsizei count, const GLfloat *value);
+extern  void ( APIENTRY * qglProgramUniform2fv )(GLuint program, GLint location, GLsizei count, const GLfloat *value);
+extern  void ( APIENTRY * qglProgramUniform3fv )(GLuint program, GLint location, GLsizei count, const GLfloat *value);
+extern  void ( APIENTRY * qglProgramUniform4fv )(GLuint program, GLint location, GLsizei count, const GLfloat *value);
+extern  void ( APIENTRY * qglProgramUniformMatrix2fv )(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+extern  void ( APIENTRY * qglProgramUniformMatrix3fv )(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+extern  void ( APIENTRY * qglProgramUniformMatrix4fv )(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+extern  void ( APIENTRY * qglProgramUniformMatrix2x3fv )(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+extern  void ( APIENTRY * qglProgramUniformMatrix3x2fv )(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+extern  void ( APIENTRY * qglProgramUniformMatrix2x4fv )(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+extern  void ( APIENTRY * qglProgramUniformMatrix4x2fv )(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+extern  void ( APIENTRY * qglProgramUniformMatrix3x4fv )(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+extern  void ( APIENTRY * qglProgramUniformMatrix4x3fv )(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+extern  void ( APIENTRY * qglValidateProgramPipeline )(GLuint pipeline);
+extern  void ( APIENTRY * qglGetProgramPipelineInfoLog )(GLuint pipeline, GLsizei bufSize, GLsizei *length, GLchar *infoLog);
+extern  void ( APIENTRY * qglBindImageTexture )(GLuint unit, GLuint texture, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format);
+extern  void ( APIENTRY * qglGetBooleani_v )(GLenum target, GLuint index, GLboolean *data);
+extern  void ( APIENTRY * qglMemoryBarrier )(GLbitfield barriers);
+extern  void ( APIENTRY * qglMemoryBarrierByRegion )(GLbitfield barriers);
+extern  void ( APIENTRY * qglTexStorage2DMultisample )(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, GLboolean fixedsamplelocations);
+extern  void ( APIENTRY * qglGetMultisamplefv )(GLenum pname, GLuint index, GLfloat *val);
+extern  void ( APIENTRY * qglSampleMaski )(GLuint maskNumber, GLbitfield mask);
+extern  void ( APIENTRY * qglGetTexLevelParameteriv )(GLenum target, GLint level, GLenum pname, GLint *params);
+extern  void ( APIENTRY * qglGetTexLevelParameterfv )(GLenum target, GLint level, GLenum pname, GLfloat *params);
+extern  void ( APIENTRY * qglBindVertexBuffer )(GLuint bindingindex, GLuint buffer, GLintptr offset, GLsizei stride);
+extern  void ( APIENTRY * qglVertexAttribFormat )(GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint relativeoffset);
+extern  void ( APIENTRY * qglVertexAttribIFormat )(GLuint attribindex, GLint size, GLenum type, GLuint relativeoffset);
+extern  void ( APIENTRY * qglVertexAttribBinding )(GLuint attribindex, GLuint bindingindex);
+extern  void ( APIENTRY * qglVertexBindingDivisor )(GLuint bindingindex, GLuint divisor);
 
 #endif
+
+#endif // GL_ES_VERSION_3_0
+
+#endif // GL_ES_VERSION_2_0
 
 #ifdef ID_WIN32
 
@@ -839,19 +912,9 @@ extern EGLSurface ( APIENTRY * qeglCreatePbufferSurface )(EGLDisplay, EGLConfig,
 extern EGLSurface ( APIENTRY * qeglCreatePixmapSurface )(EGLDisplay, EGLConfig, EGLNativePixmapType, const EGLint *);
 extern EGLBoolean ( APIENTRY * qeglDestroySurface )(EGLDisplay, EGLSurface);
 extern EGLBoolean ( APIENTRY * qeglQuerySurface )(EGLDisplay, EGLSurface, EGLint, EGLint *);
-extern EGLBoolean ( APIENTRY * qeglBindAPI )(EGLenum);
-extern EGLenum ( APIENTRY * qeglQueryAPI )(void);
-extern EGLBoolean ( APIENTRY * qeglWaitClient )(void);
-extern EGLBoolean ( APIENTRY * qeglReleaseThread )(void);
-extern EGLSurface ( APIENTRY * qeglCreatePbufferFromClientBuffer )(EGLDisplay, EGLenum, EGLClientBuffer, EGLConfig, const EGLint *);
-extern EGLBoolean ( APIENTRY * qeglSurfaceAttrib )(EGLDisplay, EGLSurface, EGLint, EGLint);
-extern EGLBoolean ( APIENTRY * qeglBindTexImage )(EGLDisplay, EGLSurface, EGLint);
-extern EGLBoolean ( APIENTRY * qeglReleaseTexImage )(EGLDisplay, EGLSurface, EGLint);
-extern EGLBoolean ( APIENTRY * qeglSwapInterval )(EGLDisplay, EGLint);
 extern EGLContext ( APIENTRY * qeglCreateContext )(EGLDisplay, EGLConfig, EGLContext, const EGLint *);
 extern EGLBoolean ( APIENTRY * qeglDestroyContext )(EGLDisplay, EGLContext);
 extern EGLBoolean ( APIENTRY * qeglMakeCurrent )(EGLDisplay, EGLSurface, EGLSurface, EGLContext);
-extern EGLContext ( APIENTRY * qeglGetCurrentContext )(void);
 extern EGLSurface ( APIENTRY * qeglGetCurrentSurface )(EGLint);
 extern EGLDisplay ( APIENTRY * qeglGetCurrentDisplay )(void);
 extern EGLBoolean ( APIENTRY * qeglQueryContext )(EGLDisplay, EGLContext, EGLint, EGLint *);
@@ -861,7 +924,45 @@ extern EGLBoolean ( APIENTRY * qeglSwapBuffers )(EGLDisplay, EGLSurface);
 extern EGLBoolean ( APIENTRY * qeglCopyBuffers )(EGLDisplay, EGLSurface, EGLNativePixmapType);
 extern GLExtension_t ( APIENTRY * qeglGetProcAddress )(const char *);
 
-#endif
+#ifdef EGL_VERSION_1_1
+
+extern EGLBoolean ( APIENTRY * qeglBindTexImage )(EGLDisplay, EGLSurface, EGLint);
+extern EGLBoolean ( APIENTRY * qeglReleaseTexImage )(EGLDisplay, EGLSurface, EGLint);
+extern EGLBoolean ( APIENTRY * qeglSurfaceAttrib )(EGLDisplay, EGLSurface, EGLint, EGLint);
+extern EGLBoolean ( APIENTRY * qeglSwapInterval )(EGLDisplay, EGLint);
+
+#ifdef EGL_VERSION_1_2
+
+extern EGLBoolean ( APIENTRY * qeglBindAPI )(EGLenum);
+extern EGLenum ( APIENTRY * qeglQueryAPI )(void);
+extern EGLSurface ( APIENTRY * qeglCreatePbufferFromClientBuffer )(EGLDisplay, EGLenum, EGLClientBuffer, EGLConfig, const EGLint *);
+extern EGLBoolean ( APIENTRY * qeglReleaseThread )(void);
+extern EGLBoolean ( APIENTRY * qeglWaitClient )(void);
+
+#ifdef EGL_VERSION_1_4
+
+extern EGLContext ( APIENTRY * qeglGetCurrentContext )(void);
+
+#ifdef EGL_VERSION_1_5
+
+extern EGLSync ( APIENTRY * qeglCreateSync )(EGLDisplay, EGLenum, const EGLAttrib *);
+extern EGLBoolean ( APIENTRY * qeglDestroySync )(EGLDisplay, EGLSync);
+extern EGLint ( APIENTRY * qeglClientWaitSync )(EGLDisplay, EGLSync, EGLint, EGLTime);
+extern EGLBoolean ( APIENTRY * qeglGetSyncAttrib )(EGLDisplay, EGLSync, EGLint, EGLAttrib *);
+extern EGLDisplay ( APIENTRY * qeglGetPlatformDisplay )(EGLenum, void *, const EGLAttrib *);
+extern EGLSurface ( APIENTRY * qeglCreatePlatformWindowSurface )(EGLDisplay, EGLConfig, void *, const EGLAttrib *);
+extern EGLSurface ( APIENTRY * qeglCreatePlatformPixmapSurface )(EGLDisplay, EGLConfig, void *, const EGLAttrib *);
+extern EGLBoolean ( APIENTRY * qeglWaitSync )(EGLDisplay, EGLSync, EGLint);
+
+#endif // EGL_VERSION_1_5
+
+#endif // EGL_VERSION_1_4
+
+#endif // EGL_VERSION_1_2
+
+#endif // EGL_VERSION_1_1
+
+#endif // ID_WIN32
 
 #endif	// hardlink vs dlopen
 

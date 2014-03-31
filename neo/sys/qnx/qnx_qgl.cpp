@@ -65,7 +65,7 @@ typedef struct {
 	void		*link;
 } glSymLink_t;
 
-#define GL_LINK_COUNT 282
+#define GL_LINK_COUNT 356
 static glSymLink_t glLinks[GL_LINK_COUNT];
 static int glSymCount = 0;
 
@@ -138,19 +138,9 @@ EGLSurface ( APIENTRY * qeglCreatePbufferSurface )(EGLDisplay dpy, EGLConfig con
 EGLSurface ( APIENTRY * qeglCreatePixmapSurface )(EGLDisplay dpy, EGLConfig config, EGLNativePixmapType pixmap, const EGLint *attrib_list);
 EGLBoolean ( APIENTRY * qeglDestroySurface )(EGLDisplay dpy, EGLSurface surface);
 EGLBoolean ( APIENTRY * qeglQuerySurface )(EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint *value);
-EGLBoolean ( APIENTRY * qeglBindAPI )(EGLenum api);
-EGLenum ( APIENTRY * qeglQueryAPI )(void);
-EGLBoolean ( APIENTRY * qeglWaitClient )(void);
-EGLBoolean ( APIENTRY * qeglReleaseThread )(void);
-EGLSurface ( APIENTRY * qeglCreatePbufferFromClientBuffer )(EGLDisplay dpy, EGLenum buftype, EGLClientBuffer buffer, EGLConfig config, const EGLint *attrib_list);
-EGLBoolean ( APIENTRY * qeglSurfaceAttrib )(EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint value);
-EGLBoolean ( APIENTRY * qeglBindTexImage )(EGLDisplay dpy, EGLSurface surface, EGLint buffer);
-EGLBoolean ( APIENTRY * qeglReleaseTexImage )(EGLDisplay dpy, EGLSurface surface, EGLint buffer);
-EGLBoolean ( APIENTRY * qeglSwapInterval )(EGLDisplay dpy, EGLint interval);
 EGLContext ( APIENTRY * qeglCreateContext )(EGLDisplay dpy, EGLConfig config, EGLContext share_context, const EGLint *attrib_list);
 EGLBoolean ( APIENTRY * qeglDestroyContext )(EGLDisplay dpy, EGLContext ctx);
 EGLBoolean ( APIENTRY * qeglMakeCurrent )(EGLDisplay dpy, EGLSurface draw, EGLSurface read, EGLContext ctx);
-EGLContext ( APIENTRY * qeglGetCurrentContext )(void);
 EGLSurface ( APIENTRY * qeglGetCurrentSurface )(EGLint readdraw);
 EGLDisplay ( APIENTRY * qeglGetCurrentDisplay )(void);
 EGLBoolean ( APIENTRY * qeglQueryContext )(EGLDisplay dpy, EGLContext ctx, EGLint attribute, EGLint *value);
@@ -159,6 +149,44 @@ EGLBoolean ( APIENTRY * qeglWaitNative )(EGLint engine);
 EGLBoolean ( APIENTRY * qeglSwapBuffers )(EGLDisplay dpy, EGLSurface surface);
 EGLBoolean ( APIENTRY * qeglCopyBuffers )(EGLDisplay dpy, EGLSurface surface, EGLNativePixmapType target);
 GLExtension_t ( APIENTRY * qeglGetProcAddress )(const char *procname);
+
+#ifdef EGL_VERSION_1_1
+
+EGLBoolean ( APIENTRY * qeglBindTexImage )(EGLDisplay dpy, EGLSurface surface, EGLint buffer);
+EGLBoolean ( APIENTRY * qeglReleaseTexImage )(EGLDisplay dpy, EGLSurface surface, EGLint buffer);
+EGLBoolean ( APIENTRY * qeglSurfaceAttrib )(EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint value);
+EGLBoolean ( APIENTRY * qeglSwapInterval )(EGLDisplay dpy, EGLint interval);
+
+#ifdef EGL_VERSION_1_2
+
+EGLBoolean ( APIENTRY * qeglBindAPI )(EGLenum api);
+EGLenum ( APIENTRY * qeglQueryAPI )(void);
+EGLSurface ( APIENTRY * qeglCreatePbufferFromClientBuffer )(EGLDisplay dpy, EGLenum buftype, EGLClientBuffer buffer, EGLConfig config, const EGLint *attrib_list);
+EGLBoolean ( APIENTRY * qeglReleaseThread )(void);
+EGLBoolean ( APIENTRY * qeglWaitClient )(void);
+
+#ifdef EGL_VERSION_1_4
+
+EGLContext ( APIENTRY * qeglGetCurrentContext )(void);
+
+#ifdef EGL_VERSION_1_5
+
+EGLSync ( APIENTRY * qeglCreateSync )(EGLDisplay dpy, EGLenum type, const EGLAttrib *attrib_list);
+EGLBoolean ( APIENTRY * qeglDestroySync )(EGLDisplay dpy, EGLSync sync);
+EGLint ( APIENTRY * qeglClientWaitSync )(EGLDisplay dpy, EGLSync sync, EGLint flags, EGLTime timeout);
+EGLBoolean ( APIENTRY * qeglGetSyncAttrib )(EGLDisplay dpy, EGLSync sync, EGLint attribute, EGLAttrib *value);
+EGLDisplay ( APIENTRY * qeglGetPlatformDisplay )(EGLenum platform, void *native_display, const EGLAttrib *attrib_list);
+EGLSurface ( APIENTRY * qeglCreatePlatformWindowSurface )(EGLDisplay dpy, EGLConfig config, void *native_window, const EGLAttrib *attrib_list);
+EGLSurface ( APIENTRY * qeglCreatePlatformPixmapSurface )(EGLDisplay dpy, EGLConfig config, void *native_pixmap, const EGLAttrib *attrib_list);
+EGLBoolean ( APIENTRY * qeglWaitSync )(EGLDisplay dpy, EGLSync sync, EGLint flags);
+
+#endif // EGL_VERSION_1_5
+
+#endif // EGL_VERSION_1_4
+
+#endif // EGL_VERSION_1_2
+
+#endif // EGL_VERSION_1_1
 
 void ( APIENTRY * qglActiveTexture )(GLenum texture);
 //void ( APIENTRY * qglAttachShader )(GLuint program, GLuint shader);
@@ -410,7 +438,80 @@ void ( APIENTRY * qglTexStorage2D )(GLenum target, GLsizei levels, GLenum intern
 void ( APIENTRY * qglTexStorage3D )(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth);
 void ( APIENTRY * qglGetInternalformativ )(GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint* params);
 
-#endif
+#ifdef GL_ES_VERSION_3_1
+
+void ( APIENTRY * qglDispatchCompute )(GLuint num_groups_x, GLuint num_groups_y, GLuint num_groups_z);
+void ( APIENTRY * qglDispatchComputeIndirect )(GLintptr indirect);
+void ( APIENTRY * qglDrawArraysIndirect )(GLenum mode, const void *indirect);
+void ( APIENTRY * qglDrawElementsIndirect )(GLenum mode, GLenum type, const void *indirect);
+void ( APIENTRY * qglFramebufferParameteri )(GLenum target, GLenum pname, GLint param);
+void ( APIENTRY * qglGetFramebufferParameteriv )(GLenum target, GLenum pname, GLint *params);
+void ( APIENTRY * qglGetProgramInterfaceiv )(GLuint program, GLenum programInterface, GLenum pname, GLint *params);
+GLuint ( APIENTRY * qglGetProgramResourceIndex )(GLuint program, GLenum programInterface, const GLchar *name);
+void ( APIENTRY * qglGetProgramResourceName )(GLuint program, GLenum programInterface, GLuint index, GLsizei bufSize, GLsizei *length, GLchar *name);
+void ( APIENTRY * qglGetProgramResourceiv )(GLuint program, GLenum programInterface, GLuint index, GLsizei propCount, const GLenum *props, GLsizei bufSize, GLsizei *length, GLint *params);
+GLint ( APIENTRY * qglGetProgramResourceLocation )(GLuint program, GLenum programInterface, const GLchar *name);
+void ( APIENTRY * qglUseProgramStages )(GLuint pipeline, GLbitfield stages, GLuint program);
+void ( APIENTRY * qglActiveShaderProgram )(GLuint pipeline, GLuint program);
+GLuint ( APIENTRY * qglCreateShaderProgramv )(GLenum type, GLsizei count, const GLchar *const*strings);
+void ( APIENTRY * qglBindProgramPipeline )(GLuint pipeline);
+void ( APIENTRY * qglDeleteProgramPipelines )(GLsizei n, const GLuint *pipelines);
+void ( APIENTRY * qglGenProgramPipelines )(GLsizei n, GLuint *pipelines);
+GLboolean ( APIENTRY * qglIsProgramPipeline )(GLuint pipeline);
+void ( APIENTRY * qglGetProgramPipelineiv )(GLuint pipeline, GLenum pname, GLint *params);
+void ( APIENTRY * qglProgramUniform1i )(GLuint program, GLint location, GLint v0);
+void ( APIENTRY * qglProgramUniform2i )(GLuint program, GLint location, GLint v0, GLint v1);
+void ( APIENTRY * qglProgramUniform3i )(GLuint program, GLint location, GLint v0, GLint v1, GLint v2);
+void ( APIENTRY * qglProgramUniform4i )(GLuint program, GLint location, GLint v0, GLint v1, GLint v2, GLint v3);
+void ( APIENTRY * qglProgramUniform1ui )(GLuint program, GLint location, GLuint v0);
+void ( APIENTRY * qglProgramUniform2ui )(GLuint program, GLint location, GLuint v0, GLuint v1);
+void ( APIENTRY * qglProgramUniform3ui )(GLuint program, GLint location, GLuint v0, GLuint v1, GLuint v2);
+void ( APIENTRY * qglProgramUniform4ui )(GLuint program, GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3);
+void ( APIENTRY * qglProgramUniform1f )(GLuint program, GLint location, GLfloat v0);
+void ( APIENTRY * qglProgramUniform2f )(GLuint program, GLint location, GLfloat v0, GLfloat v1);
+void ( APIENTRY * qglProgramUniform3f )(GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
+void ( APIENTRY * qglProgramUniform4f )(GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
+void ( APIENTRY * qglProgramUniform1iv )(GLuint program, GLint location, GLsizei count, const GLint *value);
+void ( APIENTRY * qglProgramUniform2iv )(GLuint program, GLint location, GLsizei count, const GLint *value);
+void ( APIENTRY * qglProgramUniform3iv )(GLuint program, GLint location, GLsizei count, const GLint *value);
+void ( APIENTRY * qglProgramUniform4iv )(GLuint program, GLint location, GLsizei count, const GLint *value);
+void ( APIENTRY * qglProgramUniform1uiv )(GLuint program, GLint location, GLsizei count, const GLuint *value);
+void ( APIENTRY * qglProgramUniform2uiv )(GLuint program, GLint location, GLsizei count, const GLuint *value);
+void ( APIENTRY * qglProgramUniform3uiv )(GLuint program, GLint location, GLsizei count, const GLuint *value);
+void ( APIENTRY * qglProgramUniform4uiv )(GLuint program, GLint location, GLsizei count, const GLuint *value);
+void ( APIENTRY * qglProgramUniform1fv )(GLuint program, GLint location, GLsizei count, const GLfloat *value);
+void ( APIENTRY * qglProgramUniform2fv )(GLuint program, GLint location, GLsizei count, const GLfloat *value);
+void ( APIENTRY * qglProgramUniform3fv )(GLuint program, GLint location, GLsizei count, const GLfloat *value);
+void ( APIENTRY * qglProgramUniform4fv )(GLuint program, GLint location, GLsizei count, const GLfloat *value);
+void ( APIENTRY * qglProgramUniformMatrix2fv )(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+void ( APIENTRY * qglProgramUniformMatrix3fv )(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+void ( APIENTRY * qglProgramUniformMatrix4fv )(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+void ( APIENTRY * qglProgramUniformMatrix2x3fv )(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+void ( APIENTRY * qglProgramUniformMatrix3x2fv )(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+void ( APIENTRY * qglProgramUniformMatrix2x4fv )(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+void ( APIENTRY * qglProgramUniformMatrix4x2fv )(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+void ( APIENTRY * qglProgramUniformMatrix3x4fv )(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+void ( APIENTRY * qglProgramUniformMatrix4x3fv )(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+void ( APIENTRY * qglValidateProgramPipeline )(GLuint pipeline);
+void ( APIENTRY * qglGetProgramPipelineInfoLog )(GLuint pipeline, GLsizei bufSize, GLsizei *length, GLchar *infoLog);
+void ( APIENTRY * qglBindImageTexture )(GLuint unit, GLuint texture, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format);
+void ( APIENTRY * qglGetBooleani_v )(GLenum target, GLuint index, GLboolean *data);
+void ( APIENTRY * qglMemoryBarrier )(GLbitfield barriers);
+void ( APIENTRY * qglMemoryBarrierByRegion )(GLbitfield barriers);
+void ( APIENTRY * qglTexStorage2DMultisample )(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, GLboolean fixedsamplelocations);
+void ( APIENTRY * qglGetMultisamplefv )(GLenum pname, GLuint index, GLfloat *val);
+void ( APIENTRY * qglSampleMaski )(GLuint maskNumber, GLbitfield mask);
+void ( APIENTRY * qglGetTexLevelParameteriv )(GLenum target, GLint level, GLenum pname, GLint *params);
+void ( APIENTRY * qglGetTexLevelParameterfv )(GLenum target, GLint level, GLenum pname, GLfloat *params);
+void ( APIENTRY * qglBindVertexBuffer )(GLuint bindingindex, GLuint buffer, GLintptr offset, GLsizei stride);
+void ( APIENTRY * qglVertexAttribFormat )(GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint relativeoffset);
+void ( APIENTRY * qglVertexAttribIFormat )(GLuint attribindex, GLint size, GLenum type, GLuint relativeoffset);
+void ( APIENTRY * qglVertexAttribBinding )(GLuint attribindex, GLuint bindingindex);
+void ( APIENTRY * qglVertexBindingDivisor )(GLuint bindingindex, GLuint divisor);
+
+#endif // GL_ES_VERSION_3_1
+
+#endif // GL_ES_VERSION_3_0
 
 #endif
 
@@ -1150,7 +1251,186 @@ glEnumName_t	glEnumNames[] = {
 	DEF(GL_NUM_SAMPLE_COUNTS)
 	DEF(GL_TEXTURE_IMMUTABLE_LEVELS)
 
-#endif
+#ifdef GL_ES_VERSION_3_1
+	/* OpenGL ES 3.1 */
+
+	DEF(GL_COMPUTE_SHADER)
+	DEF(GL_MAX_COMPUTE_UNIFORM_BLOCKS)
+	DEF(GL_MAX_COMPUTE_TEXTURE_IMAGE_UNITS)
+	DEF(GL_MAX_COMPUTE_IMAGE_UNIFORMS)
+	DEF(GL_MAX_COMPUTE_SHARED_MEMORY_SIZE)
+	DEF(GL_MAX_COMPUTE_UNIFORM_COMPONENTS)
+	DEF(GL_MAX_COMPUTE_ATOMIC_COUNTER_BUFFERS)
+	DEF(GL_MAX_COMPUTE_ATOMIC_COUNTERS)
+	DEF(GL_MAX_COMBINED_COMPUTE_UNIFORM_COMPONENTS)
+	DEF(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS)
+	DEF(GL_MAX_COMPUTE_WORK_GROUP_COUNT)
+	DEF(GL_MAX_COMPUTE_WORK_GROUP_SIZE)
+	DEF(GL_COMPUTE_WORK_GROUP_SIZE)
+	DEF(GL_DISPATCH_INDIRECT_BUFFER)
+	DEF(GL_DISPATCH_INDIRECT_BUFFER_BINDING)
+	DEF(GL_COMPUTE_SHADER_BIT)
+	DEF(GL_DRAW_INDIRECT_BUFFER)
+	DEF(GL_DRAW_INDIRECT_BUFFER_BINDING)
+	DEF(GL_MAX_UNIFORM_LOCATIONS)
+	DEF(GL_FRAMEBUFFER_DEFAULT_WIDTH)
+	DEF(GL_FRAMEBUFFER_DEFAULT_HEIGHT)
+	DEF(GL_FRAMEBUFFER_DEFAULT_SAMPLES)
+	DEF(GL_FRAMEBUFFER_DEFAULT_FIXED_SAMPLE_LOCATIONS)
+	DEF(GL_MAX_FRAMEBUFFER_WIDTH)
+	DEF(GL_MAX_FRAMEBUFFER_HEIGHT)
+	DEF(GL_MAX_FRAMEBUFFER_SAMPLES)
+	DEF(GL_UNIFORM)
+	DEF(GL_UNIFORM_BLOCK)
+	DEF(GL_PROGRAM_INPUT)
+	DEF(GL_PROGRAM_OUTPUT)
+	DEF(GL_BUFFER_VARIABLE)
+	DEF(GL_SHADER_STORAGE_BLOCK)
+	DEF(GL_ATOMIC_COUNTER_BUFFER)
+	DEF(GL_TRANSFORM_FEEDBACK_VARYING)
+	DEF(GL_ACTIVE_RESOURCES)
+	DEF(GL_MAX_NAME_LENGTH)
+	DEF(GL_MAX_NUM_ACTIVE_VARIABLES)
+	DEF(GL_NAME_LENGTH)
+	DEF(GL_TYPE)
+	DEF(GL_ARRAY_SIZE)
+	DEF(GL_OFFSET)
+	DEF(GL_BLOCK_INDEX)
+	DEF(GL_ARRAY_STRIDE)
+	DEF(GL_MATRIX_STRIDE)
+	DEF(GL_IS_ROW_MAJOR)
+	DEF(GL_ATOMIC_COUNTER_BUFFER_INDEX)
+	DEF(GL_BUFFER_BINDING)
+	DEF(GL_BUFFER_DATA_SIZE)
+	DEF(GL_NUM_ACTIVE_VARIABLES)
+	DEF(GL_ACTIVE_VARIABLES)
+	DEF(GL_REFERENCED_BY_VERTEX_SHADER)
+	DEF(GL_REFERENCED_BY_FRAGMENT_SHADER)
+	DEF(GL_REFERENCED_BY_COMPUTE_SHADER)
+	DEF(GL_TOP_LEVEL_ARRAY_SIZE)
+	DEF(GL_TOP_LEVEL_ARRAY_STRIDE)
+	DEF(GL_LOCATION)
+	DEF(GL_VERTEX_SHADER_BIT)
+	DEF(GL_FRAGMENT_SHADER_BIT)
+	DEF(GL_ALL_SHADER_BITS)
+	DEF(GL_PROGRAM_SEPARABLE)
+	DEF(GL_ACTIVE_PROGRAM)
+	DEF(GL_PROGRAM_PIPELINE_BINDING)
+	DEF(GL_ATOMIC_COUNTER_BUFFER_BINDING)
+	DEF(GL_ATOMIC_COUNTER_BUFFER_START)
+	DEF(GL_ATOMIC_COUNTER_BUFFER_SIZE)
+	DEF(GL_MAX_VERTEX_ATOMIC_COUNTER_BUFFERS)
+	DEF(GL_MAX_FRAGMENT_ATOMIC_COUNTER_BUFFERS)
+	DEF(GL_MAX_COMBINED_ATOMIC_COUNTER_BUFFERS)
+	DEF(GL_MAX_VERTEX_ATOMIC_COUNTERS)
+	DEF(GL_MAX_FRAGMENT_ATOMIC_COUNTERS)
+	DEF(GL_MAX_COMBINED_ATOMIC_COUNTERS)
+	DEF(GL_MAX_ATOMIC_COUNTER_BUFFER_SIZE)
+	DEF(GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS)
+	DEF(GL_ACTIVE_ATOMIC_COUNTER_BUFFERS)
+	DEF(GL_UNSIGNED_INT_ATOMIC_COUNTER)
+	DEF(GL_MAX_IMAGE_UNITS)
+	DEF(GL_MAX_VERTEX_IMAGE_UNIFORMS)
+	DEF(GL_MAX_FRAGMENT_IMAGE_UNIFORMS)
+	DEF(GL_MAX_COMBINED_IMAGE_UNIFORMS)
+	DEF(GL_IMAGE_BINDING_NAME)
+	DEF(GL_IMAGE_BINDING_LEVEL)
+	DEF(GL_IMAGE_BINDING_LAYERED)
+	DEF(GL_IMAGE_BINDING_LAYER)
+	DEF(GL_IMAGE_BINDING_ACCESS)
+	DEF(GL_IMAGE_BINDING_FORMAT)
+	DEF(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT)
+	DEF(GL_ELEMENT_ARRAY_BARRIER_BIT)
+	DEF(GL_UNIFORM_BARRIER_BIT)
+	DEF(GL_TEXTURE_FETCH_BARRIER_BIT)
+	DEF(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT)
+	DEF(GL_COMMAND_BARRIER_BIT)
+	DEF(GL_PIXEL_BUFFER_BARRIER_BIT)
+	DEF(GL_TEXTURE_UPDATE_BARRIER_BIT)
+	DEF(GL_BUFFER_UPDATE_BARRIER_BIT)
+	DEF(GL_FRAMEBUFFER_BARRIER_BIT)
+	DEF(GL_TRANSFORM_FEEDBACK_BARRIER_BIT)
+	DEF(GL_ATOMIC_COUNTER_BARRIER_BIT)
+	DEF(GL_ALL_BARRIER_BITS)
+	DEF(GL_IMAGE_2D)
+	DEF(GL_IMAGE_3D)
+	DEF(GL_IMAGE_CUBE)
+	DEF(GL_IMAGE_2D_ARRAY)
+	DEF(GL_INT_IMAGE_2D)
+	DEF(GL_INT_IMAGE_3D)
+	DEF(GL_INT_IMAGE_CUBE)
+	DEF(GL_INT_IMAGE_2D_ARRAY)
+	DEF(GL_UNSIGNED_INT_IMAGE_2D)
+	DEF(GL_UNSIGNED_INT_IMAGE_3D)
+	DEF(GL_UNSIGNED_INT_IMAGE_CUBE)
+	DEF(GL_UNSIGNED_INT_IMAGE_2D_ARRAY)
+	DEF(GL_IMAGE_FORMAT_COMPATIBILITY_TYPE)
+	DEF(GL_IMAGE_FORMAT_COMPATIBILITY_BY_SIZE)
+	DEF(GL_IMAGE_FORMAT_COMPATIBILITY_BY_CLASS)
+	DEF(GL_READ_ONLY)
+	DEF(GL_WRITE_ONLY)
+	DEF(GL_READ_WRITE)
+	DEF(GL_SHADER_STORAGE_BUFFER)
+	DEF(GL_SHADER_STORAGE_BUFFER_BINDING)
+	DEF(GL_SHADER_STORAGE_BUFFER_START)
+	DEF(GL_SHADER_STORAGE_BUFFER_SIZE)
+	DEF(GL_MAX_VERTEX_SHADER_STORAGE_BLOCKS)
+	DEF(GL_MAX_FRAGMENT_SHADER_STORAGE_BLOCKS)
+	DEF(GL_MAX_COMPUTE_SHADER_STORAGE_BLOCKS)
+	DEF(GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS)
+	DEF(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS)
+	DEF(GL_MAX_SHADER_STORAGE_BLOCK_SIZE)
+	DEF(GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT)
+	DEF(GL_SHADER_STORAGE_BARRIER_BIT)
+	DEF(GL_MAX_COMBINED_SHADER_OUTPUT_RESOURCES)
+	DEF(GL_DEPTH_STENCIL_TEXTURE_MODE)
+	DEF(GL_STENCIL_INDEX)
+	DEF(GL_MIN_PROGRAM_TEXTURE_GATHER_OFFSET)
+	DEF(GL_MAX_PROGRAM_TEXTURE_GATHER_OFFSET)
+	DEF(GL_SAMPLE_POSITION)
+	DEF(GL_SAMPLE_MASK)
+	DEF(GL_SAMPLE_MASK_VALUE)
+	DEF(GL_TEXTURE_2D_MULTISAMPLE)
+	DEF(GL_MAX_SAMPLE_MASK_WORDS)
+	DEF(GL_MAX_COLOR_TEXTURE_SAMPLES)
+	DEF(GL_MAX_DEPTH_TEXTURE_SAMPLES)
+	DEF(GL_MAX_INTEGER_SAMPLES)
+	DEF(GL_TEXTURE_BINDING_2D_MULTISAMPLE)
+	DEF(GL_TEXTURE_SAMPLES)
+	DEF(GL_TEXTURE_FIXED_SAMPLE_LOCATIONS)
+	DEF(GL_TEXTURE_WIDTH)
+	DEF(GL_TEXTURE_HEIGHT)
+	DEF(GL_TEXTURE_DEPTH)
+	DEF(GL_TEXTURE_INTERNAL_FORMAT)
+	DEF(GL_TEXTURE_RED_SIZE)
+	DEF(GL_TEXTURE_GREEN_SIZE)
+	DEF(GL_TEXTURE_BLUE_SIZE)
+	DEF(GL_TEXTURE_ALPHA_SIZE)
+	DEF(GL_TEXTURE_DEPTH_SIZE)
+	DEF(GL_TEXTURE_STENCIL_SIZE)
+	DEF(GL_TEXTURE_SHARED_SIZE)
+	DEF(GL_TEXTURE_RED_TYPE)
+	DEF(GL_TEXTURE_GREEN_TYPE)
+	DEF(GL_TEXTURE_BLUE_TYPE)
+	DEF(GL_TEXTURE_ALPHA_TYPE)
+	DEF(GL_TEXTURE_DEPTH_TYPE)
+	DEF(GL_TEXTURE_COMPRESSED)
+	DEF(GL_SAMPLER_2D_MULTISAMPLE)
+	DEF(GL_INT_SAMPLER_2D_MULTISAMPLE)
+	DEF(GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE)
+	DEF(GL_VERTEX_ATTRIB_BINDING)
+	DEF(GL_VERTEX_ATTRIB_RELATIVE_OFFSET)
+	DEF(GL_VERTEX_BINDING_DIVISOR)
+	DEF(GL_VERTEX_BINDING_OFFSET)
+	DEF(GL_VERTEX_BINDING_STRIDE)
+	DEF(GL_VERTEX_BINDING_BUFFER)
+	DEF(GL_MAX_VERTEX_ATTRIB_RELATIVE_OFFSET)
+	DEF(GL_MAX_VERTEX_ATTRIB_BINDINGS)
+	DEF(GL_MAX_VERTEX_ATTRIB_STRIDE)
+
+#endif // GL_ES_VERSION_3_1
+
+#endif // GL_ES_VERSION_3_0
 
 	{ 0, NULL }
 };
@@ -1502,7 +1782,80 @@ void QGL_Shutdown( void )
 	GLNULL( glTexStorage3D );
 	GLNULL( glGetInternalformativ );
 
-#endif
+#ifdef GL_ES_VERSION_3_1
+
+	GLNULL( glDispatchCompute );
+	GLNULL( glDispatchComputeIndirect );
+	GLNULL( glDrawArraysIndirect );
+	GLNULL( glDrawElementsIndirect );
+	GLNULL( glFramebufferParameteri );
+	GLNULL( glGetFramebufferParameteriv );
+	GLNULL( glGetProgramInterfaceiv );
+	GLNULL( glGetProgramResourceIndex );
+	GLNULL( glGetProgramResourceName );
+	GLNULL( glGetProgramResourceiv );
+	GLNULL( glGetProgramResourceLocation );
+	GLNULL( glUseProgramStages );
+	GLNULL( glActiveShaderProgram );
+	GLNULL( glCreateShaderProgramv );
+	GLNULL( glBindProgramPipeline );
+	GLNULL( glDeleteProgramPipelines );
+	GLNULL( glGenProgramPipelines );
+	GLNULL( glIsProgramPipeline );
+	GLNULL( glGetProgramPipelineiv );
+	GLNULL( glProgramUniform1i );
+	GLNULL( glProgramUniform2i );
+	GLNULL( glProgramUniform3i );
+	GLNULL( glProgramUniform4i );
+	GLNULL( glProgramUniform1ui );
+	GLNULL( glProgramUniform2ui );
+	GLNULL( glProgramUniform3ui );
+	GLNULL( glProgramUniform4ui );
+	GLNULL( glProgramUniform1f );
+	GLNULL( glProgramUniform2f );
+	GLNULL( glProgramUniform3f );
+	GLNULL( glProgramUniform4f );
+	GLNULL( glProgramUniform1iv );
+	GLNULL( glProgramUniform2iv );
+	GLNULL( glProgramUniform3iv );
+	GLNULL( glProgramUniform4iv );
+	GLNULL( glProgramUniform1uiv );
+	GLNULL( glProgramUniform2uiv );
+	GLNULL( glProgramUniform3uiv );
+	GLNULL( glProgramUniform4uiv );
+	GLNULL( glProgramUniform1fv );
+	GLNULL( glProgramUniform2fv );
+	GLNULL( glProgramUniform3fv );
+	GLNULL( glProgramUniform4fv );
+	GLNULL( glProgramUniformMatrix2fv );
+	GLNULL( glProgramUniformMatrix3fv );
+	GLNULL( glProgramUniformMatrix4fv );
+	GLNULL( glProgramUniformMatrix2x3fv );
+	GLNULL( glProgramUniformMatrix3x2fv );
+	GLNULL( glProgramUniformMatrix2x4fv );
+	GLNULL( glProgramUniformMatrix4x2fv );
+	GLNULL( glProgramUniformMatrix3x4fv );
+	GLNULL( glProgramUniformMatrix4x3fv );
+	GLNULL( glValidateProgramPipeline );
+	GLNULL( glGetProgramPipelineInfoLog );
+	GLNULL( glBindImageTexture );
+	GLNULL( glGetBooleani_v );
+	GLNULL( glMemoryBarrier );
+	GLNULL( glMemoryBarrierByRegion );
+	GLNULL( glTexStorage2DMultisample );
+	GLNULL( glGetMultisamplefv );
+	GLNULL( glSampleMaski );
+	GLNULL( glGetTexLevelParameteriv );
+	GLNULL( glGetTexLevelParameterfv );
+	GLNULL( glBindVertexBuffer );
+	GLNULL( glVertexAttribFormat );
+	GLNULL( glVertexAttribIFormat );
+	GLNULL( glVertexAttribBinding );
+	GLNULL( glVertexBindingDivisor );
+
+#endif // GL_ES_VERSION_3_1
+
+#endif // GL_ES_VERSION_3_0
 
 	EGLNULL( eglGetError );
 	EGLNULL( eglGetDisplay );
@@ -1517,19 +1870,9 @@ void QGL_Shutdown( void )
 	EGLNULL( eglCreatePixmapSurface );
 	EGLNULL( eglDestroySurface );
 	EGLNULL( eglQuerySurface );
-	EGLNULL( eglBindAPI );
-	EGLNULL( eglQueryAPI );
-	EGLNULL( eglWaitClient );
-	EGLNULL( eglReleaseThread );
-	EGLNULL( eglCreatePbufferFromClientBuffer );
-	EGLNULL( eglSurfaceAttrib );
-	EGLNULL( eglBindTexImage );
-	EGLNULL( eglReleaseTexImage );
-	EGLNULL( eglSwapInterval );
 	EGLNULL( eglCreateContext );
 	EGLNULL( eglDestroyContext );
 	EGLNULL( eglMakeCurrent );
-	EGLNULL( eglGetCurrentContext );
 	EGLNULL( eglGetCurrentSurface );
 	EGLNULL( eglGetCurrentDisplay );
 	EGLNULL( eglQueryContext );
@@ -1538,6 +1881,41 @@ void QGL_Shutdown( void )
 	EGLNULL( eglSwapBuffers );
 	EGLNULL( eglCopyBuffers );
 	EGLNULL( eglGetProcAddress );
+
+#ifdef EGL_VERSION_1_1
+
+	EGLNULL( eglBindTexImage );
+	EGLNULL( eglReleaseTexImage );
+	EGLNULL( eglSurfaceAttrib );
+	EGLNULL( eglSwapInterval );
+
+#ifdef EGL_VERSION_1_2
+
+	EGLNULL( eglBindAPI );
+	EGLNULL( eglQueryAPI );
+	EGLNULL( eglCreatePbufferFromClientBuffer );
+	EGLNULL( eglReleaseThread );
+	EGLNULL( eglWaitClient );
+
+#ifdef EGL_VERSION_1_4
+
+	EGLNULL( eglGetCurrentContext );
+
+#ifdef EGL_VERSION_1_5
+
+	EGLNULL( eglCreateSync );
+	EGLNULL( eglDestroySync );
+	EGLNULL( eglClientWaitSync );
+	EGLNULL( eglGetSyncAttrib );
+	EGLNULL( eglGetPlatformDisplay );
+	EGLNULL( eglCreatePlatformWindowSurface );
+	EGLNULL( eglCreatePlatformPixmapSurface );
+	EGLNULL( eglWaitSync );
+
+#endif // EGL_VERSION_1_5
+#endif // EGL_VERSION_1_4
+#endif // EGL_VERSION_1_2
+#endif // EGL_VERSION_1_1
 }
 
 /*
@@ -1864,9 +2242,84 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 	GLSYM( glTexStorage3D );
 	GLSYM( glGetInternalformativ );
 
-#endif
+#ifdef GL_ES_VERSION_3_1
 
-	glVersion = 0.0f;
+	glVersion = 3.1f;
+
+	GLSYM( glDispatchCompute );
+	GLSYM( glDispatchComputeIndirect );
+	GLSYM( glDrawArraysIndirect );
+	GLSYM( glDrawElementsIndirect );
+	GLSYM( glFramebufferParameteri );
+	GLSYM( glGetFramebufferParameteriv );
+	GLSYM( glGetProgramInterfaceiv );
+	GLSYM( glGetProgramResourceIndex );
+	GLSYM( glGetProgramResourceName );
+	GLSYM( glGetProgramResourceiv );
+	GLSYM( glGetProgramResourceLocation );
+	GLSYM( glUseProgramStages );
+	GLSYM( glActiveShaderProgram );
+	GLSYM( glCreateShaderProgramv );
+	GLSYM( glBindProgramPipeline );
+	GLSYM( glDeleteProgramPipelines );
+	GLSYM( glGenProgramPipelines );
+	GLSYM( glIsProgramPipeline );
+	GLSYM( glGetProgramPipelineiv );
+	GLSYM( glProgramUniform1i );
+	GLSYM( glProgramUniform2i );
+	GLSYM( glProgramUniform3i );
+	GLSYM( glProgramUniform4i );
+	GLSYM( glProgramUniform1ui );
+	GLSYM( glProgramUniform2ui );
+	GLSYM( glProgramUniform3ui );
+	GLSYM( glProgramUniform4ui );
+	GLSYM( glProgramUniform1f );
+	GLSYM( glProgramUniform2f );
+	GLSYM( glProgramUniform3f );
+	GLSYM( glProgramUniform4f );
+	GLSYM( glProgramUniform1iv );
+	GLSYM( glProgramUniform2iv );
+	GLSYM( glProgramUniform3iv );
+	GLSYM( glProgramUniform4iv );
+	GLSYM( glProgramUniform1uiv );
+	GLSYM( glProgramUniform2uiv );
+	GLSYM( glProgramUniform3uiv );
+	GLSYM( glProgramUniform4uiv );
+	GLSYM( glProgramUniform1fv );
+	GLSYM( glProgramUniform2fv );
+	GLSYM( glProgramUniform3fv );
+	GLSYM( glProgramUniform4fv );
+	GLSYM( glProgramUniformMatrix2fv );
+	GLSYM( glProgramUniformMatrix3fv );
+	GLSYM( glProgramUniformMatrix4fv );
+	GLSYM( glProgramUniformMatrix2x3fv );
+	GLSYM( glProgramUniformMatrix3x2fv );
+	GLSYM( glProgramUniformMatrix2x4fv );
+	GLSYM( glProgramUniformMatrix4x2fv );
+	GLSYM( glProgramUniformMatrix3x4fv );
+	GLSYM( glProgramUniformMatrix4x3fv );
+	GLSYM( glValidateProgramPipeline );
+	GLSYM( glGetProgramPipelineInfoLog );
+	GLSYM( glBindImageTexture );
+	GLSYM( glGetBooleani_v );
+	GLSYM( glMemoryBarrier );
+	GLSYM( glMemoryBarrierByRegion );
+	GLSYM( glTexStorage2DMultisample );
+	GLSYM( glGetMultisamplefv );
+	GLSYM( glSampleMaski );
+	GLSYM( glGetTexLevelParameteriv );
+	GLSYM( glGetTexLevelParameterfv );
+	GLSYM( glBindVertexBuffer );
+	GLSYM( glVertexAttribFormat );
+	GLSYM( glVertexAttribIFormat );
+	GLSYM( glVertexAttribBinding );
+	GLSYM( glVertexBindingDivisor );
+
+#endif // GL_ES_VERSION_3_1
+
+#endif // GL_ES_VERSION_3_0
+
+	glVersion = 1.0f;
 
 	EGLSYM( eglGetError );
 	EGLSYM( eglGetDisplay );
@@ -1881,19 +2334,9 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 	EGLSYM( eglCreatePixmapSurface );
 	EGLSYM( eglDestroySurface );
 	EGLSYM( eglQuerySurface );
-	EGLSYM( eglBindAPI );
-	EGLSYM( eglQueryAPI );
-	EGLSYM( eglWaitClient );
-	EGLSYM( eglReleaseThread );
-	EGLSYM( eglCreatePbufferFromClientBuffer );
-	EGLSYM( eglSurfaceAttrib );
-	EGLSYM( eglBindTexImage );
-	EGLSYM( eglReleaseTexImage );
-	EGLSYM( eglSwapInterval );
 	EGLSYM( eglCreateContext );
 	EGLSYM( eglDestroyContext );
 	EGLSYM( eglMakeCurrent );
-	EGLSYM( eglGetCurrentContext );
 	EGLSYM( eglGetCurrentSurface );
 	EGLSYM( eglGetCurrentDisplay );
 	EGLSYM( eglQueryContext );
@@ -1902,6 +2345,49 @@ bool QGL_Init( const char *dllname, const EGLFunctionReplacements_t & replacemen
 	EGLSYM( eglSwapBuffers );
 	EGLSYM( eglCopyBuffers );
 	EGLSYM( eglGetProcAddress );
+
+#ifdef EGL_VERSION_1_1
+
+	glVersion = 1.1f;
+
+	EGLSYM( eglBindTexImage );
+	EGLSYM( eglReleaseTexImage );
+	EGLSYM( eglSurfaceAttrib );
+	EGLSYM( eglSwapInterval );
+
+#ifdef EGL_VERSION_1_2
+
+	glVersion = 1.2f;
+
+	EGLSYM( eglBindAPI );
+	EGLSYM( eglQueryAPI );
+	EGLSYM( eglCreatePbufferFromClientBuffer );
+	EGLSYM( eglReleaseThread );
+	EGLSYM( eglWaitClient );
+
+#ifdef EGL_VERSION_1_4
+
+	glVersion = 1.4f;
+
+	EGLSYM( eglGetCurrentContext );
+
+#ifdef EGL_VERSION_1_5
+
+	glVersion = 1.5f;
+
+	EGLSYM( eglCreateSync );
+	EGLSYM( eglDestroySync );
+	EGLSYM( eglClientWaitSync );
+	EGLSYM( eglGetSyncAttrib );
+	EGLSYM( eglGetPlatformDisplay );
+	EGLSYM( eglCreatePlatformWindowSurface );
+	EGLSYM( eglCreatePlatformPixmapSurface );
+	EGLSYM( eglWaitSync );
+
+#endif // EGL_VERSION_1_5
+#endif // EGL_VERSION_1_4
+#endif // EGL_VERSION_1_2
+#endif // EGL_VERSION_1_1
 
 	return true;
 }

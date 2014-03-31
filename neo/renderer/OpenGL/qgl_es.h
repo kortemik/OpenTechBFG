@@ -39,7 +39,13 @@ If you have questions concerning this license or the applicable additional terms
 #error Trying to use OpenGL ES utility header in non-OpenGL ES program
 #endif
 #ifdef ID_OPENGL_ES_3
+#if (ID_OPENGL_ES_3 > 0)
+#define _GLES3_GL_VERSION_PATH(ver) GLES3/gl3##ver.h
+#define _GLES3_GL_VERSION_HEADER(ver) <_GLES3_GL_VERSION_PATH(ver)>
+#include _GLES3_GL_VERSION_HEADER(ID_OPENGL_ES_3)
+#else
 #include <GLES3/gl3.h>
+#endif
 #include <GLES3/gl3ext.h>
 #include <GLES2/gl2ext.h>
 #elif defined(ID_OPENGL_ES_2)

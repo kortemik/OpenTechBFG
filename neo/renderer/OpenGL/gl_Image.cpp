@@ -366,12 +366,20 @@ void idImage::AllocImage() {
 		dataType = GL_UNSIGNED_BYTE;
 		break;
 	case FMT_XRGB8:
-		internalFormat = GL_RGB;
+		internalFormat = GL_RGB; //XXX this may not work on GLES 3.x and up based on glTexStorage2D docs
 		dataFormat = GL_RGBA;
 		dataType = GL_UNSIGNED_BYTE;
 		break;
 	case FMT_RGB565:
+#ifdef GL_ES_VERSION_3_0
+		if ( glConfig.glVersion >= 3.0 ) {
+			internalFormat = GL_RGB565;
+		} else {
+			internalFormat = GL_RGB;
+		}
+#else
 		internalFormat = GL_RGB;
+#endif
 		dataFormat = GL_RGB;
 		dataType = GL_UNSIGNED_SHORT_5_6_5;
 		break;
