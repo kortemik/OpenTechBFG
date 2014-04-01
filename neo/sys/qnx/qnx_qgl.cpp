@@ -50,6 +50,16 @@ If you have questions concerning this license or the applicable additional terms
 // eglGetProcAddress does not support, nor is required,
 // to return non-extension functions.
 //
+// As of EGL version 1.5 and higher, this is no longer required.
+// This is because eglGetProcAddress supports all functions
+// instead of just processes. This will still exist unless
+// EGL version dependent checks are done before loading links.
+// It really does not matter as having direct access reduces
+// the chance of driver bugs in retrieving the functions and
+// provides a way to look up functions without using any EGL
+// functions (which could be faster and can be rearranged by
+// known usage within game/engine).
+//
 // Implemented as seen below to facilitate NOT direct linking
 // which could break due to ID_HARDLINK or "extension" functions
 // that are built in to GLES but were written as extension functions
@@ -66,7 +76,7 @@ typedef struct {
 } glSymLink_t;
 
 #define GL_LINK_COUNT 356
-static glSymLink_t glLinks[GL_LINK_COUNT];
+static glSymLink_t glLinks[GL_LINK_COUNT]; // Use a static array to prevent loading all the functions only to need a cleanup function to remove them all
 static int glSymCount = 0;
 
 static void glLinkSet( const char *name, void *link, bool isEgl, float version ) {

@@ -1186,8 +1186,8 @@ bool QNXGLimp_CreateEGLConfig( int multisamples, bool gles3bit ) {
 		EGL_DEPTH_SIZE,         24,
 		EGL_STENCIL_SIZE,       8,
 		EGL_SURFACE_TYPE,       EGL_WINDOW_BIT,
-#ifdef EGL_KHR_create_context
-		EGL_RENDERABLE_TYPE,    ( gles3bit ? EGL_OPENGL_ES3_BIT_KHR : EGL_OPENGL_ES2_BIT ),
+#if defined(EGL_VERSION_1_5) || defined(EGL_KHR_create_context)
+		EGL_RENDERABLE_TYPE,    ( gles3bit ? EGL_OPENGL_ES3_BIT : EGL_OPENGL_ES2_BIT ),
 #else
 		EGL_RENDERABLE_TYPE,    EGL_OPENGL_ES2_BIT,
 #endif
@@ -1230,8 +1230,8 @@ bool QNXGLimp_CreateEGLSurface( EGLNativeWindowType window, const int multisampl
 	EGLint eglContextAttrs[] =
 	{
 		EGL_CONTEXT_CLIENT_VERSION,	0,
-		EGL_NONE,					EGL_NONE, // EGL_CONTEXT_FLAGS_KHR,				EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR
-		EGL_NONE,					EGL_NONE, // EGL_CONTEXT_PRIORITY_LEVEL_IMG,	EGL_CONTEXT_PRIORITY_HIGH_IMG
+		EGL_NONE,					EGL_NONE, // EGL_CONTEXT_FLAGS_KHR/EGL_CONTEXT_OPENGL_DEBUG,	EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR/EGL_TRUE
+		EGL_NONE,					EGL_NONE, // EGL_CONTEXT_PRIORITY_LEVEL_IMG,					EGL_CONTEXT_PRIORITY_HIGH_IMG
 		EGL_NONE
 	};
 #ifdef GL_ES_VERSION_3_0
@@ -1249,13 +1249,27 @@ bool QNXGLimp_CreateEGLSurface( EGLNativeWindowType window, const int multisampl
 
 	// Additional attrib. if supported
 	int additionalAttribIndex = 2;
+#ifdef EGL_VERSION_1_5
+	if ( r_debugContext.GetBool() && createContextAvaliable ) {
+		if ( glConfig.eglVersion >= 1.5f ) {
+			eglContextAttrs[additionalAttribIndex + 0] = EGL_CONTEXT_OPENGL_DEBUG;
+			eglContextAttrs[additionalAttribIndex + 1] = EGL_TRUE;
+		}
 #ifdef EGL_KHR_create_context
+		else {
+			eglContextAttrs[additionalAttribIndex + 0] = EGL_CONTEXT_FLAGS_KHR;
+			eglContextAttrs[additionalAttribIndex + 1] = EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR;
+		}
+#endif
+		additionalAttribIndex += 2;
+	}
+#elif defined(EGL_KHR_create_context)
 	if ( r_debugContext.GetBool() && createContextAvaliable ) {
 		eglContextAttrs[additionalAttribIndex + 0] = EGL_CONTEXT_FLAGS_KHR;
 		eglContextAttrs[additionalAttribIndex + 1] = EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR;
 		additionalAttribIndex += 2;
 	}
-#endif
+#endif // EGL_VERSION_1_5
 #ifdef EGL_IMG_context_priority
 	if ( contextPriorityAvaliable ) {
 		eglContextAttrs[additionalAttribIndex + 0] = EGL_CONTEXT_PRIORITY_LEVEL_IMG;
@@ -1291,6 +1305,7 @@ bool QNXGLimp_CreateEGLSurface( EGLNativeWindowType window, const int multisampl
 		return false;
 	}
 
+	// EGL 1.5 adds eglCreatePlatformWindowSurface, but that isn't needed as there is only one platform to support (as of 10.2.1)
 	qnx.eglSurface = qeglCreateWindowSurface( qnx.eglDisplay, qnx.eglConfig, window, NULL );
 	if ( qnx.eglSurface == EGL_NO_SURFACE ) {
 		common->Printf( "...^3Could not create EGL window surface^0\n");
@@ -1364,11 +1379,14 @@ bool GLimp_Init( glimpParms_t parms ) {
 		return false;
 	}
 
+	// EGL 1.5 adds eglGetPlatformDisplay, but that isn't needed as there is only one platform to support (as of 10.2.1)
 	qnx.eglDisplay = qeglGetDisplay( EGL_DEFAULT_DISPLAY );
 	if ( qnx.eglDisplay == EGL_NO_DISPLAY ) {
 		common->Printf( "...^3Could not get EGL display^0\n");
 		return false;
 	}
+	glConfig.egl_version_string = qeglQueryString( qnx.eglDisplay, EGL_VERSION );
+	glConfig.eglVersion = atof( glConfig.egl_version_string );
 
 	if ( qeglInitialize( qnx.eglDisplay, NULL, NULL ) != EGL_TRUE ) {
 		common->Printf( "...^3Could not initialize EGL display^0\n");
@@ -1388,7 +1406,7 @@ bool GLimp_Init( glimpParms_t parms ) {
 	}
 
 	if ( !QNXGLimp_CreateEGLSurface( qnx.screenWin, parms.multiSamples,
-			EGL_CheckExtension( "EGL_KHR_create_context" ), EGL_CheckExtension( "EGL_IMG_context_priority" ) ) ) {
+			( glConfig.eglVersion >= 1.5f || EGL_CheckExtension( "EGL_KHR_create_context" ) ), EGL_CheckExtension( "EGL_IMG_context_priority" ) ) ) {
 		GLimp_Shutdown();
 		return false;
 	}
@@ -1467,6 +1485,7 @@ bool GLimp_SetScreenParms( glimpParms_t parms ) {
 		return false;
 	}
 
+	// EGL 1.5 adds eglCreatePlatformWindowSurface, but that isn't needed as there is only one platform to support (as of 10.2.1)
 	qnx.eglSurface = qeglCreateWindowSurface( qnx.eglDisplay, qnx.eglConfig, qnx.screenWin, NULL );
 	if ( qnx.eglSurface == EGL_NO_SURFACE ) {
 		common->Printf( "Could not recreate EGL window surface\n");
@@ -1901,7 +1920,7 @@ GLExtension_t GLimp_ExtensionPointer( const char *name ) {
 
 	proc = (GLExtension_t)qeglGetProcAddress( name );
 
-	if ( !proc && !EGL_CheckExtension( "EGL_KHR_get_all_proc_addresses" ) ) {
+	if ( !proc && ( glConfig.eglVersion < 1.5f && !EGL_CheckExtension( "EGL_KHR_get_all_proc_addresses" ) ) ) {
 		proc = (GLExtension_t)QGL_GetSym( name, ( name != NULL && name[0] == 'e' ) );
 	}
 	if ( !proc ) {

@@ -431,6 +431,14 @@ extern "C" {
 //=============
 //Defines for enums that are defined but may not actually exist
 //=============
+#ifndef EGL_OPENGL_ES3_BIT
+	#ifdef EGL_OPENGL_ES3_BIT_KHR
+		#define EGL_OPENGL_ES3_BIT EGL_OPENGL_ES3_BIT_KHR
+	#else
+		#define EGL_OPENGL_ES3_BIT 0x00000040
+	#endif
+#endif
+
 #ifndef GL_FRONT_LEFT
 	#define GL_FRONT_LEFT 0x0400
 #endif

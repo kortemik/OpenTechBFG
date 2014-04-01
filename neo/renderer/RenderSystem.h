@@ -97,6 +97,8 @@ struct glconfig_t {
 	const char *		wgl_extensions_string;
 #endif
 #ifdef GL_ES_VERSION_2_0
+	const char *		egl_version_string;
+	float				eglVersion;
 	const char *		egl_extensions_string;
 #endif
 	const char *		shading_language_string;
