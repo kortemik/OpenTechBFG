@@ -1631,37 +1631,6 @@ void GLimp_SwapBuffers() {
 
 	// Only if framebuffers have been init should framebuffer processing be executed
 	if ( qnx.framebuffers[0] != 0 ) {
-#if 0 //def GL_EXT_discard_framebuffer //XXX Causes nothing to draw even though not discarding left buffers (the ones being drawn to). Figure out why
-		static const GLenum discardAttachments[3] = { GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT };
-
-		if ( qnx.discardFramebuffersSupported ) {
-
-			// Discard front-right buffer (not needed in current implementation)
-			qglBindFramebuffer( GL_FRAMEBUFFER, qnx.framebuffers[0] );
-			qglDiscardFramebufferEXT( GL_FRAMEBUFFER, 3, discardAttachments );
-
-			// Swap front-right with back-right
-			int tmp = qnx.framebuffers[0];
-			qnx.framebuffers[0] = qnx.framebuffers[2];
-			qnx.framebuffers[2] = tmp;
-
-			int renderbufferOffset = qnx.packedFramebufferSupported ? RENDERBUFFER_PER_FRAMEBUFFER_PACKED : RENDERBUFFER_PER_FRAMEBUFFER;
-			tmp = qnx.renderbuffers[0 * renderbufferOffset + 0];
-			qnx.renderbuffers[0 * renderbufferOffset + 0] = qnx.renderbuffers[2 * renderbufferOffset + 0];
-			qnx.renderbuffers[2 * renderbufferOffset + 0] = tmp;
-
-			tmp = qnx.renderbuffers[0 * renderbufferOffset + 1];
-			qnx.renderbuffers[0 * renderbufferOffset + 1] = qnx.renderbuffers[2 * renderbufferOffset + 1];
-			qnx.renderbuffers[2 * renderbufferOffset + 1] = tmp;
-
-			if ( renderbufferOffset == RENDERBUFFER_PER_FRAMEBUFFER ) {
-				tmp = qnx.renderbuffers[0 * renderbufferOffset + 2];
-				qnx.renderbuffers[0 * renderbufferOffset + 2] = qnx.renderbuffers[2 * renderbufferOffset + 2];
-				qnx.renderbuffers[2 * renderbufferOffset + 2] = tmp;
-			}
-		}
-#endif
-
 		int curDraw = R_GetBufferIndex( qnx.drawBuffer );
 		if ( qnx.useBlit ) {
 			int curRead = R_GetBufferIndex( qnx.readBuffer );
@@ -1738,6 +1707,37 @@ void GLimp_SwapBuffers() {
 
 			qglBindFramebuffer( GL_FRAMEBUFFER, qnx.framebuffers[1] );
 		}
+
+		// Discard framebuffers when done, as it could result in a performance improvement
+#if defined(GL_ES_VERSION_3_0) || defined(GL_EXT_discard_framebuffer)
+		static const GLenum discardAttachments[3] = { GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT };
+#endif
+#ifdef GL_ES_VERSION_3_0
+		if ( glConfig.glVersion >= 3.0f ) {
+			qglBindFramebuffer( GL_FRAMEBUFFER, qnx.framebuffers[0] ); // FRONT_RIGHT
+			qglInvalidateFramebuffer( GL_FRAMEBUFFER, 3, discardAttachments );
+			qglBindFramebuffer( GL_FRAMEBUFFER, qnx.framebuffers[1] ); // BACK_LEFT
+			qglInvalidateFramebuffer( GL_FRAMEBUFFER, 3, discardAttachments );
+			qglBindFramebuffer( GL_FRAMEBUFFER, qnx.framebuffers[2] ); // BACK_RIGHT
+			qglInvalidateFramebuffer( GL_FRAMEBUFFER, 3, discardAttachments );
+		}
+#endif
+#ifdef GL_EXT_discard_framebuffer
+#ifdef GL_ES_VERSION_3_0
+		else {
+#endif
+		if ( qnx.discardFramebuffersSupported ) {
+			qglBindFramebuffer( GL_FRAMEBUFFER, qnx.framebuffers[0] ); // FRONT_RIGHT
+			qglDiscardFramebufferEXT( GL_FRAMEBUFFER, 3, discardAttachments );
+			qglBindFramebuffer( GL_FRAMEBUFFER, qnx.framebuffers[1] ); // BACK_LEFT
+			qglDiscardFramebufferEXT( GL_FRAMEBUFFER, 3, discardAttachments );
+			qglBindFramebuffer( GL_FRAMEBUFFER, qnx.framebuffers[2] ); // BACK_RIGHT
+			qglDiscardFramebufferEXT( GL_FRAMEBUFFER, 3, discardAttachments );
+		}
+#ifdef GL_ES_VERSION_3_0
+		}
+#endif
+#endif
 	}
 
 	// Swap EGL buffers
