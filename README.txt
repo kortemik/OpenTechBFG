@@ -42,11 +42,24 @@ right now since it has OpenGL ES 3.0 support.
 A set of projects are located within the blackberry folder. Import these projects and
 compile doom3bfg.
 
-Notes:
-- Amplitude is not needed for compilation.
-- X86 is currently not supported, so only on device compiles will work
+## Data:
+Currently, in order to get to run, images and shaders must be modified to convert
+to a format that OpenGL ES 3.0 can handle.
 
-TODO: write instructions for game data
+Steps for now (as of last change to this file):
+- Convert shaders to HLSL, so OpenGL ES version of project can convert them to a GLSL ES
+    compatible version of GLSL. Do this by using Win32 project, and calling
+    idRenderProgManager::SaveCGShader to convert the shader from its current GLSL format 
+    to "Cg" (which looks more like a bastardized HLSL/Cg hybrid).
+- Convert all DXT textures to ETC format. This can be done using either the built in
+    conversion (which is very slow and doesn't cache the files by default) or to write
+    an offline conversion program to convert each texture from it's generated format (bimage)
+    to a normal texture, then compress it, then convert it back into it's generated format.
+- Rebuild all resource files unless you are willing to take an IO performance hit from each
+    file being open, read, and closed during execution compared to opening a resource file
+    once, parsing it's metadata, and it never getting touched again until level load time 
+    where it will only be read.
+
 
 Steam:
 ------

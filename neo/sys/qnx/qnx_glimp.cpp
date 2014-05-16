@@ -194,7 +194,7 @@ PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEIMGPROC		qglFramebufferTexture2DMultisampleI
 #define GL_FRAMEBUFFER_TEXTURE2D( textureID, level, samples ) qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ( textureID ), ( level ) )
 #endif
 
-PFNGLDISCARDFRAMEBUFFEREXTPROC					qglDiscardFramebufferEXT;
+PFNGLDISCARDFRAMEBUFFEREXTPROC					qglDiscardFramebufferEXT; // If OpenGL ES 3.0 or higher is used, this will NOT be set, regardless of if supported or not
 
 /*
 ========================
@@ -829,7 +829,7 @@ void R_SetupFramebuffers() {
 
 	// quick extension check
 	qnx.discardFramebuffersSupported = R_CheckExtension( "GL_EXT_discard_framebuffer" );
-	if ( qnx.discardFramebuffersSupported ) {
+	if ( glConfig.glVersion < 3.0f && qnx.discardFramebuffersSupported ) {
 		qglDiscardFramebufferEXT = (PFNGLDISCARDFRAMEBUFFEREXTPROC)GLimp_ExtensionPointer( "glDiscardFramebufferEXT" );
 	}
 
@@ -1387,6 +1387,9 @@ bool GLimp_Init( glimpParms_t parms ) {
 	}
 	glConfig.egl_version_string = qeglQueryString( qnx.eglDisplay, EGL_VERSION );
 	glConfig.eglVersion = atof( glConfig.egl_version_string );
+	if ( glConfig.eglVersion > 1.3f && glConfig.eglVersion < 1.4f ) {
+		glConfig.eglVersion = 1.4f; // Annoying rounding issue
+	}
 
 	if ( qeglInitialize( qnx.eglDisplay, NULL, NULL ) != EGL_TRUE ) {
 		common->Printf( "...^3Could not initialize EGL display^0\n");
@@ -1705,7 +1708,9 @@ void GLimp_SwapBuffers() {
 
 			qglFlush();
 
-			qglBindFramebuffer( GL_FRAMEBUFFER, qnx.framebuffers[1] );
+			if ( curDraw != INT_MAX ) {
+				qglBindFramebuffer( GL_FRAMEBUFFER, qnx.framebuffers[curDraw] );
+			}
 		}
 
 		// Discard framebuffers when done, as it could result in a performance improvement
@@ -1737,7 +1742,7 @@ void GLimp_SwapBuffers() {
 #ifdef GL_ES_VERSION_3_0
 		}
 #endif
-#endif
+#endif // GL_EXT_discard_framebuffer
 	}
 
 	// Swap EGL buffers

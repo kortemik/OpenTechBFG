@@ -310,7 +310,7 @@ ID_FORCE_INLINE_EXTERN float32x4_t neon_rcp32q_f32( float32x4_t x ) {
 	return r;
 }
 // floating-point divide with close to full precision
-ID_FORCE_INLINE_EXTERN float32x4_t _mm_div32_ps( float32x4_t x, float32x2_t y ) {
+ID_FORCE_INLINE_EXTERN float32x4_t _mm_div32_ps( float32x4_t x, float32x4_t y ) {
 	return vmulq_f32( x, neon_rcp32q_f32( y ) );
 }
 

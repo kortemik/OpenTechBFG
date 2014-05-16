@@ -670,7 +670,7 @@ int Sys_ListFiles( const char *directory, const char *extension, idStrList &list
 	// the following lines are from the readdir_r manpage.. fscking ugly.
 	int nameMax = pathconf( directory, _PC_NAME_MAX );
 	if ( nameMax == -1 )
-		nameMax = 255;
+		nameMax = NAME_MAX;
 	int direntLen = offsetof( struct dirent, d_name ) + nameMax + 1;
 
 	struct dirent* entry = ( struct dirent* )Mem_Alloc( direntLen, TAG_CRAP );

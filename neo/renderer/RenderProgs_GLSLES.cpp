@@ -1108,7 +1108,8 @@ GLuint idRenderProgManager::LoadGLSLShader( GLenum target, const char * name, id
 
 			// catch the strings the ATI and Intel drivers output on success
 			if ( strstr( infoLog.Ptr(), "successfully compiled to run on hardware" ) != NULL ||
-					strstr( infoLog.Ptr(), "No errors." ) != NULL ) {
+					strstr( infoLog.Ptr(), "No errors." ) != NULL ||
+					strstr( infoLog.Ptr(), "Shader: SUCCESS" ) != NULL ) {
 				//idLib::Printf( "%s program %s from %s compiled to run on hardware\n", typeName, GetName(), GetFileName() );
 			} else {
 				idLib::Printf( "While compiling %s program %s\n", ( target == GL_FRAGMENT_SHADER ) ? "fragment" : "vertex" , inFile.c_str() );
