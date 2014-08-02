@@ -893,7 +893,7 @@ void idRenderMatrix::OffsetScaleForBounds( const idRenderMatrix & src, const idB
 	float32x4_t t0 = vaddq_f32( t01.val[0], t01.val[1] );
 	uint32x4_t t0u = vreinterpretq_u32_f32( vaddq_f32( t0, t23.val[0] ) );
 
-	uint32x4_t keep_last = vreinterpretq_u32_f32( vector_float_keep_last );
+	uint32x4_t keep_last = vreinterpretq_u32_s32( vector_float_keep_last );
 	float32x4_t n0 = vreinterpretq_f32_u32( vandq_u32( vdupq_lane_u32( vget_low_u32( t0u ), 0 ), keep_last ) );
 	float32x4_t n1 = vreinterpretq_f32_u32( vandq_u32( vdupq_lane_u32( vget_low_u32( t0u ), 1 ), keep_last ) );
 	float32x4_t n2 = vreinterpretq_f32_u32( vandq_u32( vdupq_lane_u32( vget_high_u32( t0u ), 0 ), keep_last ) );
@@ -1055,7 +1055,7 @@ void idRenderMatrix::InverseOffsetScaleForBounds( const idRenderMatrix & src, co
 
 	uint32x4_t offsetu = vreinterpretq_u32_f32( vmulq_f32( offset, rscale ) );
 
-	uint32x4_t keep_last = vreinterpretq_u32_f32( vector_float_keep_last );
+	uint32x4_t keep_last = vreinterpretq_u32_s32( vector_float_keep_last );
 	float32x4_t d0 = vreinterpretq_f32_u32( vandq_u32( vdupq_lane_u32( vget_low_u32( offsetu ), 0 ), keep_last ) );
 	float32x4_t d1 = vreinterpretq_f32_u32( vandq_u32( vdupq_lane_u32( vget_low_u32( offsetu ), 1 ), keep_last ) );
 	float32x4_t d2 = vreinterpretq_f32_u32( vandq_u32( vdupq_lane_u32( vget_high_u32( offsetu ), 0 ), keep_last ) );
@@ -2029,6 +2029,8 @@ void DeterminantIsNegative( bool & negativeDeterminant, const __m128 & r0, const
 	negativeDeterminant	= _mm_movemask_ps( result ) & 1;
 }
 
+//TODO
+
 #else
 
 void DeterminantIsNegative( bool & negativeDeterminant, const float * row0, const float * row1, const float * row2, const float * row3 ) {
@@ -2141,6 +2143,8 @@ void idRenderMatrix::SetMVP( const idRenderMatrix & mvp, idVec4 & row0, idVec4 &
 
 	DeterminantIsNegative( negativeDeterminant, r0, r1, r2, r3 );
 
+//TODO
+
 #else
 
 	memcpy( row0.ToFloatPtr(), mvp[0], sizeof( idVec4 ) );
@@ -2212,6 +2216,8 @@ void idRenderMatrix::SetMVPForBounds( const idRenderMatrix & mvp, const idBounds
 	_mm_store_ps( row3.ToFloatPtr(), r3 );
 
 	DeterminantIsNegative( negativeDeterminant, r0, r1, r2, r3 );
+
+//TODO
 
 #else
 
@@ -2292,6 +2298,8 @@ void idRenderMatrix::SetMVPForInverseProject( const idRenderMatrix & mvp, const 
 	_mm_store_ps( row3.ToFloatPtr(), t3 );
 
 	DeterminantIsNegative( negativeDeterminant, t0, t1, t2, t3 );
+
+//TODO
 
 #else
 
@@ -2477,6 +2485,8 @@ bool idRenderMatrix::CullBoundsToMVPbits( const idRenderMatrix & mvp, const idBo
 	*outBits = (byte)( bits ^ 63 );
 
 	return ( bits != 63 );
+
+//TODO
 
 #else
 
@@ -2760,6 +2770,8 @@ bool idRenderMatrix::CullExtrudedBoundsToMVPbits( const idRenderMatrix & mvp, co
 
 	return ( bits != 63 );
 
+//TODO
+
 #else
 
 	int bits = 0;
@@ -2965,6 +2977,8 @@ void idRenderMatrix::ProjectedBounds( idBounds & projected, const idRenderMatrix
 	_mm_store_ss( & projected[1].x, maxX );
 	_mm_store_ss( & projected[1].y, maxY );
 	_mm_store_ss( & projected[1].z, maxZ );
+
+//TODO
 
 #else
 
@@ -3334,6 +3348,8 @@ void idRenderMatrix::ProjectedNearClippedBounds( idBounds & projected, const idR
 	_mm_store_ss( & projected[1].x, maxX );
 	_mm_store_ss( & projected[1].y, maxY );
 	_mm_store_ss( & projected[1].z, maxZ );
+
+//TODO
 
 #elif 1
 
@@ -4093,6 +4109,8 @@ void idRenderMatrix::ProjectedFullyClippedBounds( idBounds & projected, const id
 	_mm_store_ss( & projected[1].y, maxY );
 	_mm_store_ss( & projected[1].z, maxZ );
 
+//TODO
+
 #else
 
 	const idVec3 points[8] = {
@@ -4261,6 +4279,8 @@ void idRenderMatrix::DepthBoundsForBounds( float & min, float & max, const idRen
 
 	_mm_store_ss( & min, minv );
 	_mm_store_ss( & max, maxv );
+
+//TODO
 
 #else
 
@@ -4472,6 +4492,8 @@ void idRenderMatrix::DepthBoundsForExtrudedBounds( float & min, float & max, con
 
 	_mm_store_ss( & min, minv );
 	_mm_store_ss( & max, maxv );
+
+//TODO
 
 #else
 
@@ -4756,6 +4778,8 @@ void idRenderMatrix::DepthBoundsForShadowBounds( float & min, float & max, const
 
 	_mm_store_ss( & min, minZ );
 	_mm_store_ss( & max, maxZ );
+
+//TODO
 
 #else
 
@@ -5287,10 +5311,10 @@ frustumCull_t idRenderMatrix::CullFrustumCornersToPlane( const frustumCorners_t 
 	float32x4_t y1 = vld1q_f32( (float32_t *)(corners.y + 4) );
 	float32x4_t z1 = vld1q_f32( (float32_t *)(corners.z + 4) );
 
-	float32x4_t p0 = vdupq_lane_f32( vp, 0 );
-	float32x4_t p1 = vdupq_lane_f32( vp, 1 );
-	float32x4_t p2 = vdupq_lane_f32( vp, 2 );
-	float32x4_t p3 = vdupq_lane_f32( vp, 3 );
+	float32x4_t p0 = vdupq_lane_f32( vget_low_f32( vp ), 0 );
+	float32x4_t p1 = vdupq_lane_f32( vget_low_f32( vp ), 1 );
+	float32x4_t p2 = vdupq_lane_f32( vget_high_f32( vp ), 0 );
+	float32x4_t p3 = vdupq_lane_f32( vget_high_f32( vp ), 1 );
 
 	float32x4_t d0 = vmlaq_f32( vmlaq_f32( vmlaq_f32( p3, z0, p2 ), y0, p1 ), x0, p0 );
 	float32x4_t d1 = vmlaq_f32( vmlaq_f32( vmlaq_f32( p3, z1, p2 ), y1, p1 ), x1, p0 );

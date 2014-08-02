@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -43,13 +43,13 @@ void idMenuHandler_HUD::Update() {
 	}
 
 	if ( nextScreen != activeScreen ) {
-	
+
 		if ( activeScreen > HUD_AREA_INVALID && activeScreen < HUD_NUM_AREAS && menuScreens[ activeScreen ] != NULL ) {
 			menuScreens[ activeScreen ]->HideScreen( static_cast<mainMenuTransition_t>(transition) );
 		}
 
 		if ( nextScreen > HUD_AREA_INVALID && nextScreen < HUD_NUM_AREAS && menuScreens[ nextScreen ] != NULL ) {
-			menuScreens[ nextScreen ]->ShowScreen( static_cast<mainMenuTransition_t>(transition) );			
+			menuScreens[ nextScreen ]->ShowScreen( static_cast<mainMenuTransition_t>(transition) );
 		}
 
 		transition = MENU_TRANSITION_INVALID;
@@ -58,7 +58,7 @@ void idMenuHandler_HUD::Update() {
 
 	idPlayer * player = gameLocal.GetLocalPlayer();
 	if ( player != NULL ) {
-		if ( player->IsTipVisible() && autoHideTip && !hiding ) {		
+		if ( player->IsTipVisible() && autoHideTip && !hiding ) {
 			if ( gameLocal.time >= tipStartTime + TIP_DISPLAY_TIME ) {
 				player->HideTip();
 			}
@@ -89,11 +89,11 @@ idMenuHandler_HUD::ActivateMenu
 void idMenuHandler_HUD::ActivateMenu( bool show ) {
 
 	idMenuHandler::ActivateMenu( show );
-	
+
 	idPlayer * player = gameLocal.GetLocalPlayer();
 	if ( player == NULL ) {
 		return;
-	}  	
+	}
 
 	if ( show ) {
 		activeScreen = HUD_AREA_INVALID;
@@ -158,8 +158,8 @@ idMenuScreen_HUD * idMenuHandler_HUD::GetHud() {
 idMenuHandler_HUD::ShowTip
 ========================
 */
-void idMenuHandler_HUD::ShowTip( const char * title, const char * tip, bool autoHide ) {	
-	autoHideTip = autoHideTip;
+void idMenuHandler_HUD::ShowTip( const char * title, const char * tip, bool autoHide ) {
+	autoHideTip = autoHideTip; //XXX
 	tipStartTime = gameLocal.time;
 	hiding = false;
 	idMenuScreen_HUD * screen = GetHud();

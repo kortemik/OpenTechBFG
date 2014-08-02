@@ -34,6 +34,13 @@ If you have questions concerning this license or the applicable additional terms
 
 idRenderProgManager renderProgManager;
 
+#ifndef ID_QNX
+#define SHADOW_FRAGMENT -1
+#else
+// GLES requires that all shader programs have a vertex and fragment shader. A shader program cannot only have a vertex shader or only a fragment shader.
+#define SHADOW_FRAGMENT FindFragmentShader( "invisible.vp" )
+#endif
+
 /*
 ================================================================================================
 idRenderProgManager::idRenderProgManager()
@@ -145,8 +152,8 @@ void idRenderProgManager::Init() {
 	builtinShaders[BUILTIN_SHADOW] = FindVertexShader( "shadow.vp" );
 	builtinShaders[BUILTIN_SHADOW_SKINNED] = FindVertexShader( "shadow_skinned.vp" );
 
-	FindGLSLProgram( "shadow.vp", builtinShaders[BUILTIN_SHADOW], -1 );
-	FindGLSLProgram( "shadow_skinned.vp", builtinShaders[BUILTIN_SHADOW_SKINNED], -1 );
+	FindGLSLProgram( "shadow.vp", builtinShaders[BUILTIN_SHADOW], SHADOW_FRAGMENT );
+	FindGLSLProgram( "shadow_skinned.vp", builtinShaders[BUILTIN_SHADOW_SKINNED], SHADOW_FRAGMENT );
 
 	glslUniforms.SetNum( RENDERPARM_USER + MAX_GLSL_USER_PARMS, vec4_zero );
 

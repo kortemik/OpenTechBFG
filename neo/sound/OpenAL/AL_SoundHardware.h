@@ -60,7 +60,7 @@ public:
 	static void		PrintDeviceList( const char* list );
 	static void		PrintALCInfo( ALCdevice* device );
 
-	bool			SupportsIMA4() const { return hasIMA4Support; }
+	bool			SupportsNativeADPCM() const { return hasADPCMSupport; }
 
 private:
 	friend class idSoundSample_OpenAL;
@@ -69,7 +69,7 @@ private:
 	ALCdevice *			openalDevice;
 	ALCcontext *		openalContext;
 
-	bool				hasIMA4Support;
+	bool				hasADPCMSupport;
 
 	int					lastResetTime;
 

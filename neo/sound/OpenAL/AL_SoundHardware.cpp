@@ -198,12 +198,12 @@ void idSoundHardware_OpenAL::Init() {
 	common->Printf( "OpenAL version: %s\n", alGetString( AL_VERSION ) );
 	common->Printf( "OpenAL extensions: %s\n", extensions );
 
-#if 0//defined(AL_EXT_IMA4)
-	hasIMA4Support = strstr( extensions, "AL_EXT_IMA4" ) != NULL;
+	// AL_LOKI_IMA_ADPCM_format may be the proper extension... but it isn't supported so there is no guarantee. AL_EXT_IMA4 is supported but doesn't pause the audio correctly
+#if defined(AL_LOKI_IMA_ADPCM_format)
+	hasADPCMSupport = strstr( extensions, "AL_LOKI_IMA_ADPCM_format" ) != NULL;
 #else
-	hasIMA4Support = false;
+	hasADPCMSupport = false;
 #endif
-	// XXX should AL_LOKI_IMA_ADPCM_format be checked as well?
 
 	// ---------------------
 	// Try to get information about the sound device

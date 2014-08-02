@@ -40,8 +40,8 @@ If you have questions concerning this license or the applicable additional terms
 #define SUPPORT_EMAIL_SUBJECT_FATAL	"DOOM 3 Fatal Error"
 #define SUPPORT_EMAIL_BODY			"%s"	// One string argument has to exist, which will be the error message.
 
-#define USE_SCORELOOP
+#define USE_SOCIAL
 
-#define SCORELOOP_ID			"todo"
-#define SCORELOOP_SECRET		"todo"
-#define SCORELOOP_CURRENCY		"todo"
+#define SOCIAL_ID			"todo"
+#define SOCIAL_SECRET		"todo"
+#define SOCIAL_CURRENCY		"todo"

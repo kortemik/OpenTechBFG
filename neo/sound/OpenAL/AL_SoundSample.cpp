@@ -275,7 +275,7 @@ void idSoundSample_OpenAL::CreateOpenALBuffer() {
 			buffer = buffers[0].buffer;
 			bufferSize = buffers[0].bufferSize;
 
-			if ( !static_cast<const idSoundHardware_OpenAL*>( soundSystemLocal.GetHardware() )->SupportsIMA4() ) {
+			if ( !static_cast<const idSoundHardware_OpenAL*>( soundSystemLocal.GetHardware() )->SupportsNativeADPCM() ) {
 
 				if( MS_ADPCM_decode( ( uint8** ) &buffer, &bufferSize ) < 0 ) {
 					common->Error( "idSoundSample_OpenAL::CreateOpenALBuffer: could not decode ADPCM '%s' to 16 bit format", GetName() );
@@ -599,9 +599,9 @@ ALenum idSoundSample_OpenAL::GetOpenALBufferFormat() const {
 	if( format.basic.formatTag == idWaveFile::FORMAT_PCM ) {
 		alFormat = NumChannels() == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
 	} else if( format.basic.formatTag == idWaveFile::FORMAT_ADPCM ) {
-#ifdef AL_EXT_IMA4
-		if ( static_cast<const idSoundHardware_OpenAL*>( soundSystemLocal.GetHardware() )->SupportsIMA4() ) {
-			alFormat = NumChannels() == 1 ? AL_FORMAT_MONO_IMA4 : AL_FORMAT_STEREO_IMA4;
+#ifdef AL_LOKI_IMA_ADPCM_format
+		if ( static_cast<const idSoundHardware_OpenAL*>( soundSystemLocal.GetHardware() )->SupportsNativeADPCM() ) {
+			alFormat = NumChannels() == 1 ? AL_FORMAT_IMA_ADPCM_MONO16_EXT : AL_FORMAT_IMA_ADPCM_STEREO16_EXT;
 		}
 		else
 #endif

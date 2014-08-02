@@ -169,7 +169,7 @@ Sys_LangCodes
 
 Made to match the order of Sys_Lang
 
-This may not be the best place for this, but it's only needed for Scoreloop which is managed here
+This may not be the best place for this, but it's only needed for social which is managed here
 ========================
 */
 const char * sysLanguageCodes[] = {
