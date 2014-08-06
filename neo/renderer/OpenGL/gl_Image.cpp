@@ -436,7 +436,11 @@ void idImage::AllocImage() {
 	case FMT_DEPTH:
 		internalFormat = GL_DEPTH_COMPONENT;
 		dataFormat = GL_DEPTH_COMPONENT;
+#ifndef GL_ES_VERSION_2_0
 		dataType = GL_UNSIGNED_BYTE;
+#else
+		dataType = GL_UNSIGNED_INT;
+#endif
 		break;
 	case FMT_X16:
 #ifndef GL_ES_VERSION_2_0

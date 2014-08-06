@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?>
-
-<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="com.qnx.qcc.configuration.exe.debug.1778893354">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.exe.debug.1778893354" moduleId="org.eclipse.cdt.core.settings" name="Device-Debug">
 				<externalSettings/>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="com.qnx.tools.ide.qde.core.QDELinkerErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -37,6 +35,7 @@
 								<option id="com.qnx.qcc.option.compiler.qccoptions.168100639" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
 								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.2129427086" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList"/>
 								<inputType id="com.qnx.qcc.inputType.compiler.1422041738" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool command="qcc" commandLinePattern="${COMMAND}  ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS} ${FLAGS}" errorParsers="" id="com.qnx.qcc.tool.assembler.696761276" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
@@ -104,7 +103,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic/Device-Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic"/>
-						<entry flags="" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -114,7 +113,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Device-Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
-						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -124,7 +123,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib/Device-Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib"/>
-						<entry flags="" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -134,7 +133,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity/Device-Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity"/>
-						<entry flags="" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -144,10 +143,10 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.exe.release.1657557283" moduleId="org.eclipse.cdt.core.settings" name="Device-Release">
 				<externalSettings/>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="com.qnx.tools.ide.qde.core.QDELinkerErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -243,7 +242,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic/Device-Release"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic"/>
-						<entry flags="" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -253,7 +252,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Device-Release"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
-						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -263,7 +262,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib/Device-Release"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib"/>
-						<entry flags="" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -273,7 +272,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity/Device-Release"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity"/>
-						<entry flags="" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -283,10 +282,10 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.exe.profile.664212159" moduleId="org.eclipse.cdt.core.settings" name="Device-Profile">
 				<externalSettings/>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="com.qnx.tools.ide.qde.core.QDELinkerErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -382,7 +381,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic/Device-Profile"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic"/>
-						<entry flags="" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -392,7 +391,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Device-Profile"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
-						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -402,7 +401,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib/Device-Profile"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib"/>
-						<entry flags="" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -412,7 +411,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity/Device-Profile"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity"/>
-						<entry flags="" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -422,10 +421,10 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.exe.profile.coverage.448140697" moduleId="org.eclipse.cdt.core.settings" name="Device-Coverage">
 				<externalSettings/>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="com.qnx.tools.ide.qde.core.QDELinkerErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -521,7 +520,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic/Device-Coverage"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic"/>
-						<entry flags="" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -531,7 +530,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Device-Coverage"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
-						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -541,7 +540,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib/Device-Coverage"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib"/>
-						<entry flags="" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -551,7 +550,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity/Device-Coverage"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity"/>
-						<entry flags="" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -561,10 +560,10 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.exe.debug.673103559" moduleId="org.eclipse.cdt.core.settings" name="Simulator-Debug">
 				<externalSettings/>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="com.qnx.tools.ide.qde.core.QDELinkerErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -658,7 +657,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic/Simulator-Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic"/>
-						<entry flags="" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -668,7 +667,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Simulator-Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
-						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -678,7 +677,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib/Simulator-Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib"/>
-						<entry flags="" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -688,7 +687,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity/Simulator-Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity"/>
-						<entry flags="" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -698,10 +697,10 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.exe.profile.2074727550" moduleId="org.eclipse.cdt.core.settings" name="Simulator-Profile">
 				<externalSettings/>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="com.qnx.tools.ide.qde.core.QDELinkerErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -797,7 +796,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic/Simulator-Profile"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic"/>
-						<entry flags="" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -807,7 +806,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Simulator-Profile"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
-						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -817,7 +816,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib/Simulator-Profile"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib"/>
-						<entry flags="" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -827,7 +826,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity/Simulator-Profile"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity"/>
-						<entry flags="" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -837,10 +836,10 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.exe.profile.coverage.1197712012" moduleId="org.eclipse.cdt.core.settings" name="Simulator-Coverage">
 				<externalSettings/>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="com.qnx.tools.ide.qde.core.QDELinkerErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -936,7 +935,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic/Simulator-Coverage"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic"/>
-						<entry flags="" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -946,7 +945,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Simulator-Coverage"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
-						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -956,7 +955,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib/Simulator-Coverage"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib"/>
-						<entry flags="" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -966,7 +965,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity/Simulator-Coverage"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity"/>
-						<entry flags="" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>

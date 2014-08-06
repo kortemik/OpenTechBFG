@@ -148,7 +148,7 @@ typedef struct {
 	int dx10_format;
 } DDSTextureFormatSynonym;
 
-#define NU_DDS_SYNONYMS 20
+#define NU_DDS_SYNONYMS 22
 
 static DDSTextureFormatSynonym dds_synonym[NU_DDS_SYNONYMS] = {
 	{ TEXTURE_TYPE_UNCOMPRESSED_RGBA8, "DX10", 27 },
@@ -167,6 +167,8 @@ static DDSTextureFormatSynonym dds_synonym[NU_DDS_SYNONYMS] = {
 	{ TEXTURE_TYPE_DXT3, "DX10", 74 },
 	{ TEXTURE_TYPE_DXT5, "DX10", 76 },
 	{ TEXTURE_TYPE_DXT5, "DX10", 77 },
+        { TEXTURE_TYPE_RGTC1, "DX10", 79 },
+        { TEXTURE_TYPE_RGTC2, "DX10", 82 },
 	{ TEXTURE_TYPE_BPTC, "DX10", 97 },
 	{ TEXTURE_TYPE_BPTC_FLOAT, "DX10", 94 },
 	{ TEXTURE_TYPE_RGTC1, "ATI1", 0 },
@@ -230,9 +232,8 @@ TextureInfo *match_dds_id(const char *four_cc, int dx10_format, uint32_t pixel_f
 			if (dds_synonym[i].dx10_format == dx10_format)
 				return match_texture_type(dds_synonym[i].type);
 		}
-		else
-		if (texture_info[i].dx_four_cc[0] != '\0' &&
-		strncmp(texture_info[i].dx_four_cc, four_cc, 4) == 0)
+		else if (dds_synonym[i].dx10_four_cc[0] != '\0' &&
+		strncmp(dds_synonym[i].dx10_four_cc, four_cc, 4) == 0)
 			return match_texture_type(dds_synonym[i].type);
 	return NULL;
 }

@@ -150,7 +150,7 @@ namespace texgen {
 		int dx10_format;
 	} DDSTextureFormatSynonym;
 
-#define NU_DDS_SYNONYMS 20
+#define NU_DDS_SYNONYMS 22
 
 	static DDSTextureFormatSynonym dds_synonym[NU_DDS_SYNONYMS] = {
 		{ TEXTURE_TYPE_UNCOMPRESSED_RGBA8,			"DX10", 27 },
@@ -169,6 +169,8 @@ namespace texgen {
 		{ TEXTURE_TYPE_DXT3,						"DX10", 74 },
 		{ TEXTURE_TYPE_DXT5,						"DX10", 76 },
 		{ TEXTURE_TYPE_DXT5,						"DX10", 77 },
+		{ TEXTURE_TYPE_RGTC1,						"DX10", 79 },
+		{ TEXTURE_TYPE_RGTC2,						"DX10", 82 },
 		{ TEXTURE_TYPE_BPTC,						"DX10", 97 },
 		{ TEXTURE_TYPE_BPTC_FLOAT,					"DX10", 94 },
 		{ TEXTURE_TYPE_RGTC1,						"ATI1", 0 },
@@ -233,9 +235,8 @@ namespace texgen {
 				return match_texture_type(dds_synonym[i].type);
 		}
 		else
-		if (texture_info[i].dx_four_cc[0] != '\0' &&
-			strncmp(texture_info[i].dx_four_cc, four_cc, 4) == 0)
-			return match_texture_type(dds_synonym[i].type);
+			if (dds_synonym[i].dx10_four_cc[0] != '\0' && strncmp(dds_synonym[i].dx10_four_cc, four_cc, 4) == 0)
+				return match_texture_type(dds_synonym[i].type);
 		return NULL;
 	}
 

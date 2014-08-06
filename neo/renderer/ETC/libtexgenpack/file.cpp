@@ -879,7 +879,7 @@ bool load_pkm_file(const char *filename, Texture *texture) {
 		png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 		fclose(fp);
 
-		if ((color_type != PNG_COLOR_TYPE_RGB && color_type != PNG_COLOR_TYPE_RGBA) || (bit_depth != 8)) {
+		if ((color_type != PNG_COLOR_TYPE_GRAY && color_type != PNG_COLOR_TYPE_RGB && color_type != PNG_COLOR_TYPE_RGBA) || (bit_depth != 8)) {
 			for (int y = 0; y < png_height; y++)
 				free(row_pointers[y]);
 			free(row_pointers);
@@ -897,7 +897,18 @@ bool load_pkm_file(const char *filename, Texture *texture) {
 		image->srgb = 0;
 		image->is_half_float = 0;
 		image->is_signed = 0;
-		if (color_type == PNG_COLOR_TYPE_RGB) {
+		// The internal image format after reading a PNG file is always 32 bits per pixel.
+		if (color_type == PNG_COLOR_TYPE_GRAY) {
+			image->alpha_bits = 0;
+					image->nu_components = 1;
+			for (int y = 0; y < image->height; y++)
+				for (int x = 0; x < image->width; x++) {
+									unsigned int pixel = (unsigned int)*(row_pointers[y] + x) +
+										0xFF000000;
+					*(image->pixels + y * image->extended_width + x) = pixel;
+				}
+			}
+		else if (color_type == PNG_COLOR_TYPE_RGB) {
 			image->alpha_bits = 0;
 			for (int y = 0; y < image->height; y++)
 				for (int x = 0; x < image->width; x++) {
@@ -961,7 +972,9 @@ bool load_pkm_file(const char *filename, Texture *texture) {
 		}
 		png_init_io(png_ptr, fp);
 		int t;
-		if (image->alpha_bits > 0)
+		if (image->nu_components == 1)
+			t = PNG_COLOR_TYPE_GRAY;
+		else if (image->alpha_bits > 0)
 			t = PNG_COLOR_TYPE_RGBA;
 		else
 			t = PNG_COLOR_TYPE_RGB;
@@ -970,7 +983,7 @@ bool load_pkm_file(const char *filename, Texture *texture) {
 
 		png_write_info(png_ptr, info_ptr);
 
-		if (image->alpha_bits == 0)
+		if (t == PNG_COLOR_TYPE_GRAY || image->alpha_bits == 0)
 			// We have RGB data in 32-bit pixels with the last byte unused.
 			png_set_filler(png_ptr, 0, PNG_FILLER_AFTER);
 

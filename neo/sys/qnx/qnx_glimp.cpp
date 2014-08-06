@@ -914,7 +914,7 @@ void R_ShutdownFramebuffers() {
 	if ( !qnx.useBlit ) {
 		qglDeleteTextures( FRAMEBUFFER_COUNT, qnx.fbTextures );
 	}
-	qglDeleteRenderbuffers( ( qnx.packedFramebufferSupported ? RENDERBUFFER_PER_FRAMEBUFFER_PACKED : RENDERBUFFER_PER_FRAMEBUFFER ), qnx.renderbuffers );
+	qglDeleteRenderbuffers( FRAMEBUFFER_COUNT * ( qnx.packedFramebufferSupported ? RENDERBUFFER_PER_FRAMEBUFFER_PACKED : RENDERBUFFER_PER_FRAMEBUFFER ), qnx.renderbuffers );
 	qglDeleteFramebuffers( FRAMEBUFFER_COUNT, qnx.framebuffers );
 }
 
@@ -1563,6 +1563,11 @@ void GLimp_Shutdown() {
 		common->Printf( "...qeglMakeCurrent( display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT ): %s\n", success[retVal] );
 	}
 
+	if ( qnx.depthFramebuffer != 0 ) {
+		qglDeleteFramebuffers( 1, &qnx.depthFramebuffer );
+		qnx.depthFramebuffer = 0;
+	}
+
 	if ( qnx.eglSurface != EGL_NO_SURFACE ) {
 		retVal = qeglDestroySurface( qnx.eglDisplay, qnx.eglSurface );
 		common->Printf( "...destroying surface: %s\n", success[retVal] );
@@ -1611,6 +1616,40 @@ void GLimp_Shutdown() {
 
 	// shutdown QGL subsystem
 	QGL_Shutdown();
+}
+
+/*
+=====================
+GLimp_CopyDepthBufferToTexture
+=====================
+*/
+void GLimp_CopyDepthBufferToTexture( GLenum target, GLuint texture, int x, int y, int imageWidth, int imageHeight ) {
+	if ( texture == 0 ) {
+		return;
+	} else if( !qnx.useBlit ) {
+		// If blit is not available, then we have to skip this. There is no way to copy texture to texture that's supported widely. Otherwise, there is no
+		// way to get the depth buffer from an already rendered scene to a texture without rerendering.
+
+		// No other option... maybe it will work one day in the future
+		qglCopyTexImage2D( target, 0, GL_DEPTH_COMPONENT, x, y, imageWidth, imageHeight, 0 );
+		return;
+	}
+
+	// Resize image
+	qglTexImage2D( target, 0, GL_DEPTH_COMPONENT, imageWidth, imageHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL );
+
+	// Setup framebuffer
+	if ( qnx.depthFramebuffer == 0 ) {
+		qglGenFramebuffers( 1, &qnx.depthFramebuffer );
+	}
+	qglBindFramebuffer( GL_DRAW_FRAMEBUFFER_ANGLE, qnx.depthFramebuffer );
+	qglFramebufferTexture2D( GL_DRAW_FRAMEBUFFER_ANGLE, GL_DEPTH_ATTACHMENT, target, texture, 0 );
+
+	// Copy the texture
+	qglBlitFramebufferANGLE( x, y, imageWidth, imageHeight, 0, 0, imageWidth, imageHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST );
+
+	// Reset the framebuffer back to it's original draw framebuffer
+	qglBindFramebuffer( GL_DRAW_FRAMEBUFFER_ANGLE, qnx.framebuffers[ R_GetBufferIndex( qnx.drawBuffer ) ] );
 }
 
 /*

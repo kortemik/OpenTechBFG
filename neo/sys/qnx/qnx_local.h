@@ -143,6 +143,7 @@ typedef struct {
 	GLuint						framebuffers[FRAMEBUFFER_COUNT];		// FRONT_RIGHT, BACK_LEFT, BACK_RIGHT
 	GLuint						renderbuffers[FRAMEBUFFER_COUNT * 3];	// FRONT_RIGHT (color, depth, [stencil]), BACK_LEFT, BACK_RIGHT
 	GLuint						fbTextures[FRAMEBUFFER_COUNT];			// FRONT_RIGHT, BACK_LEFT, BACK_RIGHT
+	GLuint						depthFramebuffer;
 	GLenum						readBuffer;
 	GLenum						drawBuffer;
 	bool						discardFramebuffersSupported;
