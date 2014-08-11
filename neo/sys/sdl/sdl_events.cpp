@@ -56,6 +56,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "renderer/tr_local.h"
 #include "sdl_local.h"
 
+#ifdef USE_CEGUI
+#include "../cegui/CEGUI_SDLHooks.h"
+#endif
+
+
 #if !SDL_VERSION_ATLEAST(2, 0, 0)
 #define SDL_Keycode SDLKey
 #define SDLK_APPLICATION SDLK_COMPOSE
@@ -948,6 +953,9 @@ sysEvent_t Sys_GetEvent()
 				// DG: handle resizing and moving of window
 			case SDL_VIDEORESIZE:
 			{
+#ifdef USE_CEGUI
+				cegui::getInstance().notifyDisplaySizeChanged(ev.resize.w, ev.resize.h);
+#endif
 				int w = ev.resize.w;
 				int h = ev.resize.h;
 				r_windowWidth.SetInteger( w );
@@ -963,6 +971,13 @@ sysEvent_t Sys_GetEvent()
 #endif
 			
 			case SDL_KEYDOWN:
+#ifdef USE_CEGUI
+				cegui::getInstance().injectKeyDown(ev.key.keysym.sym);
+
+				if ((ev.key.keysym.unicode & 0xFF80) == 0) {
+					cegui::getInstance().injectChar(ev.key.keysym.unicode);
+				}
+#endif
 				if( ev.key.keysym.sym == SDLK_RETURN && ( ev.key.keysym.mod & KMOD_ALT ) > 0 )
 				{
 					// DG: go to fullscreen on current display, instead of always first display
@@ -1003,6 +1018,9 @@ sysEvent_t Sys_GetEvent()
 				// fall through
 			case SDL_KEYUP:
 			{
+#ifdef USE_CEGUI
+				cegui::getInstance().injectKeyUp(ev.key.keysym.sym);
+#endif
 				bool isChar;
 				
 				// DG: special case for SDL_SCANCODE_GRAVE - the console key under Esc
@@ -1090,6 +1108,9 @@ sysEvent_t Sys_GetEvent()
 #endif
 				
 			case SDL_MOUSEMOTION:
+#ifdef USE_CEGUI
+				cegui::getInstance().injectMousePosition(ev.motion.x, ev.motion.y);
+#endif
 				// DG: return event with absolute mouse-coordinates when in menu
 				// to fix cursor problems in windowed mode
 				if( game && game->Shell_IsActive() )
@@ -1147,25 +1168,61 @@ sysEvent_t Sys_GetEvent()
 				switch( ev.button.button )
 				{
 					case SDL_BUTTON_LEFT:
+#ifdef USE_CEGUI
+						if (ev.type == SDL_MOUSEBUTTONDOWN)
+						{
+							cegui::getInstance().injectMouseButtonLeftDown();
+						}
+						if (ev.type == SDL_MOUSEBUTTONUP)
+						{
+							cegui::getInstance().injectMouseButtonLeftUp();
+						}
+#endif
 						res.evValue = K_MOUSE1;
 						mouse_polls.Append( mouse_poll_t( M_ACTION1, ev.button.state == SDL_PRESSED ? 1 : 0 ) );
 						break;
 					case SDL_BUTTON_MIDDLE:
+#ifdef USE_CEGUI
+						if (ev.type == SDL_MOUSEBUTTONDOWN)
+						{
+							cegui::getInstance().injectMouseButtonMiddleDown();
+						}
+						if (ev.type == SDL_MOUSEBUTTONUP)
+						{
+							cegui::getInstance().injectMouseButtonMiddleUp();
+						}
+#endif
 						res.evValue = K_MOUSE3;
 						mouse_polls.Append( mouse_poll_t( M_ACTION3, ev.button.state == SDL_PRESSED ? 1 : 0 ) );
 						break;
 					case SDL_BUTTON_RIGHT:
 						res.evValue = K_MOUSE2;
+#ifdef USE_CEGUI
+						if (ev.type == SDL_MOUSEBUTTONDOWN)
+						{
+							cegui::getInstance().injectMouseButtonRightDown();
+						}
+						if (ev.type == SDL_MOUSEBUTTONUP)
+						{
+							cegui::getInstance().injectMouseButtonRightUp();
+						}
+#endif
 						mouse_polls.Append( mouse_poll_t( M_ACTION2, ev.button.state == SDL_PRESSED ? 1 : 0 ) );
 						break;
 						
 #if !SDL_VERSION_ATLEAST(2, 0, 0)
 					case SDL_BUTTON_WHEELUP:
+#ifdef USE_CEGUI
+						cegui::getInstance().injectMouseWheelChange( +1 );
+#endif
 						res.evValue = K_MWHEELUP;
 						if( ev.button.state == SDL_PRESSED )
 							mouse_polls.Append( mouse_poll_t( M_DELTAZ, 1 ) );
 						break;
 					case SDL_BUTTON_WHEELDOWN:
+#ifdef USE_CEGUI
+						cegui::getInstance().injectMouseWheelChange( -1 );
+#endif
 						res.evValue = K_MWHEELDOWN;
 						if( ev.button.state == SDL_PRESSED )
 							mouse_polls.Append( mouse_poll_t( M_DELTAZ, -1 ) );
