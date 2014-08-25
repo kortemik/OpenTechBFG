@@ -1,0 +1,64 @@
+// engine requires these variables
+
+object weapon_base {
+				// engine needs
+	boolean		WEAPON_ATTACK;
+	boolean		WEAPON_RELOAD;
+	boolean		WEAPON_NETRELOAD;
+	boolean		WEAPON_NETENDRELOAD;
+	boolean		WEAPON_NETFIRING;
+	boolean		WEAPON_RAISEWEAPON;
+	boolean		WEAPON_LOWERWEAPON;
+
+				// player script needs
+	boolean		WEAPON_START_FIRING;
+
+				// engine calls
+	void		EnterCinematic();
+	void		ExitCinematic();
+	void		NetCatchup();
+	void		WeaponStolen();
+	void		OwnerDied();
+	void		UpdateSkin();
+
+				// player script calls
+	string		GetFireAnim();
+};
+
+
+//cinematics need, todo implement in subclass
+void weapon_base::EnterCinematic() {
+}
+
+//cinematics need, todo implement in subclass
+void weapon_base::ExitCinematic() {
+}
+
+//networking code needs, todo implement in subclass
+void weapon_base::NetCatchup() {
+	weaponState( "Idle", 0 );
+}
+
+//multiplayer code needs, todo implement in subclass
+void weapon_base::WeaponStolen() {
+}
+
+//engine needs, todo implement in subclass
+//script is free'd after being called, must be single frame execution
+void weapon_base::OwnerDied() {
+}
+
+//engine needs for skin update (powerup etc.), todo implement in subclass
+//executes only for one frame, so switch state or create new thread  
+void weapon_base::UpdateSkin() {
+	if ( isInvisible() ) {
+		setSkin( getKey( "skin_invisible" ) );
+	} else {
+		setSkin( "" );
+	}
+}
+
+//player script needs, todo implement sublcass to overide for syncing viewmodel with player view model
+string weapon_base::GetFireAnim() {
+	return "fire";
+}
