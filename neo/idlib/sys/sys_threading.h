@@ -69,6 +69,7 @@ typedef int						interlockedInt_t;
 // from reordering read and write instructions across the barrier.
 // MemoryBarrier() inserts and CPU instruction that keeps the CPU from reordering reads and writes.
 #if defined(_MSC_VER)
+extern "C" void _ReadWriteBarrier(void);
 #pragma intrinsic(_ReadWriteBarrier)
 #define SYS_MEMORYBARRIER		_ReadWriteBarrier(); MemoryBarrier()
 #elif defined(__GNUC__) // FIXME: what about clang?
