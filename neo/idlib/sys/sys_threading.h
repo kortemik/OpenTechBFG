@@ -41,6 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // RB begin
 #if defined(_WIN32)
+
 typedef CRITICAL_SECTION		mutexHandle_t;
 typedef HANDLE					signalHandle_t;
 typedef LONG					interlockedInt_t;

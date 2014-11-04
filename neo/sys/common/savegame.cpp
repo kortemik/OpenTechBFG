@@ -182,7 +182,7 @@ int idSaveGameThread::Save()
 		if( outputFile == NULL )
 		{
 #ifdef _WIN32 // DG: unify windows and posix savegames => replace GetLastError with strerror(errno)
-			idLib::Warning( "[%s]: Couldn't open file for writing, %s. Error = %08x", __FUNCTION__, tempFileName.c_str(), GetLastError() );
+			idLib::Warning( "[%s]: Couldn't open file for writing, %s. Error = %lud", __FUNCTION__, tempFileName.c_str(), GetLastError() );
 #else
 			idLib::Warning( "[%s]: Couldn't open file for writing, %s. Error = %s", __FUNCTION__, tempFileName.c_str(), strerror( errno ) );
 #endif // DG end
@@ -204,7 +204,7 @@ int idSaveGameThread::Save()
 				if( ( size_t )outputFile->Write( block.data, block.bytes ) != block.bytes )
 				{
 #ifdef _WIN32 // DG: unify windows and posix savegames => replace GetLastError with strerror(errno)
-					idLib::Warning( "[%s]: Write failed. Error = %08x", __FUNCTION__, GetLastError() );
+					idLib::Warning("[%s]: Write failed. Error = %lud", __FUNCTION__, GetLastError());
 #else
 					idLib::Warning( "[%s]: Write failed. Error = %s", __FUNCTION__, strerror( errno ) );
 #endif // DG end
@@ -228,7 +228,7 @@ int idSaveGameThread::Save()
 					if( size != sizeof( checksum ) )
 					{
 #ifdef _WIN32 // DG: unify windows and posix savegames => replace GetLastError with strerror(errno)
-						idLib::Warning( "[%s]: Write failed. Error = %08x", __FUNCTION__, GetLastError() );
+						idLib::Warning("[%s]: Write failed. Error = %lud", __FUNCTION__, GetLastError());
 #else
 						idLib::Warning( "[%s]: Write failed. Error = %s", __FUNCTION__, strerror( errno ) );
 #endif // DG end
@@ -243,7 +243,7 @@ int idSaveGameThread::Save()
 			if( size != ( size_t )file->Length() )
 			{
 #ifdef _WIN32 // DG: unify windows and posix savegames => replace GetLastError with strerror(errno)
-				idLib::Warning( "[%s]: Write failed. Error = %08x", __FUNCTION__, GetLastError() );
+				idLib::Warning("[%s]: Write failed. Error = %lud", __FUNCTION__, GetLastError());
 #else
 				idLib::Warning( "[%s]: Write failed. Error = %s", __FUNCTION__, strerror( errno ) );
 #endif // DG end

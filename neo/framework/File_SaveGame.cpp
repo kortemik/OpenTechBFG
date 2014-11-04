@@ -26,6 +26,7 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 #pragma hdrstop
+
 #include "precompiled.h"
 
 #include "File_SaveGame.h"
@@ -1227,9 +1228,10 @@ static void TestProcessFile( const char* const filename )
 	
 	const uint64 endWriteMicroseconds = Sys_Microseconds();
 	const uint64 writeMicroseconds = endWriteMicroseconds - startWriteMicroseconds;
-	
-	idLib::Printf( "%lld microseconds to compress %i bytes to %i written bytes = %4.1f MB/s\n",
-				   writeMicroseconds, testDataLength, readDataLength, ( float )readDataLength / writeMicroseconds );
+
+	idLib::Printf("%" PRIu64 " microseconds to compress %i bytes to %i written bytes = %4.1f MB/s\n",
+					   writeMicroseconds, testDataLength, readDataLength, ( float )readDataLength / writeMicroseconds );
+
 				   
 	void* readData = ( void* )Mem_Alloc( testDataLength, TAG_SAVEGAMES );
 	
@@ -1242,8 +1244,8 @@ static void TestProcessFile( const char* const filename )
 	
 	const uint64 endReadMicroseconds = Sys_Microseconds();
 	const uint64 readMicroseconds = endReadMicroseconds - startReadMicroseconds;
-	
-	idLib::Printf( "%lld microseconds to decompress = %4.1f MB/s\n", readMicroseconds, ( float )testDataLength / readMicroseconds );
+
+	idLib::Printf("%" PRIu64 " microseconds to decompress = %4.1f MB/s\n", readMicroseconds, (float)testDataLength / readMicroseconds);
 	
 	int comparePoint;
 	for( comparePoint = 0; comparePoint < testDataLength; comparePoint++ )

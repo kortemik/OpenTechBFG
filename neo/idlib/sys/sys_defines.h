@@ -262,16 +262,26 @@ extern volatile int ignoredReturnValue;
  * Macros for format conversion specifications for integer arguments of type
  * size_t or ssize_t.
  */
-#ifdef _MSV_VER
+#ifdef _WIN32
 
 #define PRIiSIZE "Ii"
 #define PRIuSIZE "Iu"
 #define PRIxSIZE "Ix"
 
-#else // ifdef _MSV_VER
+#undef PRId64
+#undef PRIu64
+#define PRId64 "I64d"
+#define PRIu64 "I64u"
+
+#else // ifdef _MSC_VER
 
 #define PRIiSIZE "zi"
 #define PRIuSIZE "zu"
 #define PRIxSIZE "zx"
 
-#endif // ifdef _MSV_VER
+#undef PRId64
+#undef PRIu64
+#define PRId64 "lld"
+#define PRIu64 "llu"
+
+#endif // ifdef _MSC_VER

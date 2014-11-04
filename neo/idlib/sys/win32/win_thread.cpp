@@ -118,7 +118,7 @@ uintptr_t Sys_CreateThread( xthread_t function, void* parms, xthreadPriority pri
 									&threadId );
 	if( handle == 0 )
 	{
-		idLib::common->FatalError( "CreateThread error: %i", GetLastError() );
+		idLib::common->FatalError( "CreateThread error: %lud", GetLastError() );
 		return ( uintptr_t )0;
 	}
 	// TODO: when writing the SDL backend, just use this name when creating the thread
