@@ -673,7 +673,7 @@ bool GetCPUInfo( cpuInfo_t & cpuInfo ) {
 
 				buffer = (PSYSTEM_LOGICAL_PROCESSOR_INFORMATION)malloc( returnLength );
 			} else {
-				idLib::Printf("Sys_CPUCount error: %lud\n", GetLastError());
+				idLib::Printf( "Sys_CPUCount error: %s\n", Sys_GetLastErrorString() );
 				return false;
 			}
 		} else {

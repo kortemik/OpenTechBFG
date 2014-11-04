@@ -2139,21 +2139,14 @@ bool idFileSystemLocal::RenameFile( const char* relativePath, const char* newNam
 	// There is a MoveFileTransacted() on vista and above, not sure if that means there
 	// is a race condition inside MoveFileEx...
 	const bool success = ( MoveFileEx( oldOSPath.c_str(), newOSPath.c_str(), MOVEFILE_REPLACE_EXISTING ) != 0 );
-	
-	if( !success )
-	{
-		const int err = GetLastError();
-		idLib::Warning( "RenameFile( %s, %s ) error %i", newOSPath.c_str(), oldOSPath.c_str(), err );
-	}
 #else
 	const bool success = ( rename( oldOSPath.c_str(), newOSPath.c_str() ) == 0 );
-	
+#endif
+
 	if( !success )
 	{
-		const int err = errno;
-		idLib::Warning( "rename( %s, %s ) error %s", newOSPath.c_str(), oldOSPath.c_str(), strerror( errno ) );
+		idLib::Warning( "RenameFile( %s, %s ) error %s", newOSPath.c_str(), oldOSPath.c_str(), Sys_GetLastErrorString() );
 	}
-#endif
 	// RB end
 	
 	return success;

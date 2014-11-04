@@ -164,7 +164,7 @@ NET_ErrorString
 const char* NET_ErrorString()
 {
 #ifndef _WIN32
-	return strerror( errno );
+	return Sys_GetLastErrorString();
 #else // _WIN32
 	int code = WSAGetLastError();
 	switch( code )
@@ -965,7 +965,7 @@ void Sys_InitNetworking()
 	
 	if( getifaddrs( &ifap ) < 0 )
 	{
-		common->FatalError( "InitNetworking: SIOCGIFCONF error - %s\n", strerror( errno ) );
+		common->FatalError( "InitNetworking: SIOCGIFCONF error - %s\n", Sys_GetLastErrorString() );
 		return;
 	}
 	
@@ -1028,7 +1028,7 @@ void Sys_InitNetworking()
 	ifc.ifc_buf = buf;
 	if( ioctl( s, SIOCGIFCONF, &ifc ) < 0 )
 	{
-		common->FatalError( "InitNetworking: SIOCGIFCONF error - %s\n", strerror( errno ) );
+		common->FatalError( "InitNetworking: SIOCGIFCONF error - %s\n", Sys_GetLastErrorString() );
 		return;
 	}
 	ifindex = 0;
@@ -1039,7 +1039,7 @@ void Sys_InitNetworking()
 		ifr = ( ifreq* )( ifc.ifc_buf + ifindex );
 		if( ioctl( s, SIOCGIFADDR, ifr ) < 0 )
 		{
-			common->Printf( "SIOCGIFADDR failed: %s\n", strerror( errno ) );
+			common->Printf( "SIOCGIFADDR failed: %s\n", Sys_GetLastErrorString() );
 		}
 		else
 		{
@@ -1072,7 +1072,7 @@ void Sys_InitNetworking()
 	
 				if( ioctl( s, SIOCGIFNETMASK, ifr ) < 0 )
 				{
-					common->Printf( " SIOCGIFNETMASK failed: %s\n", strerror( errno ) );
+					common->Printf( " SIOCGIFNETMASK failed: %s\n", Sys_GetLastErrorString() );
 				}
 				else
 				{

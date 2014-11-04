@@ -181,11 +181,9 @@ int idSaveGameThread::Save()
 		idFile* outputFile = fileSystem->OpenFileWrite( tempFileName, "fs_savePath" );
 		if( outputFile == NULL )
 		{
-#ifdef _WIN32 // DG: unify windows and posix savegames => replace GetLastError with strerror(errno)
-			idLib::Warning( "[%s]: Couldn't open file for writing, %s. Error = %lud", __FUNCTION__, tempFileName.c_str(), GetLastError() );
-#else
-			idLib::Warning( "[%s]: Couldn't open file for writing, %s. Error = %s", __FUNCTION__, tempFileName.c_str(), strerror( errno ) );
-#endif // DG end
+			// DG: unify windows and posix savegames => replace GetLastError() Sys_GetLastErrorString()
+			idLib::Warning( "[%s]: Couldn't open file for writing, %s. Error = %s", __FUNCTION__, tempFileName.c_str(), Sys_GetLastErrorString() );
+			// DG end
 			file->error = true;
 			callback->errorCode = SAVEGAME_E_UNKNOWN;
 			ret = -1;
@@ -203,11 +201,8 @@ int idSaveGameThread::Save()
 			{
 				if( ( size_t )outputFile->Write( block.data, block.bytes ) != block.bytes )
 				{
-#ifdef _WIN32 // DG: unify windows and posix savegames => replace GetLastError with strerror(errno)
-					idLib::Warning("[%s]: Write failed. Error = %lud", __FUNCTION__, GetLastError());
-#else
-					idLib::Warning( "[%s]: Write failed. Error = %s", __FUNCTION__, strerror( errno ) );
-#endif // DG end
+					// DG: unify windows and posix savegames => replace GetLastError() Sys_GetLastErrorString()
+					idLib::Warning( "[%s]: Write failed. Error = %s", __FUNCTION__, Sys_GetLastErrorString() );
 					file->error = true;
 					callback->errorCode = SAVEGAME_E_INSUFFICIENT_ROOM;
 					ret = -1;
@@ -227,11 +222,9 @@ int idSaveGameThread::Save()
 					size_t size = outputFile->WriteBig( checksum );
 					if( size != sizeof( checksum ) )
 					{
-#ifdef _WIN32 // DG: unify windows and posix savegames => replace GetLastError with strerror(errno)
-						idLib::Warning("[%s]: Write failed. Error = %lud", __FUNCTION__, GetLastError());
-#else
-						idLib::Warning( "[%s]: Write failed. Error = %s", __FUNCTION__, strerror( errno ) );
-#endif // DG end
+						// DG: unify windows and posix savegames => replace GetLastError() Sys_GetLastErrorString()
+						idLib::Warning( "[%s]: Write failed. Error = %s", __FUNCTION__, Sys_GetLastErrorString() );
+
 						file->error = true;
 						callback->errorCode = SAVEGAME_E_INSUFFICIENT_ROOM;
 						ret = -1;
@@ -242,11 +235,8 @@ int idSaveGameThread::Save()
 			size_t size = outputFile->Write( file->GetDataPtr(), file->Length() );
 			if( size != ( size_t )file->Length() )
 			{
-#ifdef _WIN32 // DG: unify windows and posix savegames => replace GetLastError with strerror(errno)
-				idLib::Warning("[%s]: Write failed. Error = %lud", __FUNCTION__, GetLastError());
-#else
-				idLib::Warning( "[%s]: Write failed. Error = %s", __FUNCTION__, strerror( errno ) );
-#endif // DG end
+				// DG: unify windows and posix savegames => replace GetLastError() Sys_GetLastErrorString()
+				idLib::Warning( "[%s]: Write failed. Error = %s", __FUNCTION__, Sys_GetLastErrorString() );
 				file->error = true;
 				callback->errorCode = SAVEGAME_E_INSUFFICIENT_ROOM;
 				ret = -1;

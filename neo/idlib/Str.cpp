@@ -2355,7 +2355,7 @@ char* va( const char* fmt, ... )
 	index = ( index + 1 ) & 3;
 	
 	va_start( argptr, fmt );
-	vsprintf( buf, fmt, argptr );
+	vsprintf( buf, fmt, argptr ); // FIXME: wtf, this should really use idStr::vsnPrintf() !!!
 	va_end( argptr );
 	
 	return buf;

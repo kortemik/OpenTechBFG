@@ -188,13 +188,13 @@ void Sys_DoStartProcess( const char* exeName, bool dofork )
 		struct stat buf;
 		if( stat( exeName, &buf ) == -1 )
 		{
-			printf( "stat %s failed: %s\n", exeName, strerror( errno ) );
+			printf( "stat %s failed: %s\n", exeName, Sys_GetLastErrorString() );
 		}
 		else
 		{
 			if( chmod( exeName, buf.st_mode | S_IXUSR ) == -1 )
 			{
-				printf( "cmod +x %s failed: %s\n", exeName, strerror( errno ) );
+				printf( "cmod +x %s failed: %s\n", exeName, Sys_GetLastErrorString() );
 			}
 		}
 	}
@@ -216,7 +216,7 @@ void Sys_DoStartProcess( const char* exeName, bool dofork )
 				{
 					printf( "execl %s\n", exeName );
 					execl( exeName, exeName, NULL );
-					printf( "execl failed: %s\n", strerror( errno ) );
+					printf( "execl failed: %s\n", Sys_GetLastErrorString() );
 					_exit( -1 );
 				}
 				break;
@@ -234,7 +234,7 @@ void Sys_DoStartProcess( const char* exeName, bool dofork )
 		{
 			printf( "execl %s\n", exeName );
 			execl( exeName, exeName, NULL );
-			printf( "execl failed: %s\n", strerror( errno ) );
+			printf( "execl failed: %s\n", Sys_GetLastErrorString() );
 		}
 		// terminate
 		_exit( 0 );
@@ -323,7 +323,7 @@ void Sys_ReLaunch()
 	
 	int ret = fork();
 	if( ret < 0 )
-		idLib::Error( "Sys_ReLaunch(): Couldn't fork(), reason: %s ", strerror( errno ) );
+		idLib::Error( "Sys_ReLaunch(): Couldn't fork(), reason: %s ", Sys_GetLastErrorString() );
 		
 	if( ret == 0 )
 	{
@@ -334,7 +334,7 @@ void Sys_ReLaunch()
 		pid_t sId = setsid();
 		if( sId == ( pid_t ) - 1 )
 		{
-			idLib::Error( "Sys_ReLaunch(): setsid() failed! Reason: %s ", strerror( errno ) );
+			idLib::Error( "Sys_ReLaunch(): setsid() failed! Reason: %s ", Sys_GetLastErrorString() );
 		}
 		
 		// close all FDs (except for stdin/out/err) so we don't leak FDs
@@ -354,7 +354,7 @@ void Sys_ReLaunch()
 		}
 		else
 		{
-			idLib::Warning( "Sys_ReLaunch(): Couldn't open /dev/fd/ - will leak file descriptors. Reason: %s", strerror( errno ) );
+			idLib::Warning( "Sys_ReLaunch(): Couldn't open /dev/fd/ - will leak file descriptors. Reason: %s", Sys_GetLastErrorString() );
 		}
 		
 		// + 3 because "+set" "com_skipIntroVideos" "1" - and note that while we'll skip
@@ -378,7 +378,7 @@ void Sys_ReLaunch()
 		errno = 0;
 		execv( exepath, ( char** )argv );
 		// we only get here if execv() fails, else the executable is restarted
-		idLib::Error( "Sys_ReLaunch(): WTF exec() failed! Reason: %s ", strerror( errno ) );
+		idLib::Error( "Sys_ReLaunch(): WTF exec() failed! Reason: %s ", Sys_GetLastErrorString() );
 		
 	}
 	else

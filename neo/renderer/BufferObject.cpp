@@ -50,7 +50,7 @@ bool IsWriteCombined( void* base )
 	if( size == 0 )
 	{
 		DWORD error = GetLastError();
-		error = error;
+		error = error; // FIXME: ok, wtf is this supposed to achieve?!
 		return false;
 	}
 	bool isWriteCombined = ( ( info.AllocationProtect & PAGE_WRITECOMBINE ) != 0 );

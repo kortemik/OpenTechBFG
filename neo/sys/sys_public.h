@@ -428,6 +428,10 @@ struct sysMemoryStats_t
 
 // typedef unsigned long address_t; // DG: this isn't even used
 
+// DG: this returns (a threadsafe version of) strerror(errno) on Unix and the string for GetLastError() on Windows
+const char*		Sys_GetLastErrorString();
+// DG end
+
 void			Sys_Init();
 void			Sys_Shutdown();
 void			Sys_Error( const char* error, ... );

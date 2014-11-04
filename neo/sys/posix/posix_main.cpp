@@ -122,7 +122,7 @@ void Posix_Exit( int ret )
 		Sys_Printf( "shutdown terminal support\n" );
 		if( tcsetattr( 0, TCSADRAIN, &tty_tc ) == -1 )
 		{
-			Sys_Printf( "tcsetattr failed: %s\n", strerror( errno ) );
+			Sys_Printf( "tcsetattr failed: %s\n", Sys_GetLastErrorString() );
 		}
 	}
 	// at this point, too late to catch signals
@@ -831,7 +831,7 @@ void Sys_Sleep( int msec )
 	usleep( msec * 1000 );
 #else
 	if( usleep( msec * 1000 ) == -1 )
-		Sys_Printf( "usleep: %s\n", strerror( errno ) );
+		Sys_Printf( "usleep: %s\n", Sys_GetLastErrorString() );
 #endif
 }
 
@@ -1023,14 +1023,14 @@ void Posix_InitConsoleInput()
 		}
 		if( tcgetattr( 0, &tty_tc ) == -1 )
 		{
-			Sys_Printf( "tcgetattr failed. disabling terminal support: %s\n", strerror( errno ) );
+			Sys_Printf( "tcgetattr failed. disabling terminal support: %s\n", Sys_GetLastErrorString() );
 			in_tty.SetBool( false );
 			return;
 		}
 		// make the input non blocking
 		if( fcntl( STDIN_FILENO, F_SETFL, fcntl( STDIN_FILENO, F_GETFL, 0 ) | O_NONBLOCK ) == -1 )
 		{
-			Sys_Printf( "fcntl STDIN non blocking failed.  disabling terminal support: %s\n", strerror( errno ) );
+			Sys_Printf( "fcntl STDIN non blocking failed.  disabling terminal support: %s\n", Sys_GetLastErrorString() );
 			in_tty.SetBool( false );
 			return;
 		}
@@ -1053,14 +1053,14 @@ void Posix_InitConsoleInput()
 		tc.c_cc[VTIME] = 0;
 		if( tcsetattr( 0, TCSADRAIN, &tc ) == -1 )
 		{
-			Sys_Printf( "tcsetattr failed: %s\n", strerror( errno ) );
+			Sys_Printf( "tcsetattr failed: %s\n", Sys_GetLastErrorString() );
 			Sys_Printf( "terminal support may not work correctly. Use +set in_tty 0 to disable it\n" );
 		}
 #if 0
 		// make the output non blocking
 		if( fcntl( STDOUT_FILENO, F_SETFL, fcntl( STDOUT_FILENO, F_GETFL, 0 ) | O_NONBLOCK ) == -1 )
 		{
-			Sys_Printf( "fcntl STDOUT non blocking failed: %s\n", strerror( errno ) );
+			Sys_Printf( "fcntl STDOUT non blocking failed: %s\n", Sys_GetLastErrorString() );
 		}
 #endif
 		tty_enabled = true;
@@ -1477,7 +1477,7 @@ char* Posix_ConsoleInput()
 		
 		if( len < 1 )
 		{
-			Sys_Printf( "read failed: %s\n", strerror( errno ) );	// something bad happened, cancel this line and print an error
+			Sys_Printf( "read failed: %s\n", Sys_GetLastErrorString() );	// something bad happened, cancel this line and print an error
 			return NULL;
 		}
 		
@@ -1637,6 +1637,8 @@ void idSysLocal::OpenURL( const char* url, bool quit )
 		return;
 	}
 	
+	// FIXME: this could use xdg-open
+
 	common->Printf( "Open URL: %s\n", url );
 	// opening an URL on *nix can mean a lot of things ..
 	// just spawn a script instead of deciding for the user :-)
@@ -1670,4 +1672,24 @@ void idSysLocal::OpenURL( const char* url, bool quit )
 	sys->StartProcess( cmdline, quit );
 }
 
+// DG: get string for last OS error code
+// according to http://stackoverflow.com/questions/423248/what-size-should-i-allow-for-strerror-r
+// 256 bytes are more than enough
+__thread char lastErrorBuf[256]; // a thread-local buffer for the returned string
+const char* Sys_GetLastErrorString()
+{
+	int errorCode = errno;
+	memset( lastErrorBuf, 0, 256 );
 
+#ifdef _GNU_SOURCE
+	// use the GNU version of strerror_r which is not guaranteed to write into the buffer
+	// but returns a threadsafe string
+	return strerror_r( errorCode, lastErrorBuf, 256 );
+#else // this should at least work with OSX and FreeBSD
+	// use the XSI-compliant version of strerror_r, it returns int and always writes into the buffer
+	strerror_r( errorCode, lastErrorBuf, 256 );
+	return lastErrorBuf;
+#endif
+
+}
+// DG end

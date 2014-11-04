@@ -1348,7 +1348,7 @@ int idFile_Permanent::Read( void* buffer, int len )
 		DWORD bytesRead;
 		if( !ReadFile( o, buf, block, &bytesRead, NULL ) )
 		{
-			idLib::Warning("idFile_Permanent::Read failed with %lud from %s", GetLastError(), name.c_str());
+			idLib::Warning("idFile_Permanent::Read failed with %s from %s", Sys_GetLastErrorString(), name.c_str());
 		}
 		read = bytesRead;
 #else

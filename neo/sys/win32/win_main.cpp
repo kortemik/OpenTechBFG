@@ -1643,3 +1643,51 @@ extern idCVar sys_lang;
 void Sys_SetLanguageFromSystem() {
 	sys_lang.SetString( Sys_DefaultLanguage() );
 }
+
+/*
+================
+Sys_GetLastErrorString
+================
+*/
+
+// DG: get string for last OS error code (GetLastError())
+// the pointer to the returned string (which is allocated on the heap)
+// is saved thread-locally so it can be free()d on next call
+#ifdef _MSC_VER
+	__declspec( thread ) char lastErrorBuf[256];
+#else // mingw
+	__thread char lastErrorBuf[256];
+#endif
+
+const char* Sys_GetLastErrorString()
+{
+	DWORD lastError = GetLastError();
+	LPVOID lastErrorMsgPtr = NULL;
+
+	memset(lastErrorBuf, 0, 256);
+
+	// adapted from http://msdn.microsoft.com/en-us/library/windows/desktop/ms680582%28v=vs.85%29.aspx
+
+	FormatMessageA(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		FORMAT_MESSAGE_FROM_SYSTEM |
+		FORMAT_MESSAGE_IGNORE_INSERTS,
+		NULL,
+		lastError,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPTSTR) &lastErrorMsgPtr,
+		0, NULL );
+
+	if( lastErrorMsgPtr == NULL )
+	{
+		// seems like FormatMessage failed for some reason
+		return "Unknown error, FormatMessage() failed!";
+	}
+
+	idStr::Copynz(lastErrorBuf, (const char*)lastErrorMsgPtr, 256);
+
+	LocalFree( lastErrorMsgPtr );
+
+	return lastErrorBuf;
+}
+// DG end
