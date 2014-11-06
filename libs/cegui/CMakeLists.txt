@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 2.8)
 
 include_directories(include)
 
+if(BUNDLED_GLEW)
+  add_definitions(-DGLEW_STATIC)
+  include_directories(../libs/glew/glew/include)
+endif()
+
+
 set(CEGUI_HAS_FREETYPE ON)
 set(CEGUI_HAS_PCRE_REGEX OFF)
 set(CEGUI_HAS_MINIZIP_RESOURCE_PROVIDER OFF)
