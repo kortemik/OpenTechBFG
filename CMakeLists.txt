@@ -34,6 +34,9 @@ option(FFMPEG
 option(IDTOOLS
   "Compile the built-in game tools" ON)
 
+option(CEGUI
+  "Use cegui" ON)
+
 #options########################################################################
 
 
@@ -71,6 +74,9 @@ option(BUNDLED_OPENAL
 option(BUNDLED_SDL
   "Use bundled SDL" OFF)
 
+option(BUNDLED_CEGUI
+  "Use bundled CEGUI" ON)
+
   
 ################################################################################
 
@@ -107,6 +113,12 @@ endif()
 if(BUNDLED_SDL)
   add_subdirectory(libs/sdl)
 endif()
+
+# openal
+if(BUNDLED_CEGUI)
+  add_subdirectory(libs/cegui)
+endif()
+
 ####
 
 add_subdirectory(neo)
