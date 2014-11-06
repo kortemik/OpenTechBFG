@@ -4,9 +4,16 @@ include_directories(include)
 
 if(BUNDLED_GLEW)
   add_definitions(-DGLEW_STATIC)
-  include_directories(../libs/glew/glew/include)
+  set(GLEW_LIB glew)
+  set(GLEW_H_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../glew/glew/include)
 endif()
 
+if(BUNDLED_ZLIB)
+  set(MINIZIP_LIB minizip)
+  set(MINIZIP_H_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../zlib/zlib)
+endif()
+
+set(RAPIDXML_H_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 set(CEGUI_HAS_FREETYPE ON)
 set(CEGUI_HAS_PCRE_REGEX OFF)
