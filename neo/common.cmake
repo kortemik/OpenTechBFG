@@ -463,3 +463,17 @@ if(IDTOOLS)
     ${IDTOOLS_SOURCES} 
     )
 endif()
+
+if(CEGUI)
+  file(GLOB CEGUI_INCLUDES cegui/*.h)
+  file(GLOB CEGUI_SOURCES cegui/*.cpp)
+  source_group("cegui" FILES ${CEGUI_INCLUDES})
+  source_group("cegui" FILES ${CEGUI_SOURCES})
+
+  list(APPEND OpenTechBFG_INCLUDES
+    ${CEGUI_INCLUDES}
+    )
+  list(APPEND OpenTechBFG_SOURCES
+    ${CEGUI_SOURCES}
+    )
+endif()
