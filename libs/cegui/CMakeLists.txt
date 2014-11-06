@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
+add_definitions(-std=c++11)
+
 include_directories(include)
 
 if(BUNDLED_GLEW)
@@ -14,6 +16,8 @@ if(BUNDLED_ZLIB)
 endif()
 
 set(RAPIDXML_H_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+set(GLM_H_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include/glm)
 
 set(CEGUI_HAS_FREETYPE ON)
 set(CEGUI_HAS_PCRE_REGEX OFF)
