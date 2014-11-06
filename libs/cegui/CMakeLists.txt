@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 
-add_definitions(-std=c++11)
-
 include_directories(include)
+
+if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+  add_definitions(-Wno-c++11-narrowing)
+endif()
 
 if(BUNDLED_GLEW)
   add_definitions(-DGLEW_STATIC)
