@@ -13,7 +13,7 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
   add_definitions(-std=c++03)
 
   add_definitions(-Wdelete-non-virtual-dtor)
-  #add_definitions(-Wnon-virtual-dtor)
+  add_definitions(-Wnon-virtual-dtor)
   add_definitions(-Wctor-dtor-privacy)
 
   #add_definitions(-Wold-style-cast)
@@ -28,7 +28,10 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
   #add_definitions(-fvtable-verify=std)
   # perhaps someday:
   #add_definitions(-Weffc++)
-  #add_definitions(-Wall)
+  add_definitions(-Wall)
+  add_definitions(-Wno-unknown-pragmas)
+  add_definitions(-Wno-unused-local-typedefs)
+  add_definitions(-Wno-unused-function)
   #add_definitions(-pedantic) 
 
 elseif(MSVC)
