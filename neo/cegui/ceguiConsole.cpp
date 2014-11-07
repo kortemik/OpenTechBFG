@@ -72,6 +72,13 @@ void ceguiConsole::Close()
 	}
 }
 
+void ceguiConsole::TabComplete(void)
+{
+	if (isInitialized()) {
+		ourVars->consoleInstance->TabComplete();
+	}
+}
+
 void ceguiConsole::Print(const char * text)
 {
 
@@ -96,6 +103,8 @@ bool ceguiConsole::ProcessEvent( const sysEvent_t* event, bool forceAccept )
 	if (isInitialized()) {
 		const bool consoleKey = event->evType == SE_KEY && event->evValue == K_GRAVE && com_allowConsole.GetBool();
 
+		const bool tabKey = event->evType == SE_KEY && event->evValue == K_TAB;
+
 		// we always catch the console key event
 		if( !forceAccept && consoleKey )
 		{
@@ -115,6 +124,16 @@ bool ceguiConsole::ProcessEvent( const sysEvent_t* event, bool forceAccept )
 			{
 				Open();
 				Sys_GrabMouseCursor( false );
+			}
+			return true;
+		}
+
+		// return event as processed when console open
+		// aka don't pass the input further
+		if( Active() )
+		{
+			if(tabKey) {
+				TabComplete();
 			}
 			return true;
 		}

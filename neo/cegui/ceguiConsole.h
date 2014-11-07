@@ -44,6 +44,8 @@ public:
 private:
 	bool isInitialized();
 
+	void TabComplete(void);
+
 	struct ceguiConsoleVars;
 	ceguiConsoleVars *ourVars;
 };
