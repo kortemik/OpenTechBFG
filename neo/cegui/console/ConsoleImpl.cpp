@@ -5,105 +5,93 @@
  *      Author: kordex
  */
 
-#include <CEGUI/widgets/Combobox.h>
-#include "CEGUI_Console.h"
+#include <memory>
+#include <list>
+#include "ConsoleEditBox.h"
+#include "ConsoleImpl.h"
+#include "ConsoleMsg.h"
+
 #include "../idlib/Str.h"
 #include "../framework/ConsoleHistory.h"
 #include "../framework/CmdSystem.h"
 
-struct CEGUI_Console::CEGUI_ConsoleVars {
+namespace CEGUIConsole {
+
+struct ConsoleImpl::ConsoleImplVars {
+	std::list<CEGUI::String> tabCompletions;
 };
 
 
-CEGUI_Console::CEGUI_Console()
+ConsoleImpl::ConsoleImpl() :
+		ourVars(new ConsoleImplVars)
 {
 	CreateCEGUIWindow();
 	RegisterHandlers();
 	setVisible(false);
 }
 
-CEGUI_Console::~CEGUI_Console() {
-	// TODO Auto-generated destructor stub
+ConsoleImpl::~ConsoleImpl() {
+	this->ourVars->tabCompletions.clear();
 }
 
-void CEGUI_Console::CreateCEGUIWindow()
+void ConsoleImpl::CreateCEGUIWindow()
 {
+	CEGUI::WindowFactoryManager::addWindowType<CEGUIConsole::ConsoleEditBox>();
+
 	CEGUI::System::getSingleton().getDefaultGUIContext()
 						.getRootWindow()->addChild(
 								CEGUI::WindowManager::getSingleton().
 								loadLayoutFromFile("console.layout"));
 }
-void CEGUI_Console::RegisterHandlers()
+void ConsoleImpl::RegisterHandlers()
 {
 	CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 							.getRootWindow()->getChild("Console");
+
+
 	/*
 	 * handles mouse on submit to input
 	 */
 	ConsoleWin->getChild("Submit")->subscribeEvent(
 			CEGUI::PushButton::EventClicked,
-			&CEGUI_Console::Handle_TextSubmitted,
+			&ConsoleImpl::Handle_TextSubmitted,
 			(this)
 			);
 	/*
 	 * handles keypress (enter) to input
 	 */
+
+	// FIXME catches tab too, some way to avoid that?
 	ConsoleWin->getChild("Combobox")->subscribeEvent(
 			CEGUI::Combobox::EventTextAccepted,
-			&CEGUI_Console::Handle_TextSubmitted,
+			&ConsoleImpl::Handle_TextSubmitted,
 			(this)
 			);
-
 }
 
-bool CEGUI_Console::Handle_TextSubmitted(const CEGUI::EventArgs& args)
+bool ConsoleImpl::Handle_TextSubmitted(const CEGUI::EventArgs& args)
 {
-	CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
-								.getRootWindow()->getChild("Console");
+		CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
+										.getRootWindow()->getChild("Console");
 
-	CEGUI::String Line = ConsoleWin->getChild("Combobox")->getText();
+		CEGUI::String Line = ConsoleWin->getChild("Combobox")->getText();
 
-	(this)->Execute(Line);
+		(this)->Execute(Line);
 
-	ConsoleWin->getChild("Combobox")->setText("");
+		ConsoleWin->getChild("Combobox")->setText("");
 
 	return true;
+
 }
 
-void CEGUI_Console::OutputText(CEGUI::String inMsg, CEGUI::Colour colour)
+void ConsoleImpl::OutputText(ConsoleMsg outMsg)
 {
 	/*
 	 * checks if cegui is initialized
 	 */
 	if (CEGUI::System::getSingletonPtr() != NULL)
 	{
-
-		/*
-		// TODO implement id->cegui formatting
-		// idStr::ColorForIndex( C_COLOR_CYAN )
-		// idStr::ColorIndex(2);
-
-		int currentColor = idStr::ColorIndex( C_COLOR_WHITE );
-		idStr formatedStr;
-
-		for( int x = 0; x > 0; x++ )
-		{
-			// checks if string ends
-			if( ( text[x] & 0xff ) == ' ' )
-			{
-				continue;
-			}
-
-			if( idStr::ColorIndex( text[x] >> 8 ) != currentColor )
-			{
-				currentColor = idStr::ColorIndex( text[x] >> 8 );
-
-
-				//renderSystem->SetColor( idStr::ColorForIndex( currentColor ) );
-			}
-			formatedStr.Append(text[x] & 0xff);
-		}
-		 */
+		//ConsoleMsg outMsg = ConsoleMsg(inMsg);
 
 		CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 									.getRootWindow()->getChild("Console");
@@ -111,48 +99,54 @@ void CEGUI_Console::OutputText(CEGUI::String inMsg, CEGUI::Colour colour)
 		{
 			CEGUI::Listbox *outputWindow = static_cast<CEGUI::Listbox*>(ConsoleWin->getChild("History"));
 
-			CEGUI::ListboxTextItem* newItem=0;
-			newItem = new CEGUI::ListboxTextItem(inMsg);
-			newItem->setTextColours(colour);
+			CEGUI::ListboxTextItem* newItem = new CEGUI::ListboxTextItem(outMsg.msg);
 			outputWindow->addItem(newItem);
-
 			(this)->ScrollBottom();
 		}
+
 	}
 }
 
 
-void CEGUI_Console::setVisible(bool visible)
+void ConsoleImpl::setVisible(bool visible)
 {
 	CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 										.getRootWindow()->getChild("Console");
 	ConsoleWin->setVisible(visible);
 
 	if(visible)
+	{
 		ConsoleWin->getChild("Combobox")->activate();
-	else
+	    CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().show();
+	}
+	else {
 		ConsoleWin->getChild("Combobox")->deactivate();
+		CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().hide();
+	}
 }
 
-bool CEGUI_Console::isVisible()
+bool ConsoleImpl::isVisible()
 {
 	CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 											.getRootWindow()->getChild("Console");
 	return ConsoleWin->isVisible();
 }
 
-void CEGUI_Console::ScrollBottom()
+void ConsoleImpl::ScrollBottom()
 {
-	/* TODO implement
-	 * A MultiLineEditbox is composed of a text area and a scrollbar.
-	 * Try finding that scrollbar and talking to it: "hey you scrollbar,
-	 * move down to the bottom". The next bit would be to set the caret
-	 * to the last position, maybe something like
-	 * setCaretAtCharacterPosition( multilineEditbox->getText().size() );
-	 */
+	CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
+										.getRootWindow()->getChild("Console");
+
+	CEGUI::Listbox *outputWindow = static_cast<CEGUI::Listbox*>(ConsoleWin->getChild("History"));
+
+	float document_size = outputWindow->getVertScrollbar()->getDocumentSize();
+	float page_size = outputWindow->getVertScrollbar()->getPageSize();
+
+
+	outputWindow->getVertScrollbar()->setScrollPosition(document_size - page_size);
 }
 
-void CEGUI_Console::Execute(CEGUI::String inMsg)
+void ConsoleImpl::Execute(CEGUI::String inMsg)
 {
 	const char *cmd = inMsg.c_str();
 	if (strlen(cmd) >= 1)
@@ -163,13 +157,88 @@ void CEGUI_Console::Execute(CEGUI::String inMsg)
 		consoleHistory.AddToHistory( cmd );
 	}
 }
-void CEGUI_Console::PopulateHistory(void)
+void ConsoleImpl::PopulateHistory(void)
 {
+	// TODO implement cegui window historylist aka the dropdown list,
+	// should be filled on access
 	idStr hist = consoleHistory.RetrieveFromHistory( true );
 }
 
-idStr CEGUI_Console::AutoComplete(const char *cmdStub){
-	/* TODO implement
+void ConsoleImpl::TabComplete(void)
+{
+	CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
+												.getRootWindow()->getChild("Console");
+
+	CEGUI::String cmdStub = ConsoleWin->getChild("Combobox")->getText();
+
+	cmdSystem->CommandCompletion( AutoCompleteCallback ); // function pointer to our static member function
+	// if command is valid
+	cmdSystem->ArgCompletion( cmdStub.c_str(), AutoCompleteCallback );
+
+
+
+}
+
+void ConsoleImpl::AutoCompleteCallback(const char *s)
+{
+	// this little fellow just gets all the matches and is responsible for acting accordingly
+	// for now let's test and print..
+
+	//getInstance().OutputText(ConsoleMsg(s));
+	getInstance().TabCompleteListAdd(CEGUI::String(s));
+
+}
+
+void ConsoleImpl::TabCompleteListAdd(CEGUI::String option)
+{
+	this->ourVars->tabCompletions.push_back(option);
+#if 0
+	if (CEGUI::System::getSingletonPtr() != NULL)
+	{
+		CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
+									.getRootWindow()->getChild("Console");
+		if (ConsoleWin != NULL)
+		{
+			CEGUI::Window *outputWindow = static_cast<CEGUI::Window*>(ConsoleWin->getChild("TabCompList"));
+			outputWindow->setText(option);
+		}
+#endif
+#if 0
+	idStr cmdMatch = (this)->AutoComplete(cmdStub.c_str());
+
+	if (!cmdMatch.IsEmpty()) {
+		ConsoleWin->getChild("Combobox")->setText(cmdMatch.c_str());
+	}
+#endif
+#if 0
+	int		i;
+	const char *completionString = "ma"; //p
+	char *currentMatch;
+	int matchCount = 0;
+
+	if( idStr::Icmpn( buf, completionString, strlen( completionString ) ) != 0 )
+	{
+		return;
+	}
+	matchCount++;
+	if( matchCount == 1 )
+	{
+		idStr::Copynz( currentMatch, buf, sizeof( currentMatch ) );
+		return;
+	}
+
+	// cut currentMatch to the amount common with s
+	for( i = 0; buf[i]; i++ )
+	{
+		if( tolower( currentMatch[i] ) != tolower( buf[i] ) )
+		{
+			currentMatch[i] = 0;
+			break;
+		}
+	}
+	currentMatch[i] = 0;
+#endif
+#if 0
 	char completionArgString[MAX_EDIT_LINE];
 	idCmdArgs args;
 
@@ -281,8 +350,8 @@ idStr CEGUI_Console::AutoComplete(const char *cmdStub){
 		}
 		SetCursor( autoComplete.length );
 	}
-	*/
-	return NULL;
+	}
+#endif
 }
 
-
+} /* namespace CEGUIConsole */

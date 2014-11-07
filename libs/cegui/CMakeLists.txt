@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
+unset(CMAKE_MODULE_PATH)
+
 include_directories(include)
 
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
