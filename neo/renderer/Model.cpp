@@ -2762,7 +2762,7 @@ void idRenderModelStatic::WriteToDemoFile( class idDemoFile* f )
 idRenderModelStatic::IsLoaded
 ================
 */
-bool idRenderModelStatic::IsLoaded()
+bool idRenderModelStatic::IsLoaded() const
 {
 	return !purged;
 }
