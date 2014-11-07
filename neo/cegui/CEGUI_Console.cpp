@@ -37,6 +37,9 @@ void CEGUI_Console::RegisterHandlers()
 {
 	CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 							.getRootWindow()->getChild("Console");
+
+	// FIXME catches TAB key for some reason
+
 	/*
 	 * handles mouse on submit to input
 	 */
@@ -70,7 +73,76 @@ bool CEGUI_Console::Handle_TextSubmitted(const CEGUI::EventArgs& args)
 	return true;
 }
 
-void CEGUI_Console::OutputText(CEGUI::String inMsg, CEGUI::Colour colour)
+const CEGUI::String CEGUI_Console::FormatConvert(const char *convertString)
+{
+	return convertString;
+	// see http://cegui.org.uk/wiki/Formatting_Tags_in_CEGUI
+
+	/* FIXME see the Console.cpp for working implementation
+	idStr formatedStr;
+	CEGUI::String coloredString;
+
+	int currentColor = idStr::ColorIndex( C_COLOR_WHITE );
+
+	for( int x = 0; x > 0; x++ )
+	{
+
+		// checks if string ends
+		if( ( convertString[x] & 0xff ) == ' ' )
+		{
+			continue;
+		}
+
+		if( idStr::ColorIndex( convertString[x] >> 8 ) != currentColor )
+		{
+			currentColor = idStr::ColorIndex( convertString[x] >> 8 );
+
+			formatedStr.Append(convertString[x] & 0xff);
+
+			switch(currentColor)
+			{
+
+			case 1:	// C_COLOR_RED
+				coloredString.append("[colour='FFFF0000']\0");
+				break;
+			case 2:	// C_COLOR_GREEN
+				coloredString.append("[colour='FF00FF00']\0");
+				break;
+			case 3:	// C_COLOR_YELLOW
+				coloredString.append("[colour='FFFFFF00']\0");
+				break;
+			case 4:	// C_COLOR_BLUE
+				coloredString.append("[colour='FF0000FF']\0");
+				break;
+			case 5:	// C_COLOR_CYAN
+				coloredString.append("[colour='FF33CCCC']\0");
+				break;
+			case 6:	// C_COLOR_ORANGE
+				coloredString.append("[colour='FFFF6600']\0");
+				break;
+			case 7:	// C_COLOR_WHITE
+				coloredString.append("[colour='FFFFFFFF']\0");
+				break;
+			case 8:	// C_COLOR_GRAY
+				coloredString.append("[colour='FF808080']\0");
+				break;
+			case 9:	// C_COLOR_BLACK
+				coloredString.append("[colour='FF000000']\0");
+				break;
+			case 0: // C_COLOR_DEFAULT
+			default: // C_COLOR_DEFAULT
+				coloredString.append("[colour='FF33CCCC']\0");
+				break;
+			}
+		}
+		coloredString.append(formatedStr.c_str());
+	}
+
+	return coloredString;
+	*/
+}
+
+void CEGUI_Console::OutputText(const CEGUI::String inMsg)
 {
 	/*
 	 * checks if cegui is initialized
@@ -78,32 +150,7 @@ void CEGUI_Console::OutputText(CEGUI::String inMsg, CEGUI::Colour colour)
 	if (CEGUI::System::getSingletonPtr() != NULL)
 	{
 
-		/*
-		// TODO implement id->cegui formatting
-		// idStr::ColorForIndex( C_COLOR_CYAN )
-		// idStr::ColorIndex(2);
-
-		int currentColor = idStr::ColorIndex( C_COLOR_WHITE );
-		idStr formatedStr;
-
-		for( int x = 0; x > 0; x++ )
-		{
-			// checks if string ends
-			if( ( text[x] & 0xff ) == ' ' )
-			{
-				continue;
-			}
-
-			if( idStr::ColorIndex( text[x] >> 8 ) != currentColor )
-			{
-				currentColor = idStr::ColorIndex( text[x] >> 8 );
-
-
-				//renderSystem->SetColor( idStr::ColorForIndex( currentColor ) );
-			}
-			formatedStr.Append(text[x] & 0xff);
-		}
-		 */
+		const CEGUI::String outMsg = (this)->FormatConvert(inMsg.c_str());
 
 		CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 									.getRootWindow()->getChild("Console");
@@ -112,8 +159,7 @@ void CEGUI_Console::OutputText(CEGUI::String inMsg, CEGUI::Colour colour)
 			CEGUI::Listbox *outputWindow = static_cast<CEGUI::Listbox*>(ConsoleWin->getChild("History"));
 
 			CEGUI::ListboxTextItem* newItem=0;
-			newItem = new CEGUI::ListboxTextItem(inMsg);
-			newItem->setTextColours(colour);
+			newItem = new CEGUI::ListboxTextItem(outMsg);
 			outputWindow->addItem(newItem);
 
 			(this)->ScrollBottom();
@@ -129,9 +175,14 @@ void CEGUI_Console::setVisible(bool visible)
 	ConsoleWin->setVisible(visible);
 
 	if(visible)
+	{
 		ConsoleWin->getChild("Combobox")->activate();
-	else
+	    CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().show();
+	}
+	else {
 		ConsoleWin->getChild("Combobox")->deactivate();
+		CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().hide();
+	}
 }
 
 bool CEGUI_Console::isVisible()
@@ -143,13 +194,16 @@ bool CEGUI_Console::isVisible()
 
 void CEGUI_Console::ScrollBottom()
 {
-	/* TODO implement
-	 * A MultiLineEditbox is composed of a text area and a scrollbar.
-	 * Try finding that scrollbar and talking to it: "hey you scrollbar,
-	 * move down to the bottom". The next bit would be to set the caret
-	 * to the last position, maybe something like
-	 * setCaretAtCharacterPosition( multilineEditbox->getText().size() );
-	 */
+	CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
+										.getRootWindow()->getChild("Console");
+
+	CEGUI::Listbox *outputWindow = static_cast<CEGUI::Listbox*>(ConsoleWin->getChild("History"));
+
+	float document_size = outputWindow->getVertScrollbar()->getDocumentSize();
+	float page_size = outputWindow->getVertScrollbar()->getPageSize();
+
+
+	outputWindow->getVertScrollbar()->setScrollPosition(document_size - page_size);
 }
 
 void CEGUI_Console::Execute(CEGUI::String inMsg)
@@ -165,10 +219,28 @@ void CEGUI_Console::Execute(CEGUI::String inMsg)
 }
 void CEGUI_Console::PopulateHistory(void)
 {
+	// TODO implement cegui window historylist aka the dropdown list,
+	// should be filled on access
 	idStr hist = consoleHistory.RetrieveFromHistory( true );
 }
 
+void CEGUI_Console::TabComplete(void)
+{
+	CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
+												.getRootWindow()->getChild("Console");
+
+	CEGUI::String cmdStub = ConsoleWin->getChild("Combobox")->getText();
+
+	idStr cmdMatch = (this)->AutoComplete(cmdStub.c_str());
+
+	if (!cmdMatch.IsEmpty()) {
+		ConsoleWin->getChild("Combobox")->setText(cmdMatch.c_str());
+	}
+
+}
+
 idStr CEGUI_Console::AutoComplete(const char *cmdStub){
+	// TODO AutoComplete should show cegui tooltips for multiple matches
 	/* TODO implement
 	char completionArgString[MAX_EDIT_LINE];
 	idCmdArgs args;

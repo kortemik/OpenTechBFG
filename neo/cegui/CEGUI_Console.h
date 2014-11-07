@@ -21,13 +21,15 @@ public:
 
 	void setVisible(bool visible);
 	bool isVisible();
-	void OutputText(CEGUI::String inMsg,
-			CEGUI::Colour colour = CEGUI::Colour( 0xFFFFFFFF));
+	void OutputText(CEGUI::String inMsg);
+	void TabComplete(void);
 
 private:
 	void CreateCEGUIWindow();
 	void RegisterHandlers();
 	bool Handle_TextSubmitted(const CEGUI::EventArgs&);
+
+	const CEGUI::String FormatConvert(const char *convertString);
 
 	void Execute(CEGUI::String inMsg);
 	void PopulateHistory(void);
