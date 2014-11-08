@@ -7,6 +7,7 @@
 
 #include <CEGUI/widgets/Combobox.h>
 #include "CEGUI_Console.h"
+
 #include "../idlib/Str.h"
 #include "../framework/ConsoleHistory.h"
 #include "../framework/CmdSystem.h"
@@ -75,71 +76,93 @@ bool CEGUI_Console::Handle_TextSubmitted(const CEGUI::EventArgs& args)
 
 const CEGUI::String CEGUI_Console::FormatConvert(const char *convertString)
 {
-	return convertString;
+
 	// see http://cegui.org.uk/wiki/Formatting_Tags_in_CEGUI
 
-	/* FIXME see the Console.cpp for working implementation
-	idStr formatedStr;
-	CEGUI::String coloredString;
+    // I personally like working with std::string. So i'm going to convert it here.
+       std::string inString = convertString;
 
-	int currentColor = idStr::ColorIndex( C_COLOR_WHITE );
-
-	for( int x = 0; x > 0; x++ )
+	if (inString.length() >= 1) // Be sure we got a string longer than 0
 	{
+		std::string::size_type caretLoc = 0;
 
-		// checks if string ends
-		if( ( convertString[x] & 0xff ) == ' ' )
+		// find first carret in string if exists
+
+		// find all carets in the string
+		while (caretLoc != std::string::npos)
 		{
-			continue;
-		}
+			int escapeFlag = 0;
 
-		if( idStr::ColorIndex( convertString[x] >> 8 ) != currentColor )
-		{
-			currentColor = idStr::ColorIndex( convertString[x] >> 8 );
+			caretLoc = inString.find('^', caretLoc);
 
-			formatedStr.Append(convertString[x] & 0xff);
-
-			switch(currentColor)
+			if (caretLoc != std::string::npos)
 			{
 
-			case 1:	// C_COLOR_RED
-				coloredString.append("[colour='FFFF0000']\0");
-				break;
-			case 2:	// C_COLOR_GREEN
-				coloredString.append("[colour='FF00FF00']\0");
-				break;
-			case 3:	// C_COLOR_YELLOW
-				coloredString.append("[colour='FFFFFF00']\0");
-				break;
-			case 4:	// C_COLOR_BLUE
-				coloredString.append("[colour='FF0000FF']\0");
-				break;
-			case 5:	// C_COLOR_CYAN
-				coloredString.append("[colour='FF33CCCC']\0");
-				break;
-			case 6:	// C_COLOR_ORANGE
-				coloredString.append("[colour='FFFF6600']\0");
-				break;
-			case 7:	// C_COLOR_WHITE
-				coloredString.append("[colour='FFFFFFFF']\0");
-				break;
-			case 8:	// C_COLOR_GRAY
-				coloredString.append("[colour='FF808080']\0");
-				break;
-			case 9:	// C_COLOR_BLACK
-				coloredString.append("[colour='FF000000']\0");
-				break;
-			case 0: // C_COLOR_DEFAULT
-			default: // C_COLOR_DEFAULT
-				coloredString.append("[colour='FF33CCCC']\0");
-				break;
+				if (escapeFlag == 0)
+				{
+					// removing the caret
+					inString.erase(caretLoc, 1);
+					// next character on the string is the color code
+					char colorCand = inString.at(caretLoc);
+
+					switch(colorCand)
+					{
+
+					case '1':	// C_COLOR_RED
+						inString.erase(caretLoc, 1);
+						inString.insert(caretLoc, "[colour='FFFF0000']");
+						break;
+					case '2':	// C_COLOR_GREEN
+						inString.erase(caretLoc, 1);
+						inString.insert(caretLoc, "[colour='FF00FF00']");
+						break;
+					case '3':	// C_COLOR_YELLOW
+						inString.erase(caretLoc, 1);
+						inString.insert(caretLoc, "[colour='FFFFFF00']");
+						break;
+					case '4':	// C_COLOR_BLUE
+						inString.erase(caretLoc, 1);
+						inString.insert(caretLoc, "[colour='FF0000FF']");
+						break;
+					case '5':	// C_COLOR_CYAN
+						inString.erase(caretLoc, 1);
+						inString.insert(caretLoc, "[colour='FF33CCCC']");
+						break;
+					case '6':	// C_COLOR_ORANGE
+						inString.erase(caretLoc, 1);
+						inString.insert(caretLoc, "[colour='FFFF6600']");
+						break;
+					case '7':	// C_COLOR_WHITE
+						inString.erase(caretLoc, 1);
+						inString.insert(caretLoc, "[colour='FFFFFFFF']");
+						break;
+					case '8':	// C_COLOR_GRAY
+						inString.erase(caretLoc, 1);
+						inString.insert(caretLoc, "[colour='FF808080']");
+						break;
+					case '9':	// C_COLOR_BLACK
+						inString.erase(caretLoc, 1);
+						inString.insert(caretLoc, "[colour='FF000000']");
+						break;
+					case '^': // Escaped caret
+						escapeFlag = 1;
+						break;
+					case '0': // C_COLOR_DEFAULT
+					default: // C_COLOR_DEFAULT
+						inString.erase(caretLoc, 1);
+						inString.insert(caretLoc, "[colour='FF33CCCC']");
+						break;
+					}
+				}
+				else
+				{
+					escapeFlag = 0;
+				}
 			}
 		}
-		coloredString.append(formatedStr.c_str());
 	}
+	return inString;
 
-	return coloredString;
-	*/
 }
 
 void CEGUI_Console::OutputText(const CEGUI::String inMsg)
