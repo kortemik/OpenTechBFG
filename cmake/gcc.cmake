@@ -7,7 +7,8 @@ add_definitions(-Werror=format-security)
 add_definitions(-Werror=format)
 add_definitions(-mmmx -msse -msse2)
 
-add_definitions(-ftrapv)
+add_definitions(-fwrapv)
+# add_definitions(-ftrapv) # do we really wanna forbid signed int overflows? breaks code in subtle ways..
 # add_definitions(-Wextra)
 # add_definitions(-Wfloat-equal)
 add_definitions(-Wundef)
