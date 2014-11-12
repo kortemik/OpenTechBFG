@@ -261,6 +261,8 @@ extern volatile int ignoredReturnValue;
 
 #endif
 
+// DG: so we don't have to rely on "multichar constants" - 'asdf' is equivalent to MUCHARC('a', 's', 'd', 'f') on msvc and gcc
+#define MUCHARC(a, b, c, d) ( ((a)<<24) | ((b)<<16) | ((c)<<8) | (d) )
 
 /*
  * Macros for format conversion specifications for integer arguments of type

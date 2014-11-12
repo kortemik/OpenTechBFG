@@ -12,7 +12,7 @@ add_definitions(-ftrapv)
 # add_definitions(-Wfloat-equal)
 add_definitions(-Wundef)
 add_definitions(-Wpointer-arith)
-add_definitions(-Wcast-align)
+# add_definitions(-Wcast-align)
 # add_definitions(-Wstrict-prototypes)
 # add_definitions(-Wstrict-overflow=5)
 # add_definitions(-Wwrite-strings)
@@ -22,6 +22,10 @@ add_definitions(-Wcast-align)
 # add_definitions(-Wswitch-enum)
 # add_definitions(-Wconversion)
 # add_definitions(-Wunreachable-code)
+
+if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+  add_definitions(-Wno-inline-new-delete)
+endif()
 
 if(NOT UNIX) # MinGW
   # require msvcr70.dll or newer for _aligned_malloc etc
