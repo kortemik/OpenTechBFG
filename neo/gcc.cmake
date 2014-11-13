@@ -54,20 +54,19 @@ add_definitions(-Wno-unused-function)
 add_definitions(-Wno-switch)
 add_definitions(-Wno-sign-compare)
 add_definitions(-Wno-invalid-offsetof)
-
+add_definitions(-Wno-unused-variable)
+add_definitions(-Wno-unused-but-set-variable)
+add_definitions(-Wno-unused-value) # a were set for debugging?
 #add_definitions(-Wno-pragmas)
-#add_definitions(-Wno-unused-variable)
-#add_definitions(-Wno-unused-but-set-variable)
-#add_definitions(-Wno-unused-value)
 #add_definitions(-Wno-multichar)
 
 
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
-  add_definitions(-Wno-unknown-warning-option)
-  add_definitions(-Wno-inline-new-delete)
   # append clang-specific settings for warnings (the second one make sure clang doesn't complain
   # about unknown -W flags, like -Wno-unused-but-set-variable)
-  set(my_warn_flags "${my_warn_flags} -Wno-local-type-template-args -Wno-unknown-warning-option -Wno-inline-new-delete")
+  add_definitions(-Wno-unknown-warning-option)
+  add_definitions(-Wno-inline-new-delete)
+  add_definitions(-Wno-local-type-template-args)
 endif()
 
 if(NOT UNIX) # MinGW
