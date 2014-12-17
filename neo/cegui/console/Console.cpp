@@ -1,37 +1,41 @@
 /*
- * ceguiConsole.cpp
+ * Console.cpp
  *
  *  Created on: Sep 5, 2014
  *      Author: kordex
  */
 
-#include "CEGUI_Console.h"
-#include "ceguiConsole.h"
 
-struct ceguiConsole::ceguiConsoleVars {
-	CEGUI_Console *consoleInstance;
+#include "Console.h"
+
+#include "ConsoleImpl.h"
+
+namespace CEGUIConsole {
+
+struct Console::ConsoleVars {
+	ConsoleImpl *consoleInstance;
 	idStr *missedLog[999];
 	int missedLogIndex;
 };
 
-ceguiConsole::ceguiConsole()
-: ourVars(new ceguiConsoleVars)
+Console::Console()
+: ourVars(new ConsoleVars)
 {
 	ourVars->consoleInstance = NULL;
 	ourVars->missedLogIndex = 0;
 }
 
-ceguiConsole::~ceguiConsole() {
+Console::~Console() {
 	// TODO Auto-generated destructor stub
 }
 
-bool ceguiConsole::isInitialized() {
+bool Console::isInitialized() {
 	// checks if cegui is up and running
 	if (CEGUI::System::getSingletonPtr() != NULL) {
 		if (ourVars->consoleInstance == NULL)
 		{
 			// initializes the console singleton
-			ourVars->consoleInstance = &CEGUI_Console::getInstance();
+			ourVars->consoleInstance = &ConsoleImpl::getInstance();
 
 			while( ourVars->missedLogIndex > 0 )
 			{
@@ -50,7 +54,7 @@ bool ceguiConsole::isInitialized() {
 		return false;
 }
 
-bool ceguiConsole::Active()
+bool Console::Active()
 {
 	if (isInitialized())
 		return ourVars->consoleInstance->isVisible();
@@ -58,28 +62,28 @@ bool ceguiConsole::Active()
 		return false;
 }
 
-void ceguiConsole::Open()
+void Console::Open()
 {
 	if (isInitialized()) {
 		ourVars->consoleInstance->setVisible(true);
 	}
 }
 
-void ceguiConsole::Close()
+void Console::Close()
 {
 	if (isInitialized()) {
 		ourVars->consoleInstance->setVisible(false);
 	}
 }
 
-void ceguiConsole::TabComplete(void)
+void Console::TabComplete(void)
 {
 	if (isInitialized()) {
 		ourVars->consoleInstance->TabComplete();
 	}
 }
 
-void ceguiConsole::Print(const char * text)
+void Console::Print(const char * text)
 {
 
 	if (isInitialized())
@@ -98,7 +102,7 @@ void ceguiConsole::Print(const char * text)
 	}
 }
 
-bool ceguiConsole::ProcessEvent( const sysEvent_t* event, bool forceAccept )
+bool Console::ProcessEvent( const sysEvent_t* event, bool forceAccept )
 {
 	if (isInitialized()) {
 		const bool consoleKey = event->evType == SE_KEY && event->evValue == K_GRAVE && com_allowConsole.GetBool();
@@ -155,6 +159,7 @@ bool ceguiConsole::ProcessEvent( const sysEvent_t* event, bool forceAccept )
 	}
 	return false;
 }
+} /* namespace CEGUIConsole */
 
-static ceguiConsole localConsole;
+static CEGUIConsole::Console localConsole;
 idConsole* console = &localConsole;

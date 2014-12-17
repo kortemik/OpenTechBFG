@@ -10,10 +10,12 @@
 
 #include "framework/Console.h"
 
-class ceguiConsole: public virtual idConsole {
+namespace CEGUIConsole {
+
+class Console: public virtual idConsole {
 public:
-	ceguiConsole();
-	virtual ~ceguiConsole();
+	Console();
+	virtual ~Console();
 
 	// the system code can release the mouse pointer when the console is active
 	bool	Active();
@@ -46,8 +48,10 @@ private:
 
 	void TabComplete(void);
 
-	struct ceguiConsoleVars;
-	ceguiConsoleVars *ourVars;
+	struct ConsoleVars;
+	ConsoleVars *ourVars;
 };
+
+} /* namespace CEGUIConsole */
 
 #endif /* CEGUICONSOLE_H_ */

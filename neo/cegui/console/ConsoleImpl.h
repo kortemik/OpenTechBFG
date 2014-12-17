@@ -5,17 +5,19 @@
  *      Author: kordex
  */
 
-#ifndef CEGUI_CONSOLE_H_
-#define CEGUI_CONSOLE_H_
+#ifndef ConsoleImpl_H_
+#define ConsoleImpl_H_
 
 #include <CEGUI/CEGUI.h>
 #include "../idlib/Str.h"
 
-class CEGUI_Console {
+namespace CEGUIConsole {
+
+class ConsoleImpl {
 public:
 
-	static CEGUI_Console& getInstance() {
-		static CEGUI_Console instance;
+	static ConsoleImpl& getInstance() {
+		static ConsoleImpl instance;
 		return instance;
 	}
 
@@ -29,21 +31,21 @@ private:
 	void RegisterHandlers();
 	bool Handle_TextSubmitted(const CEGUI::EventArgs&);
 
-	const CEGUI::String FormatConvert(const char *convertString);
-
 	void Execute(CEGUI::String inMsg);
 	void PopulateHistory(void);
 	idStr AutoComplete(const char *cmdStub);
 
-	struct CEGUI_ConsoleVars;
-	CEGUI_ConsoleVars *ourVars;
+	struct ConsoleImplVars;
+	ConsoleImplVars *ourVars;
 
-	CEGUI_Console();
-	virtual ~CEGUI_Console();
-	CEGUI_Console(CEGUI_Console const&);
-	void operator=(CEGUI_Console const&);
+	ConsoleImpl();
+	virtual ~ConsoleImpl();
+	ConsoleImpl(ConsoleImpl const&);
+	void operator=(ConsoleImpl const&);
 
 	void ScrollBottom();
 };
+
+} /* namespace CEGUIConsole */
 
 #endif /* CEGUICONSOLE_H_ */

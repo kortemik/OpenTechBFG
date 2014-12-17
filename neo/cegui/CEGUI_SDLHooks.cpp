@@ -27,20 +27,23 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
  */
 
+#include <GL/glew.h>
+
+#include <GL/gl.h>
+#include <GL/glu.h>
+
 #include <CEGUI/CEGUI.h>
 #include <CEGUI/InputEvent.h>
 #include <CEGUI/RendererModules/OpenGL/GLRenderer.h>
 
 #include <SDL.h>
 
-#include <GL/gl.h>
-#include <GL/glu.h>
-
 #include <map>
+
 
 #include "CEGUI_SDLHooks.h"
 
-#include "CEGUI_Console.h"
+#include "console/Console.h"
 
 using namespace CEGUI;
 
