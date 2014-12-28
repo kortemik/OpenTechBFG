@@ -9,24 +9,23 @@
 #include "Console.h"
 
 #include "ConsoleImpl.h"
+#include "ConsoleQueue.h"
+#include "ConsoleMsg.h"
 
 namespace CEGUIConsole {
 
 struct Console::ConsoleVars {
 	ConsoleImpl *consoleInstance;
-	idStr *missedLog[999];
-	int missedLogIndex;
+	ConsoleQueue msgQueue;
 };
 
 Console::Console()
 : ourVars(new ConsoleVars)
 {
 	ourVars->consoleInstance = NULL;
-	ourVars->missedLogIndex = 0;
 }
 
 Console::~Console() {
-	// TODO Auto-generated destructor stub
 }
 
 bool Console::isInitialized() {
@@ -36,17 +35,6 @@ bool Console::isInitialized() {
 		{
 			// initializes the console singleton
 			ourVars->consoleInstance = &ConsoleImpl::getInstance();
-
-			while( ourVars->missedLogIndex > 0 )
-			{
-				// displays buffered text from missedLog
-				// TODO we should unload the missedLog in a way
-				// that it would be displayed first
-				// perhaps locking
-				ourVars->missedLogIndex--;
-				ourVars->consoleInstance->OutputText((ourVars->missedLog[ourVars->missedLogIndex])->c_str());
-				delete(ourVars->missedLog[ourVars->missedLogIndex]);
-			}
 		}
 		return true;
 	}
@@ -86,18 +74,12 @@ void Console::TabComplete(void)
 void Console::Print(const char * text)
 {
 
+	ourVars->msgQueue.push(ConsoleMsg(text));
 	if (isInitialized())
 	{
-		ourVars->consoleInstance->OutputText(text);
-	}
-	else
-	{
-		// buffer the text into missedLog;
-		// and increment the index
-		if (ourVars->missedLogIndex <= 999)
-		{
-			ourVars->missedLog[ourVars->missedLogIndex] = new idStr(text);
-			ourVars->missedLogIndex++;
+		while (!ourVars->msgQueue.empty()) {
+			ConsoleMsg outMsg = ourVars->msgQueue.pop();
+			ourVars->consoleInstance->OutputText(outMsg.msg);
 		}
 	}
 }

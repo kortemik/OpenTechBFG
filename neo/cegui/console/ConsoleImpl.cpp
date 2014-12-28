@@ -85,7 +85,7 @@ void ConsoleImpl::OutputText(const CEGUI::String inMsg)
 	 */
 	if (CEGUI::System::getSingletonPtr() != NULL)
 	{
-		ConsoleMsg *outMsg = new ConsoleMsg(inMsg);
+		ConsoleMsg outMsg = ConsoleMsg(inMsg);
 
 		CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 									.getRootWindow()->getChild("Console");
@@ -94,12 +94,11 @@ void ConsoleImpl::OutputText(const CEGUI::String inMsg)
 			CEGUI::Listbox *outputWindow = static_cast<CEGUI::Listbox*>(ConsoleWin->getChild("History"));
 
 			CEGUI::ListboxTextItem* newItem=0;
-			newItem = new CEGUI::ListboxTextItem(outMsg->msg);
+			newItem = new CEGUI::ListboxTextItem(outMsg.msg);
 			outputWindow->addItem(newItem);
 
 			(this)->ScrollBottom();
 		}
-		delete(outMsg);
 	}
 }
 
