@@ -79,7 +79,7 @@ void Console::Print(const char * text)
 	{
 		while (!ourVars->msgQueue.empty()) {
 			ConsoleMsg outMsg = ourVars->msgQueue.pop();
-			ourVars->consoleInstance->OutputText(outMsg.msg);
+			ourVars->consoleInstance->OutputText(outMsg);
 		}
 	}
 }

@@ -78,14 +78,14 @@ bool ConsoleImpl::Handle_TextSubmitted(const CEGUI::EventArgs& args)
 	return true;
 }
 
-void ConsoleImpl::OutputText(const CEGUI::String inMsg)
+void ConsoleImpl::OutputText(ConsoleMsg outMsg)
 {
 	/*
 	 * checks if cegui is initialized
 	 */
 	if (CEGUI::System::getSingletonPtr() != NULL)
 	{
-		ConsoleMsg outMsg = ConsoleMsg(inMsg);
+		//ConsoleMsg outMsg = ConsoleMsg(inMsg);
 
 		CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 									.getRootWindow()->getChild("Console");
@@ -176,7 +176,11 @@ void ConsoleImpl::TabComplete(void)
 
 idStr ConsoleImpl::AutoComplete(const char *cmdStub){
 	// TODO AutoComplete should show cegui tooltips for multiple matches
-	/* TODO implement
+	// TODO implement
+#if 0
+	cmdSystem->CommandCompletion( functionPointerTakingStringConstPtr );
+	cmdSystem->ArgCompletion( commandConstStringPtr, functionPointerTakingStringConstPtr );
+#elif 0
 	char completionArgString[MAX_EDIT_LINE];
 	idCmdArgs args;
 
@@ -288,7 +292,7 @@ idStr ConsoleImpl::AutoComplete(const char *cmdStub){
 		}
 		SetCursor( autoComplete.length );
 	}
-	*/
+#endif
 	return NULL;
 }
 

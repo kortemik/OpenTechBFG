@@ -11,6 +11,8 @@
 #include <CEGUI/CEGUI.h>
 #include "../idlib/Str.h"
 
+#include "ConsoleMsg.h"
+
 namespace CEGUIConsole {
 
 class ConsoleImpl {
@@ -23,7 +25,7 @@ public:
 
 	void setVisible(bool visible);
 	bool isVisible();
-	void OutputText(CEGUI::String inMsg);
+	void OutputText(ConsoleMsg outMsg);
 	void TabComplete(void);
 
 private:
