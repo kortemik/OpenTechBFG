@@ -27,6 +27,7 @@ public:
 	bool isVisible();
 	void OutputText(ConsoleMsg outMsg);
 	void TabComplete(void);
+	static void TabToolTip(const char *s);
 
 private:
 	void CreateCEGUIWindow();

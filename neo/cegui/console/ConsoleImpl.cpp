@@ -99,6 +99,7 @@ void ConsoleImpl::OutputText(ConsoleMsg outMsg)
 
 			(this)->ScrollBottom();
 		}
+
 	}
 }
 
@@ -174,13 +175,49 @@ void ConsoleImpl::TabComplete(void)
 
 }
 
+void ConsoleImpl::TabToolTip(const char *s)
+{
+	// this little fellow just gets all the matches and is responsible for acting accordingly
+	// for now let's test and print..
+
+	getInstance().OutputText(ConsoleMsg(s));
+#if 0
+	int		i;
+	const char *completionString = "ma"; //p
+	char *currentMatch;
+	int matchCount = 0;
+
+	if( idStr::Icmpn( buf, completionString, strlen( completionString ) ) != 0 )
+	{
+		return;
+	}
+	matchCount++;
+	if( matchCount == 1 )
+	{
+		idStr::Copynz( currentMatch, buf, sizeof( currentMatch ) );
+		return;
+	}
+
+	// cut currentMatch to the amount common with s
+	for( i = 0; buf[i]; i++ )
+	{
+		if( tolower( currentMatch[i] ) != tolower( buf[i] ) )
+		{
+			currentMatch[i] = 0;
+			break;
+		}
+	}
+	currentMatch[i] = 0;
+#endif
+}
+
 idStr ConsoleImpl::AutoComplete(const char *cmdStub){
 	// TODO AutoComplete should show cegui tooltips for multiple matches
 	// TODO implement
+	const char *cmdString = "map";
+	cmdSystem->CommandCompletion( TabToolTip );
+	cmdSystem->ArgCompletion( cmdString, TabToolTip );
 #if 0
-	cmdSystem->CommandCompletion( functionPointerTakingStringConstPtr );
-	cmdSystem->ArgCompletion( commandConstStringPtr, functionPointerTakingStringConstPtr );
-#elif 0
 	char completionArgString[MAX_EDIT_LINE];
 	idCmdArgs args;
 
