@@ -27,7 +27,8 @@ public:
 	bool isVisible();
 	void OutputText(ConsoleMsg outMsg);
 	void TabComplete(void);
-	static void TabToolTip(const char *s);
+	static void AutoCompleteCallback(const char *s);
+	void TabCompleteListAdd(CEGUI::String option);
 
 private:
 	void CreateCEGUIWindow();
@@ -36,7 +37,6 @@ private:
 
 	void Execute(CEGUI::String inMsg);
 	void PopulateHistory(void);
-	idStr AutoComplete(const char *cmdStub);
 
 	struct ConsoleImplVars;
 	ConsoleImplVars *ourVars;

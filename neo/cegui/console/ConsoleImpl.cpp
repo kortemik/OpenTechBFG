@@ -6,6 +6,7 @@
  */
 
 #include <memory>
+#include <list>
 #include <CEGUI/widgets/Combobox.h>
 #include "ConsoleImpl.h"
 #include "ConsoleMsg.h"
@@ -17,10 +18,12 @@
 namespace CEGUIConsole {
 
 struct ConsoleImpl::ConsoleImplVars {
+	std::list<CEGUI::String> tabCompletions;
 };
 
 
-ConsoleImpl::ConsoleImpl()
+ConsoleImpl::ConsoleImpl() :
+		ourVars(new ConsoleImplVars)
 {
 	CreateCEGUIWindow();
 	RegisterHandlers();
@@ -28,7 +31,7 @@ ConsoleImpl::ConsoleImpl()
 }
 
 ConsoleImpl::~ConsoleImpl() {
-	// TODO Auto-generated destructor stub
+	this->ourVars->tabCompletions.clear();
 }
 
 void ConsoleImpl::CreateCEGUIWindow()
@@ -43,7 +46,6 @@ void ConsoleImpl::RegisterHandlers()
 	CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 							.getRootWindow()->getChild("Console");
 
-	// FIXME catches TAB key for some reason
 
 	/*
 	 * handles mouse on submit to input
@@ -56,12 +58,13 @@ void ConsoleImpl::RegisterHandlers()
 	/*
 	 * handles keypress (enter) to input
 	 */
+
+	// FIXME catches tab too, some way to avoid that?
 	ConsoleWin->getChild("Combobox")->subscribeEvent(
 			CEGUI::Combobox::EventTextAccepted,
 			&ConsoleImpl::Handle_TextSubmitted,
 			(this)
 			);
-
 }
 
 bool ConsoleImpl::Handle_TextSubmitted(const CEGUI::EventArgs& args)
@@ -93,10 +96,8 @@ void ConsoleImpl::OutputText(ConsoleMsg outMsg)
 		{
 			CEGUI::Listbox *outputWindow = static_cast<CEGUI::Listbox*>(ConsoleWin->getChild("History"));
 
-			CEGUI::ListboxTextItem* newItem=0;
-			newItem = new CEGUI::ListboxTextItem(outMsg.msg);
+			CEGUI::ListboxTextItem* newItem = new CEGUI::ListboxTextItem(outMsg.msg);
 			outputWindow->addItem(newItem);
-
 			(this)->ScrollBottom();
 		}
 
@@ -167,20 +168,45 @@ void ConsoleImpl::TabComplete(void)
 
 	CEGUI::String cmdStub = ConsoleWin->getChild("Combobox")->getText();
 
+	cmdSystem->CommandCompletion( AutoCompleteCallback ); // function pointer to our static member function
+	// if command is valid
+	cmdSystem->ArgCompletion( cmdStub.c_str(), AutoCompleteCallback );
+
+
+
+}
+
+void ConsoleImpl::AutoCompleteCallback(const char *s)
+{
+	// this little fellow just gets all the matches and is responsible for acting accordingly
+	// for now let's test and print..
+
+	//getInstance().OutputText(ConsoleMsg(s));
+	getInstance().TabCompleteListAdd(CEGUI::String(s));
+
+}
+
+void ConsoleImpl::TabCompleteListAdd(CEGUI::String option)
+{
+	this->ourVars->tabCompletions.push_back(option);
+#if 0
+	if (CEGUI::System::getSingletonPtr() != NULL)
+	{
+		CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
+									.getRootWindow()->getChild("Console");
+		if (ConsoleWin != NULL)
+		{
+			CEGUI::Window *outputWindow = static_cast<CEGUI::Window*>(ConsoleWin->getChild("TabCompList"));
+			outputWindow->setText(option);
+		}
+#endif
+#if 0
 	idStr cmdMatch = (this)->AutoComplete(cmdStub.c_str());
 
 	if (!cmdMatch.IsEmpty()) {
 		ConsoleWin->getChild("Combobox")->setText(cmdMatch.c_str());
 	}
-
-}
-
-void ConsoleImpl::TabToolTip(const char *s)
-{
-	// this little fellow just gets all the matches and is responsible for acting accordingly
-	// for now let's test and print..
-
-	getInstance().OutputText(ConsoleMsg(s));
+#endif
 #if 0
 	int		i;
 	const char *completionString = "ma"; //p
@@ -209,14 +235,6 @@ void ConsoleImpl::TabToolTip(const char *s)
 	}
 	currentMatch[i] = 0;
 #endif
-}
-
-idStr ConsoleImpl::AutoComplete(const char *cmdStub){
-	// TODO AutoComplete should show cegui tooltips for multiple matches
-	// TODO implement
-	const char *cmdString = "map";
-	cmdSystem->CommandCompletion( TabToolTip );
-	cmdSystem->ArgCompletion( cmdString, TabToolTip );
 #if 0
 	char completionArgString[MAX_EDIT_LINE];
 	idCmdArgs args;
@@ -329,8 +347,8 @@ idStr ConsoleImpl::AutoComplete(const char *cmdStub){
 		}
 		SetCursor( autoComplete.length );
 	}
+	}
 #endif
-	return NULL;
 }
 
 } /* namespace CEGUIConsole */
