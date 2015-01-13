@@ -69,16 +69,24 @@ void ConsoleImpl::RegisterHandlers()
 
 bool ConsoleImpl::Handle_TextSubmitted(const CEGUI::EventArgs& args)
 {
-	CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
-								.getRootWindow()->getChild("Console");
 
-	CEGUI::String Line = ConsoleWin->getChild("Combobox")->getText();
+	const CEGUI::KeyEventArgs& keyEventArg =
+		    static_cast<const CEGUI::KeyEventArgs&>(args);
 
-	(this)->Execute(Line);
+	if (keyEventArg.scancode != CEGUI::Key::Tab)
+	{
 
-	ConsoleWin->getChild("Combobox")->setText("");
+		CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
+										.getRootWindow()->getChild("Console");
 
+		CEGUI::String Line = ConsoleWin->getChild("Combobox")->getText();
+
+		(this)->Execute(Line);
+
+		ConsoleWin->getChild("Combobox")->setText("");
+	}
 	return true;
+
 }
 
 void ConsoleImpl::OutputText(ConsoleMsg outMsg)
