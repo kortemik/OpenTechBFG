@@ -8,6 +8,7 @@
 #include <memory>
 #include <list>
 #include <CEGUI/widgets/Combobox.h>
+#include "ConsoleEditBox.h"
 #include "ConsoleImpl.h"
 #include "ConsoleMsg.h"
 
@@ -36,6 +37,8 @@ ConsoleImpl::~ConsoleImpl() {
 
 void ConsoleImpl::CreateCEGUIWindow()
 {
+	CEGUI::WindowFactoryManager::addWindowType<CEGUIConsole::ConsoleEditBox>();
+
 	CEGUI::System::getSingleton().getDefaultGUIContext()
 						.getRootWindow()->addChild(
 								CEGUI::WindowManager::getSingleton().
@@ -69,13 +72,6 @@ void ConsoleImpl::RegisterHandlers()
 
 bool ConsoleImpl::Handle_TextSubmitted(const CEGUI::EventArgs& args)
 {
-
-	const CEGUI::KeyEventArgs& keyEventArg =
-		    static_cast<const CEGUI::KeyEventArgs&>(args);
-
-	if (keyEventArg.scancode != CEGUI::Key::Tab)
-	{
-
 		CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 										.getRootWindow()->getChild("Console");
 
@@ -84,7 +80,7 @@ bool ConsoleImpl::Handle_TextSubmitted(const CEGUI::EventArgs& args)
 		(this)->Execute(Line);
 
 		ConsoleWin->getChild("Combobox")->setText("");
-	}
+
 	return true;
 
 }

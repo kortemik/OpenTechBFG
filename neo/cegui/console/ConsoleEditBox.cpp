@@ -9,6 +9,8 @@
 
 namespace CEGUIConsole {
 
+const CEGUI::String ConsoleEditBox::WidgetTypeName("CEGUIConsole/ConsoleEditBox");
+
 void ConsoleEditBox::onKeyDown(CEGUI::KeyEventArgs& e)
 {
     // fire event.
