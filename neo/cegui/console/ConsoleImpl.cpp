@@ -7,7 +7,6 @@
 
 #include <memory>
 #include <list>
-#include "ConsoleComboBox.h"
 #include "ConsoleEditBox.h"
 #include "ConsoleImpl.h"
 #include "ConsoleMsg.h"
@@ -38,7 +37,6 @@ ConsoleImpl::~ConsoleImpl() {
 void ConsoleImpl::CreateCEGUIWindow()
 {
 	CEGUI::WindowFactoryManager::addWindowType<CEGUIConsole::ConsoleEditBox>();
-	CEGUI::WindowFactoryManager::addWindowType<CEGUIConsole::ConsoleComboBox>();
 
 	CEGUI::System::getSingleton().getDefaultGUIContext()
 						.getRootWindow()->addChild(
