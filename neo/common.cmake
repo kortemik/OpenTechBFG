@@ -467,6 +467,19 @@ endif()
 if(CEGUI)
   file(GLOB CEGUI_INCLUDES cegui/*.h)
   file(GLOB CEGUI_SOURCES cegui/*.cpp)
+
+  file(GLOB CEGUI_CONSOLE_INCLUDES cegui/console/*.h)
+  file(GLOB CEGUI_CONSOLE_SOURCES cegui/console/*.cpp)
+
+
+  list(APPEND CEGUI_INCLUDES
+    ${CEGUI_CONSOLE_INCLUDES}
+    )
+  
+  list(APPEND CEGUI_SOURCES
+    ${CEGUI_CONSOLE_SOURCES}
+    )
+
   source_group("cegui" FILES ${CEGUI_INCLUDES})
   source_group("cegui" FILES ${CEGUI_SOURCES})
 

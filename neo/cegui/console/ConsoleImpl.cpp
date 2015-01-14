@@ -5,175 +5,93 @@
  *      Author: kordex
  */
 
-#include <CEGUI/widgets/Combobox.h>
-#include "CEGUI_Console.h"
+#include <memory>
+#include <list>
+#include "ConsoleEditBox.h"
+#include "ConsoleImpl.h"
+#include "ConsoleMsg.h"
 
 #include "../idlib/Str.h"
 #include "../framework/ConsoleHistory.h"
 #include "../framework/CmdSystem.h"
 
-struct CEGUI_Console::CEGUI_ConsoleVars {
+namespace CEGUIConsole {
+
+struct ConsoleImpl::ConsoleImplVars {
+	std::list<CEGUI::String> tabCompletions;
 };
 
 
-CEGUI_Console::CEGUI_Console()
+ConsoleImpl::ConsoleImpl() :
+		ourVars(new ConsoleImplVars)
 {
 	CreateCEGUIWindow();
 	RegisterHandlers();
 	setVisible(false);
 }
 
-CEGUI_Console::~CEGUI_Console() {
-	// TODO Auto-generated destructor stub
+ConsoleImpl::~ConsoleImpl() {
+	this->ourVars->tabCompletions.clear();
 }
 
-void CEGUI_Console::CreateCEGUIWindow()
+void ConsoleImpl::CreateCEGUIWindow()
 {
+	CEGUI::WindowFactoryManager::addWindowType<CEGUIConsole::ConsoleEditBox>();
+
 	CEGUI::System::getSingleton().getDefaultGUIContext()
 						.getRootWindow()->addChild(
 								CEGUI::WindowManager::getSingleton().
 								loadLayoutFromFile("console.layout"));
 }
-void CEGUI_Console::RegisterHandlers()
+void ConsoleImpl::RegisterHandlers()
 {
 	CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 							.getRootWindow()->getChild("Console");
 
-	// FIXME catches TAB key for some reason
 
 	/*
 	 * handles mouse on submit to input
 	 */
 	ConsoleWin->getChild("Submit")->subscribeEvent(
 			CEGUI::PushButton::EventClicked,
-			&CEGUI_Console::Handle_TextSubmitted,
+			&ConsoleImpl::Handle_TextSubmitted,
 			(this)
 			);
 	/*
 	 * handles keypress (enter) to input
 	 */
+
+	// FIXME catches tab too, some way to avoid that?
 	ConsoleWin->getChild("Combobox")->subscribeEvent(
 			CEGUI::Combobox::EventTextAccepted,
-			&CEGUI_Console::Handle_TextSubmitted,
+			&ConsoleImpl::Handle_TextSubmitted,
 			(this)
 			);
-
 }
 
-bool CEGUI_Console::Handle_TextSubmitted(const CEGUI::EventArgs& args)
+bool ConsoleImpl::Handle_TextSubmitted(const CEGUI::EventArgs& args)
 {
-	CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
-								.getRootWindow()->getChild("Console");
+		CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
+										.getRootWindow()->getChild("Console");
 
-	CEGUI::String Line = ConsoleWin->getChild("Combobox")->getText();
+		CEGUI::String Line = ConsoleWin->getChild("Combobox")->getText();
 
-	(this)->Execute(Line);
+		(this)->Execute(Line);
 
-	ConsoleWin->getChild("Combobox")->setText("");
+		ConsoleWin->getChild("Combobox")->setText("");
 
 	return true;
-}
-
-const CEGUI::String CEGUI_Console::FormatConvert(const char *convertString)
-{
-
-	// see http://cegui.org.uk/wiki/Formatting_Tags_in_CEGUI
-
-    // I personally like working with std::string. So i'm going to convert it here.
-       std::string inString = convertString;
-
-	if (inString.length() >= 1) // Be sure we got a string longer than 0
-	{
-		std::string::size_type caretLoc = 0;
-
-		// find first carret in string if exists
-
-		// find all carets in the string
-		while (caretLoc != std::string::npos)
-		{
-			int escapeFlag = 0;
-
-			caretLoc = inString.find('^', caretLoc);
-
-			if (caretLoc != std::string::npos)
-			{
-
-				if (escapeFlag == 0)
-				{
-					// removing the caret
-					inString.erase(caretLoc, 1);
-					// next character on the string is the color code
-					char colorCand = inString.at(caretLoc);
-
-					switch(colorCand)
-					{
-
-					case '1':	// C_COLOR_RED
-						inString.erase(caretLoc, 1);
-						inString.insert(caretLoc, "[colour='FFFF0000']");
-						break;
-					case '2':	// C_COLOR_GREEN
-						inString.erase(caretLoc, 1);
-						inString.insert(caretLoc, "[colour='FF00FF00']");
-						break;
-					case '3':	// C_COLOR_YELLOW
-						inString.erase(caretLoc, 1);
-						inString.insert(caretLoc, "[colour='FFFFFF00']");
-						break;
-					case '4':	// C_COLOR_BLUE
-						inString.erase(caretLoc, 1);
-						inString.insert(caretLoc, "[colour='FF0000FF']");
-						break;
-					case '5':	// C_COLOR_CYAN
-						inString.erase(caretLoc, 1);
-						inString.insert(caretLoc, "[colour='FF33CCCC']");
-						break;
-					case '6':	// C_COLOR_ORANGE
-						inString.erase(caretLoc, 1);
-						inString.insert(caretLoc, "[colour='FFFF6600']");
-						break;
-					case '7':	// C_COLOR_WHITE
-						inString.erase(caretLoc, 1);
-						inString.insert(caretLoc, "[colour='FFFFFFFF']");
-						break;
-					case '8':	// C_COLOR_GRAY
-						inString.erase(caretLoc, 1);
-						inString.insert(caretLoc, "[colour='FF808080']");
-						break;
-					case '9':	// C_COLOR_BLACK
-						inString.erase(caretLoc, 1);
-						inString.insert(caretLoc, "[colour='FF000000']");
-						break;
-					case '^': // Escaped caret
-						escapeFlag = 1;
-						break;
-					case '0': // C_COLOR_DEFAULT
-					default: // C_COLOR_DEFAULT
-						inString.erase(caretLoc, 1);
-						inString.insert(caretLoc, "[colour='FF33CCCC']");
-						break;
-					}
-				}
-				else
-				{
-					escapeFlag = 0;
-				}
-			}
-		}
-	}
-	return inString;
 
 }
 
-void CEGUI_Console::OutputText(const CEGUI::String inMsg)
+void ConsoleImpl::OutputText(ConsoleMsg outMsg)
 {
 	/*
 	 * checks if cegui is initialized
 	 */
 	if (CEGUI::System::getSingletonPtr() != NULL)
 	{
-
-		const CEGUI::String outMsg = (this)->FormatConvert(inMsg.c_str());
+		//ConsoleMsg outMsg = ConsoleMsg(inMsg);
 
 		CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 									.getRootWindow()->getChild("Console");
@@ -181,17 +99,16 @@ void CEGUI_Console::OutputText(const CEGUI::String inMsg)
 		{
 			CEGUI::Listbox *outputWindow = static_cast<CEGUI::Listbox*>(ConsoleWin->getChild("History"));
 
-			CEGUI::ListboxTextItem* newItem=0;
-			newItem = new CEGUI::ListboxTextItem(outMsg);
+			CEGUI::ListboxTextItem* newItem = new CEGUI::ListboxTextItem(outMsg.msg);
 			outputWindow->addItem(newItem);
-
 			(this)->ScrollBottom();
 		}
+
 	}
 }
 
 
-void CEGUI_Console::setVisible(bool visible)
+void ConsoleImpl::setVisible(bool visible)
 {
 	CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 										.getRootWindow()->getChild("Console");
@@ -208,14 +125,14 @@ void CEGUI_Console::setVisible(bool visible)
 	}
 }
 
-bool CEGUI_Console::isVisible()
+bool ConsoleImpl::isVisible()
 {
 	CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 											.getRootWindow()->getChild("Console");
 	return ConsoleWin->isVisible();
 }
 
-void CEGUI_Console::ScrollBottom()
+void ConsoleImpl::ScrollBottom()
 {
 	CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 										.getRootWindow()->getChild("Console");
@@ -229,7 +146,7 @@ void CEGUI_Console::ScrollBottom()
 	outputWindow->getVertScrollbar()->setScrollPosition(document_size - page_size);
 }
 
-void CEGUI_Console::Execute(CEGUI::String inMsg)
+void ConsoleImpl::Execute(CEGUI::String inMsg)
 {
 	const char *cmd = inMsg.c_str();
 	if (strlen(cmd) >= 1)
@@ -240,31 +157,88 @@ void CEGUI_Console::Execute(CEGUI::String inMsg)
 		consoleHistory.AddToHistory( cmd );
 	}
 }
-void CEGUI_Console::PopulateHistory(void)
+void ConsoleImpl::PopulateHistory(void)
 {
 	// TODO implement cegui window historylist aka the dropdown list,
 	// should be filled on access
 	idStr hist = consoleHistory.RetrieveFromHistory( true );
 }
 
-void CEGUI_Console::TabComplete(void)
+void ConsoleImpl::TabComplete(void)
 {
 	CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 												.getRootWindow()->getChild("Console");
 
 	CEGUI::String cmdStub = ConsoleWin->getChild("Combobox")->getText();
 
+	cmdSystem->CommandCompletion( AutoCompleteCallback ); // function pointer to our static member function
+	// if command is valid
+	cmdSystem->ArgCompletion( cmdStub.c_str(), AutoCompleteCallback );
+
+
+
+}
+
+void ConsoleImpl::AutoCompleteCallback(const char *s)
+{
+	// this little fellow just gets all the matches and is responsible for acting accordingly
+	// for now let's test and print..
+
+	//getInstance().OutputText(ConsoleMsg(s));
+	getInstance().TabCompleteListAdd(CEGUI::String(s));
+
+}
+
+void ConsoleImpl::TabCompleteListAdd(CEGUI::String option)
+{
+	this->ourVars->tabCompletions.push_back(option);
+#if 0
+	if (CEGUI::System::getSingletonPtr() != NULL)
+	{
+		CEGUI::Window *ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
+									.getRootWindow()->getChild("Console");
+		if (ConsoleWin != NULL)
+		{
+			CEGUI::Window *outputWindow = static_cast<CEGUI::Window*>(ConsoleWin->getChild("TabCompList"));
+			outputWindow->setText(option);
+		}
+#endif
+#if 0
 	idStr cmdMatch = (this)->AutoComplete(cmdStub.c_str());
 
 	if (!cmdMatch.IsEmpty()) {
 		ConsoleWin->getChild("Combobox")->setText(cmdMatch.c_str());
 	}
+#endif
+#if 0
+	int		i;
+	const char *completionString = "ma"; //p
+	char *currentMatch;
+	int matchCount = 0;
 
-}
+	if( idStr::Icmpn( buf, completionString, strlen( completionString ) ) != 0 )
+	{
+		return;
+	}
+	matchCount++;
+	if( matchCount == 1 )
+	{
+		idStr::Copynz( currentMatch, buf, sizeof( currentMatch ) );
+		return;
+	}
 
-idStr CEGUI_Console::AutoComplete(const char *cmdStub){
-	// TODO AutoComplete should show cegui tooltips for multiple matches
-	/* TODO implement
+	// cut currentMatch to the amount common with s
+	for( i = 0; buf[i]; i++ )
+	{
+		if( tolower( currentMatch[i] ) != tolower( buf[i] ) )
+		{
+			currentMatch[i] = 0;
+			break;
+		}
+	}
+	currentMatch[i] = 0;
+#endif
+#if 0
 	char completionArgString[MAX_EDIT_LINE];
 	idCmdArgs args;
 
@@ -376,8 +350,8 @@ idStr CEGUI_Console::AutoComplete(const char *cmdStub){
 		}
 		SetCursor( autoComplete.length );
 	}
-	*/
-	return NULL;
+	}
+#endif
 }
 
-
+} /* namespace CEGUIConsole */

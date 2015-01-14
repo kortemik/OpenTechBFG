@@ -1,48 +1,40 @@
 /*
- * ceguiConsole.cpp
+ * Console.cpp
  *
  *  Created on: Sep 5, 2014
  *      Author: kordex
  */
 
-#include "CEGUI_Console.h"
-#include "ceguiConsole.h"
 
-struct ceguiConsole::ceguiConsoleVars {
-	CEGUI_Console *consoleInstance;
-	idStr *missedLog[999];
-	int missedLogIndex;
+#include "Console.h"
+
+#include "ConsoleImpl.h"
+#include "ConsoleQueue.h"
+#include "ConsoleMsg.h"
+
+namespace CEGUIConsole {
+
+struct Console::ConsoleVars {
+	ConsoleImpl *consoleInstance;
+	ConsoleQueue msgQueue;
 };
 
-ceguiConsole::ceguiConsole()
-: ourVars(new ceguiConsoleVars)
+Console::Console()
+: ourVars(new ConsoleVars)
 {
 	ourVars->consoleInstance = NULL;
-	ourVars->missedLogIndex = 0;
 }
 
-ceguiConsole::~ceguiConsole() {
-	// TODO Auto-generated destructor stub
+Console::~Console() {
 }
 
-bool ceguiConsole::isInitialized() {
+bool Console::isInitialized() {
 	// checks if cegui is up and running
 	if (CEGUI::System::getSingletonPtr() != NULL) {
 		if (ourVars->consoleInstance == NULL)
 		{
 			// initializes the console singleton
-			ourVars->consoleInstance = &CEGUI_Console::getInstance();
-
-			while( ourVars->missedLogIndex > 0 )
-			{
-				// displays buffered text from missedLog
-				// TODO we should unload the missedLog in a way
-				// that it would be displayed first
-				// perhaps locking
-				ourVars->missedLogIndex--;
-				ourVars->consoleInstance->OutputText((ourVars->missedLog[ourVars->missedLogIndex])->c_str());
-				delete(ourVars->missedLog[ourVars->missedLogIndex]);
-			}
+			ourVars->consoleInstance = &ConsoleImpl::getInstance();
 		}
 		return true;
 	}
@@ -50,7 +42,7 @@ bool ceguiConsole::isInitialized() {
 		return false;
 }
 
-bool ceguiConsole::Active()
+bool Console::Active()
 {
 	if (isInitialized())
 		return ourVars->consoleInstance->isVisible();
@@ -58,47 +50,41 @@ bool ceguiConsole::Active()
 		return false;
 }
 
-void ceguiConsole::Open()
+void Console::Open()
 {
 	if (isInitialized()) {
 		ourVars->consoleInstance->setVisible(true);
 	}
 }
 
-void ceguiConsole::Close()
+void Console::Close()
 {
 	if (isInitialized()) {
 		ourVars->consoleInstance->setVisible(false);
 	}
 }
 
-void ceguiConsole::TabComplete(void)
+void Console::TabComplete(void)
 {
 	if (isInitialized()) {
 		ourVars->consoleInstance->TabComplete();
 	}
 }
 
-void ceguiConsole::Print(const char * text)
+void Console::Print(const char * text)
 {
 
+	ourVars->msgQueue.push(ConsoleMsg(text));
 	if (isInitialized())
 	{
-		ourVars->consoleInstance->OutputText(text);
-	}
-	else
-	{
-		// buffer the text into missedLog;
-		// and increment the index
-		if (ourVars->missedLogIndex <= 999)
-		{
-			ourVars->missedLog[ourVars->missedLogIndex] = new idStr(text);
-			ourVars->missedLogIndex++;
+		while (!ourVars->msgQueue.empty()) {
+			ConsoleMsg outMsg = ourVars->msgQueue.pop();
+			ourVars->consoleInstance->OutputText(outMsg);
 		}
 	}
 }
 
-bool ceguiConsole::ProcessEvent( const sysEvent_t* event, bool forceAccept )
+bool Console::ProcessEvent( const sysEvent_t* event, bool forceAccept )
 {
 	if (isInitialized()) {
 		const bool consoleKey = event->evType == SE_KEY && event->evValue == K_GRAVE && com_allowConsole.GetBool();
@@ -155,6 +141,7 @@ bool ceguiConsole::ProcessEvent( const sysEvent_t* event, bool forceAccept )
 	}
 	return false;
 }
+} /* namespace CEGUIConsole */
 
-static ceguiConsole localConsole;
+static CEGUIConsole::Console localConsole;
 idConsole* console = &localConsole;
