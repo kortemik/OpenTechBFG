@@ -36,6 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 #undef vsnprintf
 // DG end
 
+#include <memory>
 #include <SDL.h>
 #include <assert.h>
 #include <stddef.h>
@@ -51,6 +52,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "sdl_local.h"
 
 #ifdef USE_CEGUI
+#include "../cegui/Renderer.h"
 #include "../cegui/CEGUI_SDLHooks.h"
 #endif
 
@@ -545,28 +547,10 @@ GLimp_SwapBuffers
 void GLimp_SwapBuffers()
 {
 #ifdef USE_CEGUI
-
-	cegui::getInstance().injectTimePulse(SDL_GetTicks());
-/*
- * update cegui
- */
-	GLint glProgId;
-	GLint glVertexArray;
-	GLint glArrayBuffer;
-	// save the state
-	glGetIntegerv(GL_CURRENT_PROGRAM, &glProgId);
-	glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &glVertexArray);
-	glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &glArrayBuffer);
-	// set defaults for cegui
-	glUseProgram(0);
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glActiveTexture(GL_TEXTURE0);
-	cegui::getInstance().renderAllGUIContexts();
-	glActiveTexture(GL_TEXTURE0);
-	glBindBuffer(GL_ARRAY_BUFFER, glArrayBuffer);
-	glBindVertexArray(glVertexArray);
-	glUseProgram(glProgId);
+	{
+		std::auto_ptr<CEGUIRenderer::Renderer> ceguiRenderer (new CEGUIRenderer::Renderer());
+		ceguiRenderer->draw();
+	}
 #endif
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	SDL_GL_SwapWindow( window );
