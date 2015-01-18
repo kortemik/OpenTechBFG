@@ -386,11 +386,11 @@ enum keyNum_t
 	// K_MOUSE enums must be contiguous (no char codes in the middle)
 	//------------------------
 	
-	K_MOUSE1,
-	K_MOUSE2,
-	K_MOUSE3,
-	K_MOUSE4,
-	K_MOUSE5,
+	K_MOUSE1, // left
+	K_MOUSE2, // right
+	K_MOUSE3, // middle
+	K_MOUSE4, // X1
+	K_MOUSE5, // X2
 	K_MOUSE6,
 	K_MOUSE7,
 	K_MOUSE8,

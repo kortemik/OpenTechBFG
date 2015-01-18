@@ -36,11 +36,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "CEGUI_Hooks.h"
 
 #ifdef __GNUC__ // gcc and clang - ignore warning about non-virtual destructors in cegui code
-
 #pragma GCC diagnostic push // save old warning settings
-
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
-
 #endif // __GNUC__
 
 #include <CEGUI/CEGUI.h>
@@ -162,6 +159,46 @@ namespace // anon. namespace for helper functions and global state
 		*/
 	}
 
+	// keyboard keys, mouse keys, mousewheel (TODO: really?)
+	bool HandleKeyEvent(const sysEvent_t& keyEvent)
+	{
+		assert(keyEvent.evType == SE_KEY);
+
+		keyNum_t keyNum = static_cast<keyNum_t>(keyEvent.evValue);
+		bool pressed = keyEvent.evValue2;
+
+		if(keyNum < K_JOY1)
+		{
+			// Key::Scan is dinput keynums, and so is keyNum_t (at least for everything below K_JOY1)
+			Key::Scan key = static_cast<Key::Scan>(keyEvent.evValue);
+
+			if(pressed) // 1 if pressed, 0 if released
+			{
+				return ceguiSys->getDefaultGUIContext().injectKeyDown( key );
+			}
+			else
+			{
+				return ceguiSys->getDefaultGUIContext().injectKeyUp( key );
+			}
+		}
+		else if(keyNum >= K_MOUSE1 && keyNum < K_MOUSE1 + MouseButtonCount)
+		{
+			// K_MOUSE* are contiguous, so are CEGUI::MouseButton::*Button - and have the same order
+			// (left, right, middle, X1, X2). CEGUI::LeftButton is 0.
+			MouseButton button = static_cast<MouseButton>(keyNum - K_MOUSE1);
+			if(pressed)
+			{
+				return ceguiSys->getDefaultGUIContext().injectMouseButtonDown(button);
+			}
+			else
+			{
+				return ceguiSys->getDefaultGUIContext().injectMouseButtonUp(button);
+			}
+		}
+
+		return false;
+	}
+
 } //anon namespace
 
 bool idCEGUI::Init()
@@ -188,40 +225,33 @@ bool idCEGUI::InjectChar(uint32 utf32char)
 	return ceguiSys->getDefaultGUIContext().injectChar(utf32char);
 }
 
-bool idCEGUI::InjectKeyDown(keyNum_t key)
+// inject a sys event
+bool idCEGUI::InjectSysEvent(const sysEvent_t* event)
 {
-	// Key::Scan is dinput keynums, and so is keyNum_t
-	return ceguiSys->getDefaultGUIContext().injectKeyDown( static_cast<Key::Scan>(key) );
-}
-
-bool idCEGUI::InjectKeyUp(keyNum_t key)
-{
-	// Key::Scan is dinput keynums, and so is keyNum_t
-	return ceguiSys->getDefaultGUIContext().injectKeyUp( static_cast<Key::Scan>(key) );
-}
-
-bool idCEGUI::InjectMousePosition(int x, int y)
-{
-	return ceguiSys->getDefaultGUIContext().injectMousePosition(x, y);
-}
-
-bool idCEGUI::InjectMouseButtonDown(int button)
-{
-	// luckily cegui enumerates the mouse buttons in the same way we do (it just supports less)
-	if(button < MouseButtonCount)
+	if(event == NULL)
 	{
-		return ceguiSys->getDefaultGUIContext().injectMouseButtonDown(static_cast<MouseButton>(button));
+		assert(0); // I think this shouldn't happen
+		return false;
 	}
-	return false;
-}
 
-bool idCEGUI::InjectMouseButtonUp(int button)
-{
-	// luckily cegui enumerates the mouse buttons in the same way we do (it just supports less)
-	if(button < MouseButtonCount)
+	const sysEvent_t& ev = *event;
+
+	switch(ev.evType)
 	{
-		return ceguiSys->getDefaultGUIContext().injectMouseButtonUp(static_cast<MouseButton>(button));
+		case SE_KEY:
+			return HandleKeyEvent(ev);
+		case SE_MOUSE_ABSOLUTE:
+			return ceguiSys->getDefaultGUIContext().injectMousePosition(ev.evValue, ev.evValue2);
+		case SE_CHAR:
+			// TODO: not really an utf-32 char.. but values should be the same for ASCII range
+			return ceguiSys->getDefaultGUIContext().injectChar(ev.evValue);
+
+		// TODO: SE_UNICHAR
+
+		default:
+			break;
 	}
+
 	return false;
 }
 

@@ -40,18 +40,16 @@ namespace idCEGUI
 {
 	bool Init();
 
+	// tell cegui that the (game) window size has changed
 	void NotifyDisplaySizeChanged(int width, int height);
 
+	// inject an UTF-32 char TODO: might just be handled by InjectSysEvent() as well.
 	bool InjectChar(uint32 utf32char);
 
-	bool InjectKeyDown (keyNum_t key);
-	bool InjectKeyUp (keyNum_t key);
+	// inject a sys event (keyboard, mouse)
+	bool InjectSysEvent(const sysEvent_t *keyEvent);
 
-	bool InjectMousePosition(int x, int y);
-
-	bool InjectMouseButtonDown(int button); // 0 == first mouse button - just like sys_mEvents
-	bool InjectMouseButtonUp(int button); // 0 == first mouse button
-
+	// inject the current mouse wheel delta for scrolling
 	bool InjectMouseWheel(int delta);
 
 	void Update(); // call this once per frame (at the end) - it'll inject the time pulse and render

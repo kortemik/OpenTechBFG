@@ -755,6 +755,11 @@ void R_SetNewMode( const bool fullInit )
 			// just rebuild the window
 			if( GLimp_SetScreenParms( parms ) )
 			{
+#ifdef USE_CEGUI
+				// DG: cegui must know about the changed window size
+				idCEGUI::NotifyDisplaySizeChanged(parms.width, parms.height);
+#endif // USE_CEGUI
+
 				// it worked
 				break;
 			}
