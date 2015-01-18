@@ -3,7 +3,7 @@
 
 Doom 3 BFG Edition GPL Source Code
 Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
-Copyright (C) 2012 Robert Beckebans
+Copyright (C) 2014-2015 Daniel Gibson and Mikko Kortelainen (OpenTechBFG)
 
 This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
@@ -27,52 +27,36 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#ifndef CEGUI_SDLHOOKS_H_
-#define CEGUI_SDLHOOKS_H_
+// hooks to pass engine events (key, mouse, ...) into CEGUI
 
-#include <SDL.h>
+#ifdef USE_CEGUI
 
-class cegui {
-public:
-	static cegui& getInstance() {
-		static cegui instance;
-		return instance;
-	}
+#ifndef NEO_CEGUI_CEGUI_HOOKS_H_
+#define NEO_CEGUI_CEGUI_HOOKS_H_
 
-	void notifyDisplaySizeChanged(int width, int height);
-	bool injectChar (Uint16 unicode_char);
-	bool injectKeyDown (SDLKey sym);
-	bool injectKeyUp (SDLKey sym);
-	bool injectMousePosition(Uint16 x, Uint16 y);
-	bool injectMouseButtonLeftDown(void);
-	bool injectMouseButtonLeftUp(void);
-	bool injectMouseButtonMiddleDown(void);
-	bool injectMouseButtonMiddleUp(void);
-	bool injectMouseButtonRightDown(void);
-	bool injectMouseButtonRightUp(void);
-	bool injectMouseWheelChange(float delta);
+#include <../sys/sys_public.h>
 
-	bool injectTimePulse (Uint32 ticks);
+namespace idCEGUI
+{
+	bool Init();
 
-	void renderAllGUIContexts(void);
+	// tell cegui that the (game) window size has changed
+	void NotifyDisplaySizeChanged(int width, int height);
 
-private:
-	void initializeKeyMap(void);
-	void initRenderer(void);
-	void initResourceProvider(void);
-	void initResourceGroups(void);
-	void initResources(void);
-	void createWindow(void);
+	// inject an UTF-32 char TODO: might just be handled by InjectSysEvent() as well.
+	bool InjectChar(uint32 utf32char);
 
-	struct ceguiVars;
-	ceguiVars *ourVars;
+	// inject a sys event (keyboard, mouse)
+	bool InjectSysEvent(const sysEvent_t *keyEvent);
 
-	cegui();
+	// inject the current mouse wheel delta for scrolling
+	bool InjectMouseWheel(int delta);
 
-	cegui(cegui const&);
-	void operator=(cegui const&);
-};
+	void Update(); // call this once per frame (at the end) - it'll inject the time pulse and render
+	// TODO: or is there a good reason to update the timepulse at another time (maybe at the beginning of a frame)?
+}
 
 
-#endif /* CEGUI_H_ */
+#endif /* NEO_CEGUI_CEGUI_HOOKS_H_ */
 
+#endif // USE_CEGUI

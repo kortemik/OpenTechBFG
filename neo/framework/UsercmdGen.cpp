@@ -45,6 +45,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_types.h"
 #include "../sys/sys_public.h"
 
+#ifdef USE_CEGUI // we inject mousewheel events in idUsercmdGenLocal::Mouse()
+#include "../cegui/CEGUI_Hooks.h"
+#endif // USE_CEGUI
+
 #pragma hdrstop
 
 idCVar joy_mergedThreshold( "joy_mergedThreshold", "1", CVAR_BOOL | CVAR_ARCHIVE, "If the thresholds aren't merged, you drift more off center" );
@@ -1392,6 +1396,10 @@ void idUsercmdGenLocal::Mouse()
 				break;
 			case M_DELTAZ:	// mouse wheel, may have multiple clicks
 			{
+#ifdef USE_CEGUI // DG: this seems like a good place to inject mousewheel deltas into cegui.
+				idCEGUI::InjectMouseWheel(value);
+#endif //USE_CEGUI
+
 				int key = value < 0 ? K_MWHEELDOWN : K_MWHEELUP;
 				value = abs( value );
 				while( value-- > 0 )

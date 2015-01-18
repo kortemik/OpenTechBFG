@@ -5,7 +5,11 @@ unset(CMAKE_MODULE_PATH)
 include_directories(include)
 
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
-  add_definitions(-Wno-c++11-narrowing)
+  add_definitions(-Wno-c++11-narrowing -Wno-return-type-c-linkage)
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
+	add_definitions(-Wno-non-virtual-dtor -Wno-switch)
 endif()
 
 if(BUNDLED_GLEW)
