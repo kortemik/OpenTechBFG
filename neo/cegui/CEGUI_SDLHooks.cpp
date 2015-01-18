@@ -320,9 +320,11 @@ void cegui::initializeKeyMap(void) {
 cegui::cegui() : ourVars(new ceguiVars)
 {
 initializeKeyMap();
+#if 0
 initRenderer();
 initResourceProvider();
 initResourceGroups();
 initResources();
 createWindow();
+#endif // 0
 }

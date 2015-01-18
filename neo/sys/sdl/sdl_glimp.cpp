@@ -50,10 +50,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "renderer/tr_local.h"
 #include "sdl_local.h"
 
-#ifdef USE_CEGUI
-#include "../cegui/CEGUI_SDLHooks.h"
-#endif
-
 idCVar in_nograb( "in_nograb", "0", CVAR_SYSTEM | CVAR_NOCHEAT, "prevents input grabbing" );
 
 // RB: FIXME this shit. We need the OpenGL alpha channel for advanced rendering effects
@@ -341,13 +337,6 @@ bool GLimp_Init( glimpParms_t parms )
 	SDL_ShowCursor( SDL_DISABLE );
 	// DG end
 	
-#ifdef USE_CEGUI
-	/*
-	 * Initializes CEGUI
-	 */
-	cegui::getInstance();
-#endif
-
 	return true;
 }
 /*
@@ -548,30 +537,6 @@ GLimp_SwapBuffers
 */
 void GLimp_SwapBuffers()
 {
-#ifdef USE_CEGUI
-
-	cegui::getInstance().injectTimePulse(SDL_GetTicks());
-/*
- * update cegui
- */
-	GLint glProgId;
-	GLint glVertexArray;
-	GLint glArrayBuffer;
-	// save the state
-	glGetIntegerv(GL_CURRENT_PROGRAM, &glProgId);
-	glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &glVertexArray);
-	glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &glArrayBuffer);
-	// set defaults for cegui
-	glUseProgram(0);
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glActiveTexture(GL_TEXTURE0);
-	cegui::getInstance().renderAllGUIContexts();
-	glActiveTexture(GL_TEXTURE0);
-	glBindBuffer(GL_ARRAY_BUFFER, glArrayBuffer);
-	glBindVertexArray(glVertexArray);
-	glUseProgram(glProgId);
-#endif
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	SDL_GL_SwapWindow( window );
 #else
