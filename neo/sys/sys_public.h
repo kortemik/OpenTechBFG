@@ -111,7 +111,9 @@ enum sysEventType_t
 	SE_MOUSE_ABSOLUTE,		// evValue and evValue2 are absolute coordinates in the window's client area.
 	SE_MOUSE_LEAVE,			// evValue and evValue2 are meaninless, this indicates the mouse has left the client area.
 	SE_JOYSTICK,		// evValue is an axis number and evValue2 is the current state (-127 to 127)
-	SE_CONSOLE				// evPtr is a char*, from typing something at a non-game console
+	SE_CONSOLE,				// evPtr is a char*, from typing something at a non-game console
+
+	SE_UNICHAR				// evValue is an UTF-32 char. DG: added for CEGUI
 };
 
 enum sys_mEvents

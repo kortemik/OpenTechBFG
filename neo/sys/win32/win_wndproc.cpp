@@ -166,6 +166,31 @@ void WIN_Sizing( WORD side, RECT* rect )
 	}
 }
 
+// DG: support utf32 unichar events
+static void GenerateUniCharEvents( WPARAM wParam, LPARAM lParam )
+{
+	// this is how SDL2 generates SDL_TEXTINPUT events on windows (they translate it to utf-8 afterwards)
+	PBYTE kbState[256];
+	int32 uniChar = 0; // UTF32 char
+
+	if( GetKeyboardState(kbState) == 0 )
+	{
+		// it failed - print warning?
+
+		return;
+	}
+
+	if( ToUnicode( wParam, (lParam >> 16) & 0xff, kbState, (LPWSTR)&uniChar, 1, 0 ) > 0 )
+	{
+		WORD repetition;
+		for( repetition = lParam & 0xffff; repetition > 0; --repetition )
+		{
+			Sys_QueEvent( SE_UNICHAR, uniChar, 0, 0, NULL, 0 );
+		}
+	}
+}
+// DG end
+
 /*
 ====================
 MainWndProc
@@ -341,6 +366,14 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 				key = K_NUMLOCK;
 			}
 			Sys_QueEvent( SE_KEY, key, true, 0, NULL, 0 );
+
+			// DG: generate SE_UNICHAR events - only for WM_KEYDOWN, not for WM_SYSKEYDOWN, I think
+			if( uMsg == WM_KEYDOWN )
+			{
+				GenerateUniCharEvents( wParam, lParam );
+			}
+			// DG end
+
 			break;
 			
 		case WM_SYSKEYUP:
