@@ -242,11 +242,8 @@ bool idCEGUI::InjectSysEvent(const sysEvent_t* event)
 			return HandleKeyEvent(ev);
 		case SE_MOUSE_ABSOLUTE:
 			return ceguiSys->getDefaultGUIContext().injectMousePosition(ev.evValue, ev.evValue2);
-		case SE_CHAR:
-			// TODO: not really an utf-32 char.. but values should be the same for ASCII range
+		case SE_UNICHAR:
 			return ceguiSys->getDefaultGUIContext().injectChar(ev.evValue);
-
-		// TODO: SE_UNICHAR
 
 		default:
 			break;

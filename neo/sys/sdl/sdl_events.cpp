@@ -176,6 +176,42 @@ static SDL_Scancode KeyNumToSDLScanCode(int keyNum)
 	return SDL_SCANCODE_UNKNOWN;
 }
 
+// both strings are expected to have at most SDL_TEXTINPUTEVENT_TEXT_SIZE chars/ints (including terminating null)
+static void ConvertUTF8toUTF32(const char* utf8str, int32* utf32buf)
+{
+	static SDL_iconv_t cd = SDL_iconv_t(-1);
+
+	if( cd == SDL_iconv_t(-1) )
+	{
+		const char* toFormat = "UTF-32LE"; // TODO: what does CEGUI expect on big endian machines?
+		cd = SDL_iconv_open(toFormat, "UTF-8");
+		if( cd == SDL_iconv_t(-1) )
+		{
+			common->Warning("Couldn't initialize SDL_iconv for UTF-8 to UTF-32!"); // TODO: or error?
+			return;
+		}
+	}
+
+	size_t len = strlen(utf8str);
+
+	size_t inbytesleft = len;
+	size_t outbytesleft = 4 * SDL_TEXTINPUTEVENT_TEXT_SIZE; // *4 because utf-32 needs 4x as much space as utf-8
+	char* outbuf = (char*)utf32buf;
+	size_t n = SDL_iconv(cd, &utf8str, &inbytesleft, &outbuf, &outbytesleft);
+
+	if( n == size_t(-1) ) // some error occured during iconv
+	{
+		common->Warning("Converting UTF-8 string \"%s\" from SDL_TEXTINPUT to UTF-32 failed!", utf8str);
+
+		// clear utf32-buffer, just to be sure there's no garbage..
+		memset(utf32buf, 0, SDL_TEXTINPUTEVENT_TEXT_SIZE*sizeof(int32));
+	}
+
+	// reset cd so it can be used again
+	SDL_iconv(cd, NULL, &inbytesleft, NULL, &outbytesleft);
+
+}
+
 #else // SDL1.2
 static int SDL_KeyToDoom3Key( SDL_Keycode key, bool& isChar )
 {
@@ -820,21 +856,41 @@ sysEvent_t Sys_GetEvent()
 	
 	if( str_pos != 0 )
 	{
-		// TODO: SE_UNICHAR
-
 		res.evType = SE_CHAR;
 		res.evValue = str[str_pos];
 		
 		++str_pos;
-		if( !str[str_pos] )
+		if( !str[str_pos] || str_pos == SDL_TEXTINPUTEVENT_TEXT_SIZE )
 		{
 			memset( str, 0, sizeof( str ) );
 			str_pos = 0;
 		}
 		
+		// TODO: only return for ascii values?
+
 		return res;
 	}
 	
+	// utf-32 version of the textinput event
+	static int32 uniStr[SDL_TEXTINPUTEVENT_TEXT_SIZE] = {0};
+	static size_t uniStrPos = 0;
+
+	if(uniStr[0] != 0)
+	{
+		res.evType = SE_UNICHAR;
+		res.evValue = uniStr[uniStrPos];
+
+		++uniStrPos;
+
+		if( !uniStr[uniStrPos] || uniStrPos == SDL_TEXTINPUTEVENT_TEXT_SIZE )
+		{
+			memset(uniStr, 0, sizeof(uniStr));
+			uniStrPos = 0;
+		}
+
+		return res;
+	}
+
 	// DG: fake a "mousewheel not pressed anymore" event for SDL2
 	// so scrolling in menus stops after one step
 	static int mwheelRel = 0;
@@ -850,6 +906,7 @@ sysEvent_t Sys_GetEvent()
 #endif
 	
 	static byte c = 0;
+	static int32 uniChar = 0;
 	
 	if( c )
 	{
@@ -861,6 +918,16 @@ sysEvent_t Sys_GetEvent()
 		return res;
 	}
 	
+	if(uniChar)
+	{
+		res.evType = SE_UNICHAR;
+		res.evValue = uniChar;
+
+		uniChar = 0;
+
+		return res;
+	}
+
 	// loop until there is an event we care about (will return then) or no more events
 	while( SDL_PollEvent( &ev ) )
 	{
@@ -995,11 +1062,15 @@ sysEvent_t Sys_GetEvent()
 				
 #if ! SDL_VERSION_ATLEAST(2, 0, 0)
 				// DG: only do this for key-down, don't care about isChar from SDL_KeyToDoom3Key.
-				//     if unicode is not 0 and is translatable to ASCII it should work..
-				if( ev.key.state == SDL_PRESSED && ( ev.key.keysym.unicode & 0xff80 ) == 0 )
+				//     if unicode is not 0  it should work..
+				if( ev.key.state == SDL_PRESSED )
 				{
-					// TODO: SE_UNICHAR
-					c = ev.key.keysym.unicode & 0x7f;
+					uniChar = ev.key.keysym.unicode; // for SE_UNICHAR
+					if(( ev.key.keysym.unicode & 0xff80 ) == 0)
+					{
+						// it's translatable to ascii
+						c = ev.key.keysym.unicode & 0x7f; // for SE_CHAR
+					}
 				}
 				// DG end
 #endif
@@ -1078,7 +1149,9 @@ sysEvent_t Sys_GetEvent()
 			case SDL_TEXTINPUT:
 				if( ev.text.text[0] != '\0' )
 				{
-					// TODO: SE_UNICHAR
+					// fill uniStr array for SE_UNICHAR events
+					ConvertUTF8toUTF32(ev.text.text, uniStr);
+
 					// FIXME: all this really only works for ascii.. convert to unicode etc
 					if( ev.text.text[1] )
 					{
