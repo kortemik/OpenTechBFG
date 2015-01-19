@@ -840,8 +840,9 @@ Sys_GetEvent
 */
 sysEvent_t Sys_GetEvent()
 {
-	SDL_Event ev;
 	sysEvent_t res = { };
+
+	SDL_Event ev;
 	int key;
 	
 	// when this is returned, it's assumed that there are no more events!
@@ -903,7 +904,7 @@ sysEvent_t Sys_GetEvent()
 		return res;
 	}
 	// DG end
-#endif
+#endif // SDL2
 	
 	static byte c = 0;
 	static int32 uniChar = 0;
@@ -987,7 +988,7 @@ sysEvent_t Sys_GetEvent()
 				}
 				
 				continue; // handle next event
-#else
+#else // SDL 1.2
 			case SDL_ACTIVEEVENT:
 			{
 				// DG: (un-)pause the game when focus is gained, that also (un-)grabs the input
@@ -1031,7 +1032,7 @@ sysEvent_t Sys_GetEvent()
 				continue; // handle next event
 			}
 			// DG end
-#endif
+#endif // SDL1.2
 			
 			case SDL_KEYDOWN:
 				if( ev.key.keysym.sym == SDLK_RETURN && ( ev.key.keysym.mod & KMOD_ALT ) > 0 )
@@ -1073,7 +1074,7 @@ sysEvent_t Sys_GetEvent()
 					}
 				}
 				// DG end
-#endif
+#endif // SDL 1.2
 				
 				// fall through
 			case SDL_KEYUP:
@@ -1099,7 +1100,7 @@ sysEvent_t Sys_GetEvent()
 							
 						continue; // just handle next event
 					}
-#else
+#else // SDL1.2
 					key = SDL_KeyToDoom3Key( ev.key.keysym.sym, isChar );
 
 					if( key == 0 )
@@ -1130,7 +1131,7 @@ sysEvent_t Sys_GetEvent()
 							continue; // just handle next event
 						}
 					}
-#endif
+#endif // SDL 1.2
 				}
 				
 				res.evType = SE_KEY;
@@ -1166,7 +1167,7 @@ sysEvent_t Sys_GetEvent()
 				}
 				
 				continue; // just handle next event
-#endif
+#endif // SDL2
 				
 			case SDL_MOUSEMOTION:
 				// DG: return event with absolute mouse-coordinates when in menu
@@ -1199,27 +1200,17 @@ sysEvent_t Sys_GetEvent()
 			case SDL_MOUSEWHEEL:
 				res.evType = SE_KEY;
 				
-				if( ev.wheel.y > 0 )
-				{
-					res.evValue = K_MWHEELUP;
-					mouse_polls.Append( mouse_poll_t( M_DELTAZ, 1 ) );
-				}
-				else
-				{
-					res.evValue = K_MWHEELDOWN;
-					mouse_polls.Append( mouse_poll_t( M_DELTAZ, -1 ) );
-				}
+				res.evValue = (ev.wheel.y > 0) ? K_MWHEELUP : K_MWHEELDOWN;
 				
-				// TODO: mouse_polls.Append( mouse_poll_t( M_DELTAZ, ev.wheel.y ); ???
+				mouse_polls.Append( mouse_poll_t( M_DELTAZ, ev.wheel.y ) );
 
-				// DG: remember mousewheel direction to issue a "not pressed anymore" event
+				res.evValue2 = 1; // for "pressed"
+
+				// remember mousewheel direction to issue a "not pressed anymore" event
 				mwheelRel = res.evValue;
-				// DG end
-				
-				res.evValue2 = 1;
 				
 				return res;
-#endif
+#endif // SDL2
 				
 			case SDL_MOUSEBUTTONDOWN:
 			case SDL_MOUSEBUTTONUP:
@@ -1239,9 +1230,15 @@ sysEvent_t Sys_GetEvent()
 						res.evValue = K_MOUSE2;
 						mouse_polls.Append( mouse_poll_t( M_ACTION2, ev.button.state == SDL_PRESSED ? 1 : 0 ) );
 						break;
+					case SDL_BUTTON_X1:
+						res.evValue = K_MOUSE4;
+						mouse_polls.Append( mouse_poll_t( M_ACTION4, ev.button.state == SDL_PRESSED ? 1 : 0 ) );
+						break;
+					case SDL_BUTTON_X2:
+						res.evValue = K_MOUSE5;
+						mouse_polls.Append( mouse_poll_t( M_ACTION5, ev.button.state == SDL_PRESSED ? 1 : 0 ) );
+						break;
 						
-					// TODO: X1 and X2 for M_ACTION4-8 ?
-
 #if !SDL_VERSION_ATLEAST(2, 0, 0)
 					case SDL_BUTTON_WHEELUP:
 						res.evValue = K_MWHEELUP;
@@ -1253,7 +1250,7 @@ sysEvent_t Sys_GetEvent()
 						if( ev.button.state == SDL_PRESSED )
 							mouse_polls.Append( mouse_poll_t( M_DELTAZ, -1 ) );
 						break;
-#endif
+#endif // SDL1.2
 				}
 				
 				res.evValue2 = ev.button.state == SDL_PRESSED ? 1 : 0;
@@ -1536,7 +1533,8 @@ sysEvent_t Sys_GetEvent()
 				
 			case SDL_QUIT:
 				PushConsoleEvent( "quit" );
-				return no_more_events; // don't handle next event, just quit.
+				res = no_more_events; // don't handle next event, just quit.
+				return res;
 				
 			case SDL_USEREVENT:
 				switch( ev.user.code )
@@ -1556,7 +1554,8 @@ sysEvent_t Sys_GetEvent()
 		}
 	}
 	
-	return no_more_events;
+	res = no_more_events;
+	return res;
 }
 
 /*
