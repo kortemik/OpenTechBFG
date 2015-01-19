@@ -34,7 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef NEO_CEGUI_CEGUI_HOOKS_H_
 #define NEO_CEGUI_CEGUI_HOOKS_H_
 
-#include <../sys/sys_public.h>
+#include "../sys/sys_public.h"
 
 namespace idCEGUI
 {
@@ -43,16 +43,14 @@ namespace idCEGUI
 	// tell cegui that the (game) window size has changed
 	void NotifyDisplaySizeChanged(int width, int height);
 
-	// inject an UTF-32 char TODO: might just be handled by InjectSysEvent() as well.
-	bool InjectChar(uint32 utf32char);
-
-	// inject a sys event (keyboard, mouse)
+	// inject a sys event (keyboard, mouse, unicode character)
 	bool InjectSysEvent(const sysEvent_t *keyEvent);
 
 	// inject the current mouse wheel delta for scrolling
 	bool InjectMouseWheel(int delta);
 
-	void Update(); // call this once per frame (at the end) - it'll inject the time pulse and render
+	// call this once per frame (at the end) - it'll inject the time pulse and render
+	void Update();
 	// TODO: or is there a good reason to update the timepulse at another time (maybe at the beginning of a frame)?
 }
 
