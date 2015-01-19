@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?>
-
-<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="com.qnx.qcc.configuration.staticLib.debug.395557705">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.staticLib.debug.395557705" moduleId="org.eclipse.cdt.core.settings" name="Device-Debug">
@@ -11,13 +9,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib/Device-Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib"/>
-						<entry flags="" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -43,7 +41,12 @@
 									<listOptionValue builtIn="false" value="_DEBUG"/>
 									<listOptionValue builtIn="false" value="_INLINEDEBUG"/>
 								</option>
-								<option id="com.qnx.qcc.option.compiler.ccoptions.873337990" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions"/>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.873337990" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-unknown-pragmas"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
+								</option>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.1490938776" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
 								</option>
@@ -80,13 +83,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib/Device-Release"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib"/>
-						<entry flags="" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -116,7 +119,12 @@
 									<listOptionValue builtIn="false" value="-frecord-gcc-switches"/>
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
 								</option>
-								<option id="com.qnx.qcc.option.compiler.ccoptions.1644774784" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions"/>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.1644774784" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-unknown-pragmas"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
+								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.357395126" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool id="com.qnx.qcc.tool.assembler.1949191104" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
@@ -149,13 +157,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib/Device-Profile"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib"/>
-						<entry flags="" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -183,7 +191,12 @@
 									<listOptionValue builtIn="false" value="_INLINEDEBUG"/>
 									<listOptionValue builtIn="false" value="NO_NEON_INTRIN"/>
 								</option>
-								<option id="com.qnx.qcc.option.compiler.ccoptions.1140395024" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions"/>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.1140395024" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-unknown-pragmas"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
+								</option>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.1976137877" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
 								</option>
@@ -221,13 +234,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib/Device-Coverage"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib"/>
-						<entry flags="" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -254,7 +267,12 @@
 									<listOptionValue builtIn="false" value="_DEBUG"/>
 									<listOptionValue builtIn="false" value="_INLINEDEBUG"/>
 								</option>
-								<option id="com.qnx.qcc.option.compiler.ccoptions.1240332865" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions"/>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.1240332865" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-unknown-pragmas"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
+								</option>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.1224410427" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
 								</option>
@@ -292,13 +310,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib/Simulator-Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib"/>
-						<entry flags="" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -323,7 +341,12 @@
 									<listOptionValue builtIn="false" value="_DEBUG"/>
 									<listOptionValue builtIn="false" value="_INLINEDEBUG"/>
 								</option>
-								<option id="com.qnx.qcc.option.compiler.ccoptions.27184091" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions"/>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.27184091" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-unknown-pragmas"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
+								</option>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.1414109948" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-msse"/>
 									<listOptionValue builtIn="false" value="-msse2"/>
@@ -361,13 +384,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib/Simulator-Profile"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib"/>
-						<entry flags="" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -393,7 +416,12 @@
 									<listOptionValue builtIn="false" value="_DEBUG"/>
 									<listOptionValue builtIn="false" value="_INLINEDEBUG"/>
 								</option>
-								<option id="com.qnx.qcc.option.compiler.ccoptions.1636896177" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions"/>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.1636896177" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-unknown-pragmas"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
+								</option>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.2090494324" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-msse"/>
 									<listOptionValue builtIn="false" value="-msse2"/>
@@ -432,13 +460,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/idlib"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib/Simulator-Coverage"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/idlib"/>
-						<entry flags="" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="idlib" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -464,7 +492,12 @@
 									<listOptionValue builtIn="false" value="_DEBUG"/>
 									<listOptionValue builtIn="false" value="_INLINEDEBUG"/>
 								</option>
-								<option id="com.qnx.qcc.option.compiler.ccoptions.1519344823" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions"/>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.1519344823" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-unknown-pragmas"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
+								</option>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.977810563" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-msse"/>
 									<listOptionValue builtIn="false" value="-msse2"/>

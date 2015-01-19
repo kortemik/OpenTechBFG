@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?>
-
-<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="com.qnx.qcc.configuration.staticLib.debug.1258582821">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.staticLib.debug.1258582821" moduleId="org.eclipse.cdt.core.settings" name="Device-Debug">
@@ -11,13 +9,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Device-Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
-						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -43,6 +41,12 @@
 								</option>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.531411907" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.409564280" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-unknown-pragmas"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.132165498" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -84,13 +88,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Device-Release"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
-						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -129,6 +133,12 @@
 								<option id="com.qnx.qcc.option.compiler.pie.796994145" name="Position Independent Executable (-fPIE)" superClass="com.qnx.qcc.option.compiler.pie" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.568461763" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.151806534" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-unknown-pragmas"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.1846122860" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -180,13 +190,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Device-Profile"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
-						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -226,6 +236,12 @@
 								</option>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.2020627110" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.1668980301" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-unknown-pragmas"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.1624445506" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -279,13 +295,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Device-Coverage"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
-						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -323,6 +339,12 @@
 								</option>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.502424578" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.1701073131" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-unknown-pragmas"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.1905752695" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -376,13 +398,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Simulator-Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
-						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -455,6 +477,12 @@
 								<option id="com.qnx.qcc.option.compiler.qccoptions.169635127" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-msse"/>
 									<listOptionValue builtIn="false" value="-msse2"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.2147157979" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-unknown-pragmas"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.433288646" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -543,13 +571,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Simulator-Profile"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
-						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -624,6 +652,12 @@
 								<option id="com.qnx.qcc.option.compiler.qccoptions.261936578" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-msse"/>
 									<listOptionValue builtIn="false" value="-msse2"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.982295319" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-unknown-pragmas"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.1739592871" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -713,13 +747,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/game-d3xp"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp/Simulator-Coverage"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/game-d3xp"/>
-						<entry flags="" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="game-d3xp" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -793,6 +827,12 @@
 								<option id="com.qnx.qcc.option.compiler.qccoptions.221432536" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-msse"/>
 									<listOptionValue builtIn="false" value="-msse2"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.1775965208" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-unknown-pragmas"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.987042865" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>

@@ -73,7 +73,7 @@ If you have questions concerning this license or the applicable additional terms
 	typedef pthread_mutex_t			mutexHandle_t;
 	typedef idSysThreadSignal*		signalHandle_t;
 	typedef int						interlockedInt_t;
-	#define SYS_MEMORYBARRIER		__cpu_membarrier(); //XXX Not sure if this is correct
+	#define SYS_MEMORYBARRIER		__sync_synchronize();
 #endif
 
 

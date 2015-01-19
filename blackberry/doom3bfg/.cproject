@@ -35,7 +35,12 @@
 								<option id="com.qnx.qcc.option.compiler.qccoptions.168100639" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
 								</option>
-								<option id="com.qnx.qcc.option.compiler.ccoptions.2129427086" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList"/>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.2129427086" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-unknown-pragmas"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
+								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.1422041738" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool command="qcc" commandLinePattern="${COMMAND}  ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS} ${FLAGS}" errorParsers="" id="com.qnx.qcc.tool.assembler.696761276" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
@@ -174,6 +179,12 @@
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
 								</option>
 								<option id="com.qnx.qcc.option.compile.debug.1625623223" name="Debug (-g)" superClass="com.qnx.qcc.option.compile.debug" value="true" valueType="boolean"/>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.108078689" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-unknown-pragmas"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
+								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.516975726" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool errorParsers="" id="com.qnx.qcc.tool.assembler.1112417811" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
@@ -312,6 +323,12 @@
 								</option>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.1174713231" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.578521302" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-unknown-pragmas"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.452095292" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -452,6 +469,12 @@
 								<option id="com.qnx.qcc.option.compiler.qccoptions.212591966" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
 								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.1911510923" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-unknown-pragmas"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
+								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.1564631756" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool errorParsers="" id="com.qnx.qcc.tool.assembler.1194282320" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
@@ -589,6 +612,12 @@
 								</option>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.247017931" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.845723618" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-unknown-pragmas"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.1137492076" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -728,6 +757,12 @@
 								<option id="com.qnx.qcc.option.compiler.qccoptions.1447811706" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
 								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.1938152021" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-unknown-pragmas"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
+								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.1282601949" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
 							<tool errorParsers="" id="com.qnx.qcc.tool.assembler.1962855" name="QCC Assembler" superClass="com.qnx.qcc.tool.assembler">
@@ -866,6 +901,12 @@
 								</option>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.929329724" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.812257517" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-unknown-pragmas"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.796137051" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>

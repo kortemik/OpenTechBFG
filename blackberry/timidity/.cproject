@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?>
-
-<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="com.qnx.qcc.configuration.staticLib.debug.1215202710">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.staticLib.debug.1215202710" moduleId="org.eclipse.cdt.core.settings" name="Device-Debug">
@@ -11,13 +9,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity/Device-Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity"/>
-						<entry flags="" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -43,7 +41,11 @@
 								<option id="com.qnx.qcc.option.compiler.qccoptions.145142291" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
 								</option>
-								<option id="com.qnx.qcc.option.compiler.ccoptions.717561133" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList"/>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.717561133" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
+								</option>
 								<option id="com.qnx.qcc.option.compiler.cppoptions.466530091" name="Preprocessor Options (-Wp,)" superClass="com.qnx.qcc.option.compiler.cppoptions"/>
 								<inputType id="com.qnx.qcc.inputType.compiler.843230115" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -78,13 +80,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity/Device-Release"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity"/>
-						<entry flags="" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -110,6 +112,11 @@
 								<option id="com.qnx.qcc.option.compiler.pie.1226851860" name="Position Independent Executable (-fPIE)" superClass="com.qnx.qcc.option.compiler.pie" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.1467082997" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.78128059" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.862972812" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -143,13 +150,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity/Device-Profile"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity"/>
-						<entry flags="" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -176,6 +183,11 @@
 								</option>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.1061220755" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.785948096" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.329684942" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -211,13 +223,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity/Device-Coverage"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity"/>
-						<entry flags="" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -243,6 +255,11 @@
 								</option>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.1089007976" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.414077535" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.760457011" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -278,13 +295,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity/Simulator-Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity"/>
-						<entry flags="" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -309,6 +326,11 @@
 								<option id="com.qnx.qcc.option.compiler.qccoptions.1314586345" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-msse"/>
 									<listOptionValue builtIn="false" value="-msse2"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.606241817" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.1914455561" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -343,13 +365,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity/Simulator-Profile"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity"/>
-						<entry flags="" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -375,6 +397,11 @@
 								<option id="com.qnx.qcc.option.compiler.qccoptions.362455561" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-msse"/>
 									<listOptionValue builtIn="false" value="-msse2"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.348082999" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.1380973916" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -410,13 +437,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/timidity"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity/Simulator-Coverage"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/timidity"/>
-						<entry flags="" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="timidity" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -442,6 +469,11 @@
 								<option id="com.qnx.qcc.option.compiler.qccoptions.1494059289" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-msse"/>
 									<listOptionValue builtIn="false" value="-msse2"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.884650037" name="Compiler Options (-Wc,)" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.72517209" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>

@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?>
-
-<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="com.qnx.qcc.configuration.staticLib.debug.283553325">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.qnx.qcc.configuration.staticLib.debug.283553325" moduleId="org.eclipse.cdt.core.settings" name="Device-Debug">
@@ -11,13 +9,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic/Device-Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic"/>
-						<entry flags="" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -43,6 +41,11 @@
 								</option>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.1342022069" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.470625616" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.787563552" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -77,13 +80,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic/Device-Release"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic"/>
-						<entry flags="" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -110,6 +113,11 @@
 								<option id="com.qnx.qcc.option.compiler.pie.1446439643" name="Position Independent Executable (-fPIE)" superClass="com.qnx.qcc.option.compiler.pie" value="true" valueType="boolean"/>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.842766458" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.2106748221" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.635738240" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -143,13 +151,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic/Device-Profile"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic"/>
-						<entry flags="" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -177,6 +185,11 @@
 								</option>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.1289208344" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.971965470" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.517326894" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -212,13 +225,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic/Device-Coverage"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic"/>
-						<entry flags="" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -245,6 +258,11 @@
 								</option>
 								<option id="com.qnx.qcc.option.compiler.qccoptions.1889202052" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mfpu=neon"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.1283246542" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.489816505" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -280,13 +298,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic/Simulator-Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic"/>
-						<entry flags="" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -312,6 +330,11 @@
 								<option id="com.qnx.qcc.option.compiler.qccoptions.597152615" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-msse"/>
 									<listOptionValue builtIn="false" value="-msse2"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.642421779" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.1888377998" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -346,13 +369,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic/Simulator-Profile"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic"/>
-						<entry flags="" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -379,6 +402,11 @@
 								<option id="com.qnx.qcc.option.compiler.qccoptions.472213192" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-msse"/>
 									<listOptionValue builtIn="false" value="-msse2"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.1236859358" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.67071526" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>
@@ -414,13 +442,13 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/doomclassic"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic/Simulator-Coverage"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/doomclassic"/>
-						<entry flags="" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="NONE" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="doomclassic" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.qnx.tools.ide.qde.core.QDEBynaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -447,6 +475,11 @@
 								<option id="com.qnx.qcc.option.compiler.qccoptions.5196016" name="QCC Options" superClass="com.qnx.qcc.option.compiler.qccoptions" valueType="stringList">
 									<listOptionValue builtIn="false" value="-msse"/>
 									<listOptionValue builtIn="false" value="-msse2"/>
+								</option>
+								<option id="com.qnx.qcc.option.compiler.ccoptions.2078898136" superClass="com.qnx.qcc.option.compiler.ccoptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Wno-psabi"/>
+									<listOptionValue builtIn="false" value="-Wno-reorder"/>
+									<listOptionValue builtIn="false" value="-Wno-write-strings"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.659564180" superClass="com.qnx.qcc.inputType.compiler"/>
 							</tool>

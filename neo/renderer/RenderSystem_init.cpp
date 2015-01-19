@@ -669,7 +669,7 @@ static void R_CheckPortableExtensions() {
 	qglBufferDataARB = (PFNGLBUFFERDATAARBPROC)GLimp_ExtensionPointer( "glBufferData" );
 	qglBufferSubDataARB = (PFNGLBUFFERSUBDATAARBPROC)GLimp_ExtensionPointer( "glBufferSubData" );
 	qglGetBufferSubDataARB = NULL; //Not used
-	qglMapBufferARB = (PFNGLMAPBUFFERARBPROC)GLimp_ExtensionPointer( "glMapBuffer" ); //Commented out. glMapBufferRange used instead
+	qglMapBufferARB = (PFNGLMAPBUFFERARBPROC)GLimp_ExtensionPointer( "glMapBuffer" ); // Commented out. glMapBufferRange used instead
 	if ( qglMapBufferARB == NULL ) {
 		qglMapBufferARB = (PFNGLMAPBUFFERARBPROC)GLimp_ExtensionPointer( "glMapBufferOES" );
 	}
