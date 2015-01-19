@@ -56,6 +56,12 @@ If you have questions concerning this license or the applicable additional terms
 #include "renderer/tr_local.h"
 #include "sdl_local.h"
 
+#ifdef USE_CEGUI
+// DG: we need to tell cegui when the window size changes.
+//     unfortunately there doesn't seem to be a good way to do this outside the backends :-/
+#include "../../cegui/CEGUI_Hooks.h"
+#endif // USE_CEGUI
+
 
 #if !SDL_VERSION_ATLEAST(2, 0, 0)
 #define SDL_Keycode SDLKey
@@ -961,6 +967,11 @@ sysEvent_t Sys_GetEvent()
 						cvarSystem->SetCVarBool( "com_pause", true );
 						// DG end
 						break;
+
+					case SDL_WINDOWEVENT_LEAVE:
+						// mouse has left the window
+						res.evType = SE_MOUSE_LEAVE;
+						return res;
 						
 						// DG: handle resizing and moving of window
 					case SDL_WINDOWEVENT_RESIZED:
@@ -973,6 +984,11 @@ sysEvent_t Sys_GetEvent()
 						glConfig.nativeScreenWidth = w;
 						glConfig.nativeScreenHeight = h;
 
+#ifdef USE_CEGUI
+						// DG: cegui must know about the changed window size
+						idCEGUI::NotifyDisplaySizeChanged(glConfig.nativeScreenWidth, glConfig.nativeScreenHeight);
+#endif // USE_CEGUI
+
 						break;
 					}
 					
@@ -984,6 +1000,7 @@ sysEvent_t Sys_GetEvent()
 						r_windowY.SetInteger( y );
 						break;
 					}
+
 					// DG end
 				}
 				
@@ -1010,6 +1027,14 @@ sysEvent_t Sys_GetEvent()
 				}
 			
 				cvarSystem->SetCVarBool( "com_pause", pause );
+
+				if( ev.active.state == SDL_APPMOUSEFOCUS && !ev.active.gain )
+				{
+					// the mouse has left the window.
+					res.evType = SE_MOUSE_LEAVE;
+					return res;
+				}
+
 			}
 			
 			continue; // handle next event
@@ -1027,6 +1052,12 @@ sysEvent_t Sys_GetEvent()
 			
 				glConfig.nativeScreenWidth = w;
 				glConfig.nativeScreenHeight = h;
+
+#ifdef USE_CEGUI
+				// DG: cegui must know about the changed window size
+				idCEGUI::NotifyDisplaySizeChanged(glConfig.nativeScreenWidth, glConfig.nativeScreenHeight);
+#endif // USE_CEGUI
+
 				// for some reason this needs a vid_restart in SDL1 but not SDL2 so GLimp_SetScreenParms() is called
 				PushConsoleEvent( "vid_restart" );
 				continue; // handle next event

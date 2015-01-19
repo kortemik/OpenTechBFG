@@ -38,6 +38,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "../framework/Console.h"
 #include "../d3xp/Game.h"
 
+#ifdef USE_CEGUI
+// DG: we need to tell cegui when the window size changes
+#include "../../cegui/CEGUI_Hooks.h"
+#endif // USE_CEGUI
+
 LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
 
 static bool s_alttab_disabled;
@@ -222,6 +227,10 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 							r_windowWidth.SetInteger( glConfig.nativeScreenWidth );
 							r_windowHeight.SetInteger( glConfig.nativeScreenHeight );
 						}
+#ifdef USE_CEGUI
+						// DG: cegui must know about the changed window size
+						idCEGUI::NotifyDisplaySizeChanged(glConfig.nativeScreenWidth, glConfig.nativeScreenHeight);
+#endif // USE_CEGUI
 					}
 				}
 			}
