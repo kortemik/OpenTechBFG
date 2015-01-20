@@ -23,6 +23,10 @@ if(BUNDLED_ZLIB)
   set(MINIZIP_H_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../zlib/zlib)
 endif()
 
+if(MINGW)
+  add_definitions(-D__USE_MINGW_ANSI_STDIO=1)
+endif()
+
 set(RAPIDXML_H_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 set(GLM_H_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include/glm)
