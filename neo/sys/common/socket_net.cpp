@@ -38,7 +38,11 @@ Note that other POSIX systems may need some small changes, e.g. in Sys_InitNetwo
 
 #ifndef _WIN32
 #include <sys/socket.h> // IWYU pragma: keep
+#else
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #endif
+
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
