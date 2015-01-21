@@ -29,7 +29,7 @@ endif()
 if(BUNDLED_ZLIB)
   set(MINIZIP_LIB minizip)
   set(MINIZIP_LIB_STATIC_DBG minizip)
-  set(MINIZIP_H_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../zlib/zlib/minizip/)
+  set(MINIZIP_H_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../zlib/zlib/)
 endif()
 
 if(BUNDLED_FREETYPE)
