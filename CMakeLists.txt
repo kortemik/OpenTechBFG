@@ -63,13 +63,13 @@ option(BUNDLED_GLEW
   "Use bundled glew" ON)
 
 option(BUNDLED_FREETYPE
-  "Use bundled freetype" OFF)
+  "Use bundled freetype")
 
 option(BUNDLED_OGGVORBIS
   "Use bundled oggvorbis" OFF)
   
 option(BUNDLED_OPENAL
-  "Use bundled openal" OFF)
+  "Use bundled openal")
 
 option(BUNDLED_SDL
   "Use bundled SDL" OFF)
@@ -104,17 +104,22 @@ if(BUNDLED_GLEW)
   add_subdirectory(libs/glew)
 endif()
 
+# freetype
+if(BUNDLED_FREETYPE)
+  add_subdirectory(libs/freetype)
+endif()
+
 # openal
 if(BUNDLED_OPENAL)
-  add_subdirectory(libs/openal)
+#  add_subdirectory(libs/openal)
 endif()
 
-# openal
+# sdl
 if(BUNDLED_SDL)
-  add_subdirectory(libs/sdl)
+#  add_subdirectory(libs/sdl)
 endif()
 
-# openal
+# cegui
 if(BUNDLED_CEGUI)
   add_subdirectory(libs/cegui)
 endif()

@@ -14,13 +14,30 @@ endif()
 
 if(BUNDLED_GLEW)
   add_definitions(-DGLEW_STATIC)
-  set(GLEW_LIB glew)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../glew/glew/include)
+
   set(GLEW_H_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../glew/glew/include)
+
+  if(WIN32)
+    set(GLEW_LIB_STATIC_DBG glew opengl32 glu32)
+    set(GLEW_LIB glew opengl32 glu32)
+  else()
+    set(GLEW_LIB glew)
+  endif()
 endif()
 
 if(BUNDLED_ZLIB)
   set(MINIZIP_LIB minizip)
-  set(MINIZIP_H_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../zlib/zlib)
+  set(MINIZIP_LIB_STATIC_DBG minizip)
+  set(MINIZIP_H_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../zlib/zlib/minizip/)
+endif()
+
+if(BUNDLED_FREETYPE)
+  set(FREETYPE_H_PATH_ft2build ${CMAKE_CURRENT_SOURCE_DIR}/../freetype/freetype-2.5.5/include/)
+  set(FREETYPE_H_PATH_ftconfig ${CMAKE_CURRENT_SOURCE_DIR}/../freetype/freetype-2.5.5/include/config/)
+
+  set(FREETYPE_LIB freetype)
+  set(FREETYPE_LIB_STATIC_DBG libfreetype)
 endif()
 
 set(RAPIDXML_H_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include)
