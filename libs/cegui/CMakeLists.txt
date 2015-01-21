@@ -37,7 +37,7 @@ if(BUNDLED_FREETYPE)
   set(FREETYPE_H_PATH_ftconfig ${CMAKE_CURRENT_SOURCE_DIR}/../freetype/freetype-2.5.5/include/config/)
 
   set(FREETYPE_LIB freetype)
-  set(FREETYPE_LIB_STATIC_DBG libfreetype)
+  set(FREETYPE_LIB_STATIC_DBG freetype)
 endif()
 
 set(RAPIDXML_H_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include)
