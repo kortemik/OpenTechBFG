@@ -40,6 +40,10 @@ if(BUNDLED_FREETYPE)
   set(FREETYPE_LIB_STATIC_DBG freetype)
 endif()
 
+if(MINGW)
+  add_definitions(-D__USE_MINGW_ANSI_STDIO=1)
+endif()
+
 set(RAPIDXML_H_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 set(GLM_H_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include/glm)
