@@ -237,7 +237,7 @@ bool idCEGUI::InjectSysEvent(const sysEvent_t* event)
 			return HandleKeyEvent(ev);
 		case SE_MOUSE_ABSOLUTE:
 			return ceguiSys->getDefaultGUIContext().injectMousePosition(ev.evValue, ev.evValue2);
-		case SE_UNICHAR:
+		case SE_CHAR:
 			return ceguiSys->getDefaultGUIContext().injectChar(ev.evValue);
 		case SE_MOUSE_LEAVE:
 			// not sure why this is interesting (and mouse entering again not), but whatever..

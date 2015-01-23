@@ -857,34 +857,15 @@ sysEvent_t Sys_GetEvent()
 	// WM0110: previous state of joystick hat
 	static int previous_hat_state = SDL_HAT_CENTERED;	
 
+	// TODO: use eventLoop->PushEvent() instead of those static variables?
 #if SDL_VERSION_ATLEAST(2, 0, 0)
-	static char str[SDL_TEXTINPUTEVENT_TEXT_SIZE] = {0};
-	static size_t str_pos = 0;
-	
-	if( str_pos != 0 )
-	{
-		res.evType = SE_CHAR;
-		res.evValue = str[str_pos];
-		
-		++str_pos;
-		if( !str[str_pos] || str_pos == SDL_TEXTINPUTEVENT_TEXT_SIZE )
-		{
-			memset( str, 0, sizeof( str ) );
-			str_pos = 0;
-		}
-		
-		// TODO: only return for ascii values?
-
-		return res;
-	}
-	
 	// utf-32 version of the textinput event
 	static int32 uniStr[SDL_TEXTINPUTEVENT_TEXT_SIZE] = {0};
 	static size_t uniStrPos = 0;
 
 	if(uniStr[0] != 0)
 	{
-		res.evType = SE_UNICHAR;
+		res.evType = SE_CHAR;
 		res.evValue = uniStr[uniStrPos];
 
 		++uniStrPos;
@@ -912,22 +893,11 @@ sysEvent_t Sys_GetEvent()
 	// DG end
 #endif // SDL2
 	
-	static byte c = 0;
 	static int32 uniChar = 0;
-	
-	if( c )
-	{
-		res.evType = SE_CHAR;
-		res.evValue = c;
-		
-		c = 0;
-		
-		return res;
-	}
 	
 	if(uniChar)
 	{
-		res.evType = SE_UNICHAR;
+		res.evType = SE_CHAR;
 		res.evValue = uniChar;
 
 		uniChar = 0;
@@ -1097,12 +1067,7 @@ sysEvent_t Sys_GetEvent()
 				//     if unicode is not 0  it should work..
 				if( ev.key.state == SDL_PRESSED )
 				{
-					uniChar = ev.key.keysym.unicode; // for SE_UNICHAR
-					if(( ev.key.keysym.unicode & 0xff80 ) == 0)
-					{
-						// it's translatable to ascii
-						c = ev.key.keysym.unicode & 0x7f; // for SE_CHAR
-					}
+					uniChar = ev.key.keysym.unicode; // for SE_CHAR
 				}
 				// DG end
 #endif // SDL 1.2
@@ -1116,7 +1081,7 @@ sysEvent_t Sys_GetEvent()
 				if( ev.key.keysym.scancode == SDL_SCANCODE_GRAVE )
 				{
 					key = K_GRAVE;
-					c = K_BACKSPACE; // bad hack to get empty console inputline..
+					uniChar = K_BACKSPACE; // bad hack to get empty console inputline..
 				} // DG end, the original code is in the else case
 				else
 				{
@@ -1141,16 +1106,16 @@ sysEvent_t Sys_GetEvent()
 						if( uc == Sys_GetConsoleKey( false ) || uc == Sys_GetConsoleKey( true ) )
 						{
 							key = K_GRAVE;
-							c = K_BACKSPACE; // bad hack to get empty console inputline..
+							uniChar = K_BACKSPACE; // bad hack to get empty console inputline..
 						}
 						else
 						{
-							if(c)
+							if(uniChar)
 							{
 								res.evType = SE_CHAR;
-								res.evValue = c;
+								res.evValue = uniChar;
 
-								c = 0;
+								uniChar = 0;
 
 								return res;
 							}
@@ -1172,7 +1137,7 @@ sysEvent_t Sys_GetEvent()
 				kbd_polls.Append( kbd_poll_t( key, ev.key.state == SDL_PRESSED ) );
 				
 				if( key == K_BACKSPACE && ev.key.state == SDL_PRESSED )
-					c = key;
+					uniChar = key;
 					
 				return res;
 			}
@@ -1181,19 +1146,21 @@ sysEvent_t Sys_GetEvent()
 			case SDL_TEXTINPUT:
 				if( ev.text.text[0] != '\0' )
 				{
-					// fill uniStr array for SE_UNICHAR events
+					// fill uniStr array for SE_CHAR events
 					ConvertUTF8toUTF32(ev.text.text, uniStr);
 
-					// FIXME: all this really only works for ascii.. convert to unicode etc
-					if( ev.text.text[1] )
-					{
-						// more than 1 char => handle the next chars later
-						idStr::Copynz( str, ev.text.text, sizeof( str ) );
-						str_pos = 1;
-					}
 					// return an event with the first/only char
 					res.evType = SE_CHAR;
-					res.evValue = ev.text.text[0];
+					res.evValue = uniStr[0];
+
+					uniStrPos = 1;
+
+					if( uniStr[1] == 0)
+					{
+						// it's just this one character, clear uniStr
+						uniStr[0] = 0;
+						uniStrPos = 0;
+					}
 					return res;
 				}
 				
