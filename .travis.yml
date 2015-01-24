@@ -10,7 +10,7 @@ compiler:
   - clang
   - CXX=g++-mingw-w64-x86-64; g++
 before_install:
-  - openssl aes-256-cbc -K $encrypted_24fdd259e571_key -iv $encrypted_24fdd259e571_iv -in id_rsa.enc -out id_rsa -d
+  - openssl aes-256-cbc -K $encrypted_24fdd259e571_key -iv $encrypted_24fdd259e571_iv -in .travis/id_rsa.enc -out .travis/id_rsa -d
 install:
  - if [ "$CXX" = "g++" ]; then sudo sed -i 's/precise/trusty/g' /etc/apt/sources.list; fi
  - if [ "$CXX" = "g++-mingw-w64-x86-64" ]; then sudo sed -i 's/precise/trusty/g' /etc/apt/sources.list; fi
