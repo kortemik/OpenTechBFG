@@ -27,4 +27,4 @@ after_success:
  - cp -a base OpenTechEngine/
  - if [ "$CXX" = "g++-mingw-w64-x86-64" ]; then cp build/OpenTechEngine.exe OpenTechEngine/; else cp build/OpenTechEngine OpenTechEngine/; fi
  - tar cjf OpenTechEngine.tar.bz2 OpenTechEngine
- - scp -B OpenTechEngine.tar.bz2 kordex@frs.sourceforge.net:/home/frs/project/testrepositoryproject/TestRel/$(date +%s).$CXX.OpenTechEngine.tar.bz2
+ - scp -B -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no OpenTechEngine.tar.bz2 kordex@frs.sourceforge.net:/home/frs/project/testrepositoryproject/TestRel/$(date +%s).$CXX.OpenTechEngine.tar.bz2
