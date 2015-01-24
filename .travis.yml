@@ -9,6 +9,8 @@ compiler:
   - gcc
   - clang
   - CXX=g++-mingw-w64-x86-64; g++
+before_install:
+  - openssl aes-256-cbc -K $encrypted_24fdd259e571_key -iv $encrypted_24fdd259e571_iv -in id_rsa.enc -out id_rsa -d
 install:
  - if [ "$CXX" = "g++" ]; then sudo sed -i 's/precise/trusty/g' /etc/apt/sources.list; fi
  - if [ "$CXX" = "g++-mingw-w64-x86-64" ]; then sudo sed -i 's/precise/trusty/g' /etc/apt/sources.list; fi
@@ -17,3 +19,9 @@ install:
  - if [ "$CXX" = "g++" ]; then sudo apt-get install -qqy gcc g++; fi
  - if [ "$CXX" = "g++-mingw-w64-x86-64" ]; then sudo apt-get install -qqy g++-mingw-w64-x86-64; fi
 script: mkdir build && cd build &&  if [ "$CXX" = "g++-mingw-w64-x86-64" ]; then cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../scripts/mingw32.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug -DSDL2=OFF -DBUNDLED_FREETYPE=ON -DBUNDLED_OPENAL=ON ../ ;else cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DSDL2=OFF ../;fi && make
+after_success:
+ - cd ..
+ - chmod 600 .travis/id_rsa
+ - ssh-add .travis/id_rsa
+ - bzip2 -9 build/OpenTechEngine.exe
+ - scp build/OpenTechEngine.exe.bz2 kordex@frs.sourceforge.net:/home/frs/project/testrepositoryproject/TestRel/$(date +%s).OpenTechEngine.exe.bz2
