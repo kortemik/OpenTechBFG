@@ -23,5 +23,8 @@ after_success:
  - cd ..
  - chmod 600 .travis/id_rsa
  - ssh-add .travis/id_rsa
- - bzip2 -9 build/OpenTechEngine.exe
- - scp build/OpenTechEngine.exe.bz2 kordex@frs.sourceforge.net:/home/frs/project/testrepositoryproject/TestRel/$(date +%s).OpenTechEngine.exe.bz2
+ - mkdir OpenTechEngine
+ - cp -a base OpenTechEngine/
+ - if [ "$CXX" = "g++-mingw-w64-x86-64" ]; then cp build/OpenTechEngine.exe OpenTechEngine/; else cp build/OpenTechEngine OpenTechEngine/; fi
+ - tar cjf OpenTechEngine.tar.bz2 OpenTechEngine
+ - scp -B OpenTechEngine.tar.bz2 kordex@frs.sourceforge.net:/home/frs/project/testrepositoryproject/TestRel/$(date +%s).$CXX.OpenTechEngine.tar.bz2
