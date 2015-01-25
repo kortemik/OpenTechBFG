@@ -36,12 +36,11 @@ endif()
 
 if(BUNDLED_FREETYPE)
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../freetype/freetype-2.5.5/include/)
-  set(FREETYPE_H_PATH_ft2build ${CMAKE_CURRENT_SOURCE_DIR}/../freetype/freetype-2.5.5/include/)
-  set(FREETYPE_H_PATH_ftconfig ${CMAKE_CURRENT_SOURCE_DIR}/../freetype/freetype-2.5.5/include/config/)
-
-  set(FREETYPE_LIB freetype)
-  set(FREETYPE_LIB_STATIC freetype)
-  set(FREETYPE_LIB_STATIC_DBG freetype)
+  set(FREETYPE_H_PATH_ft2build ${CMAKE_CURRENT_SOURCE_DIR}/../freetype/freetype-2.5.5/include/ CACHE FILEPATH "Set path FREETYPE_H_PATH_ft2build" FORCE)
+  set(FREETYPE_H_PATH_ftconfig ${CMAKE_CURRENT_SOURCE_DIR}/../freetype/freetype-2.5.5/include/config/ CACHE FILEPATH "Set path FREETYPE_H_PATH_ft2build" FORCE)
+  set(FREETYPE_LIB freetype CACHE FILEPATH "Set path FREETYPE_LIB" FORCE)
+  set(FREETYPE_LIB_STATIC freetype CACHE FILEPATH "Set path FREETYPE_LIB_STATIC" FORCE)
+  set(FREETYPE_LIB_STATIC_DBG freetype CACHE FILEPATH "Set path FREETYPE_LIB_STATIC_DEBUG" FORCE)
 endif()
 
 if(MINGW)
