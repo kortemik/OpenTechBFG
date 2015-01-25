@@ -39,9 +39,9 @@ if(BUNDLED_FREETYPE)
   set(FREETYPE_H_PATH_ft2build ${CMAKE_CURRENT_SOURCE_DIR}/../freetype/freetype-2.5.5/include/)
   set(FREETYPE_H_PATH_ftconfig ${CMAKE_CURRENT_SOURCE_DIR}/../freetype/freetype-2.5.5/include/config/)
 
-  set(FREETYPE_LIB ${CMAKE_CURRENT_SOURCE_DIR} freetype)
-  set(FREETYPE_LIB_STATIC ${CMAKE_CURRENT_SOURCE_DIR} freetype)
-  set(FREETYPE_LIB_STATIC_DBG ${CMAKE_CURRENT_SOURCE_DIR} freetype)
+  set(FREETYPE_LIB freetype)
+  set(FREETYPE_LIB_STATIC freetype)
+  set(FREETYPE_LIB_STATIC_DBG freetype)
 endif()
 
 if(MINGW)

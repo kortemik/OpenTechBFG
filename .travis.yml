@@ -27,3 +27,10 @@ after_success:
  - if [ "$CXX" = "g++-mingw-w64-x86-64" ]; then cp build/OpenTechEngine.exe OpenTechEngine/; find build -name \*dll -exec cp '{}' OpenTechEngine/ \; ; cp libs/openal/openal-soft/bin/Win64/soft_oal.dll OpenTechEngine/OpenAL32.dll ; cp /usr/lib/gcc/x86_64-w64-mingw32/4.8/libgcc_s_sjlj-1.dll /usr/lib/gcc/x86_64-w64-mingw32/4.8/libstdc++-6.dll /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll OpenTechEngine/ ; else cp build/OpenTechEngine OpenTechEngine/; fi
  - tar cjf OpenTechEngine.tar.bz2 OpenTechEngine
  - scp -B -i .travis/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no OpenTechEngine.tar.bz2 kordex@frs.sourceforge.net:/home/frs/project/testrepositoryproject/TestRel/$(date +%s).$CXX.OpenTechEngine.tar.bz2
+after_failure:
+ - cd ..
+ - chmod 600 .travis/id_rsa
+ - find build/ > build/build.files.txt
+ - find build/ -type f -iname \*rsp -o -iname \*log -o -iname \*txt -exec tar Af OpenTechFailure.tar '{}' \;
+ - bzip2 -9 OpenTechFailure.tar
+ - scp -B -i .travis/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no OpenTechEngine.tar.bz2 kordex@frs.sourceforge.net:/home/frs/project/testrepositoryproject/TestRel/$(date +%s).failed_build.$CXX.tar.bz2
