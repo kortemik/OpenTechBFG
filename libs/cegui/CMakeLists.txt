@@ -41,12 +41,7 @@ if(BUNDLED_FREETYPE)
 
   set(FREETYPE_LIB freetype)
   set(FREETYPE_LIB_STATIC freetype)
-
-  if(WIN32)
-    set(FREETYPE_LIB_STATIC_DBG freetype_d)
-  else()
-    set(FREETYPE_LIB_STATIC_DBG freetype)
-  endif()
+  set(FREETYPE_LIB_STATIC_DBG freetype)
 endif()
 
 if(MINGW)
