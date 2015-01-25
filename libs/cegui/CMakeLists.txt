@@ -35,12 +35,18 @@ if(BUNDLED_ZLIB)
 endif()
 
 if(BUNDLED_FREETYPE)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../freetype/freetype-2.5.5/include/)
   set(FREETYPE_H_PATH_ft2build ${CMAKE_CURRENT_SOURCE_DIR}/../freetype/freetype-2.5.5/include/)
   set(FREETYPE_H_PATH_ftconfig ${CMAKE_CURRENT_SOURCE_DIR}/../freetype/freetype-2.5.5/include/config/)
 
   set(FREETYPE_LIB freetype)
   set(FREETYPE_LIB_STATIC freetype)
-  set(FREETYPE_LIB_STATIC_DBG freetype)
+
+  if(WIN32)
+    set(FREETYPE_LIB_STATIC_DBG freetype_d)
+  else()
+    set(FREETYPE_LIB_STATIC_DBG freetype)
+  endif()
 endif()
 
 if(MINGW)
