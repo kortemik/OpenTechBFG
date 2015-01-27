@@ -1228,14 +1228,6 @@ sysEvent_t Sys_GetEvent()
 						res.evValue = K_MOUSE2;
 						mouse_polls.Append( mouse_poll_t( M_ACTION2, ev.button.state == SDL_PRESSED ? 1 : 0 ) );
 						break;
-					case SDL_BUTTON_X1:
-						res.evValue = K_MOUSE4;
-						mouse_polls.Append( mouse_poll_t( M_ACTION4, ev.button.state == SDL_PRESSED ? 1 : 0 ) );
-						break;
-					case SDL_BUTTON_X2:
-						res.evValue = K_MOUSE5;
-						mouse_polls.Append( mouse_poll_t( M_ACTION5, ev.button.state == SDL_PRESSED ? 1 : 0 ) );
-						break;
 						
 #if !SDL_VERSION_ATLEAST(2, 0, 0)
 					case SDL_BUTTON_WHEELUP:
@@ -1249,6 +1241,19 @@ sysEvent_t Sys_GetEvent()
 							mouse_polls.Append( mouse_poll_t( M_DELTAZ, -1 ) );
 						break;
 #endif // SDL1.2
+
+					default:
+						// handle X1 button and above
+						if( ev.button.button <= 16 ) // d3bfg doesn't support more than 16 mouse buttons
+						{
+							int buttonIndex = ev.button.button - SDL_BUTTON_LEFT;
+							res.evValue = K_MOUSE1 + buttonIndex;
+							mouse_polls.Append( mouse_poll_t( M_ACTION1 + buttonIndex, ev.button.state == SDL_PRESSED ? 1 : 0 ) );
+						}
+						else // unsupported mouse button
+						{
+							continue; // just ignore
+						}
 				}
 				
 				res.evValue2 = ev.button.state == SDL_PRESSED ? 1 : 0;
