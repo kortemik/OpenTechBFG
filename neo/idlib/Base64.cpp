@@ -5,6 +5,8 @@
 #include "Base64.h"
 #include "../framework/File.h"          // for idFile
 
+namespace BFG {
+
 /*
 Copyright (c) 1996 Lars Wirzenius.  All rights reserved.
 
@@ -258,3 +260,5 @@ void idBase64_TestBase64()
 }
 
 #endif
+
+} // namespace BFG

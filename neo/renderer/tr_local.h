@@ -39,6 +39,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/RenderWorld.h"    // for renderLight_t, etc
 #include "../renderer/RenderSystem.h"   // for idRenderSystem, etc
 
+namespace BFG {
+
 // everything that is needed by the backend needs
 // to be double buffered to allow it to run in
 // parallel on a dual cpu machine
@@ -1481,5 +1483,7 @@ void RB_ShutdownDebugTools();
 #include "RenderWorld_local.h"
 #include "GuiModel.h"
 #include "VertexCache.h"
+
+} // namespace BFG
 
 #endif /* !__TR_LOCAL_H__ */

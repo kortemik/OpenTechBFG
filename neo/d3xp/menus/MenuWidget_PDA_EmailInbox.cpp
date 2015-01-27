@@ -42,6 +42,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../swf/SWF_TextInstance.h"
 #include "../sys/sys_session.h"
 
+namespace BFG {
+
 class idMenuHandler;
 
 static const int MAX_EMAIL_ITEMS = 7;
@@ -219,3 +221,5 @@ void idMenuWidget_PDA_EmailInbox::ObserveEvent( const idMenuWidget& widget, cons
 		}
 	}
 }
+
+} // namespace BFG

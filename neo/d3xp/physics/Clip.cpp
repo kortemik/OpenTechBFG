@@ -55,6 +55,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/Material.h"
 #include "../renderer/RenderWorld.h"
 
+namespace BFG {
+
 class idClass;
 
 #define	MAX_SECTOR_DEPTH				12
@@ -2086,3 +2088,5 @@ bool idClip::DrawModelContactFeature( const contactInfo_t& contact, const idClip
 	
 	return true;
 }
+
+} // namespace BFG

@@ -46,6 +46,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "Model_local.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 class idDrawVert;
 
 static const char* parametricParticle_SnapshotName = "_ParametricParticle_Snapshot_";
@@ -334,3 +336,5 @@ int idRenderModelPrt::Memory() const
 	
 	return total;
 }
+
+} // namespace BFG

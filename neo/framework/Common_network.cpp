@@ -50,6 +50,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sys/sys_session.h"
 #include "Common_local.h"
 
+namespace BFG {
+
 idCVar net_clientMaxPrediction( "net_clientMaxPrediction", "5000", CVAR_SYSTEM | CVAR_INTEGER | CVAR_NOCHEAT, "maximum number of milliseconds a client can predict ahead of server." );
 idCVar net_snapRate( "net_snapRate", "100", CVAR_SYSTEM | CVAR_INTEGER, "How many milliseconds between sending snapshots" );
 idCVar net_ucmdRate( "net_ucmdRate", "40", CVAR_SYSTEM | CVAR_INTEGER, "How many milliseconds between sending usercmds" );
@@ -726,3 +728,5 @@ void idCommonLocal::ResetNetworkingState()
 	nextUsercmdSendTime = 0;
 	nextSnapshotSendTime = 0;
 }
+
+} // namespace BFG

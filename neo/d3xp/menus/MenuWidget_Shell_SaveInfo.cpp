@@ -44,6 +44,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 /*
 ========================
 idMenuWidget_Shell_SaveInfo::Update
@@ -213,3 +215,5 @@ void idMenuWidget_Shell_SaveInfo::ObserveEvent( const idMenuWidget& widget, cons
 		}
 	}
 }
+
+} // namespace BFG

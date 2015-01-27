@@ -36,6 +36,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/containers/Sort.h"            // for idSort_Quick
 #include "../idlib/CmdArgs.h"
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -1425,5 +1427,7 @@ ID_INLINE void idStr::CopyRange( const char* text, int start, int end )
 	data[ l ] = '\0';
 	len = l;
 }
+
+} // namespace BFG
 
 #endif /* !__STR_H__ */

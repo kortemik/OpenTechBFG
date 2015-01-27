@@ -30,6 +30,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 /*
 ========================
 idSWF::GetTagName
@@ -221,3 +223,4 @@ const char* idSWF::GetActionName( swfAction_t action )
 	}
 }
 
+} // namespace BFG

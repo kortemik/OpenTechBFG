@@ -59,6 +59,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "Common_local.h"
 #include "sys/sys_savegame.h"
 
+namespace BFG {
+
 struct emptyCommand_t;
 
 #ifdef _WIN32
@@ -829,3 +831,4 @@ void idCommonLocal::Frame()
 	}
 }
 
+} // namespace BFG

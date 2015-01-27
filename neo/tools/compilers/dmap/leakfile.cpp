@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "dmap.h"
 
+namespace BFG {
+
 /*
 ==============================================================================
 
@@ -111,3 +113,4 @@ void LeakFile( tree_t* tree )
 	fclose( linefile );
 }
 
+} // namespace BFG

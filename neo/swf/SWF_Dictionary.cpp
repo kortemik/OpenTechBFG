@@ -39,6 +39,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 /*
 ========================
 idSWF::idSWFDictionaryEntry::idSWFDictionaryEntry
@@ -184,3 +186,7 @@ idSWFDictionaryEntry* idSWF::FindDictionaryEntry( int characterID )
 	
 	return &dictionary[ characterID ];
 }
+
+}
+
+} // namespace BFG

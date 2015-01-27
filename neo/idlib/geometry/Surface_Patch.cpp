@@ -38,6 +38,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "geometry/DrawVert.h"
 #include "sys/sys_assert.h"
 
+namespace BFG {
+
 /*
 =================
 idSurface_Patch::SetSize
@@ -832,3 +834,5 @@ void idSurface_Patch::Subdivide( float maxHorizontalError, float maxVerticalErro
 	
 	GenerateIndexes();
 }
+
+} // namespace BFG

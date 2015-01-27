@@ -55,6 +55,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_types.h"
 #include "CollisionModel_local.h"
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -1952,3 +1954,5 @@ void idCollisionModelManagerLocal::Rotation( trace_t* results, const idVec3& sta
 	}
 #endif
 }
+
+} // namespace BFG

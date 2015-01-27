@@ -33,6 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "AASFile.h"
 #include "AASFile_local.h"
 
+namespace BFG {
 
 //===============================================================
 //
@@ -170,3 +171,5 @@ void idAASFileLocal::Optimize()
 	faces = newFaces;
 	faceIndex = newFaceIndex;
 }
+
+} // namespace BFG

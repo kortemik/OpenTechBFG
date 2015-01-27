@@ -42,6 +42,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma warning( disable: 4189 ) // local variable is initialized but not referenced
 
+namespace BFG {
+
 /*
 ========================
 idSWF::DefineFont2
@@ -377,3 +379,5 @@ void idSWF::DefineEditText( idSWFBitStream& bitstream )
 	edittext->flags |= autoSize ? SWF_ET_AUTOSIZE : 0;
 	edittext->flags |= border ? SWF_ET_BORDER : 0;
 }
+
+} // namespace BFG

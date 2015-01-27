@@ -51,6 +51,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/ScreenRect.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 // if we hit this many planes, we will just stop cropping the
 // view down, which is still correct, just conservative
 const int MAX_PORTAL_PLANES	= 20;
@@ -1230,3 +1232,5 @@ void idRenderWorldLocal::ShowPortals()
 		}
 	}
 }
+
+} // namespace BFG

@@ -41,6 +41,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/sys_intrinsics.h"
 #include "sys/sys_types.h"
 
+namespace BFG {
+
 // FIXME:	it would be nice if all render matrices were 16-byte aligned
 //			so there is no need for unaligned loads and stores everywhere
 
@@ -4679,3 +4681,5 @@ frustumCull_t idRenderMatrix::CullFrustumCornersToPlane( const frustumCorners_t&
 	
 #endif
 }
+
+} // namespace BFG

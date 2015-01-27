@@ -36,6 +36,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/RenderWorld.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 class idMaterial;
 
 idRenderEntityLocal::idRenderEntityLocal()
@@ -133,3 +135,5 @@ int idRenderLightLocal::GetIndex()
 {
 	return index;
 }
+
+} // namespace BFG

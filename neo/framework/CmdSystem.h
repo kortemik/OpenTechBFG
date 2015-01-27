@@ -32,6 +32,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/CmdArgs.h"
 #include "../idlib/Str.h"
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -277,5 +279,7 @@ ID_INLINE void idCmdSystem::ArgCompletion_DemoName( const idCmdArgs& args, void(
 {
 	cmdSystem->ArgCompletion_FolderExtension( args, callback, "demos/", true, ".demo", NULL );
 }
+
+} // namespace BFG
 
 #endif /* !__CMDSYSTEM_H__ */

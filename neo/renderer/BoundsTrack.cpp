@@ -44,6 +44,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sys/sys_public.h"
 #include "BoundsTrack.h"
 
+namespace BFG {
+
 /*
 
 We want to do one SIMD compare on 8 short components and know that the bounds
@@ -312,6 +314,8 @@ class interactionPair_t
 	int		entityIndex;
 	int		lightIndex;
 };
+
+} // namespace BFG
 
 /*
 

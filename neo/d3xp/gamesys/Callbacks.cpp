@@ -1,3 +1,5 @@
+namespace BFG {
+
 // generated file - see CREATE_EVENT_CODE
 
 	/*******************************************************
@@ -2598,3 +2600,4 @@
 		( this->*( eventCallback_ffffffff_t )callback )( *( float * )&data[ 0 ], *( float * )&data[ 1 ], *( float * )&data[ 2 ], *( float * )&data[ 3 ], *( float * )&data[ 4 ], *( float * )&data[ 5 ], *( float * )&data[ 6 ], *( float * )&data[ 7 ] );
 		break;
 
+} // namespace BFG

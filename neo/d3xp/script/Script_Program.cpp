@@ -54,6 +54,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/math/Vector.h"
 #include "../idlib/sys/sys_types.h"
 
+namespace BFG {
+
 // simple types.  function types are dynamically allocated
 idTypeDef	type_void( ev_void, &def_void, "void", 0, NULL );
 
@@ -2598,3 +2600,5 @@ void idProgram::ReturnEntity( idEntity* ent )
 		*returnDef->value.entityNumberPtr = 0;
 	}
 }
+
+} // namespace BFG

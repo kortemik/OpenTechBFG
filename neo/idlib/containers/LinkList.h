@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <string.h>
 
+namespace BFG {
+
 /*
 ==============================================================================
 
@@ -369,5 +371,7 @@ void idLinkList<type>::SetOwner( type* object )
 {
 	owner = object;
 }
+
+} // namespace BFG
 
 #endif /* !__LINKLIST_H__ */

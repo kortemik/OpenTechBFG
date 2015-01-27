@@ -55,6 +55,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sound/sound.h"
 #include "../sound/snd_defines.h"
 
+namespace BFG {
+
 class idDecl;
 
 idCVar s_singleEmitter( "s_singleEmitter", "0", CVAR_INTEGER, "mute all sounds but this emitter" );
@@ -1185,3 +1187,5 @@ float idSoundEmitterLocal::CurrentAmplitude()
 	}
 	return amplitude;
 }
+
+} // namespace BFG

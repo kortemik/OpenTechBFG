@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../framework/DeclManager.h"   // for declManager, idDeclManager
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -50,5 +52,7 @@ public:
 	virtual void			FreeData();
 	virtual void			Print() const;
 };
+
+} // namespace BFG
 
 #endif /* !__DECLENTITYDEF_H__ */

@@ -52,6 +52,7 @@ Contains external code for building ZipFiles.
 #include "Zip.h"
 #include "zconf.h"
 
+namespace BFG {
 
 // #undef STDC
 
@@ -1070,3 +1071,5 @@ CONSOLE_COMMAND( testZipBuilderExtractFiles, "test routine for memory zip file e
 	idLib::Printf( "[%s] overall tests: %s\n", __FUNCTION__, overallSuccess ? "^2PASS" : "^1FAIL" );
 #endif
 }
+
+} // namespace BFG

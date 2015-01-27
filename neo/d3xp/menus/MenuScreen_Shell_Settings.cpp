@@ -44,6 +44,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 const static int NUM_SETTING_OPTIONS = 8;
 
 enum settingMenuCmds_t
@@ -295,3 +297,5 @@ bool idMenuScreen_Shell_Settings::HandleAction( idWidgetAction& action, const id
 	
 	return idMenuWidget::HandleAction( action, event, widget, forceHandled );
 }
+
+} // namespace BFG

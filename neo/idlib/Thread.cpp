@@ -41,6 +41,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/sys_threading.h"
 #include "sys/sys_threading.h"          // for Sys_DestroyThread, etc
 
+namespace BFG {
+
 /*
 ================================================================================================
 Contains the vartious ThreadingClass implementations.
@@ -337,3 +339,5 @@ void TestWorkers()
 		workers.SignalWorkAndWait();
 	}
 }
+
+} // namespace BFG

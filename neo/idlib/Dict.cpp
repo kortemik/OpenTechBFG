@@ -58,6 +58,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/sys_assert.h"
 #include "sys/sys_defines.h"
 
+namespace BFG {
+
 class idCmdArgs;
 
 idStrPool		idDict::globalKeys;
@@ -1102,3 +1104,5 @@ void idDict::ListValues_f( const idCmdArgs& args )
 	//}
 	//idLib::common->Printf( "%5d values\n", valueStrings.Num() );
 }
+
+} // namespace BFG

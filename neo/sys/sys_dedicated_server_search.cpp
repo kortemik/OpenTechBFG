@@ -36,6 +36,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys_dedicated_server_search.h"
 #include "sys_lobby_backend.h"
 
+namespace BFG {
+
 /*
 ========================
 idDedicatedServerSearch::idDedicatedServerSearch
@@ -209,3 +211,5 @@ int idDedicatedServerSearch::NumServers() const
 {
 	return list.Num();
 }
+
+} // namespace BFG

@@ -54,6 +54,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
 
 /*
 =================
@@ -2133,3 +2134,5 @@ CONSOLE_COMMAND( testEndianNessReset, "Tests the read/write compatibility betwee
 {
 	fileSystem->RemoveFile( testEndianNessFilename );
 }
+
+} // namespace BFG

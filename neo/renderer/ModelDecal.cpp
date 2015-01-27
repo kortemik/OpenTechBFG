@@ -54,6 +54,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/sys_intrinsics.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 class idDemoFile;
 
 // decalFade	filter 5 0.1
@@ -916,3 +918,5 @@ void idRenderModelDecal::WriteToDemoFile( idDemoFile* f ) const
 {
 	// FIXME: implement
 }
+
+} // namespace BFG

@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "dmap.h"
 
+namespace BFG {
+
 //=================================================================================
 
 
@@ -708,3 +710,5 @@ void WriteOutputFile()
 	
 	fileSystem->CloseFile( procFile );
 }
+
+} // namespace BFG

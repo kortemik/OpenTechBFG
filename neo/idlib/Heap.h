@@ -42,6 +42,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_defines.h"
 #include "../idlib/sys/sys_types.h"              // for Max
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -1473,5 +1475,7 @@ void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, _tag_>::CheckMemory(
 		}
 	}
 }
+
+} // namespace BFG
 
 #endif /* !__HEAP_H__ */

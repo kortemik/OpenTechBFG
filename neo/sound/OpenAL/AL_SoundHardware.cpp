@@ -46,6 +46,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sys/sys_public.h"
 #include "../sound/snd_defines.h"
 
+namespace BFG {
+
 class idCmdArgs;
 
 idCVar s_showLevelMeter( "s_showLevelMeter", "0", CVAR_BOOL | CVAR_ARCHIVE, "Show VU meter" );
@@ -491,4 +493,4 @@ void idSoundHardware_OpenAL::Update()
 	*/
 }
 
-
+} // namespace BFG

@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef SYS_DEFINES_H
 #define SYS_DEFINES_H
 
+namespace BFG {
+
 /*
 ================================================================================================
 
@@ -291,3 +293,5 @@ extern volatile int ignoredReturnValue;
 #define PRIu64 "llu"
 
 #endif // _WIN32
+
+} // namespace BFG

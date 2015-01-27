@@ -57,6 +57,8 @@ If you have questions concerning this license or the applicable additional terms
 #undef min
 #endif
 
+namespace BFG {
+
 /*
 ==============================================================================
 
@@ -2233,3 +2235,5 @@ void R_CreateStaticBuffersForTri( srfTriangles_t& tri )
 #endif
 	}
 }
+
+} // namespace BFG

@@ -44,6 +44,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 /*
 ================================================================================================
 idMenuWidget_Button
@@ -710,3 +712,5 @@ void idMenuWidget_ScoreboardButton::SetButtonInfo( int index_, idList< idStr >& 
 	voiceState = voiceState_;
 	SetValues( list );
 }
+
+} // namespace BFG

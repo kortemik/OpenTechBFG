@@ -33,6 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../framework/File_Resource.h"
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -224,5 +226,7 @@ public:
 };
 
 extern idFileSystem* 		fileSystem;
+
+} // namespace BFG
 
 #endif /* !__FILESYSTEM_H__ */

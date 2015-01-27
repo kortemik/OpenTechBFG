@@ -37,6 +37,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/Str.h"
 #include "sys_local.h"
 
+namespace BFG {
+
 const char* sysLanguageNames[] =
 {
 	ID_LANG_ENGLISH, ID_LANG_FRENCH, ID_LANG_ITALIAN, ID_LANG_GERMAN, ID_LANG_SPANISH, ID_LANG_JAPANESE, NULL
@@ -372,3 +374,5 @@ const char* Sys_DefaultLanguage()
 	
 	
 }
+
+} // namespace BFG

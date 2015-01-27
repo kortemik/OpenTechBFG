@@ -46,6 +46,8 @@ If you have questions concerning this license or the applicable additional terms
 #pragma warning(disable:4740)	// warning C4740: flow in or out of inline asm code suppresses global optimization
 #pragma warning(disable:4731)	// warning C4731: 'XXX' : frame pointer register 'ebx' modified by inline assembly code
 
+namespace BFG {
+
 /*
 ==============================================================
 
@@ -485,3 +487,5 @@ void Sys_FPU_SetFTZ( bool enable )
 	}
 	*/
 }
+
+} // namespace BFG

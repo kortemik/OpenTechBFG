@@ -50,6 +50,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/RenderWorld.h"
 #include "AAS_local.h"
 
+namespace BFG {
 
 /*
 ============
@@ -601,3 +602,5 @@ void idAASLocal::Test( const idVec3& origin )
 		ShowPushIntoArea( origin );
 	}
 }
+
+} // namespace BFG

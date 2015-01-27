@@ -82,6 +82,8 @@ move around it to view it from different angles.
 #include "../renderer/ModelManager.h"
 #include "../renderer/RenderWorld.h"
 
+namespace BFG {
+
 class idRestoreGame;
 class idSaveGame;
 
@@ -1063,3 +1065,5 @@ void idTestModel::TestModelPrevFrame_f( const idCmdArgs& args )
 	
 	gameLocal.testmodel->PrevFrame( args );
 }
+
+} // namespace BFG

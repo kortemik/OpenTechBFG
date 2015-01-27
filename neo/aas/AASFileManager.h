@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../aas/AASFile.h"
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -49,5 +51,7 @@ public:
 };
 
 extern idAASFileManager* 		AASFileManager;
+
+} // namespace BFG
 
 #endif /* !__AASFILEMANAGER_H__ */

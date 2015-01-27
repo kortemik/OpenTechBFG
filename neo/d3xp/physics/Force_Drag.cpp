@@ -39,6 +39,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/math/Rotation.h"
 #include "../idlib/math/Vector.h"
 
+namespace BFG {
+
 CLASS_DECLARATION( idForce, idForce_Drag )
 END_CLASS
 
@@ -175,3 +177,5 @@ void idForce_Drag::RemovePhysics( const idPhysics* phys )
 		physics = NULL;
 	}
 }
+
+} // namespace BFG

@@ -53,6 +53,8 @@ If you have questions concerning this license or the applicable additional terms
 static const int MAX_PDA_ITEMS = 15;
 static const int MAX_NAV_OPTIONS = 4;
 
+namespace BFG {
+
 /*
 ========================
 idMenuHandler_PDA::Update
@@ -733,3 +735,5 @@ idMenuHandler_PDA::~idMenuHandler_PDA()
 	commandBarWidget.Cleanup();
 	Cleanup();
 }
+
+} // namespace BFG

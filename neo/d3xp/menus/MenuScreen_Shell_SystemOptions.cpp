@@ -52,6 +52,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 const static int NUM_SYSTEM_OPTIONS_OPTIONS = 8;
 
 extern idCVar r_multiSamples;
@@ -692,3 +694,5 @@ bool idMenuScreen_Shell_SystemOptions::idMenuDataSource_SystemSettings::IsDataCh
 	// RB end
 	return false;
 }
+
+} // namespace BFG

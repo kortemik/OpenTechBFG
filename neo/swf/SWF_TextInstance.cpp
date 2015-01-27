@@ -51,6 +51,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sys/sys_public.h"
 #include "SWF_TextInstance.h"
 
+namespace BFG {
+
 idSWFScriptObject_TextInstancePrototype textInstanceScriptObjectPrototype;
 
 idCVar swf_textScrollSpeed( "swf_textScrollSpeed", "80", CVAR_INTEGER, "scroll speed for text" );
@@ -1638,3 +1640,5 @@ SWF_TEXT_FUNCTION_DEFINE( addSubtitleInfo )
 	pThis->subtitleTimingInfo.Append( info );
 	return idSWFScriptVar();
 }
+
+} // namespace BFG

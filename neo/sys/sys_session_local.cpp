@@ -69,6 +69,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys_session_local.h"
 #include "sys_voicechat.h"
 
+namespace BFG {
+
 class idSnapShot;
 
 
@@ -4767,3 +4769,5 @@ void lobbyUserID_t::Serialize( idSerializer& ser )
 	localUserHandle.Serialize( ser );
 	ser.Serialize( lobbyType );
 }
+
+} // namespace BFG

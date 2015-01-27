@@ -32,6 +32,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_types.h"
 #include "LightweightCompression.h"
 
+namespace BFG {
+
 /*
 ========================
 HashIndex
@@ -572,3 +574,5 @@ int idZeroRunLengthCompressor::ReadInternal()
 	}
 	return *dest++;
 }
+
+} // namespace BFG

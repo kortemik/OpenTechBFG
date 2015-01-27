@@ -38,6 +38,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 /*
 ========================
 idMenuWidget_MenuBar::Initialize
@@ -176,3 +178,5 @@ bool idMenuWidget_MenuBar::PrepareListElement( idMenuWidget& widget, const int n
 	
 	return true;
 }
+
+} // namespace BFG

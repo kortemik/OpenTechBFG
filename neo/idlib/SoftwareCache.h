@@ -34,6 +34,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef _MSC_VER // DG: #pragma warning is MSVC specific
 #pragma warning( disable : 4324 )	// structure was padded due to __declspec(align())
 #endif
+
+namespace BFG {
+
 /*
 ================================================================================================
 
@@ -602,5 +605,6 @@ private:
 	}
 };
 
+} // namespace BFG
 
 #endif // !__SOFTWARECACHE_H__

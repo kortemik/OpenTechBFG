@@ -41,6 +41,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/RenderSystem.h"
 #include "Font.h"
 
+namespace BFG {
+
 const char* DEFAULT_FONT = "Arial_Narrow";
 
 static const float old_scale2 = 0.6f;
@@ -489,3 +491,5 @@ void idFont::Touch()
 		fontInfo->material->SetSort( SS_GUI );
 	}
 }
+
+} // namespace BFG

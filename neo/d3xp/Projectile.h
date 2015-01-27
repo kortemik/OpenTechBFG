@@ -46,6 +46,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/math/Vector.h"
 #include "../renderer/RenderWorld.h"
 
+namespace BFG {
+
 class idBitMsg;
 class idDeclParticle;
 class idDict;
@@ -376,5 +378,7 @@ private:
 	void					Event_Explode();
 	void					Event_Fizzle();
 };
+
+} // namespace BFG
 
 #endif /* !__GAME_PROJECTILE_H__ */

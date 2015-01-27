@@ -37,6 +37,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 /*
 ========================
 idMenuWidget_NavButton::Update
@@ -212,3 +214,5 @@ void idMenuWidget_MenuButton::Update()
 		hitBox->Set( "onRollOut", new( TAG_SWF ) WrapWidgetSWFEvent( this, WIDGET_EVENT_ROLL_OUT, 0 ) );
 	}
 }
+
+} // namespace BFG

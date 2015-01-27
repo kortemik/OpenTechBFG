@@ -46,6 +46,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "PlayerProfile.h"
 #include "sys/sys_localuser.h"
 
+namespace BFG {
+
 // After releasing a version to the market, here are limitations for compatibility:
 //	- the major version should not ever change
 //	- always add new items to the bottom of the save/load routine
@@ -483,3 +485,5 @@ CONSOLE_COMMAND( setProfileDefaults, "sets profile settings to default and saves
 		profile->SaveSettings( true );
 	}
 }
+
+} // namespace BFG

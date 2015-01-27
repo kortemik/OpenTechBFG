@@ -36,6 +36,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../renderer/tr_local.h"                   // for r_logFile
 
+namespace BFG {
+
 /*
 ================================================================================================
 Contains the RenderLog declaration.
@@ -209,5 +211,7 @@ public:
 #endif	// !STUB_RENDER_LOG
 
 extern idRenderLog renderLog;
+
+} // namespace BFG
 
 #endif // !__RENDERLOG_H__

@@ -37,6 +37,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_assert.h"             // for assert
 #include "../idlib/sys/sys_types.h"              // for uint64, byte, int64
 
+namespace BFG {
 /*
 ================================================================================================
 
@@ -602,3 +603,5 @@ idVec3 idBitMsg::BitsToDir( int bits, int numBits )
 	dir.NormalizeFast();
 	return dir;
 }
+
+} // namespace BFG

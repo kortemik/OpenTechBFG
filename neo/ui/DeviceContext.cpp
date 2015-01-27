@@ -49,6 +49,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../ui/Rectangle.h"
 #include "DeviceContext.h"
 
+namespace BFG {
+
 extern idCVar in_useJoystick;
 
 // bypass rendersystem to directly work on guiModel
@@ -1299,3 +1301,5 @@ int idDeviceContextOptimized::DrawText( float x, float y, float scale, idVec4 co
 	}
 	return drawText.Length();
 }
+
+} // namespace BFG

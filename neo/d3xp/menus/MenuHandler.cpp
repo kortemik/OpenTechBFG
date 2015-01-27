@@ -46,9 +46,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "../swf/SWF_ScriptVar.h"
 #include "../sys/sys_public.h"
 
-class idSWFScriptObject;
-
 #pragma hdrstop
+
+namespace BFG {
+
+class idSWFScriptObject;
 
 extern idCVar in_useJoystick;
 
@@ -539,3 +541,5 @@ void idMenuHandler::ClearWidgetActionRepeater()
 {
 	actionRepeater.isActive = false;
 }
+
+} // namespace BFG

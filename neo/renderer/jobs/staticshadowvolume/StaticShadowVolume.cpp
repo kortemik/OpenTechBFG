@@ -40,6 +40,8 @@ StaticShadowVolumeJob
 #include "../renderer/jobs/staticshadowvolume/StaticShadowVolume.h"
 #include "ParallelJobList.h"
 
+namespace BFG {
+
 void StaticShadowVolumeJob( const staticShadowVolumeParms_t* parms )
 {
 	if( parms->tempCullBits == NULL )
@@ -111,3 +113,5 @@ void StaticShadowVolumeJob( const staticShadowVolumeParms_t* parms )
 }
 
 REGISTER_PARALLEL_JOB( StaticShadowVolumeJob, "StaticShadowVolumeJob" );
+
+} // namespace BFG

@@ -42,6 +42,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../swf/SWF_TextInstance.h"
 #include "../sys/sys_session.h"
 
+namespace BFG {
+
 /*
 ========================
 idMenuWidget_PDA_UserData::Update
@@ -217,3 +219,5 @@ void idMenuWidget_PDA_UserData::ObserveEvent( const idMenuWidget& widget, const 
 		}
 	}
 }
+
+} // namespace BFG

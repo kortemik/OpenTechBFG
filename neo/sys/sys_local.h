@@ -33,6 +33,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../idlib/sys/sys_defines.h"
 #include "../sys/sys_public.h"
+
+namespace BFG {
+
 /*
 ==============================================================
 
@@ -72,5 +75,7 @@ public:
 	virtual void			OpenURL( const char* url, bool quit );
 	virtual void			StartProcess( const char* exeName, bool quit );
 };
+
+} // namespace BFG
 
 #endif /* !__SYS_LOCAL__ */

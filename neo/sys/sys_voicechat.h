@@ -35,6 +35,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sys/sys_session.h"
 #include "sys_lobby_backend.h"
 
+namespace BFG {
+
 /*
 ================================================
 idVoiceChatMgr
@@ -156,5 +158,6 @@ protected:
 	bool					sendGlobal;
 };
 
+} // namespace BFG
 
 #endif	// __SYS_VOICECHATMGR_H__ 

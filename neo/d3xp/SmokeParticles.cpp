@@ -46,6 +46,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/RenderWorld.h"
 #include "Game_local.h"
 
+namespace BFG {
+
 static const char* smokeParticle_SnapshotName = "_SmokeParticle_Snapshot_";
 
 /*
@@ -513,3 +515,5 @@ bool idSmokeParticles::ModelCallback( renderEntity_s* renderEntity, const render
 	
 	return true;
 }
+
+} // namespace BFG

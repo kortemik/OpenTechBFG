@@ -39,6 +39,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/math/Vector.h"
 #include "../renderer/RenderWorld.h"
 
+namespace BFG {
+
 class idDict;
 class idMaterial;
 class idMenuHandler_HUD;
@@ -503,5 +505,7 @@ public:
 
 // the crosshair is swapped for a laser sight in stereo rendering
 bool	IsGameStereoRendered();
+
+} // namespace BFG
 
 #endif /* !__GAME_PLAYERVIEW_H__ */

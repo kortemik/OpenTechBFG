@@ -36,6 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "UserInterfaceLocal.h"
 #include "Window.h"
 
+namespace BFG {
 
 void idFieldWindow::CommonInit()
 {
@@ -112,3 +113,4 @@ void idFieldWindow::Draw( int time, float x, float y )
 	dc->DrawText( &text[paintOffset], scale, 0, foreColor, rect, false, ( ( flags & WIN_FOCUS ) || showCursor ) ? cursorPos - paintOffset : -1 );
 }
 
+} // namespace BFG

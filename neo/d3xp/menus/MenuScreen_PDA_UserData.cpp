@@ -45,7 +45,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../swf/SWF_ScriptVar.h"
 #include "../swf/SWF_SpriteInstance.h"
 
-
+namespace BFG {
 
 /*
 ========================
@@ -301,3 +301,5 @@ bool idMenuScreen_PDA_UserData::HandleAction( idWidgetAction& action, const idWi
 	
 	return idMenuWidget::HandleAction( action, event, widget, forceHandled );
 }
+
+} // namespace BFG

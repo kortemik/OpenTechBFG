@@ -46,6 +46,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "GuiScript.h"
 
+namespace BFG {
+
 class idCVar;
 class idDict;
 class idFile;
@@ -509,5 +511,7 @@ ID_INLINE void idWindow::AddDefinedVar( idWinVar* var )
 {
 	definedVars.AddUnique( var );
 }
+
+} // namespace BFG
 
 #endif /* !__WINDOW_H__ */

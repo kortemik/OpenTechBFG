@@ -51,11 +51,12 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/math/Rotation.h"
 #include "../idlib/math/Vector.h"
 
+namespace BFG {
+
 class idBounds;
 
 CLASS_DECLARATION( idPhysics_Base, idPhysics_Parametric )
 END_CLASS
-
 
 /*
 ================
@@ -1236,3 +1237,5 @@ void idPhysics_Parametric::ReadFromSnapshot( const idBitMsg& msg )
 		previous.axis = next.axis;
 	}
 }
+
+} // namespace BFG

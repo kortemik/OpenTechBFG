@@ -40,6 +40,8 @@ PreLightShadowVolumeJob
 #include "../renderer/jobs/prelightshadowvolume/PreLightShadowVolume.h"
 #include "ParallelJobList.h"
 
+namespace BFG {
+
 void PreLightShadowVolumeJob( const preLightShadowVolumeParms_t* parms )
 {
 	if( parms->tempCullBits == NULL )
@@ -110,5 +112,7 @@ void PreLightShadowVolumeJob( const preLightShadowVolumeParms_t* parms )
 		*parms->shadowVolumeState = SHADOWVOLUME_DONE;
 	}
 }
+
+} // namespace BFG
 
 REGISTER_PARALLEL_JOB( PreLightShadowVolumeJob, "PreLightShadowVolumeJob" );

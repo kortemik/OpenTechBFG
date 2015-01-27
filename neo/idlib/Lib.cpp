@@ -55,7 +55,7 @@ class idCVarSystem;
 class idFileSystem;
 class idSys;
 
-
+namespace BFG {
 /*
 ===============================================================================
 
@@ -704,3 +704,5 @@ BreakOnListDefault
 void BreakOnListDefault()
 {
 }
+
+} // namespace BFG

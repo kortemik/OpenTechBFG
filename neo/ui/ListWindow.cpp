@@ -50,6 +50,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "UserInterfaceLocal.h"
 #include "Window.h"
 
+namespace BFG {
+
 // Number of pixels above the text that the rect starts
 static const int pixelOffset = 3;
 
@@ -795,3 +797,4 @@ void idListWindow::StateChanged( bool redraw )
 	UpdateList();
 }
 
+} // namespace BFG

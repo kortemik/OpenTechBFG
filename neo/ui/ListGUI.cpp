@@ -37,6 +37,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../ui/UserInterface.h"
 #include "ListGUILocal.h"
 
+namespace BFG {
+
 /*
 ====================
 idListGUILocal::StateChanged
@@ -211,3 +213,5 @@ void idListGUILocal::Shutdown()
 	m_name.Clear();
 	Clear();
 }
+
+} // namespace BFG

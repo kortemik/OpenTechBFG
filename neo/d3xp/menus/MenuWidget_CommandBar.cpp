@@ -41,6 +41,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 /*
 ================================================================================================
 idMenuWidget_CommandBar
@@ -240,3 +242,5 @@ bool idMenuWidget_CommandBar::ExecuteEvent( const idWidgetEvent& event )
 		return idMenuWidget::ExecuteEvent( event );
 	}
 }
+
+} // namespace BFG

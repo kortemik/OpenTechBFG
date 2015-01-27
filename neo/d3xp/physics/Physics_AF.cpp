@@ -64,6 +64,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/RenderWorld.h"
 #include "Timer.h"
 
+namespace BFG {
+
 CLASS_DECLARATION( idPhysics_Base, idPhysics_AF )
 END_CLASS
 
@@ -9113,3 +9115,5 @@ void idPhysics_AF::ReadFromSnapshot( const idBitMsg& msg )
 	
 	UpdateClipModels();
 }
+
+} // namespace BFG

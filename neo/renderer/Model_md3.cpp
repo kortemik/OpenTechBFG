@@ -45,6 +45,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "Model_md3.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 class idMaterial;
 
 /***********************************************************************
@@ -411,3 +413,4 @@ idBounds idRenderModelMD3::Bounds( const struct renderEntity_s* ent ) const
 	return ret;
 }
 
+} // namespace BFG

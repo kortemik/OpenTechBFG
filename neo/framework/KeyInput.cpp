@@ -45,6 +45,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 typedef struct
 {
 	keyNum_t		keynum;
@@ -1013,3 +1015,5 @@ int Key_CovertHIDCode( int hid )
 	}
 	return K_NONE;
 }
+
+} // namespace BFG

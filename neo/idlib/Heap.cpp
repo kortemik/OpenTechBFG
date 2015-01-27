@@ -46,7 +46,9 @@ If you have questions concerning this license or the applicable additional terms
 //
 //===============================================================
 #include <stdlib.h>
-#undef new
+#undef new // TODO documentation for the reason of undef new
+
+namespace BFG {
 
 /*
 ==================
@@ -119,3 +121,4 @@ char* Mem_CopyString( const char* in )
 	return out;
 }
 
+} // namespace BFG

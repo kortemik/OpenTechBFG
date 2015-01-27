@@ -49,6 +49,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_defines.h"
 #include "Timer.h"
 
+namespace BFG {
+
 #define FUNCTION_PRIORITY	2
 #define INT_PRIORITY		2
 #define NOT_PRIORITY		5
@@ -3277,3 +3279,5 @@ void idCompiler::CompileFile( const char* text, const char* filename, bool toCon
 		gameLocal.Printf( "Compiled '%s': %.1f ms\n", filename, compile_time.Milliseconds() );
 	}
 }
+
+} // namespace BFG

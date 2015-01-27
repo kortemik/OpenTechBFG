@@ -33,6 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/Heap.h"
 #include "../idlib/geometry/TraceModel.h"
 
+namespace BFG {
+
 class idBounds;
 class idRestoreGame;
 class idSaveGame;
@@ -90,3 +92,5 @@ int idPhysics::SnapTimeToPhysicsFrame( int t )
 {
 	return MSEC_ALIGN_TO_FRAME( t );
 }
+
+} // namespace BFG

@@ -37,6 +37,8 @@ If you have questions concerning this license or the applicable additional terms
 #undef AddJob
 #endif
 
+namespace BFG {
+
 struct CellSpursJob128;
 class idColor;
 
@@ -192,5 +194,7 @@ public:
 };
 
 #define REGISTER_PARALLEL_JOB( function, name )		static idParallelJobRegistration register_##function( (jobRun_t) function, name )
+
+} // namespace BFG
 
 #endif // !__PARALLELJOBLIST_H__

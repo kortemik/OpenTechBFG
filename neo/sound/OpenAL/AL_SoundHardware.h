@@ -43,6 +43,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../sound/snd_defines.h"
 
+namespace BFG {
+
 class idSoundVoice;
 class idSoundSample;
 
@@ -125,4 +127,6 @@ class idSoundHardware : public idSoundHardware_OpenAL
 {
 };
 
-#endif
+} // namespace BFG
+
+#endif // __AL_SOUNDHARDWARE_H__

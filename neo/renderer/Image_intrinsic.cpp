@@ -42,6 +42,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/Material.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 #define	DEFAULT_SIZE	16
 
 /*
@@ -625,3 +627,5 @@ void idImageManager::CreateIntrinsicImages()
 	release_assert( loadingIconImage->referencedOutsideLevelLoad );
 	release_assert( hellLoadingIconImage->referencedOutsideLevelLoad );
 }
+
+} // namespace BFG

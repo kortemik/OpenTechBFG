@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __BTREE_H__
 #define __BTREE_H__
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -691,5 +693,7 @@ ID_INLINE void idBTree<objType, keyType, maxChildrenPerNode>::CheckTree() const
 		}
 	}
 }
+
+} // namespace BFG
 
 #endif /* !__BTREE_H__ */

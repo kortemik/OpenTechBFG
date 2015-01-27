@@ -47,6 +47,8 @@ extern "C" {
 #include <jmorecfg.h>
 }
 
+namespace BFG {
+
 /*
 ========================
 idSWF::idDecompressJPEG
@@ -666,3 +668,5 @@ void idSWF::DefineBitsLossless2( idSWFBitStream& bitstream )
 	
 	LoadImage( characterID, imageData, width, height );
 }
+
+} // namespace BFG

@@ -44,6 +44,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/jobs/dynamicshadowvolume/DynamicShadowVolume.h"
 #include "ParallelJobList.h"
 
+namespace BFG {
+
 class idJointMat;
 
 #if defined(USE_INTRINSICS)
@@ -1332,3 +1334,5 @@ void DynamicShadowVolumeJob( const dynamicShadowVolumeParms_t* parms )
 }
 
 REGISTER_PARALLEL_JOB( DynamicShadowVolumeJob, "DynamicShadowVolumeJob" );
+
+} // namespace BFG

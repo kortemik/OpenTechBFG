@@ -32,6 +32,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_types.h"
 #include "sys_profile.h"
 
+namespace BFG {
+
 class idPlayerProfile;
 class idProfileMgr;
 struct achievementDescription_t;
@@ -193,5 +195,7 @@ private:
 	
 	bool						syncAchievementsRequested;
 };
+
+} // namespace BFG
 
 #endif // __SYS_LOCALUSER_H__

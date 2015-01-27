@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <stdint.h>                     // for uintptr_t
 
+namespace BFG {
+
 #ifndef __TYPEINFOGEN__
 
 /*
@@ -248,5 +250,7 @@ enum
 	CRITICAL_SECTION_TWO,
 	CRITICAL_SECTION_THREE
 };
+
+} // namespace BFG
 
 #endif	// !__SYS_THREADING_H__

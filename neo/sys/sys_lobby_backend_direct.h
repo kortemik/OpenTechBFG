@@ -32,6 +32,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sys/sys_lobby_backend.h"
 #include "../sys/sys_public.h"
 
+namespace BFG {
+
 class idBitMsg;
 class idMatchParameters;
 
@@ -77,5 +79,7 @@ private:
 	lobbyBackendState_t		state;
 	netadr_t				address;
 };
+
+} // namespace BFG
 
 #endif	// __SYS_LOBBY_BACKEND_DIRECT_H__ 

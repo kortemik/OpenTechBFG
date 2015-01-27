@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../idlib/Str.h"
 
+namespace BFG {
+
 idComplex complex_origin( 0.0f, 0.0f );
 
 /*
@@ -42,3 +44,5 @@ const char* idComplex::ToString( int precision ) const
 {
 	return idStr::FloatArrayToString( ToFloatPtr(), GetDimension(), precision );
 }
+
+} // namespace BFG

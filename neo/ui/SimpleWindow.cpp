@@ -45,6 +45,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "UserInterfaceLocal.h"
 #include "Window.h"
 
+namespace BFG {
 
 idSimpleWindow::idSimpleWindow( idWindow* win )
 {
@@ -523,3 +524,5 @@ size_t idSimpleWindow::Size()
 	sz += backGroundName.Size();
 	return sz;
 }
+
+} // namespace BFG

@@ -38,6 +38,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
 
 /*
 =================
@@ -212,3 +213,5 @@ bool idDeclTable::Parse( const char* text, const int textLength, bool allowBinar
 	
 	return true;
 }
+
+} // namespace BFG

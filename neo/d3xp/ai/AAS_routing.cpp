@@ -45,6 +45,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_types.h"
 #include "AAS_local.h"
 
+namespace BFG {
+
 #define CACHETYPE_AREA				1
 #define CACHETYPE_PORTAL			2
 
@@ -1568,3 +1570,5 @@ bool idAASLocal::FindNearestGoal( aasGoal_t& goal, int areaNum, const idVec3 ori
 	
 	return false;
 }
+
+} // namespace BFG

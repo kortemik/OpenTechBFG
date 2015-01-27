@@ -40,6 +40,8 @@ instancing of objects.
 #include "../idlib/containers/Hierarchy.h"       // for idHierarchy
 #include "../d3xp/Game_local.h"      // gameLocal
 
+namespace BFG {
+
 class idClass;
 class idTypeInfo;
 
@@ -425,5 +427,7 @@ ID_INLINE bool idClass::RespondsTo( const idEventDef& ev ) const
 	c = GetType();
 	return c->RespondsTo( ev );
 }
+
+} // namespace BFG
 
 #endif /* !__SYS_CLASS_H__ */

@@ -98,6 +98,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../ui/UserInterface.h"
 #include "Game_local.h"
 
+namespace BFG {
+
 class idDeclSkin;
 
 /*
@@ -6787,3 +6789,5 @@ void idAnimatedEntity::Event_GetJointAngle( jointHandle_t jointnum )
 	idVec3 vec( ang[ 0 ], ang[ 1 ], ang[ 2 ] );
 	idThread::ReturnVector( vec );
 }
+
+} // namespace BFG

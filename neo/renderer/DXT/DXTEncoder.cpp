@@ -43,6 +43,8 @@ Contains the DxtEncoder implementation.
 #include "../idlib/sys/sys_types.h"
 #include "DXTCodec.h"
 
+namespace BFG {
+
 #define INSET_COLOR_SHIFT		4		// inset the bounding box with ( range >> shift )
 #define INSET_ALPHA_SHIFT		5		// inset alpha channel
 
@@ -5206,3 +5208,5 @@ void idDxtEncoder::ConvertImageDXN1_DXT1( const byte* inBuf, byte* outBuf, int w
 		inBuf += srcPadding;
 	}
 }
+
+} // namespace BFG

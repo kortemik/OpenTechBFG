@@ -35,6 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/math/Rotation.h"
 #include "../idlib/math/Vector.h"
 
+namespace BFG {
 
 /*
 =====================
@@ -343,3 +344,5 @@ idQuat Slerp( const idQuat& from, const idQuat& to, const float t )
 {
 	return idQuat().Slerp( from, to, t );
 }
+
+} // namespace BFG

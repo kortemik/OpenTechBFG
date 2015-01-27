@@ -33,6 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/containers/Sort.h"
 #include "../idlib/Heap.h"              // for memTag_t
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -1151,5 +1153,7 @@ _type_* FindFromGenericPtr( idList<_type_, _tag_>& list, const _compare_type_ & 
 	}
 	return NULL;
 }
+
+} // namespace BFG
 
 #endif /* !__LIST_H__ */

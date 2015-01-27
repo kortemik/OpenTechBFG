@@ -35,6 +35,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_intrinsics.h"         // for USE_INTRINSICS
 #include "../idlib/sys/sys_types.h"              // for dword
 
+namespace BFG {
+
 const int SMALLEST_NON_DENORMAL					= 1 << IEEE_FLT_MANTISSA_BITS;
 const int NAN_VALUE								= 0x7f800000;
 
@@ -166,3 +168,5 @@ float idMath::BitsToFloat( int i, int exponentBits, int mantissaBits )
 	value = sign << IEEE_FLT_SIGN_BIT | ( exponent + IEEE_FLT_EXPONENT_BIAS ) << IEEE_FLT_MANTISSA_BITS | mantissa;
 	return *reinterpret_cast<float*>( &value );
 }
+
+} // namespace BFG

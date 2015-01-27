@@ -38,10 +38,12 @@ If you have questions concerning this license or the applicable additional terms
 #include "../swf/SWF_ScriptObject.h"
 #include "../swf/SWF_ScriptVar.h"
 
+#pragma hdrstop
+
+namespace BFG {
+
 class idSWFSpriteInstance;
 class idSWFTextInstance;
-
-#pragma hdrstop
 
 extern idCVar swf_debugShowAddress;
 
@@ -596,3 +598,5 @@ void idSWFScriptVar::PrintToConsole() const
 		idLib::Printf( "unknown\n" );
 	}
 }
+
+} // namespace BFG

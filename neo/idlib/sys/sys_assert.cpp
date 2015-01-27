@@ -42,6 +42,8 @@ If you have questions concerning this license or the applicable additional terms
 #include <signal.h> // for raise()
 #endif
 
+namespace BFG {
+
 /*
 ================================================================================================
 Contains the AssertMacro implementation.
@@ -128,3 +130,4 @@ bool AssertFailed( const char* file, int line, const char* expression )
 	return true;
 }
 
+} // namespace BFG

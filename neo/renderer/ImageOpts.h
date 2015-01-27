@@ -32,6 +32,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <string.h>                     // for memcmp
 
+namespace BFG {
+
 enum textureType_t
 {
 	TT_DISABLED,
@@ -174,5 +176,7 @@ ID_INLINE bool idImageOpts::operator==( const idImageOpts& opts )
 {
 	return ( memcmp( this, &opts, sizeof( *this ) ) == 0 );
 }
+
+} // namespace BFG
 
 #endif

@@ -54,10 +54,11 @@ instancing of objects.
 #include "../idlib/containers/List.h"
 #include "../idlib/math/Math.h"
 
+namespace BFG {
+
 class idCmdArgs;
 class idRestoreGame;
 class idSaveGame;
-
 
 /***********************************************************************
 
@@ -1162,3 +1163,5 @@ void idClass::Event_SafeRemove()
 	// Forces the remove to be done at a safe time
 	PostEventMS( &EV_Remove, 0 );
 }
+
+} // namespace BFG

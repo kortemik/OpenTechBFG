@@ -37,6 +37,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../ui/Window.h"
 #include "../ui/Winvar.h"
 
+namespace BFG {
+
 class idCVar;
 class idMaterial;
 class idTokenParser;
@@ -114,5 +116,6 @@ private:
 	idWinStr			cvarGroup;
 };
 
-#endif /* !__SLIDERWINDOW_H__ */
+} // namespace BFG
 
+#endif /* !__SLIDERWINDOW_H__ */

@@ -50,6 +50,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sys/sys_public.h"
 #include "Common_dialog.h"
 
+namespace BFG {
+
 class idSWFScriptObject;
 
 idCVar popupDialog_debug( "popupDialog_debug", "0", CVAR_BOOL | CVAR_ARCHIVE, "display debug spam" );
@@ -1673,3 +1675,5 @@ CONSOLE_COMMAND( testShowDialogBug, "show a dynamic dialog", 0 )
 	int dialogId = atoi( args.Argv( 1 ) );
 	common->Dialog().AddDialog( ( gameDialogMessages_t )dialogId, DIALOG_ACCEPT, NULL, NULL, true );
 }
+
+} // namespace BFG

@@ -37,6 +37,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../ui/Winvar.h"
 #include "Window.h"
 
+namespace BFG {
+
 class idCVar;
 class idTokenParser;
 struct sysEvent_t;
@@ -105,5 +107,7 @@ private:
 	idWinBool			liveUpdate;
 	idWinStr			cvarGroup;
 };
+
+} // namespace BFG
 
 #endif /* !__EDITWINDOW_H__ */

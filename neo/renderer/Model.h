@@ -33,6 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "VertexCache.h"
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -325,5 +327,7 @@ public:
 		return true;
 	};
 };
+
+} // namespace BFG
 
 #endif /* !__MODEL_H__ */

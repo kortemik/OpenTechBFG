@@ -29,3 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 /*
 KORTEMIK: this file should be removed
 */
+
+namespace BFG {
+
+} // namespace BFG

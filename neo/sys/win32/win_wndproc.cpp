@@ -43,6 +43,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../../cegui/CEGUI_Hooks.h"
 #endif // USE_CEGUI
 
+namespace BFG {
+
 LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
 
 static bool s_alttab_disabled;
@@ -553,3 +555,5 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 	
 	return DefWindowProc( hWnd, uMsg, wParam, lParam );
 }
+
+} // namespace BFG

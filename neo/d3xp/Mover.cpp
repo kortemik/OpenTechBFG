@@ -74,6 +74,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../ui/UserInterface.h"
 #include "Game_local.h"
 
+namespace BFG {
+
 // _D3XP : rename all gameLocal.time to gameLocal.slow.time for merge!
 
 // a mover will update any gui entities in it's target list with
@@ -5574,3 +5576,5 @@ void idRiser::Event_Activate( idEntity* activator )
 		physicsObj.SetLinearExtrapolation( EXTRAPOLATION_LINEAR, gameLocal.slow.time, time * 1000, physicsObj.GetOrigin(), delta, vec3_origin );
 	}
 }
+
+} // namespace BFG

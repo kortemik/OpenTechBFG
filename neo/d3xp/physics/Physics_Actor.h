@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __PHYSICS_ACTOR_H__
 #define __PHYSICS_ACTOR_H__
 
+namespace BFG {
+
 #include "../d3xp/physics/Physics_Base.h"
 
 /*
@@ -112,5 +114,7 @@ protected:
 	// results of last evaluate
 	idEntityPtr<idEntity>	groundEntityPtr;
 };
+
+} // namespace BFG
 
 #endif /* !__PHYSICS_ACTOR_H__ */

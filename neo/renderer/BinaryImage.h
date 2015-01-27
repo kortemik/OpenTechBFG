@@ -38,6 +38,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/ImageOpts.h"
 #include "BinaryImageData.h"
 
+namespace BFG {
+
 class idFile;
 
 /*
@@ -134,5 +136,7 @@ private:
 	void				MakeGeneratedFileName( idStr& gfn );
 	bool				LoadFromGeneratedFile( idFile* f, ID_TIME_T sourceFileTime );
 };
+
+} // namespace BFG
 
 #endif // __BINARYIMAGE_H__

@@ -39,6 +39,8 @@
 
 #include <minizip/unzip.h>
 
+namespace BFG {
+
 /*
  * DG: all unzip code has been moved to minizip/
  *     when being updated to minizip 1.1 (instead of the previously used minizip 0.15beta from 1998)
@@ -46,5 +48,7 @@
  *     Furthermore, updates to future minizip should be much easier now, as my changes to the
  *     original source files from minizip are quite small.
  */
+
+} // namespace BFG
 
 #endif /* __UNZIP_H__ */

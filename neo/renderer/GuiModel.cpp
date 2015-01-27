@@ -46,6 +46,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/VertexCache.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 class idDemoFile;
 
 const float idGuiModel::STEREO_DEPTH_NEAR = 0.0f;
@@ -442,3 +444,5 @@ idDrawVert* idGuiModel::AllocTris( int vertCount, const triIndex_t* tempIndexes,
 	
 	return vertexPointer + startVert;
 }
+
+} // namespace BFG

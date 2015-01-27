@@ -37,6 +37,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/Str.h"
 #include "ConsoleHistory.h"
 
+namespace BFG {
+
 idConsoleHistory consoleHistory;
 
 const char* HISTORY_FILE_NAME = "consoleHistory.txt";
@@ -228,3 +230,5 @@ CONSOLE_COMMAND_SHIP( clearHistory, "Clears the console history", 0 )
 {
 	consoleHistory.ClearHistory();
 }
+
+} // namespace BFG

@@ -47,6 +47,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/ScreenRect.h"
 #include "../tr_local.h"
 
+namespace BFG {
+
 /*
 ====================
 GL_SelectTexture
@@ -721,3 +723,5 @@ uint64 GL_GetCurrentStateMinusStencil()
 {
 	return GL_GetCurrentState() & ~( GLS_STENCIL_OP_BITS | GLS_STENCIL_FUNC_BITS | GLS_STENCIL_FUNC_REF_BITS | GLS_STENCIL_FUNC_MASK_BITS );
 }
+
+} // namespace BFG

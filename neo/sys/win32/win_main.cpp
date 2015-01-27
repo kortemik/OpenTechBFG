@@ -56,6 +56,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/tr_local.h"
 #include "../framework/Licensee.h"
 
+namespace BFG {
+
 idCVar Win32Vars_t::sys_arch( "sys_arch", "", CVAR_SYSTEM | CVAR_INIT, "" );
 idCVar Win32Vars_t::sys_cpustring( "sys_cpustring", "detect", CVAR_SYSTEM | CVAR_INIT, "" );
 idCVar Win32Vars_t::in_mouse( "in_mouse", "1", CVAR_SYSTEM | CVAR_BOOL, "enable mouse input" );
@@ -1699,3 +1701,5 @@ const char* Sys_GetLastErrorString()
 	return lastErrorBuf;
 }
 // DG end
+
+} // namespace BFG

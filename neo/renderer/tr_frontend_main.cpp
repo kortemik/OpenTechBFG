@@ -53,6 +53,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/sys_intrinsics.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 /*
 ==========================================================================================
 
@@ -576,3 +578,5 @@ void R_RenderPostProcess( viewDef_t* parms )
 	
 	tr.viewDef = oldView;
 }
+
+} // namespace BFG

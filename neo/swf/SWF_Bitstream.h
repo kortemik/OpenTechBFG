@@ -33,6 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_types.h"
 #include "../swf/SWF_Types.h"
 
+namespace BFG {
+
 class idSWFBitStream
 {
 public:
@@ -215,5 +217,7 @@ ID_INLINE double idSWFBitStream::ReadDouble()
 	idSwap::Little( d );
 	return d;
 }
+
+} // namespace BFG
 
 #endif // !__SWF_BITSTREAM_H__

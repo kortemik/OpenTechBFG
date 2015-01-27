@@ -58,6 +58,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sound/sound.h"
 #include "Game_local.h"
 
+namespace BFG {
+
 class idClass;
 class idMaterial;
 
@@ -2056,5 +2058,4 @@ void FullscreenFXManager::Process( const renderView_t* view )
 	}
 }
 
-
-
+} // namespace BFG

@@ -37,6 +37,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../ui/Window.h"
 #include "../ui/Winvar.h"
 
+namespace BFG {
+
 class idMD5Anim;
 class idTokenParser;
 class idUserInterfaceLocal;
@@ -86,5 +88,7 @@ private:
 	int animEndTime;
 	bool updateAnimation;
 };
+
+} // namespace BFG
 
 #endif // __RENDERWINDOW_H

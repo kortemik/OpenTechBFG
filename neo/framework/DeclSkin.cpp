@@ -39,6 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
 
 /*
 =================
@@ -217,3 +218,5 @@ const idMaterial* idDeclSkin::RemapShaderBySkin( const idMaterial* shader ) cons
 	// didn't find a match or wildcard, so stay the same
 	return shader;
 }
+
+} // namespace BFG

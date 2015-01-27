@@ -40,6 +40,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 idCVar idEventLoop::com_journal( "com_journal", "0", CVAR_INIT | CVAR_SYSTEM, "1 = record journal, 2 = play back journal", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
 
 idEventLoop eventLoopLocal;
@@ -327,3 +329,5 @@ int idEventLoop::JournalLevel() const
 {
 	return com_journal.GetInteger();
 }
+
+} // namespace BFG

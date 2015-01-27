@@ -32,6 +32,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../framework/../framework/CmdSystem.h"
 #include "../framework/CmdSystem.h"  // for idCommandLink, etc
 
+namespace BFG {
+
 /*
 ========================
 CommandLinks
@@ -64,3 +66,4 @@ idCommandLink::idCommandLink( const char* cmdName, cmdFunction_t function,
 	argCompletion_ = argCompletion;
 }
 
+} // namespace BFG

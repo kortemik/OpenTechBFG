@@ -36,6 +36,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "win_local.h"
 
+namespace BFG {
+
 #define DINPUT_BUFFERSIZE           256
 
 /*
@@ -1112,3 +1114,5 @@ void idJoystickWin32::PushButton( int inputDeviceNum, int key, bool value )
 		Sys_QueEvent( SE_KEY, key, value, 0, NULL, inputDeviceNum );
 	}
 }
+
+} // namespace BFG

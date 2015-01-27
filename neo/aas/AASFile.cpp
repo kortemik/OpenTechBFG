@@ -47,6 +47,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "AASFile.h"
 #include "AASFile_local.h"
 
+namespace BFG {
 
 /*
 ===============================================================================
@@ -1593,3 +1594,5 @@ void idAASFileLocal::DeleteClusters()
 	memset( &cluster, 0, sizeof( cluster ) );
 	clusters.Append( cluster );
 }
+
+} // namespace BFG

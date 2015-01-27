@@ -74,6 +74,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "posix_public.h"
 
+namespace BFG {
+
 class idFile;
 
 #define					MAX_OSPATH 256
@@ -1707,3 +1709,5 @@ const char* Sys_GetLastErrorString()
 
 }
 // DG end
+
+} // namespace BFG

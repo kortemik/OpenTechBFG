@@ -55,6 +55,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/Model.h"
 #include "../sys/sys_public.h"
 
+namespace BFG {
+
 idCVar binaryLoadAnim( "binaryLoadAnim", "1", 0, "enable binary load/write of idMD5Anim" );
 
 static const byte B_ANIM_MD5_VERSION = 101;
@@ -1356,3 +1358,5 @@ void idAnimManager::FlushUnusedAnims()
 		delete removeAnims[ i ];
 	}
 }
+
+} // namespace BFG

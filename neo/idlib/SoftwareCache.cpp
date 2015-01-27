@@ -41,6 +41,8 @@ If you have questions concerning this license or the applicable additional terms
 #include <signal.h>
 #endif
 
+namespace BFG {
+
 /*
 ================================================================================================
 
@@ -72,3 +74,5 @@ bool SpursEmulationAssertFailed( const char* filename, int line, const char* exp
 	}
 	return true;
 }
+
+} // namespace BFG

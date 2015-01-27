@@ -45,6 +45,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sys/sys_signin.h"
 #include "Common_local.h"
 
+namespace BFG {
+
 struct sysEvent_t;
 
 /*
@@ -235,3 +237,5 @@ void idCommonLocal::GuiFrameEvents()
 		game->Shell_SyncWithSession();
 	}
 }
+
+} // namespace BFG

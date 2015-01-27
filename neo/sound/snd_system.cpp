@@ -60,6 +60,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sound/snd_defines.h"
 #include "snd_local.h"
 
+namespace BFG {
+
 class idDecl;
 class idRenderWorld;
 class idSoundVoice;
@@ -729,3 +731,5 @@ idSoundSystemLocal::FreeVoice
 void idSoundSystemLocal::PrintMemInfo( MemInfo_t* mi )
 {
 }
+
+} // namespace BFG

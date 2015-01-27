@@ -44,6 +44,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sys/sys_session.h"
 #include "sys_lobby_backend.h"
 
+namespace BFG {
+
 class idBitMsg;
 class idLocalUser;
 class idPlayerProfile;
@@ -1030,4 +1032,6 @@ public:
 	virtual ~idSessionCallbacks() {};
 };
 
-#endif
+} // namespace BFG
+
+#endif // __SYS_LOBBY_H__

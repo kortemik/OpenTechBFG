@@ -52,7 +52,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 const static int NUM_GAME_OPTIONS_OPTIONS = 8;
+
 /*
 ========================
 idMenuScreen_Shell_MatchSettings::Initialize
@@ -556,3 +559,5 @@ bool idMenuScreen_Shell_MatchSettings::idMenuDataSource_MatchSettings::IsDataCha
 	
 	return false;
 }
+
+} // namespace BFG

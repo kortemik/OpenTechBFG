@@ -69,6 +69,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/RenderWorld.h"
 #include "../sound/sound.h"
 
+namespace BFG {
+
 class idCmdArgs;
 
 const idEventDef EV_Thread_Execute( "<execute>", NULL );
@@ -2190,3 +2192,5 @@ void idThread::Event_InfluenceActive()
 		idThread::ReturnInt( false );
 	}
 }
+
+} // namespace BFG

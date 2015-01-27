@@ -36,6 +36,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../ui/Winvar.h"
 #include "Window.h"
 
+namespace BFG {
+
 class idCVar;
 class idTokenParser;
 class idUserInterfaceLocal;
@@ -91,5 +93,7 @@ private:
 	idWinBool			liveUpdate;
 	idWinStr			updateGroup;
 };
+
+} // namespace BFG
 
 #endif // __CHOICEWINDOW_H

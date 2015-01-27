@@ -59,6 +59,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "UserInterfaceLocal.h"
 #include "Window.h"
 
+namespace BFG {
+
 extern idCVar r_skipGuiShaders;		// 1 = don't render any gui elements on surfaces
 
 idUserInterfaceManagerLocal	uiManagerLocal;
@@ -854,3 +856,4 @@ void idUserInterfaceLocal::SetCursor( float x, float y )
 	cursorY = y;
 }
 
+} // namespace BFG

@@ -37,9 +37,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "../swf/SWF_SpriteInstance.h"
 #include "../swf/SWF_TextInstance.h"
 
-class idMenuHandler;
-
 #pragma hdrstop
+
+namespace BFG {
+
+class idMenuHandler;
 
 /*
 ========================
@@ -246,3 +248,5 @@ void idMenuWidget_InfoBox::ObserveEvent( const idMenuWidget& widget, const idWid
 		}
 	}
 }
+
+} // namespace BFG

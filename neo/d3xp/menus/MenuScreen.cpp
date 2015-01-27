@@ -41,6 +41,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 idMenuScreen::idMenuScreen()
 {
 	menuGUI = NULL;
@@ -399,3 +401,4 @@ void idMenuScreen::HandleMenu( const mainMenuTransition_t type )
 	transition = type;
 }
 
+} // namespace BFG

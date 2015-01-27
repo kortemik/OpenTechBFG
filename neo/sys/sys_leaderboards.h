@@ -33,6 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_assert.h"
 #include "../idlib/Callback.h"                   // for idCallback
 
+namespace BFG {
+
 /*
 ================================================================================================
 
@@ -271,5 +273,7 @@ protected:
 const leaderboardDefinition_t* Sys_FindLeaderboardDef( int id );
 leaderboardDefinition_t* 		Sys_CreateLeaderboardDef( int id_, int numColumns_, const columnDef_t* columnDefs_, rankOrder_t rankOrder_, bool supportsAttachments_, bool checkAgainstCurrent_ );
 void							Sys_DestroyLeaderboardDefs();
+
+} // namespace BFG
 
 #endif // !__SYS_LEADERBOARDS_H__

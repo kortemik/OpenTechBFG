@@ -38,6 +38,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../idlib/math/Matrix.h"
 
+namespace BFG {
+
 //===============================================================
 //
 //	idMat2
@@ -3004,3 +3006,5 @@ const char* idMat6::ToString( int precision ) const
 {
 	return idStr::FloatArrayToString( ToFloatPtr(), GetDimension(), precision );
 }
+
+} // namespace BFG

@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/Str.h"
 #include "Window.h"
 
+namespace BFG {
+
 class idTokenParser;
 class idUserInterfaceLocal;
 
@@ -54,5 +56,7 @@ private:
 	bool showCursor;
 	idStr cursorVar;
 };
+
+} // namespace BFG
 
 #endif // __FIELDWINDOW_H

@@ -51,6 +51,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "Model_local.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 class idJointMat;
 
 /*
@@ -289,3 +291,5 @@ void R_ListGuis_f( const idCmdArgs& args )
 {
 	uiManager->ListGuis();
 }
+
+} // namespace BFG

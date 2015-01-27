@@ -63,6 +63,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../swf/SWF_TextInstance.h"
 #include "../swf/SWF_Types.h"
 
+namespace BFG {
+
 class idEntity;
 class idMaterial;
 
@@ -2430,3 +2432,5 @@ void idMenuScreen_HUD::UpdateChattingHud( idPlayer* player )
 		}
 	}
 }
+
+} // namespace BFG

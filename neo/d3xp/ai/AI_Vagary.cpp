@@ -56,6 +56,8 @@ Vagary specific AI code
 #include "../idlib/math/Random.h"
 #include "../idlib/math/Vector.h"
 
+namespace BFG {
+
 class idAI_Vagary : public idAI
 {
 public:
@@ -179,3 +181,5 @@ void idAI_Vagary::Event_ThrowObjectAtEnemy( idEntity* ent, float speed )
 		ment->EnableDamage( true, 2.5f );
 	}
 }
+
+} // namespace BFG

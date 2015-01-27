@@ -47,6 +47,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/math/Rotation.h"
 #include "../idlib/math/Vector.h"
 
+namespace BFG {
+
 CLASS_DECLARATION( idPhysics_Actor, idPhysics_Monster )
 END_CLASS
 
@@ -912,3 +914,5 @@ void idPhysics_Monster::ReadFromSnapshot( const idBitMsg& msg )
 	current.atRest = msg.ReadLong();
 	current.onGround = msg.ReadBits( 1 ) != 0;
 }
+
+} // namespace BFG

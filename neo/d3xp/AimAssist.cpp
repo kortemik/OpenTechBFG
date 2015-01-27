@@ -49,6 +49,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/math/Vector.h"
 #include "Game_local.h"
 
+namespace BFG {
+
 /*
 ================================================================================================
 Contains the AimAssist implementation.
@@ -501,3 +503,5 @@ bool idAimAssist::ComputeTargetPos( idEntity* entity, idVec3& primaryTargetPos, 
 	
 	return false;
 }
+
+} // namespace BFG

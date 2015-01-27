@@ -46,6 +46,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../swf/SWF_ScriptVar.h"
 #include "../sys/sys_session.h"
 
+namespace BFG {
+
 class idSWFScriptObject;
 
 extern idCVar g_demoMode;
@@ -568,3 +570,5 @@ bool idMenuScreen_Shell_Pause::HandleAction( idWidgetAction& action, const idWid
 	
 	return idMenuWidget::HandleAction( action, event, widget, forceHandled );
 }
+
+} // namespace BFG

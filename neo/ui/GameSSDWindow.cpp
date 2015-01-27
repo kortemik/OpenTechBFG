@@ -50,6 +50,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "UserInterfaceLocal.h"
 #include "Window.h"
 
+namespace BFG {
 
 #define Z_NEAR 100.0f
 #define Z_FAR  4000.0f
@@ -2616,3 +2617,5 @@ void idGameSSDWindow::PlaySound( const char* sound )
 		currentSound = 0;
 	}
 }
+
+} // namespace BFG

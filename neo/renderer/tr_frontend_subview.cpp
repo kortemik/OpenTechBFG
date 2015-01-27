@@ -51,6 +51,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "Model_local.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 class idJointMat;
 
 /*
@@ -605,3 +607,5 @@ bool R_GenerateSubViews( const drawSurf_t* const drawSurfs[], const int numDrawS
 	
 	return subviews;
 }
+
+} // namespace BFG

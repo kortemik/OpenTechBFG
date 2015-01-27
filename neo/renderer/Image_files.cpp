@@ -63,6 +63,8 @@ extern "C" {
 #include <jpeglib.h>
 }
 
+namespace BFG {
+
 // hooks from jpeg lib to our system
 
 void jpg_Error( const char* fmt, ... )
@@ -1145,3 +1147,5 @@ bool R_LoadCubeImages( const char* imgName, cubeFiles_t extensions, byte* pics[6
 	}
 	return true;
 }
+
+} // namespace BFG

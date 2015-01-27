@@ -42,6 +42,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/math/Random.h"
 #include "../idlib/math/Vector.h"
 
+namespace BFG {
+
 CLASS_DECLARATION( idForce, idForce_Grab )
 END_CLASS
 
@@ -213,3 +215,4 @@ void idForce_Grab::RemovePhysics( const idPhysics* phys )
 	}
 }
 
+} // namespace BFG

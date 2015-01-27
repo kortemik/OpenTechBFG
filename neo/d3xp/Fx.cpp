@@ -63,6 +63,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/RenderWorld.h"
 #include "Game_local.h"
 
+namespace BFG {
+
 class idSoundShader;
 
 /*
@@ -1013,3 +1015,5 @@ void idTeleporter::Event_DoAction( idEntity* activator )
 	idAngles a( 0, spawnArgs.GetFloat( "angle" ), 0 );
 	activator->Teleport( GetPhysics()->GetOrigin(), a, NULL );
 }
+
+} // namespace BFG

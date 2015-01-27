@@ -60,6 +60,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_intrinsics.h"         // for USE_INTRINSICS
 #include "../idlib/sys/sys_types.h"              // for byte, triIndex_t
 
+namespace BFG {
+
 idSIMDProcessor*		processor = NULL;			// pointer to SIMD processor
 idSIMDProcessor* 	generic = NULL;				// pointer to generic SIMD implementation
 idSIMDProcessor* 	SIMDProcessor = NULL;
@@ -1467,3 +1469,5 @@ void idSIMD::Test_f( const idCmdArgs& args )
 #endif
 	// RB end
 }
+
+} // namespace BFG

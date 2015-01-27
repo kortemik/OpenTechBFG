@@ -51,6 +51,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../ui/UserInterface.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 //#define WRITE_GUIS
 
 typedef struct
@@ -821,3 +823,5 @@ void	idRenderWorldLocal::ReadRenderEntity()
 		common->Printf( "DC_UPDATE_ENTITYDEF: %i = %s\n", index, ent.hModel ? ent.hModel->Name() : "NULL" );
 	}
 }
+
+} // namespace BFG

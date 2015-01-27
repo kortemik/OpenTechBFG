@@ -34,6 +34,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../swf/SWF.h"
 #include "zconf.h"
 
+namespace BFG {
+
 /*
 ========================
 idSWF::Inflate
@@ -66,3 +68,5 @@ bool idSWF::Inflate( const byte* input, int inputSize, byte* output, int outputS
 	
 	return success;
 }
+
+} // namespace BFG

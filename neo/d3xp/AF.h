@@ -43,6 +43,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/math/Vector.h"
 #include "../renderer/Model.h"
 
+namespace BFG {
+
 class idClipModel;
 class idDeclAF_Body;
 class idDeclAF_Constraint;
@@ -158,5 +160,7 @@ protected:
 	
 	bool					TestSolid() const;
 };
+
+} // namespace BFG
 
 #endif /* !__GAME_AF_H__ */

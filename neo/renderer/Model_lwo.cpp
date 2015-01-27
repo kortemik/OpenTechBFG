@@ -39,6 +39,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_types.h"
 #include "Model_lwo.h"
 
+namespace BFG {
+
 /*
 ======================================================================
 
@@ -4406,3 +4408,5 @@ int lwGetPolyVMaps( lwPolygonList* polygon, lwVMap* vmap )
 	
 	return 1;
 }
+
+} // namespace BFG

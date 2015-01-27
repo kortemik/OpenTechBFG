@@ -35,7 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_threading.h"
 #include "sys/sys_types.h"              // for byte, dword
 
-
+namespace BFG {
 /*
 ===============================================================================
 
@@ -342,4 +342,7 @@ public:
 #include "SoftwareCache.h"
 */
 
+} // namespace BFG
+
 #endif	/* !__LIB_H__ */
+

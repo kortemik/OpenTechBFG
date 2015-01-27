@@ -36,6 +36,8 @@ If you have questions concerning this license or the applicable additional terms
 //#include "Window.h"
 #include "Winvar.h"
 
+namespace BFG {
+
 class idFile;
 class idTokenParser;
 class idWindow;
@@ -127,5 +129,7 @@ public:
 	void WriteToSaveGame( idFile* savefile );
 	void ReadFromSaveGame( idFile* savefile );
 };
+
+} // namespace BFG
 
 #endif // __GUISCRIPT_H

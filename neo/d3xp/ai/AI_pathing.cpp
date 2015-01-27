@@ -60,6 +60,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/RenderWorld.h"
 #include "bv/Box.h"
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -1814,3 +1816,5 @@ bool idAI::PredictTrajectory( const idVec3& firePos, const idVec3& target, float
 	// there is no collision free trajectory
 	return false;
 }
+
+} // namespace BFG

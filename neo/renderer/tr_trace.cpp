@@ -48,6 +48,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/sys_intrinsics.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 class idJointMat;
 
 /*
@@ -703,3 +705,5 @@ localTrace_t R_LocalTrace( const idVec3& start, const idVec3& end, const float r
 	
 	return hit;
 }
+
+} // namespace BFG

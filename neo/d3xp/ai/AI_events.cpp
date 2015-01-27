@@ -71,6 +71,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/Model.h"
 #include "../renderer/RenderWorld.h"
 
+namespace BFG {
+
 /***********************************************************************
 
 	AI Events
@@ -3440,3 +3442,5 @@ void idAI::Event_SetHomingMissileGoal()
 	
 	homingMissileGoal = enemy->GetPhysics()->GetOrigin();
 }
+
+} // namespace BFG

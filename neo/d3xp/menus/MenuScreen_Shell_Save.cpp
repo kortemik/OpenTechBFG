@@ -54,6 +54,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
 
 const static int NUM_SAVE_OPTIONS = 10;
 
@@ -609,3 +610,5 @@ bool idMenuScreen_Shell_Save::HandleAction( idWidgetAction& action, const idWidg
 	
 	return idMenuWidget::HandleAction( action, event, widget, forceHandled );
 }
+
+} // namespace BFG

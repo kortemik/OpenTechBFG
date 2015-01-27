@@ -83,8 +83,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/RenderWorld.h"
 #include "Game_local.h"
 
-class idDeclSkin;
+namespace BFG {
 
+class idDeclSkin;
 
 /*
 ===============================================================================
@@ -4233,3 +4234,4 @@ void idAFEntity_Harvest::Gib( const idVec3& dir, const char* damageDefName )
 	idAFEntity_WithAttachedHead::Gib( dir, damageDefName );
 }
 
+} // namespace BFG

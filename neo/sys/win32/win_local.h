@@ -42,6 +42,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <dinput.h>
 
+namespace BFG {
+
 #define	WINDOW_STYLE	(WS_OVERLAPPED|WS_BORDER|WS_CAPTION|WS_VISIBLE | WS_THICKFRAME)
 
 void	Sys_QueEvent( sysEventType_t type, int value, int value2, int ptrLength, void* ptr, int inputDeviceNum );
@@ -139,5 +141,7 @@ struct Win32Vars_t
 } ;
 
 extern Win32Vars_t win32;
+
+} // namespace BFG
 
 #endif /* !__WIN_LOCAL_H__ */

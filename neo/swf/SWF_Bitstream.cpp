@@ -38,6 +38,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 #define NBM( x ) (int32)( ( 1LL << x ) - 1 )
 int maskForNumBits[33] = {	NBM( 0x00 ), NBM( 0x01 ), NBM( 0x02 ), NBM( 0x03 ),
 							NBM( 0x04 ), NBM( 0x05 ), NBM( 0x06 ), NBM( 0x07 ),
@@ -461,3 +463,5 @@ void idSWFBitStream::ReadMorphGradient( swfGradient_t& grad )
 		ReadColorRGBA( grad.gradientRecords[i].endColor );
 	}
 }
+
+} // namespace BFG

@@ -41,6 +41,8 @@ Contains the ColorSpace conversion implementation.
 #include "../idlib/math/Vector.h"
 #include "ColorSpace.h"
 
+namespace BFG {
+
 /*
 ================================================================================================
 To *Color-Convert RGB and YCoCg* ColorSpaces, use the following conversions:
@@ -655,3 +657,5 @@ void idColorSpace::ConvertMonochromeToRGB( byte* rgb, const byte* mono, int widt
 		}
 	}
 }
+
+} // namespace BFG

@@ -62,6 +62,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "CollisionModel_local.h"
 #include "Timer.h"
 
+namespace BFG {
 
 /*
 ===============================================================================
@@ -593,3 +594,5 @@ void idCollisionModelManagerLocal::DebugOutput( const idVec3& origin )
 	Mem_Free( testend );
 	testend = NULL;
 }
+
+} // namespace BFG

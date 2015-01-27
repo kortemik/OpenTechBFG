@@ -45,6 +45,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../swf/SWF_ScriptVar.h"
 #include "../swf/SWF_SpriteInstance.h"
 
+namespace BFG {
+
 /*
 ========================
 idMenuScreen_PDA_UserEmails::Initialize
@@ -584,3 +586,5 @@ void idMenuScreen_PDA_UserEmails::ObserveEvent( const idMenuWidget& widget, cons
 		}
 	}
 }
+
+} // namespace BFG

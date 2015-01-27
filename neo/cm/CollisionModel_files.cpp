@@ -55,6 +55,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/Material.h"
 #include "CollisionModel_local.h"
 
+namespace BFG {
+
 class idMapEntity;
 
 #define CM_FILE_EXT			"cm"
@@ -757,3 +759,5 @@ bool idCollisionModelManagerLocal::LoadCollisionModelFile( const char* name, uns
 	
 	return true;
 }
+
+} // namespace BFG

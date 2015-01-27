@@ -39,6 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
 
 /*
 ================================================================================================
@@ -227,5 +228,4 @@ void idFileManifest::AddFile( const char* fileName )
 	//}
 }
 
-
-
+} // namespace BFG

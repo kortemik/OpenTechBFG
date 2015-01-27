@@ -43,6 +43,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 idCVar* idCVar::staticVars = NULL;
 
 extern idCVar net_allowCheats;
@@ -1437,3 +1439,5 @@ void idCVarSystemLocal::Restart_f( const idCmdArgs& args )
 		cvar->Reset();
 	}
 }
+
+} // namespace BFG

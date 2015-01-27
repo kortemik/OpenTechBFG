@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../d3xp/script/Script_Interpreter.h"  // for idInterpreter
 
+namespace BFG {
+
 extern const idEventDef EV_Thread_Execute;
 extern const idEventDef EV_Thread_SetCallback;
 extern const idEventDef EV_Thread_TerminateThread;
@@ -362,5 +364,7 @@ ID_INLINE bool idThread::IsDying()
 {
 	return interpreter.threadDying;
 }
+
+} // namespace BFG
 
 #endif /* !__SCRIPT_THREAD_H__ */

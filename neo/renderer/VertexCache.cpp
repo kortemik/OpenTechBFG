@@ -42,6 +42,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
 
 idVertexCache vertexCache;
 
@@ -396,3 +397,4 @@ void idVertexCache::BeginBackEnd()
 	
 }
 
+} // namespace BFG

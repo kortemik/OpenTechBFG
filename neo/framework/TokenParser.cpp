@@ -43,6 +43,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 void idTokenParser::LoadFromParser( idParser& parser, const char* guiName )
 {
 	idToken tok;
@@ -329,3 +331,5 @@ float idTokenParser::ParseFloat( bool* errorFlag )
 	}
 	return token.GetFloatValue();
 }
+
+} // namespace BFG

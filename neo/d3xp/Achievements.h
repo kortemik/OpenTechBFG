@@ -35,6 +35,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/containers/Array.h"
 #include "../idlib/sys/sys_assert.h"
 
+namespace BFG {
+
 class idDict;
 class idLocalUser;
 class idRestoreGame;
@@ -220,5 +222,7 @@ private:
 	idLocalUser* 	GetLocalUser();
 	void			SyncAchievments();
 };
+
+} // namespace BFG
 
 #endif // !__ACHIEVEMENTS_H__

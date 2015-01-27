@@ -48,6 +48,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../swf/SWF_ScriptVar.h"
 #include "../swf/SWF_SpriteInstance.h"
 
+namespace BFG {
+
 class idMaterial;
 
 static const int NUM_INVENTORY_ITEMS_VISIBLE = 9;
@@ -444,3 +446,5 @@ bool idMenuScreen_PDA_Inventory::HandleAction( idWidgetAction& action, const idW
 	
 	return idMenuWidget::HandleAction( action, event, widget, forceHandled );
 }
+
+} // namespace BFG

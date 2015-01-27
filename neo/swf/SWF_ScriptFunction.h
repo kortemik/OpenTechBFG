@@ -37,6 +37,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../swf/SWF_ScriptObject.h"
 #include "../swf/SWF_ScriptVar.h"
 
+namespace BFG {
+
 class idSWFBitStream;
 class idSWFParmList;
 class idSWFSpriteInstance;
@@ -290,5 +292,7 @@ private:
 	};
 	idList< parmInfo_t, TAG_SWF > parameters;
 };
+
+} // namespace BFG
 
 #endif // !__SWF_SCRIPTFUNCTION_H__

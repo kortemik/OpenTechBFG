@@ -58,6 +58,8 @@ Event are used for scheduling tasks and for linking script commands.
 #include "../idlib/sys/sys_types.h"
 #include "../renderer/Material.h"
 
+namespace BFG {
+
 #define MAX_EVENTSPERFRAME			4096
 //#define CREATE_EVENT_CODE
 
@@ -1279,4 +1281,6 @@ void CreateEventCallbackHandler()
 	fileSystem->CloseFile( file );
 }
 
-#endif
+#endif // CREATE_EVENT_CODE
+
+} // namespace BFG

@@ -127,6 +127,8 @@ If you have questions concerning this license or the applicable additional terms
 #undef max
 #endif
 
+namespace BFG {
+
 idCVar flashlight_batteryDrainTimeMS( "flashlight_batteryDrainTimeMS", "30000", CVAR_INTEGER, "amount of time (in MS) it takes for full battery to drain (-1 == no battery drain)" );
 idCVar flashlight_batteryChargeTimeMS( "flashlight_batteryChargeTimeMS", "3000", CVAR_INTEGER, "amount of time (in MS) it takes to fully recharge battery" );
 idCVar flashlight_minActivatePercent( "flashlight_minActivatePercent", ".25", CVAR_FLOAT, "( 0.0 - 1.0 ) minimum amount of battery (%) needed to turn on flashlight" );
@@ -12698,3 +12700,5 @@ gameExpansionType_t idPlayer::GetExpansionType() const
 	}
 	return GAME_UNKNOWN;
 }
+
+} // namespace BFG

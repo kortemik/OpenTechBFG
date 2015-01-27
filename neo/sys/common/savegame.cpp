@@ -52,6 +52,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sys_savegame.h"
 #include "sys/sys_threading.h"
 
+namespace BFG {
+
 class idLocalUser;
 
 idCVar savegame_winInduceDelay( "savegame_winInduceDelay", "0", CVAR_INTEGER, "on windows, this is a delay induced before any file operation occurs" );
@@ -875,3 +877,5 @@ void Sys_SaveGameCheck( bool& exists, bool& autosaveExists )
 		fileSystem->FreeFileList( files );
 	}
 }
+
+} // namespace BFG

@@ -28,6 +28,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef SYS_FILESYSTEM_H
 #define SYS_FILESYSTEM_H
 
+namespace BFG {
+
 #include "../idlib/containers/List.h"   // for idList
 
 void			Sys_Mkdir( const char* path );
@@ -53,4 +55,6 @@ const char* 	Sys_CWD();
 
 const char* 	Sys_LaunchPath();
 
-#endif
+} // namespace BFG
+
+#endif // SYS_FILESYSTEM_H

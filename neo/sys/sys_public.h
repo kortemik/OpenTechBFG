@@ -37,6 +37,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_defines.h"
 #include "../idlib/CmdArgs.h"
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -848,5 +850,6 @@ extern idSys* 				sys;
 bool Sys_LoadOpenAL();
 void Sys_FreeOpenAL();
 
+} // namespace BFG
 
 #endif /* !__SYS_PUBLIC__ */

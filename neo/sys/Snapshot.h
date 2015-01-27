@@ -32,6 +32,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Snapshot_Jobs.h"
 
+namespace BFG {
+
 extern idCVar net_verboseSnapshot;
 #define NET_VERBOSESNAPSHOT_PRINT	if ( net_verboseSnapshot.GetInteger() > 0 ) idLib::Printf
 #define NET_VERBOSESNAPSHOT_PRINT_LEVEL( X, Y )  if ( net_verboseSnapshot.GetInteger() >= ( X ) ) idLib::Printf( "%s", Y )
@@ -247,5 +249,7 @@ private:
 	void WriteObject( idFile* file, int visIndex, objectState_t* newState, objectState_t* oldState, int& lastobjectNum );
 	void FreeObjectState( int index );
 };
+
+} // namespace BFG
 
 #endif // __SNAPSHOT_H__

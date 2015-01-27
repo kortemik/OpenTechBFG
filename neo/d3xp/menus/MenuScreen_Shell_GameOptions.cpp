@@ -46,6 +46,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 const static int NUM_GAME_OPTIONS_OPTIONS = 8;
 
 const float MIN_FOV = 80.0f;
@@ -426,3 +428,5 @@ bool idMenuScreen_Shell_GameOptions::idMenuDataSource_GameSettings::IsDataChange
 	
 	return false;
 }
+
+} // namespace BFG

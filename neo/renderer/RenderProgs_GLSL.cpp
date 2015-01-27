@@ -54,6 +54,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "RenderProgs_embedded.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 idCVar r_skipStripDeadCode( "r_skipStripDeadCode", "0", CVAR_BOOL, "Skip stripping dead code" );
 idCVar r_useUniformArrays( "r_useUniformArrays", "1", CVAR_BOOL, "" );
 
@@ -2283,3 +2285,4 @@ void idRenderProgManager::ZeroUniforms()
 	memset( glslUniforms.Ptr(), 0, glslUniforms.Allocated() );
 }
 
+} // namespace BFG

@@ -56,6 +56,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sys/sys_session_savegames.h"
 #include "sys_profile.h"
 
+namespace BFG {
+
 #define SAVEGAME_PROFILE_FILENAME			"profile.bin"
 
 idCVar profile_verbose( "profile_verbose", "0", CVAR_BOOL, "Turns on debug spam for profiles" );
@@ -517,3 +519,5 @@ bool Sys_SaveGameProfileCheck()
 	
 	return exists;
 }
+
+} // namespace BFG

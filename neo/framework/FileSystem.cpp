@@ -67,6 +67,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <sys/stat.h>
 #endif
 
+namespace BFG {
 
 /*
 =============================================================================
@@ -3853,3 +3854,5 @@ sysFolder_t idFileSystemLocal::IsFolder( const char* relativePath, const char* b
 {
 	return Sys_IsFolder( RelativePathToOSPath( relativePath, basePath ) );
 }
+
+} // namespace BFG

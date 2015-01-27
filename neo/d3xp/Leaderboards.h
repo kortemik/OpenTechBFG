@@ -35,6 +35,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sys/sys_stats.h"
 #endif
 
+namespace BFG {
+
 struct lobbyUserID_t;
 
 struct leaderboardStats_t
@@ -79,5 +81,7 @@ int				LeaderboardLocal_GetID( int mapIndex, int gametype );
 void			LeaderboardLocal_Upload( lobbyUserID_t lobbyUserID, int gameType, leaderboardStats_t& stats );
 
 extern const columnGameMode_t gameMode_columnDefs[];
+
+} // namespace BFG
 
 #endif // __LEADERBOARDS_LOCAL_H__

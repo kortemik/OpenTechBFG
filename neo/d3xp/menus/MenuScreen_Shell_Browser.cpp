@@ -50,6 +50,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 enum browserCommand_t
 {
 	BROWSER_COMMAND_REFRESH_SERVERS,
@@ -479,3 +481,5 @@ bool idMenuScreen_Shell_GameBrowser::HandleAction( idWidgetAction& action, const
 	
 	return idMenuScreen::HandleAction( action, event, widget, forceHandle );
 }
+
+} // namespace BFG

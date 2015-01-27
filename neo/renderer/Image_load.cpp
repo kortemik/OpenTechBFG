@@ -49,6 +49,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/RenderSystem.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 /*
 ================
 BitsForFormat
@@ -932,3 +934,5 @@ void idImage::SetSamplerState( textureFilter_t tf, textureRepeat_t tr )
 	glBindTexture( ( opts.textureType == TT_CUBIC ) ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, texnum );
 	SetTexParameters();
 }
+
+} // namespace BFG

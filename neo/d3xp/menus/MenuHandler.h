@@ -37,6 +37,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../d3xp/menus/MenuScreen.h"   // for idMenuScreen, etc
 
+namespace BFG {
+
 enum shellAreas_t
 {
 	SHELL_AREA_INVALID = -1,
@@ -628,5 +630,6 @@ protected:
 	
 };
 
+} // namespace BFG
 
 #endif //__MENUDATA_H__

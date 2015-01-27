@@ -49,6 +49,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "Window.h"
 #include "Winvar.h"
 
+namespace BFG {
+
 /*
 =========================
 Script_Set
@@ -769,3 +771,5 @@ void idGuiScriptList::ReadFromSaveGame( idFile* savefile )
 		list[i]->ReadFromSaveGame( savefile );
 	}
 }
+
+} // namespace BFG

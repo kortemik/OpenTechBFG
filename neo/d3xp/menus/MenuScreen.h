@@ -41,6 +41,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../d3xp/menus/MenuWidget.h"   // for idMenuWidget
 
+namespace BFG {
+
 enum mainMenuTransition_t
 {
 	MENU_TRANSITION_INVALID = -1,
@@ -1853,4 +1855,6 @@ inline void InvitePartyOrFriends()
 	}
 }
 
-#endif
+} // namespace BFG
+
+#endif // __MENUSCREEN_H__

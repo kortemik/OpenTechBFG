@@ -56,6 +56,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/RenderWorld.h"
 #include "CollisionModel_local.h"
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -1249,3 +1251,5 @@ void idCollisionModelManagerLocal::Translation( trace_t* results, const idVec3& 
 	}
 #endif
 }
+
+} // namespace BFG

@@ -52,6 +52,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sound/WaveFile.h"
 #include "../sys/sys_public.h"
 
+namespace BFG {
+
 extern idCVar s_useCompression;
 extern idCVar s_noSound;
 
@@ -1181,3 +1183,4 @@ int idSoundSample_OpenAL::MS_ADPCM_decode( uint8** audio_buf, uint32* audio_len 
 	return 0;
 }
 
+} // namespace BFG

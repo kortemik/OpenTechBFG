@@ -56,6 +56,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/math/Vector.h"
 #include "../renderer/RenderWorld.h"
 
+namespace BFG {
+
 class idBounds;
 
 CLASS_DECLARATION( idPhysics_Base, idPhysics_RigidBody )
@@ -1715,3 +1717,5 @@ void idPhysics_RigidBody::ReadFromSnapshot( const idBitMsg& msg )
 		clipModel->Link( gameLocal.clip, self, clipModel->GetId(), next.i.position, next.i.orientation );
 	}
 }
+
+} // namespace BFG

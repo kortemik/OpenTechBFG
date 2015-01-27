@@ -39,6 +39,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sys/LightweightCompression.h"
 #include "PacketProcessor.h"
 
+namespace BFG {
+
 // DG: workaround for GCC bug
 const int idPacketProcessor::RETURN_TYPE_NONE = 0;
 const int idPacketProcessor::RETURN_TYPE_OOB = 1;
@@ -683,3 +685,5 @@ void idPacketProcessor::VerifyEmptyReliableQueue( byte keepMsgBelowThis, byte re
 	
 	reliable = clean;
 }
+
+} // namespace BFG

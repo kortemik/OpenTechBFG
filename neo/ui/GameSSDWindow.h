@@ -38,6 +38,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../ui/Window.h"
 #include "../ui/Winvar.h"
 
+namespace BFG {
+
 class idFile;
 class idGameSSDWindow;
 class idMaterial;
@@ -649,5 +651,7 @@ public:
 	int							currentSound;
 	
 };
+
+} // namespace BFG
 
 #endif //__GAME_SSD_WINDOW_H__

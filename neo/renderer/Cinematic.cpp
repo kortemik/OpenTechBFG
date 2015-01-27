@@ -50,7 +50,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sound/sound.h"
 #include "../sys/sys_public.h"
 
-extern idCVar s_noSound;
+
 
 //#define JPEG_INTERNALS
 //extern "C" {
@@ -58,6 +58,10 @@ extern idCVar s_noSound;
 //}
 
 #include "tr_local.h"
+
+namespace BFG {
+
+extern idCVar s_noSound;
 
 #define CIN_system	1
 #define CIN_loop	2
@@ -2538,3 +2542,5 @@ int idSndWindow::AnimationLength()
 {
 	return -1;
 }
+
+} // namespace BFG

@@ -33,6 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sys/sys_public.h"
 #include "posix_public.h"
 
+namespace BFG {
+
 const int siglist[] =
 {
 	SIGHUP,
@@ -177,3 +179,5 @@ void Sys_SetFatalError( const char* error )
 {
 	strncpy( fatalError, error, sizeof( fatalError ) );
 }
+
+} // namespace BFG

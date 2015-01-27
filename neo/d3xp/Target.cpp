@@ -76,6 +76,8 @@ Invisible entities that affect other entities or the world when activated.
 #include "../ui/UserInterface.h"
 #include "Game_local.h"
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -2235,3 +2237,5 @@ void idTarget_Achievement::Event_Activate( idEntity* activator )
 		player->GetAchievementManager().EventCompletesAchievement( ( achievement_t )achievement );
 	}
 }
+
+} // namespace BFG

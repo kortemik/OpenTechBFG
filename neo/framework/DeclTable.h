@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __DECLTABLE_H__
 #define __DECLTABLE_H__
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -53,5 +55,7 @@ private:
 	bool					snap;
 	idList<float, TAG_IDLIB_LIST_DECL>			values;
 };
+
+} // namespace BFG
 
 #endif /* !__DECLTABLE_H__ */

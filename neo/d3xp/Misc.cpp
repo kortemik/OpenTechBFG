@@ -93,6 +93,8 @@ Various utility objects and functions.
 #include "../ui/UserInterface.h"
 #include "Game_local.h"
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -4520,3 +4522,5 @@ void idPortalSky::Event_Activate( idEntity* activator )
     gameLocal.portalSkyScale = spawnArgs.GetInt( "ps_scale", "16" );
 	gameLocal.SetPortalSkyEnt( this );
 }
+
+} // namespace BFG

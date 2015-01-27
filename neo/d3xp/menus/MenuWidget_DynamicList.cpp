@@ -35,9 +35,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "../swf/SWF_ScriptObject.h"
 #include "../swf/SWF_SpriteInstance.h"
 
-class idMenuHandler;
-
 #pragma hdrstop
+
+namespace BFG {
+
+class idMenuHandler;
 
 /*
 ========================
@@ -287,3 +289,5 @@ int idMenuWidget_ScoreboardList::GetTotalNumberOfOptions() const
 {
 	return GetChildren().Num();
 }
+
+} // namespace BFG

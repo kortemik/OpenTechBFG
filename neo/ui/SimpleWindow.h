@@ -36,6 +36,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../ui/Rectangle.h"
 #include "../ui/Winvar.h"
 
+namespace BFG {
+
 class idDeviceContext;
 class idFile;
 class idMaterial;
@@ -111,5 +113,7 @@ protected:
 	
 	idWinBool	hideCursor;
 };
+
+} // namespace BFG
 
 #endif /* !__SIMPLEWIN_H__ */

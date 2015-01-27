@@ -58,6 +58,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../ui/UserInterface.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 /*
 =================================================================================
 
@@ -939,3 +941,5 @@ void R_ModulateLights_f( const idCmdArgs& args )
 	}
 	common->Printf( "modulated %i lights\n", count );
 }
+
+} // namespace BFG

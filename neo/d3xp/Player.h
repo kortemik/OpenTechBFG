@@ -67,6 +67,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../idlib/containers/HashTable.h"       // for idHashTable
 
+namespace BFG {
+
 class idAAS;
 class idAFEntity_Vehicle;
 class idAI;
@@ -1097,5 +1099,6 @@ ID_INLINE void idPlayer::SetSelfSmooth( bool b )
 
 extern idCVar g_infiniteAmmo;
 
-#endif /* !__GAME_PLAYER_H__ */
+} // namespace BFG
 
+#endif /* !__GAME_PLAYER_H__ */

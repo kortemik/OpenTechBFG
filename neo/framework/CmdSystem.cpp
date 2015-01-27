@@ -45,6 +45,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 #ifdef ID_RETAIL
 idCVar net_allowCheats( "net_allowCheats", "0", CVAR_BOOL | CVAR_ROM, "Allow cheats in multiplayer" );
 #else
@@ -945,3 +947,5 @@ bool idCmdSystemLocal::PostReloadEngine()
 	postReload.Clear();
 	return true;
 }
+
+} // namespace BFG

@@ -94,6 +94,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/RenderWorld.h"
 #include "../sys/sys_session.h"
 
+namespace BFG {
+
 /*
 ==================
 Cmd_GetFloatArg
@@ -2827,3 +2829,5 @@ void idGameLocal::ShutdownConsoleCommands()
 {
 	cmdSystem->RemoveFlaggedCommands( CMD_FL_GAME );
 }
+
+} // namespace BFG

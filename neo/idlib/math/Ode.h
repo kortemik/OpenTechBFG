@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __MATH_ODE_H__
 #define __MATH_ODE_H__
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -147,5 +149,7 @@ protected:
 	float* 				d3;
 	float* 				d4;
 };
+
+} // namespace BFG
 
 #endif /* !__MATH_ODE_H__ */

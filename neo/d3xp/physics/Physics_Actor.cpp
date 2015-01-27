@@ -43,6 +43,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/math/Matrix.h"
 #include "../idlib/math/Vector.h"
 
+namespace BFG {
+
 class idBounds;
 class idRotation;
 
@@ -436,3 +438,5 @@ bool idPhysics_Actor::EvaluateContacts()
 	
 	return ( contacts.Num() != 0 );
 }
+
+} // namespace BFG

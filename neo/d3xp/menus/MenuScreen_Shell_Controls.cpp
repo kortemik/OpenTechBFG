@@ -46,6 +46,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 const static int NUM_CONTROLS_OPTIONS = 8;
 
 enum contorlsMenuCmds_t
@@ -452,3 +454,5 @@ bool idMenuScreen_Shell_Controls::idMenuDataSource_ControlSettings::IsDataChange
 	
 	return false;
 }
+
+} // namespace BFG

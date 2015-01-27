@@ -49,6 +49,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "UserInterfaceLocal.h"
 #include "Window.h"
 
+namespace BFG {
+
 class idTokenParser;
 
 // NO LONGER SUPPORTED!
@@ -253,3 +255,5 @@ bool idRenderWindow::ParseInternalVar( const char* _name, idTokenParser* src )
 	}
 	return idWindow::ParseInternalVar( _name, src );
 }
+
+} // namespace BFG

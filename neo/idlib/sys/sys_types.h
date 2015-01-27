@@ -35,6 +35,8 @@ If you have questions concerning this license or the applicable additional terms
 #undef uint64
 #endif
 
+namespace BFG {
+
 /*
 ================================================================================================
 Contains types and defines used throughout the engine.
@@ -314,4 +316,6 @@ literals or sizeof(). NEVER use an actual variable as a parameter to one of thes
 
 #define CONST_DEG2RAD( a )			( (a) * CONST_PI / 180.0f )
 
-#endif
+#endif // SYS_TYPES_H
+
+} // namespace BFG

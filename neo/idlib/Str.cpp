@@ -59,7 +59,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/sys_assert.h"
 #include "sys/sys_types.h"
 
-
+namespace BFG {
 
 #ifdef USE_STRING_DATA_ALLOCATOR
 static idDynamicBlockAlloc < char, 1 << 18, 128, TAG_STRING >	stringDataAllocator;
@@ -2587,3 +2587,5 @@ CONSOLE_COMMAND( testStrId, "prints a localized string", 0 )
 	idStrId str( va( "#%s", args.Argv( 1 ) ) );
 	idLib::Printf( "%s = %s\n", args.Argv( 1 ), str.GetLocalizedString() );
 }
+
+} // namespace BFG

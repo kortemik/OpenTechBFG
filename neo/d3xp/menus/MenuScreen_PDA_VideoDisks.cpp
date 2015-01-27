@@ -45,6 +45,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../swf/SWF_ScriptVar.h"
 #include "../swf/SWF_SpriteInstance.h"
 
+namespace BFG {
+
 class idMaterial;
 
 static const int MAX_VIDEO_ITEMS = 5;
@@ -386,3 +388,5 @@ bool idMenuScreen_PDA_VideoDisks::HandleAction( idWidgetAction& action, const id
 	
 	return idMenuWidget::HandleAction( action, event, widget, forceHandled );
 }
+
+} // namespace BFG

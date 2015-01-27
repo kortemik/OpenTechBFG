@@ -30,6 +30,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../sys/sys_savegame.h"
 
+namespace BFG {
+
 /*
 ================================================
 idSaveGameProcessorLoadFiles
@@ -91,4 +93,6 @@ public:
 	virtual bool	Process();
 };
 
-#endif
+} // namespace BFG
+
+#endif // __SYS_SESSION_SAVEGAMES_H__

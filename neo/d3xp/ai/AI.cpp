@@ -83,6 +83,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/Model.h"
 #include "../renderer/RenderWorld.h"
 
+namespace BFG {
+
 class idCmdArgs;
 class idSoundShader;
 
@@ -6211,3 +6213,5 @@ void idCombatNode::Event_MarkUsed()
 		disabled = true;
 	}
 }
+
+} // namespace BFG

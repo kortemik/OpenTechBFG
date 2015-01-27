@@ -61,6 +61,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../d3xp/Game_local.h"
 
+namespace BFG {
+
 class idAngles;
 class idDeclEntityDef;
 class idDeclParticle;
@@ -820,5 +822,7 @@ ID_INLINE SetTimeState::~SetTimeState()
 		gameLocal.SelectTimeGroup( previousFast );
 	}
 }
+
+} // namespace BFG
 
 #endif /* !__GAME_ENTITY_H__ */

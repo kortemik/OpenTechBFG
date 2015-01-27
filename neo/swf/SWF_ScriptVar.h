@@ -37,6 +37,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_defines.h"
 #include "../idlib/sys/sys_types.h"
 
+namespace BFG {
+
 class idSWFScriptFunction;
 class idSWFScriptObject;
 class idSWFSpriteInstance;
@@ -275,5 +277,7 @@ private:
 		idSWFScriptFunction* function;
 	} value;
 };
+
+} // namespace BFG
 
 #endif // !__SWF_SCRIPTVAR_H__

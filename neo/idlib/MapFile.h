@@ -33,6 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/math/Plane.h"
 #include "../idlib/Dict.h"
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -349,5 +351,7 @@ ID_INLINE idMapFile::idMapFile()
 	entities.Resize( 1024, 256 );
 	hasPrimitiveData = false;
 }
+
+} // namespace BFG
 
 #endif /* !__MAPFILE_H__ */

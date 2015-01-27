@@ -30,6 +30,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Game_local.h"
 
+namespace BFG {
+
 /*
 ================================================
 A simple class to handle simple predictable values
@@ -77,6 +79,6 @@ private:
 };
 
 
+} // namespace BFG
 
-
-#endif
+#endif // PREDICTED_VALUE_H_

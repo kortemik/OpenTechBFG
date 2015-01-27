@@ -34,6 +34,7 @@ If you have questions concerning this license or the applicable additional terms
          
 #include "../tools/compilers/aas/Brush.h"
 
+namespace BFG {
 
 #define BRUSH_EPSILON					0.1f
 #define BRUSH_PLANE_NORMAL_EPSILON		0.00001f
@@ -1847,3 +1848,5 @@ void idBrushMap::WriteBrushList( const idBrushList& brushList )
 		WriteBrush( b );
 	}
 }
+
+} // namespace BFG

@@ -32,6 +32,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/math/Vector.h"
 #include "../idlib/bv/Bounds.h"
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -451,4 +453,7 @@ ID_INLINE void idFixedWinding::Clear()
 {
 	numPoints = 0;
 }
+
+} // namespace BFG
+
 #endif	/* !__WINDING_H__ */

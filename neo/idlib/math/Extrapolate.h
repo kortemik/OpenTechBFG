@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../idlib/math/Math.h"
 
+namespace BFG {
+
 /*
 ==============================================================================================
 
@@ -284,5 +286,7 @@ ID_INLINE type idExtrapolate<type>::GetCurrentSpeed( int time ) const
 		}
 	}
 }
+
+} // namespace BFG
 
 #endif /* !__MATH_EXTRAPOLATE_H__ */

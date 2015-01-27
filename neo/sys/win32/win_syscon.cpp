@@ -47,6 +47,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "win_local.h"
 #include "rc/doom_resource.h"
 
+namespace BFG {
+
 #define COPY_ID			1
 #define QUIT_ID			2
 #define CLEAR_ID		3
@@ -626,3 +628,5 @@ void Win_SetErrorText( const char* buf )
 		s_wcd.hwndInputLine = NULL;
 	}
 }
+
+} // namespace BFG

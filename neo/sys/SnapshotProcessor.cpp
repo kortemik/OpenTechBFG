@@ -40,10 +40,12 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sys/SnapshotProcessor.h"
 #include "../sys/Snapshot_Jobs.h"
 
+#pragma hdrstop
+
+namespace BFG {
+
 class idBitMsg;
 struct lzwCompressionData_t;
-
-#pragma hdrstop
 
 idCVar net_optimalSnapDeltaSize( "net_optimalSnapDeltaSize", "1000", CVAR_INTEGER, "Optimal size of snapshot delta msgs." );
 idCVar net_debugBaseStates( "net_debugBaseStates", "0", CVAR_BOOL, "Log out base state information" );
@@ -586,3 +588,5 @@ void idSnapshotProcessor::AddSnapObjTemplate( int objID, idBitMsg& msg )
 		state->expectedSequence = snapSequence;
 	}
 }
+
+} // namespace BFG

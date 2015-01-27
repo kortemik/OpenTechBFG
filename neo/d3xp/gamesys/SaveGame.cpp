@@ -67,6 +67,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../ui/UserInterface.h"
 #include "sys/sys_savegame.h"
 
+namespace BFG {
+
 /*
 Save game related helper classes.
 
@@ -1843,3 +1845,5 @@ void idRestoreGame::ReadSoundCommands()
 	gameSoundWorld->StopAllSounds();
 	gameSoundWorld->ReadFromSaveGame( file );
 }
+
+} // namespace BFG

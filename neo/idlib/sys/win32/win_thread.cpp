@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/Thread.h"
 #include "../framework/Common.h"
 
+namespace BFG {
+
 /*
 ================================================================================================
 ================================================================================================
@@ -407,3 +409,5 @@ void* Sys_InterlockedCompareExchangePointer( void*& ptr, void* comparand, void* 
 {
 	return InterlockedCompareExchangePointer( & ptr, exchange, comparand );
 }
+
+} // namespace BFG

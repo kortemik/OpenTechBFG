@@ -69,6 +69,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/RenderWorld.h"
 #include "../sound/sound.h"
 
+namespace BFG {
+
 class idClass;
 class idDeclSkin;
 
@@ -6193,3 +6195,5 @@ idRenderModel* idGameEdit::ANIM_CreateMeshForAnim( idRenderModel* model, const c
 	
 	return newmodel;
 }
+
+} // namespace BFG

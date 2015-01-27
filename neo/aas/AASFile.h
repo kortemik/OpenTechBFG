@@ -42,6 +42,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/math/Vector.h"
 #include "sys/sys_types.h"
 
+namespace BFG {
+
 class idFile;
 class idLexer;
 class idPlane;
@@ -471,5 +473,7 @@ protected:
 	idList<aasCluster_t, TAG_AAS>		clusters;
 	idAASSettings				settings;
 };
+
+} // namespace BFG
 
 #endif /* !__AASFILE_H__ */

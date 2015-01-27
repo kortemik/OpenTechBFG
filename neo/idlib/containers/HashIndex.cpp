@@ -36,6 +36,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "Heap.h"
 #include "sys/sys_assert.h"
 
+namespace BFG {
+
 int idHashIndex::INVALID_INDEX[1] = { -1 };
 
 /*
@@ -178,3 +180,5 @@ int idHashIndex::GetSpread() const
 	delete[] numHashItems;
 	return 100 - ( error * 100 / totalItems );
 }
+
+} // namespace BFG

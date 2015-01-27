@@ -33,6 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "dmap.h"
 
+namespace BFG {
+
 /*
 
   T junction fixing never creates more xyz points, but
@@ -757,3 +759,5 @@ void	FixGlobalTjunctions( uEntity_t* e )
 	// done
 	FreeTJunctionHash();
 }
+
+} // namespace BFG

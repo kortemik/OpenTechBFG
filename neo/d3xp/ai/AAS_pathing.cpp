@@ -41,6 +41,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_types.h"
 #include "AAS_local.h"
 
+namespace BFG {
+
 #define SUBSAMPLE_WALK_PATH		1
 #define SUBSAMPLE_FLY_PATH		0
 
@@ -831,3 +833,5 @@ int idAASLocal::GetWallEdges( int areaNum, const idBounds& bounds, int travelFla
 	}
 	return numEdges;
 }
+
+} // namespace BFG

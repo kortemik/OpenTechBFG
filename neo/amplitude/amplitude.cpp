@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 #include <math.h>
 #include <stdlib.h>
 
+namespace BFG {
+
 static const int SAMPLE_RATE = 60;
 
 enum errorCodes_t
@@ -409,3 +411,5 @@ int main( int argc, char* argv[] )
 	
 	return E_OK;
 }
+
+} // namespace BFG

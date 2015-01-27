@@ -92,6 +92,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../cegui/CEGUI_Hooks.h"
 #endif // USE_CEGUI
 
+namespace BFG {
 
 #if defined( _DEBUG )
 #define BUILD_DEBUG "-debug"
@@ -1951,3 +1952,5 @@ CONSOLE_COMMAND( testFormattingSizes, "test printf format security", 0 )
 	common->Printf( " sizeof( int64 ): %" PRIuSIZE " bytes\n", sizeof( int64 ) );
 }
 // RB end
+
+} // namespace BFG

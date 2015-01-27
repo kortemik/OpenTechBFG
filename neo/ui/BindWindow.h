@@ -34,6 +34,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../ui/Window.h"
 #include "../ui/Winvar.h"
 
+namespace BFG {
+
 class idStr;
 class idUserInterfaceLocal;
 struct sysEvent_t;
@@ -62,5 +64,7 @@ private:
 	idWinStr bindName;
 	bool waitingOnKey;
 };
+
+} // namespace BFG
 
 #endif // __BINDWINDOW_H

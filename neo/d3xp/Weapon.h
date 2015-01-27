@@ -47,6 +47,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/RenderWorld.h"
 #include "PredictedValue.h"
 
+namespace BFG {
+
 class idBitMsg;
 class idDeclEntityDef;
 class idDeclParticle;
@@ -489,5 +491,7 @@ ID_INLINE idPlayer* idWeapon::GetOwner()
 {
 	return owner;
 }
+
+} // namespace BFG
 
 #endif /* !__GAME_WEAPON_H__ */

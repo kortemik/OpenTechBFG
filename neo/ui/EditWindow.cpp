@@ -50,6 +50,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "UserInterfaceLocal.h"
 #include "Window.h"
 
+namespace BFG {
 
 bool idEditWindow::ParseInternalVar( const char* _name, idTokenParser* src )
 {
@@ -808,3 +809,5 @@ void idEditWindow::RunNamedEvent( const char* eventName )
 		}
 	}
 }
+
+} // namespace BFG

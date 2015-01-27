@@ -57,6 +57,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 idSWFScriptObject_SpriteInstancePrototype spriteInstanceScriptObjectPrototype;
 
 /*
@@ -1677,3 +1679,5 @@ SWF_SPRITE_NATIVE_VAR_DEFINE_SET( onEnterFrame )
 	SWF_SPRITE_PTHIS_SET( "onEnterFrame" );
 	pThis->onEnterFrame = value;
 }
+
+} // namespace BFG

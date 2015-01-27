@@ -37,6 +37,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/Token.h"
 #include "sys/sys_assert.h"
 
+namespace BFG {
+
 /*
 ============
 idCmdArgs::operator=
@@ -247,3 +249,4 @@ const char* const* idCmdArgs::GetArgs( int* _argc )
 	return ( const char** )&argv[0];
 }
 
+} // namespace BFG

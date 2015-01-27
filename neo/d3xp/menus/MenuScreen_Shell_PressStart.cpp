@@ -50,9 +50,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sys/sys_session.h"
 #include "../sys/sys_signin.h"
 
-class idMaterial;
-
 #pragma hdrstop
+
+namespace BFG {
+
+class idMaterial;
 
 static const int NUM_GAME_SELECTIONS_VISIBLE = 0;
 extern idCVar g_demoMode;
@@ -370,3 +372,5 @@ bool idMenuScreen_Shell_PressStart::HandleAction( idWidgetAction& action, const 
 	
 	return idMenuWidget::HandleAction( action, event, widget, forceHandled );
 }
+
+} // namespace BFG

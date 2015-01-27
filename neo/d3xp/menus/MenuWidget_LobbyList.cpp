@@ -38,6 +38,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 /*
 ========================
 idMenuWidget_LobbyList::Update
@@ -152,3 +154,5 @@ void idMenuWidget_LobbyList::SetEntryData( int index, idStr name, voiceStateDisp
 	
 	button->SetButtonInfo( name, voiceState );
 }
+
+} // namespace BFG

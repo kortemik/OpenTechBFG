@@ -34,6 +34,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "WaveFile.h"
 #include "idlib/Thread.h"
 
+namespace BFG {
+
 // demo sound commands
 typedef enum
 {
@@ -565,5 +567,7 @@ public:
 };
 
 extern	idSoundSystemLocal	soundSystemLocal;
+
+} // namespace BFG
 
 #endif /* !__SND_LOCAL_H__ */

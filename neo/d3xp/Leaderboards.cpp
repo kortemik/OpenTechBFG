@@ -54,6 +54,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "Leaderboards.h"
 #include "MultiplayerGame.h"
 
+namespace BFG {
+
 /*
 ================================================================================================
 
@@ -391,3 +393,4 @@ CONSOLE_COMMAND( testLeaderboardUpload_SendToClients, "<gameType 0 - 4 > <frags 
 	session->LeaderboardFlush();
 }
 
+} // namespace BFG

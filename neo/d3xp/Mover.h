@@ -45,6 +45,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/math/Matrix.h"
 #include "../idlib/math/Vector.h"
 
+namespace BFG {
+
 class idBitMsg;
 class idBounds;
 class idClipModel;
@@ -606,5 +608,7 @@ public:
 private:
 	void					Event_Activate( idEntity* activator );
 };
+
+} // namespace BFG
 
 #endif /* !__GAME_MOVER_H__ */

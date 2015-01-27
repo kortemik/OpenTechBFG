@@ -84,6 +84,8 @@ Note that other POSIX systems may need some small changes, e.g. in Sys_InitNetwo
 
 #endif // _WIN32
 
+namespace BFG {
+
 /*
 ================================================================================================
 
@@ -1428,3 +1430,4 @@ void idUDP::SendPacket( const netadr_t to, const void* data, int size )
 	Net_SendUDPPacket( netSocket, size, data, to );
 }
 
+} // namespace BFG

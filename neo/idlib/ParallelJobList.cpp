@@ -51,6 +51,8 @@ If you have questions concerning this license or the applicable additional terms
 #undef AddJob
 #endif
 
+namespace BFG {
+
 class idColor;
 class idParallelJobList_Threads;
 struct CellSpursJob128;
@@ -1526,3 +1528,5 @@ void idParallelJobManagerLocal::Submit( idParallelJobList_Threads* jobList, int 
 		threads[i].SignalWork();
 	}
 }
+
+} // namespace BFG

@@ -43,6 +43,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "Model_local.h"
 #include "tr_local.h"
 
+namespace BFG {
 
 /*
 
@@ -215,3 +216,5 @@ idBounds idRenderModelSprite::Bounds( const struct renderEntity_s* renderEntity 
 	}
 	return b;
 }
+
+} // namespace BFG

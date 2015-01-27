@@ -36,6 +36,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "Window.h"
 #include "Winvar.h"
 
+namespace BFG {
+
 class idDict;
 
 idWinVar::idWinVar()
@@ -99,3 +101,4 @@ void idMultiWinVar::SetGuiInfo( idDict* dict )
 	}
 }
 
+} // namespace BFG

@@ -84,6 +84,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sys/sys_session.h"
 #include "Game_local.h"
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -3453,3 +3455,5 @@ void idHomingProjectile::Event_SetEnemy( idEntity* ent )
 {
 	SetEnemy( ent );
 }
+
+} // namespace BFG

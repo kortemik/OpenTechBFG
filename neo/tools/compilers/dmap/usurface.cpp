@@ -32,6 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "dmap.h"
 
+namespace BFG {
 
 #define	 TEXTURE_OFFSET_EQUAL_EPSILON	0.005
 #define	 TEXTURE_VECTOR_EQUAL_EPSILON	0.001
@@ -1070,5 +1071,4 @@ void Prelight( uEntity_t* e )
 	
 }
 
-
-
+} // namespace BFG

@@ -45,6 +45,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sys/sys_session.h"
 #include "sys_lobby.h"
 
+namespace BFG {
+
 class idBitMsg;
 
 idCVar net_snapshot_send_warntime( "net_snapshot_send_warntime", "500", CVAR_INTEGER, "Print warning messages if we take longer than this to send a client a snapshot." );
@@ -982,3 +984,5 @@ void idLobby::AddSnapObjTemplate( int objID, idBitMsg& msg )
 		peers[p].snapProc->AddSnapObjTemplate( objID, msg );
 	}
 }
+
+} // namespace BFG

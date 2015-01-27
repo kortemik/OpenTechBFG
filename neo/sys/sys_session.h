@@ -32,8 +32,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "../framework/File.h"          // for idFile, idFile_Memory
 #include "sys_localuser.h"
 
-struct lobbyConnectInfo_t;
+namespace BFG {
 
+struct lobbyConnectInfo_t;
 
 typedef uint8 peerMask_t;
 static const int MAX_PLAYERS			= 8;
@@ -751,5 +752,7 @@ ID_INLINE int idSession::GetInputRouting( int inputRouting[ MAX_INPUT_DEVICES ] 
 }
 
 extern idSession* session;
+
+} // namespace BFG
 
 #endif // __SYS_SESSION_H__

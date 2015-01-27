@@ -32,6 +32,8 @@ If you have questions concerning this license or the applicable additional terms
 #include <stddef.h>
 #include <string.h>
 
+namespace BFG {
+
 /*
 ================================================================================================
 Contains the MD5BlockChecksum implementation.
@@ -320,3 +322,5 @@ unsigned int MD5_BlockChecksum( const void* data, size_t length )
 			
 	return val;
 }
+
+} // namespace BFG

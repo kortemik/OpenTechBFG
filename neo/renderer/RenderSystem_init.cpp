@@ -75,8 +75,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "ParallelJobList.h"
 #include "tr_local.h"
 
-class idPreloadManifest;
-
 #ifdef _WIN32
 #include "../framework/Licensee.h"
 #endif
@@ -93,6 +91,10 @@ class idPreloadManifest;
 // DG: we need to initialize cegui after a (new) window has been created
 #include "../cegui/CEGUI_Hooks.h"
 #endif // USE_CEGUI
+
+namespace BFG {
+
+class idPreloadManifest;
 
 // DeviceContext bypasses RenderSystem to work directly with this
 idGuiModel* tr_guiModel;
@@ -3129,3 +3131,5 @@ float idRenderSystemLocal::GetPhysicalScreenWidthInCentimeters() const
 	}
 	return glConfig.physicalScreenWidthInCentimeters;
 }
+
+} // namespace BFG

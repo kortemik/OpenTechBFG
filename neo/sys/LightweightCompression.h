@@ -33,6 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_defines.h"
 #include "../idlib/sys/sys_types.h"
 
+namespace BFG {
+
 struct lzwCompressionData_t
 {
 	static const int	LZW_DICT_BITS	= 12;
@@ -237,5 +239,7 @@ private:
 	int					compressed;		// Compressed size
 	int					maxSize;
 };
+
+} // namespace BFG
 
 #endif // __LIGHTWEIGHT_COMPRESSION_H__

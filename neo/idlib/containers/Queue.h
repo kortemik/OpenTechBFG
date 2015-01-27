@@ -30,6 +30,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../idlib/Heap.h"
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -246,5 +248,7 @@ void idQueue<type, nodePtr>::Test()
 #endif // 0
 	// DG end
 }
+
+} // namespace BFG
 
 #endif // !__QUEUE_H__

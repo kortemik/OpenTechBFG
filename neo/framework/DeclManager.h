@@ -34,6 +34,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/CmdArgs.h"           // for idCmdArgs
 #include "../framework/File.h"          // for idFileLocal, idFile
 
+namespace BFG {
+
 class idDeclEntityDef;
 class idDeclTable;
 
@@ -426,5 +428,7 @@ ID_INLINE void idPrintDecls_f( const idCmdArgs& args )
 {
 	declManager->PrintType( args, type );
 }
+
+} // namespace BFG
 
 #endif /* !__DECLMANAGER_H__ */

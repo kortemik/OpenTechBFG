@@ -36,6 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_intrinsics.h"         // for USE_INTRINSICS
 #include "../idlib/sys/sys_types.h"              // for dword
 
+namespace BFG {
 
 /*
 ===============================================================================
@@ -1599,5 +1600,6 @@ inline float idMath::LerpToWithScale( const float cur, const float dest, const f
 	return cur + ( dest - cur ) * scale;
 }
 
+} // namespace BFG
 
 #endif /* !__MATH_MATH_H__ */

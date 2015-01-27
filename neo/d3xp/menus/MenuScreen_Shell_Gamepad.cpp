@@ -48,6 +48,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 const static int NUM_CONTROLS_OPTIONS = 8;
 
 enum gamepadMenuCmds_t
@@ -536,3 +538,5 @@ bool idMenuScreen_Shell_Gamepad::idMenuDataSource_GamepadSettings::IsDataChanged
 	
 	return false;
 }
+
+} // namespace BFG

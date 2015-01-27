@@ -37,6 +37,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_types.h"
 #include "../swf/SWF_ScriptVar.h"
 
+namespace BFG {
+
 class idSWFSpriteInstance;
 class idSWFTextInstance;
 
@@ -242,5 +244,7 @@ private:
 	swfNamedVar_t* 	GetVariable( int index, bool create );
 	swfNamedVar_t* 	GetVariable( const char* name, bool create );
 };
+
+} // namespace BFG
 
 #endif // !__SWF_SCRIPTOBJECT_H__

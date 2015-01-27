@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __USERINTERFACE_H__
 #define __USERINTERFACE_H__
 
+namespace BFG {
+
 #include "../ui/ListGUI.h"              // for idListGUI
 #include "../sys/sys_public.h"          // for sysEvent_t
 #include "../idlib/Dict.h"              // for idDict
@@ -169,5 +171,7 @@ public:
 };
 
 extern idUserInterfaceManager* 	uiManager;
+
+} // namespace BFG
 
 #endif /* !__USERINTERFACE_H__ */

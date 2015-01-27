@@ -60,6 +60,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../cegui/CEGUI_Hooks.h" // DG: the renderer must update cegui at the end of the frame
 #endif // USE_CEGUI
 
+namespace BFG {
+
 class idFont;
 class idMaterial;
 
@@ -1194,3 +1196,5 @@ bool idRenderSystemLocal::UploadImage( const char* imageName, const byte* data, 
 	image->UploadScratch( data, width, height );
 	return true;
 }
+
+} // namespace BFG

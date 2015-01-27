@@ -48,6 +48,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/math/Vector.h"
 #include "../renderer/RenderWorld.h"
 
+namespace BFG {
+
 class idBitMsg;
 
 CLASS_DECLARATION( idPhysics, idPhysics_Base )
@@ -980,3 +982,5 @@ idPhysics_Base::ReadFromSnapshot
 void idPhysics_Base::ReadFromSnapshot( const idBitMsg& msg )
 {
 }
+
+} // namespace BFG

@@ -38,6 +38,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/LangDict.h"
 #include "../idlib/containers/StaticList.h"
 
+namespace BFG {
+
 class idSWF;
 class idSWFScriptFunction;
 struct sysEvent_t;
@@ -338,4 +340,6 @@ private:
 	bool	dialogInUse;		// this is to prevent an active msg getting lost during a map heap reset
 };
 
-#endif
+} // namespace BFG
+
+#endif // __COMMON_DIALOG_H__

@@ -36,6 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/Str.h"
 #include "../idlib/Parser.h"
 
+namespace BFG {
 
 class idSerializer;
 
@@ -413,5 +414,7 @@ ID_INLINE const idKeyValue* idDict::GetKeyVal( int index ) const
 	}
 	return NULL;
 }
+
+} // namespace BFG
 
 #endif /* !__DICT_H__ */

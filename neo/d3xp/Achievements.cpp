@@ -50,6 +50,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "Game_local.h"
 #include "sys/sys_localuser.h"
 
+namespace BFG {
+
 idCVar achievements_Verbose( "achievements_Verbose", "1", CVAR_BOOL, "debug spam" );
 idCVar g_demoMode( "g_demoMode", "0", CVAR_INTEGER, "this is a demo" );
 
@@ -499,3 +501,5 @@ CONSOLE_COMMAND( AchievementsList, "Lists achievements and status", NULL )
 idLib::Printf( "%02d: %2d/%2d | %12.12s | %12.12s | %s%s\n", i, count, achievementInfo[i].required, pInfo, sInfo, descriptionValid ? data.hidden ? "(hidden) " : "" : "(unknown) ", descriptionValid ? data.name : "" );
 	}
 }
+
+} // namespace BFG

@@ -43,6 +43,8 @@ Contains the WaveFile implementation.
 #include "../idlib/containers/StaticList.h"
 #include "WaveFile.h"
 
+namespace BFG {
+
 /*
 ========================
 idWaveFile::Open
@@ -594,3 +596,5 @@ void idWaveFile::Close()
 	}
 	chunks.SetNum( 0 );
 }
+
+} // namespace BFG

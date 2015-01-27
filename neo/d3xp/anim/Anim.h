@@ -32,6 +32,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/Model.h"          // for jointHandle_t, etc
 #include "../framework/File_Manifest.h"  // for idPreloadManifest, etc
 
+namespace BFG {
+
 //
 // animation channels
 // these can be changed by modmakers and licensees to be whatever they need.
@@ -621,5 +623,7 @@ private:
 	idStrList					jointnames;
 	idHashIndex					jointnamesHash;
 };
+
+} // namespace BFG
 
 #endif /* !__ANIM_H__ */

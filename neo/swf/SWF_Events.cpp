@@ -50,6 +50,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 /*
 ===================
 idSWF::HitTest
@@ -573,3 +575,5 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 	}
 	return false;
 }
+
+} // namespace BFG

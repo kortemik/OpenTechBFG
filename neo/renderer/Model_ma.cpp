@@ -44,6 +44,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/../idlib/sys/sys_defines.h"
 #include "sys/sys_types.h"
 
+namespace BFG {
+
 /*
 ======================================================================
 
@@ -1325,3 +1327,5 @@ void MA_Free( maModel_t* ma )
 	ma->materialNodes.Clear();
 	delete ma;
 }
+
+} // namespace BFG

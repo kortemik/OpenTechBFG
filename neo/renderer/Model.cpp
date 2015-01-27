@@ -57,6 +57,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "Model_ma.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 class idJointQuat;
 
 idCVar idRenderModelStatic::r_mergeModelSurfaces( "r_mergeModelSurfaces", "1", CVAR_BOOL | CVAR_RENDERER, "combine model surfaces with the same material" );
@@ -2883,3 +2885,5 @@ bool idRenderModelStatic::FindSurfaceWithId( int id, int& surfaceNum ) const
 	}
 	return false;
 }
+
+} // namespace BFG

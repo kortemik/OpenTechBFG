@@ -34,6 +34,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 /*
 ========================
 idAchievementSystem::SyncAchievementBits
@@ -57,3 +59,5 @@ void idAchievementSystem::SyncAchievementBits( idLocalUser* user )
 		}
 	}
 }
+
+} // namespace BFG

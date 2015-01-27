@@ -34,6 +34,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../d3xp/physics/Clip.h"
 #include "../d3xp/Game_defines.h"
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -124,5 +126,7 @@ private:
 	int				DiscardEntities( idEntity* entityList[], int numEntities, int flags, idEntity* pusher );
 #endif
 };
+
+} // namespace BFG
 
 #endif /* !__PUSH_H__ */

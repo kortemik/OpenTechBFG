@@ -55,6 +55,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys_session_local.h"
 #include "sys_session_savegames.h"
 
+namespace BFG {
 
 extern idCVar saveGame_verbose;
 
@@ -997,3 +998,5 @@ CONSOLE_COMMAND( savegameSetErrorBit, "Allows you to set savegame_error by bit i
 }
 
 #pragma endregion
+
+} // namespace BFG

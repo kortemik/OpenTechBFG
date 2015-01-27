@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __DEVICECONTEXT_H__
 #define __DEVICECONTEXT_H__
 
+namespace BFG {
+
 // device context support for gui stuff
 //
 
@@ -199,5 +201,7 @@ class idDeviceContextOptimized : public idDeviceContext
 	float				clipY1;
 	float				clipY2;
 };
+
+} // namespace BFG
 
 #endif /* !__DEVICECONTEXT_H__ */

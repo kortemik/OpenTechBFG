@@ -35,6 +35,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "ScreenRect.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 /*
 ==========================================================================================
 
@@ -180,3 +182,5 @@ void R_ShowColoredScreenRect( const idScreenRect& rect, int colorIndex )
 		tr.viewDef->renderWorld->DebugScreenRect( colors[colorIndex & 7], rect, tr.viewDef );
 	}
 }
+
+} // namespace BFG

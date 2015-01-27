@@ -40,6 +40,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/RenderSystem.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 /*
 ================================================================================================
 Contains the RenderLog implementation.
@@ -556,5 +558,7 @@ void idRenderLog::CloseBlock()
 {
 	PC_EndNamedEvent();
 }
+
+} // namespace BFG
 
 #endif // !STUB_RENDER_LOG

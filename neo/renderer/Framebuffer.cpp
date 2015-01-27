@@ -41,6 +41,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "Framebuffer.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 class idCmdArgs;
 
 idList<Framebuffer*>	Framebuffer::framebuffers;
@@ -261,3 +263,5 @@ void Framebuffer::Check()
 	
 	glBindFramebuffer( GL_FRAMEBUFFER, prev );
 }
+
+} // namespace BFG

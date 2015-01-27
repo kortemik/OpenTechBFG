@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __SCRIPT_COMPILER_H__
 #define __SCRIPT_COMPILER_H__
 
+namespace BFG {
+
 const char* const RESULT_STRING = "<RESULT>";
 
 typedef struct opcode_s
@@ -284,5 +286,7 @@ public :
 	idCompiler();
 	void			CompileFile( const char* text, const char* filename, bool console );
 };
+
+} // namespace BFG
 
 #endif /* !__SCRIPT_COMPILER_H__ */

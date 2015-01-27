@@ -40,6 +40,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/math/Vector.h"
 #include "../renderer/Model.h"
 
+namespace BFG {
+
 class idPlayer;
 /*
 ===============================================================================
@@ -133,5 +135,7 @@ private:
 	idList<selectedTypeInfo_t> selectableEntityClasses;
 	idList<idEntity*>		selectedEntities;
 };
+
+} // namespace BFG
 
 #endif /* !__GAME_EDIT_H__ */

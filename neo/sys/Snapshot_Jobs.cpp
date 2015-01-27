@@ -33,6 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_types.h"
 #include "Snapshot_Jobs.h"
 
+namespace BFG {
+
 uint32 SnapObjChecksum( const uint8* data, int length )
 {
 	// RB: 64 bit fixes, changed long to int
@@ -483,3 +485,5 @@ void LZWJob( lzwParm_t* parm )
 {
 	LZWJobInternal( parm, 0 );
 }
+
+} // namespace BFG

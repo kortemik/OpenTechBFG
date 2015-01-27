@@ -46,9 +46,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sys/sys_signin.h"
 #include "sys/sys_localuser.h"
 
-class idSWFScriptObject;
-
 #pragma hdrstop
+
+namespace BFG {
+
+class idSWFScriptObject;
 
 extern idCVar g_demoMode;
 const static int NUM_MAIN_OPTIONS = 6;
@@ -614,3 +616,5 @@ bool idMenuScreen_Shell_Root::HandleAction( idWidgetAction& action, const idWidg
 	
 	return idMenuWidget::HandleAction( action, event, widget, forceHandled );
 }
+
+} // namespace BFG

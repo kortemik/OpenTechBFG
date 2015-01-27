@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
          
 #include "../tools/compilers/compiler_public.h"
 
+namespace BFG {
+
 dmapGlobals_t	dmapGlobals;
 
 /*
@@ -460,3 +462,5 @@ void Dmap_f( const idCmdArgs& args )
 	
 	common->PrintWarnings();
 }
+
+} // namespace BFG

@@ -73,17 +73,19 @@ If you have questions concerning this license or the applicable additional terms
 #pragma warning( disable : 4127 )	// conditional expression is constant
 #endif
 
-
-
 #include "sys/sys_assert.h"
 #include "sys/sys_types.h"
 #include "sys/sys_intrinsics.h"
 #include "math/Math.h"
 #include "ParallelJobList.h"
 
+namespace BFG {
+
 #if defined(_MSC_VER) && _MSC_VER >= 1600
 #undef NULL
 #define NULL 0 // DG: TODO: really necessary? maybe use std::nullptr if available?
 #endif
+
+} // namespace BFG
 
 #endif // !__PARALLELJOBLIST_JOBHEADERS_H__

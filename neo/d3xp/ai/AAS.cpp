@@ -40,6 +40,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/math/Vector.h"
 #include "AAS_local.h"
 
+namespace BFG {
+
 class idBounds;
 
 /*
@@ -320,3 +322,5 @@ void idAASLocal::GetEdge( int edgeNum, idVec3& start, idVec3& end ) const
 	start = file->GetVertex( v[INT32_SIGNBITSET( edgeNum )] );
 	end = file->GetVertex( v[INT32_SIGNBITNOTSET( edgeNum )] );
 }
+
+} // namespace BFG

@@ -46,6 +46,8 @@ If you have questions concerning this license or the applicable additional terms
 // DG: needed for Sys_ReLaunch()
 #include <dirent.h>
 
+namespace BFG {
+
 static const char** cmdargv = NULL;
 static int cmdargc = 0;
 // DG end
@@ -465,3 +467,5 @@ int main( int argc, const char** argv )
 		common->Frame();
 	}
 }
+
+} // namespace BFG

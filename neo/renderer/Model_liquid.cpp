@@ -49,6 +49,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "Model_local.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 #define LIQUID_MAX_SKIP_FRAMES	5
 #define LIQUID_MAX_TYPES		3
 
@@ -621,3 +623,5 @@ idBounds idRenderModelLiquid::Bounds( const struct renderEntity_s* ent ) const
 	// FIXME: need to do this better
 	return bounds;
 }
+
+} // namespace BFG

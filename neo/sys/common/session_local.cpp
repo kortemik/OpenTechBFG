@@ -38,6 +38,8 @@ Contains the windows implementation of the network session
 #include "sys/sys_lobby.h"
 #include "sys/sys_lobby_backend.h"
 
+namespace BFG {
+
 class idBitMsg;
 class idCallback;
 class idFile_Memory;
@@ -777,3 +779,5 @@ bool idSessionLocalWin::GetNetAddressFromLobbyAddress( const lobbyAddress_t& lob
 {
 	return false;
 }
+
+} // namespace BFG

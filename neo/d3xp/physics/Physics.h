@@ -33,6 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../d3xp/gamesys/Class.h"      // for idClass
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -190,5 +192,7 @@ public:	// common physics interface
 	virtual void				WriteToSnapshot( idBitMsg& msg ) const = 0;
 	virtual void				ReadFromSnapshot( const idBitMsg& msg ) = 0;
 };
+
+} // namespace BFG
 
 #endif /* !__PHYSICS_H__ */

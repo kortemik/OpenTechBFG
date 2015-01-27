@@ -48,6 +48,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../swf/SWF_SpriteInstance.h"
 #include "../swf/SWF_TextInstance.h"
 
+namespace BFG {
+
 //***************************************************************
 // DEFAULT SCOREBOARD
 //***************************************************************
@@ -712,3 +714,5 @@ void idMenuScreen_Scoreboard_Team::Initialize( idMenuHandler* data )
 	AddEventAction( WIDGET_EVENT_SCROLL_UP_RELEASE ).Set( new( TAG_SWF ) idWidgetActionHandler( this, WIDGET_ACTION_EVENT_STOP_REPEATER, WIDGET_EVENT_SCROLL_UP_RELEASE ) );
 	
 }
+
+} // namespace BFG

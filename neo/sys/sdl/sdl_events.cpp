@@ -62,6 +62,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../../cegui/CEGUI_Hooks.h"
 #endif // USE_CEGUI
 
+namespace BFG {
 
 #if !SDL_VERSION_ATLEAST(2, 0, 0)
 #define SDL_Keycode SDLKey
@@ -1714,3 +1715,5 @@ void Sys_EndJoystickInputEvents()
 	// all joystick events have been read using Sys_ReturnJoystickInputEvent()
 	joystick_polls.SetNum( 0 );
 }
+
+} // namespace BFG

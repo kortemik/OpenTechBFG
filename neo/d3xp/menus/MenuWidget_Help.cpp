@@ -36,6 +36,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 /*
 ================================================================================================
 idMenuWidget_Help
@@ -163,3 +165,4 @@ void idMenuWidget_Help::ObserveEvent( const idMenuWidget& widget, const idWidget
 	}
 }
 
+} // namespace BFG

@@ -37,6 +37,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
 
 CLASS_DECLARATION( idForce, idForce_Spring )
 END_CLASS
@@ -190,3 +191,5 @@ void idForce_Spring::RemovePhysics( const idPhysics* phys )
 		physics2 = NULL;
 	}
 }
+
+} // namespace BFG

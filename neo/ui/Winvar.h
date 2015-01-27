@@ -44,6 +44,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/math/Vector.h"
 #include "Rectangle.h"
 
+namespace BFG {
+
 class idMaterial;
 
 static const char* VAR_GUIPREFIX = "gui::";
@@ -1122,5 +1124,6 @@ public:
 	void SetGuiInfo( idDict* dict );
 };
 
-#endif /* !__WINVAR_H__ */
+} // namespace BFG
 
+#endif /* !__WINVAR_H__ */

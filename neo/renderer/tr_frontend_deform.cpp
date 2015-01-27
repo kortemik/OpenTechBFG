@@ -60,6 +60,8 @@ If you have questions concerning this license or the applicable additional terms
 
 class idJointMat;
 
+namespace BFG {
+
 /*
 ==========================================================================================
 
@@ -1184,3 +1186,5 @@ drawSurf_t* R_DeformDrawSurf( drawSurf_t* drawSurf )
 			return NULL;
 	}
 }
+
+} // namespace BFG

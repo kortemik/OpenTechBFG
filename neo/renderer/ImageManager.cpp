@@ -56,6 +56,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sys/sys_public.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 // do this with a pointer, in case we want to make the actual manager
 // a private virtual subclass
 idImageManager	imageManager;
@@ -1040,3 +1042,5 @@ void idImageManager::PrintMemInfo( MemInfo_t* mi )
 	f->Printf( "\nTotal image bytes allocated: %s\n", idStr::FormatNumber( total ).c_str() );
 	fileSystem->CloseFile( f );
 }
+
+} // namespace BFG

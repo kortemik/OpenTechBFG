@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __COMPILER_PUBLIC_H__
 #define __COMPILER_PUBLIC_H__
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -44,5 +46,7 @@ void Dmap_f( const idCmdArgs& args );
 void RunAAS_f( const idCmdArgs& args );
 void RunAASDir_f( const idCmdArgs& args );
 void RunReach_f( const idCmdArgs& args );
+
+} // namespace BFG
 
 #endif	/* !__COMPILER_PUBLIC_H__ */

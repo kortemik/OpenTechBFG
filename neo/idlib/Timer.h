@@ -32,6 +32,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sys/sys_public.h"
 #include "../idlib/containers/StrList.h"
 
+namespace BFG {
+
 /*
 ===============================================================================
 
@@ -239,5 +241,7 @@ private:
 	idStrList		names;
 	idStr			reportName;
 };
+
+} // namespace BFG
 
 #endif /* !__TIMER_H__ */

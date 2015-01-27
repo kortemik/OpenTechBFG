@@ -36,6 +36,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/math/Vector.h"
 #include "../renderer/RenderWorld.h"
 
+namespace BFG {
+
 class idRestoreGame;
 class idSaveGame;
 /*
@@ -103,5 +105,7 @@ private:
 	void					Event_Alert();
 	void					Event_AddLight();
 };
+
+} // namespace BFG
 
 #endif /* !__GAME_SECURITYCAMERA_H__ */

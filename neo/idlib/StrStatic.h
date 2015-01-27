@@ -30,6 +30,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../idlib/Str.h"
 
+namespace BFG {
+
 /*
 ================================================
 idStrStatic
@@ -137,4 +139,7 @@ public:
 private:
 	char		buffer[ _size_ ];
 };
+
+} // namespace BFG
+
 #endif	// __STRSTATIC_H__ 

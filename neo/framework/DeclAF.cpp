@@ -45,9 +45,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_assert.h"
 #include "../renderer/Material.h"
 
-class idJointMat;
-
 #pragma hdrstop
+
+namespace BFG {
+
+class idJointMat;
 
 /*
 ===============================================================================
@@ -2183,3 +2185,5 @@ idDeclAF::~idDeclAF()
 	bodies.DeleteContents( true );
 	constraints.DeleteContents( true );
 }
+
+} // namespace BFG

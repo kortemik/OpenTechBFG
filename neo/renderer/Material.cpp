@@ -52,6 +52,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../ui/UserInterface.h"
 #include "tr_local.h"
 
+namespace BFG {
+
 /*
 
 Any errors during parsing just set MF_DEFAULTED and return, rather than throwing
@@ -3439,3 +3441,5 @@ fail:
 	fastPathDiffuseImage = NULL;
 	fastPathSpecularImage = NULL;
 }
+
+} // namespace BFG

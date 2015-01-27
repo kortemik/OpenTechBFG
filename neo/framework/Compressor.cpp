@@ -38,6 +38,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
 
 /*
 =================================================================================
@@ -2988,3 +2989,5 @@ idCompressor* idCompressor::AllocLZW()
 {
 	return new( TAG_IDFILE ) idCompressor_LZW();
 }
+
+} // namespace BFG

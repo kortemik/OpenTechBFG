@@ -36,6 +36,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../idlib/math/Simd_Generic.h"
 
+namespace BFG {
+
 //===============================================================
 //
 //	Generic implementation of idSIMDProcessor
@@ -233,3 +235,5 @@ void VPCALL idSIMD_Generic::UntransformJoints( idJointMat* jointMats, const int*
 		jointMats[i] /= jointMats[parents[i]];
 	}
 }
+
+} // namespace BFG

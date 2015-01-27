@@ -33,6 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../physics/Physics_Base.h"
 
+namespace BFG {
+
 /*
 ===================================================================================
 
@@ -224,5 +226,7 @@ private:
 	void					Rest();
 	void					DebugDraw();
 };
+
+} // namespace BFG
 
 #endif /* !__PHYSICS_RIGIDBODY_H__ */

@@ -30,6 +30,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __SCRIPT_INTERPRETER_H__
 #define __SCRIPT_INTERPRETER_H__
 
+namespace BFG {
+
 #define MAX_STACK_DEPTH 	64
 
 // RB: doubled local stack size
@@ -295,5 +297,7 @@ ID_INLINE void idInterpreter::NextInstruction( int position )
 	// therefore we need to compensate for that here.
 	instructionPointer = position - 1;
 }
+
+} // namespace BFG
 
 #endif /* !__SCRIPT_INTERPRETER_H__ */

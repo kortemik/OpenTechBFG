@@ -43,6 +43,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #pragma hdrstop
 
+namespace BFG {
+
 /*
 ================================================================================================
 idMenuWidget_List
@@ -499,3 +501,5 @@ int idMenuWidget_GameBrowserList::GetServerIndex()
 	return -1;
 	
 }
+
+} // namespace BFG
