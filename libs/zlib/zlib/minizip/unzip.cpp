@@ -444,7 +444,7 @@ extern int ZEXPORT unzStringFileNameCompare (const char*  fileName1,
         iCaseSensitivity=CASESENSITIVITYDEFAULTVALUE;
 
     if (iCaseSensitivity==1)
-        return strcmp(fileName1,fileName2);
+        return BFG::idStr::Cmp(fileName1,fileName2);
 
     return STRCMPCASENOSENTIVEFUNCTION(fileName1,fileName2);
 }

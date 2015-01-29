@@ -43,6 +43,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/sys/sys_types.h"              // for Max
 
 //namespace BFG { // TODO namespace Heap.h too
+using BFG::AssertFailed; // temporery for now
 
 /*
 ===============================================================================
