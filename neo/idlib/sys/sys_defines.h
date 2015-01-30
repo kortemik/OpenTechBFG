@@ -273,6 +273,7 @@ extern volatile int ignoredReturnValue;
  * Macros for format conversion specifications for integer arguments of type
  * size_t or ssize_t.
  */
+/* 
 #ifdef _WIN32
 
 #define PRIiSIZE "Ii"
@@ -285,7 +286,7 @@ extern volatile int ignoredReturnValue;
 #define PRIu64 "I64u"
 
 #else // not _WIN32
-
+*/
 #define PRIiSIZE "zi"
 #define PRIuSIZE "zu"
 #define PRIxSIZE "zx"
@@ -295,7 +296,7 @@ extern volatile int ignoredReturnValue;
 #define PRId64 "lld"
 #define PRIu64 "llu"
 
-#endif // _WIN32
+//#endif // _WIN32
 
 #ifdef __cplusplus
  } // namespace BFG
