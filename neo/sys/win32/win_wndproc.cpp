@@ -374,7 +374,8 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 		case WM_CHAR:
 			// DG: make sure it's an utf-16 non-surrogate character (and thus a valid utf-32 character as well)
 			// TODO: will there ever be two messages with surrogate characters that should be combined?
-			if( (uint16(wParam) - 0xD800) >= 2048 )
+			//       (probably not, some people claim it's actually UCS-2, not UTF-16)
+			if( wParam < 0xD800 || wParam > 0xDFFF )
 			{
 				Sys_QueEvent( SE_CHAR, wParam, 0, 0, NULL, 0 );
 			}
