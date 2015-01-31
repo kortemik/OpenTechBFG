@@ -7,7 +7,6 @@
 
 #include "ConsoleMsg.h"
 
-#include <CEGUI/CEGUI.h>
 #include "../idlib/Str.h"
 
 namespace CEGUIConsole {

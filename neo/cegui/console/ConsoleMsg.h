@@ -8,8 +8,8 @@
 #ifndef CEGUICONSOLEMSG_H_
 #define CEGUICONSOLEMSG_H_
 
-#include <CEGUI/CEGUI.h>
 #include "../idlib/Str.h"
+#include "../wrap_cegui.h"
 
 namespace CEGUIConsole {
 

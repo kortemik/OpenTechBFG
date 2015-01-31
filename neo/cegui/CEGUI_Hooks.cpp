@@ -34,19 +34,10 @@ If you have questions concerning this license or the applicable additional terms
 #include <GL/glew.h> // for gl* in RenderGUIContexts()
 
 #include "CEGUI_Hooks.h"
+#include "wrap_cegui.h"
 
-#ifdef __GNUC__ // gcc and clang - ignore warning about non-virtual destructors in cegui code
-#pragma GCC diagnostic push // save old warning settings
-#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
-#endif // __GNUC__
-
-#include <CEGUI/CEGUI.h>
-#include <CEGUI/InputEvent.h>
 #include <CEGUI/RendererModules/OpenGL/GLRenderer.h>
 
-#ifdef __GNUC__
-#pragma GCC diagnostic pop // restore old warning settings
-#endif // __GNUC__
 
 using namespace CEGUI;
 
