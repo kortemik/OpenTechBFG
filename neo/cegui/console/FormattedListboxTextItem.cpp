@@ -8,8 +8,6 @@
 // see http://cegui.org.uk/forum/viewtopic.php?f=10&t=4322
 
 #if 0
-#include <CEGUI/CEGUI.h>
-
 #include "FormattedListboxTextItem.h"
 
 namespace CEGUIConsole {

@@ -1,3 +1,4 @@
+
 /*
  * FormattedListboxTextItem.h
  *
@@ -8,7 +9,7 @@
 #ifndef FORMATTEDLISTBOXTEXTITEM_H_
 #define FORMATTEDLISTBOXTEXTITEM_H_
 
-#include <CEGUI/CEGUI.h>
+#include "../wrap_cegui.h"
 
 namespace CEGUIConsole {
 
