@@ -37,8 +37,6 @@ namespace BFG {
 	class idFile_Cached;
 	class idResourceCacheEntry;
 
-	struct sysFolder_t;
-
 /*
 ===============================================================================
 
