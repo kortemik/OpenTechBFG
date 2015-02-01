@@ -31,6 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../idlib/Str.h"
 #include "../idlib/containers/StrList.h"
+#include "../idlib/sys/sys_filesystem.h"
 
 namespace BFG {
 
