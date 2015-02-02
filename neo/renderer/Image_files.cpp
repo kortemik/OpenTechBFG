@@ -30,9 +30,6 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 
-extern "C" {
-#include <jpeglib.h>
-}
 
 extern "C"
 {
@@ -43,6 +40,11 @@ extern "C"
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
+
+extern "C" {
+#include <jpeglib.h>
+}
+
 
 #include "../framework/Common.h"
 #include "../framework/File.h"
