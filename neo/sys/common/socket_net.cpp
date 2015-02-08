@@ -906,7 +906,7 @@ void Sys_InitNetworking()
 	pAdapterInfo = ( IP_ADAPTER_INFO* )malloc( sizeof( IP_ADAPTER_INFO ) );
 	if( !pAdapterInfo )
 	{
-		idLib::FatalError("Sys_InitNetworking: Couldn't malloc( %" PRIiSIZE " )", sizeof(IP_ADAPTER_INFO));
+		idLib::FatalError( "Sys_InitNetworking: Couldn't malloc( %" PRIiSIZE " )", sizeof( IP_ADAPTER_INFO ) );
 	}
 	ulOutBufLen = sizeof( IP_ADAPTER_INFO );
 	

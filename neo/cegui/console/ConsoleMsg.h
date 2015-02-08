@@ -11,22 +11,24 @@
 #include "../idlib/Str.h"
 #include "../wrap_cegui.h"
 
-namespace CEGUIConsole {
+namespace CEGUIConsole
+{
 
-class ConsoleMsg {
+class ConsoleMsg
+{
 public:
-	ConsoleMsg(const CEGUI::String inMsg);
+	ConsoleMsg( const CEGUI::String inMsg );
 	virtual ~ConsoleMsg();
-
-	ConsoleMsg& operator=(const ConsoleMsg& rhs)
+	
+	ConsoleMsg& operator=( const ConsoleMsg& rhs )
 	{
 		return *this;
 	}
-
+	
 	CEGUI::String msg;
-
+	
 private:
-	const CEGUI::String Convert(const CEGUI::String convertString);
+	const CEGUI::String Convert( const CEGUI::String convertString );
 };
 
 

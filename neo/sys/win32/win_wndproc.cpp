@@ -204,7 +204,7 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 						}
 #ifdef USE_CEGUI
 						// DG: cegui must know about the changed window size
-						idCEGUI::NotifyDisplaySizeChanged(glConfig.nativeScreenWidth, glConfig.nativeScreenHeight);
+						idCEGUI::NotifyDisplaySizeChanged( glConfig.nativeScreenWidth, glConfig.nativeScreenHeight );
 #endif // USE_CEGUI
 					}
 				}
@@ -331,7 +331,7 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 				cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "vid_restart\n" );
 				return 0;
 			}
-			// fall through for other keys
+		// fall through for other keys
 		case WM_KEYDOWN:
 			key = ( ( lParam >> 16 ) & 0xFF ) | ( ( ( lParam >> 24 ) & 1 ) << 7 );
 			if( key == K_LCTRL || key == K_LALT || key == K_RCTRL || key == K_RALT )
@@ -350,7 +350,7 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 				key = K_NUMLOCK;
 			}
 			Sys_QueEvent( SE_KEY, key, true, 0, NULL, 0 );
-
+			
 			break;
 			
 		case WM_SYSKEYUP:
@@ -380,13 +380,13 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 				Sys_QueEvent( SE_CHAR, wParam, 0, 0, NULL, 0 );
 			}
 			break;
-
+			
 		// DG: support utf-32 input via WM_UNICHAR
 		case WM_UNICHAR:
 			Sys_QueEvent( SE_CHAR, wParam, 0, 0, NULL, 0 );
 			break;
 		// DG end
-			
+		
 		case WM_NCLBUTTONDOWN:
 //			win32.movingWindow = true;
 			break;
