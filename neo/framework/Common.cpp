@@ -1521,7 +1521,10 @@ void idCommonLocal::Shutdown()
 	printf( "delete loadGUI;\n" );
 	delete loadGUI;
 	loadGUI = NULL;
-	
+
+	printf("idCEGUI::Destroy();\n");
+	idCEGUI::Destroy();
+
 	printf( "delete renderWorld;\n" );
 	delete renderWorld;
 	renderWorld = NULL;

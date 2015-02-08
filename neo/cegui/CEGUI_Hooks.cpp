@@ -38,6 +38,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <CEGUI/RendererModules/OpenGL/GLRenderer.h>
 
+#include "console/Console.h"
 
 using namespace CEGUI;
 
@@ -82,7 +83,7 @@ void RenderGUIContexts()
 	glUseProgram( glProgId );
 }
 
-void initRenderer( void )
+void initSystem( void )
 {
 	// create renderer
 	
@@ -93,158 +94,198 @@ void initRenderer( void )
 
 void initResourceProvider( void )
 {
-	DefaultResourceProvider* rp = static_cast<DefaultResourceProvider*>
-								  ( CEGUI::System::getSingleton().getResourceProvider() );
-	rp->setResourceGroupDirectory( "schemes", "base/cegui/schemes/" );
-	rp->setResourceGroupDirectory( "imagesets", "base/cegui/imagesets/" );
-	rp->setResourceGroupDirectory( "fonts", "base/cegui/fonts/" );
-	rp->setResourceGroupDirectory( "layouts", "base/cegui/layouts/" );
-	rp->setResourceGroupDirectory( "looknfeels", "base/cegui/looknfeel/" );
-	rp->setResourceGroupDirectory( "lua_scripts", "base/cegui/lua_scripts/" );
-	// This is only really needed if you are using Xerces and need to
-	// specify the schemas location
-	rp->setResourceGroupDirectory( "schemas", "base/cegui/xml_schemas/" );
+	if (idCEGUI::isInitialized())
+	{
+		DefaultResourceProvider* rp = static_cast<DefaultResourceProvider*>
+			(CEGUI::System::getSingleton().getResourceProvider());
+		rp->setResourceGroupDirectory("schemes", "base/cegui/schemes/");
+		rp->setResourceGroupDirectory("imagesets", "base/cegui/imagesets/");
+		rp->setResourceGroupDirectory("fonts", "base/cegui/fonts/");
+		rp->setResourceGroupDirectory("layouts", "base/cegui/layouts/");
+		rp->setResourceGroupDirectory("looknfeels", "base/cegui/looknfeel/");
+		rp->setResourceGroupDirectory("lua_scripts", "base/cegui/lua_scripts/");
+		// This is only really needed if you are using Xerces and need to
+		// specify the schemas location
+		rp->setResourceGroupDirectory("schemas", "base/cegui/xml_schemas/");
+	}
 }
 
 void initResourceGroups( void )
 {
-	// set the default resource groups to be used
-	ImageManager::setImagesetDefaultResourceGroup( "imagesets" );
-	Font::setDefaultResourceGroup( "fonts" );
-	Scheme::setDefaultResourceGroup( "schemes" );
-	WidgetLookManager::setDefaultResourceGroup( "looknfeels" );
-	WindowManager::setDefaultResourceGroup( "layouts" );
-	ScriptModule::setDefaultResourceGroup( "lua_scripts" );
-	// setup default group for validation schemas
-	XMLParser* parser = System::getSingleton().getXMLParser();
-	if( parser->isPropertyPresent( "SchemaDefaultResourceGroup" ) )
+	if (idCEGUI::isInitialized())
 	{
-		parser->setProperty( "SchemaDefaultResourceGroup", "schemas" );
+		// set the default resource groups to be used
+		ImageManager::setImagesetDefaultResourceGroup("imagesets");
+		Font::setDefaultResourceGroup("fonts");
+		Scheme::setDefaultResourceGroup("schemes");
+		WidgetLookManager::setDefaultResourceGroup("looknfeels");
+		WindowManager::setDefaultResourceGroup("layouts");
+		ScriptModule::setDefaultResourceGroup("lua_scripts");
+		// setup default group for validation schemas
+		XMLParser* parser = System::getSingleton().getXMLParser();
+		if (parser->isPropertyPresent("SchemaDefaultResourceGroup"))
+		{
+			parser->setProperty("SchemaDefaultResourceGroup", "schemas");
+		}
 	}
 }
 
 void initResources( void )
 {
-	SchemeManager::getSingleton().createFromFile( "TaharezLook.scheme" );
-	FontManager::getSingleton().createFromFile( "DejaVuSans-10.font" );
-	
-	System::getSingleton().getDefaultGUIContext().setDefaultFont( "DejaVuSans-10" );
-	System::getSingleton().getDefaultGUIContext().getMouseCursor().setDefaultImage( "TaharezLook/MouseArrow" );
-	System::getSingleton().getDefaultGUIContext().setDefaultTooltipType( "TaharezLook/Tooltip" );
+	if (idCEGUI::isInitialized())
+	{
+		SchemeManager::getSingleton().createFromFile("TaharezLook.scheme");
+		FontManager::getSingleton().createFromFile("DejaVuSans-10.font");
+
+		System::getSingleton().getDefaultGUIContext().setDefaultFont("DejaVuSans-10");
+		System::getSingleton().getDefaultGUIContext().getMouseCursor().setDefaultImage("TaharezLook/MouseArrow");
+		System::getSingleton().getDefaultGUIContext().setDefaultTooltipType("TaharezLook/Tooltip");
+	}
 }
 
 void createWindow( void )
 {
-	WindowManager& wmgr = WindowManager::getSingleton();
-	Window* myRoot = wmgr.createWindow( "DefaultWindow", "root" );
-	System::getSingleton().getDefaultGUIContext().setRootWindow( myRoot );
-	/*
-	FrameWindow* fWnd = static_cast<FrameWindow*>(wmgr.createWindow(
-			"TaharezLook/FrameWindow", "testWindow"));
-	myRoot->addChild(fWnd);
-	// position a quarter of the way in from the top-left of parent.
-	fWnd->setPosition(UVector2(UDim(0.25f, 0.0f), UDim(0.25f, 0.0f)));
-	// set size to be half the size of the parent
-	fWnd->setSize(USize(UDim(0.5f, 0.0f), UDim(0.5f, 0.0f)));
-	fWnd->setText("Hello World!");
-	*/
+	if (idCEGUI::isInitialized())
+	{
+		WindowManager& wmgr = WindowManager::getSingleton();
+		Window* myRoot = wmgr.createWindow("DefaultWindow", "root");
+		System::getSingleton().getDefaultGUIContext().setRootWindow(myRoot);
+		/*
+		FrameWindow* fWnd = static_cast<FrameWindow*>(wmgr.createWindow(
+		"TaharezLook/FrameWindow", "testWindow"));
+		myRoot->addChild(fWnd);
+		// position a quarter of the way in from the top-left of parent.
+		fWnd->setPosition(UVector2(UDim(0.25f, 0.0f), UDim(0.25f, 0.0f)));
+		// set size to be half the size of the parent
+		fWnd->setSize(USize(UDim(0.5f, 0.0f), UDim(0.5f, 0.0f)));
+		fWnd->setText("Hello World!");
+		*/
+	}
 }
 
 // keyboard keys, mouse keys, mousewheel (TODO: really?)
 bool HandleKeyEvent( const sysEvent_t& keyEvent )
 {
-	assert( keyEvent.evType == SE_KEY );
-	
-	keyNum_t keyNum = static_cast<keyNum_t>( keyEvent.evValue );
-	bool pressed = keyEvent.evValue2;
-	
-	if( keyNum < K_JOY1 )
+	if (idCEGUI::isInitialized())
 	{
-		// Key::Scan is dinput keynums, and so is keyNum_t (at least for everything below K_JOY1)
-		Key::Scan key = static_cast<Key::Scan>( keyEvent.evValue );
-		
-		if( pressed ) // 1 if pressed, 0 if released
+		assert(keyEvent.evType == SE_KEY);
+
+		keyNum_t keyNum = static_cast<keyNum_t>(keyEvent.evValue);
+		bool pressed = keyEvent.evValue2;
+
+		if (keyNum < K_JOY1)
 		{
-			return ceguiSys->getDefaultGUIContext().injectKeyDown( key );
+			// Key::Scan is dinput keynums, and so is keyNum_t (at least for everything below K_JOY1)
+			Key::Scan key = static_cast<Key::Scan>(keyEvent.evValue);
+
+			if (pressed) // 1 if pressed, 0 if released
+			{
+				return ceguiSys->getDefaultGUIContext().injectKeyDown(key);
+			}
+			else
+			{
+				return ceguiSys->getDefaultGUIContext().injectKeyUp(key);
+			}
 		}
-		else
+		else if (keyNum >= K_MOUSE1 && keyNum < K_MOUSE1 + MouseButtonCount)
 		{
-			return ceguiSys->getDefaultGUIContext().injectKeyUp( key );
+			// K_MOUSE* are contiguous, so are CEGUI::MouseButton::*Button - and have the same order
+			// (left, right, middle, X1, X2). CEGUI::LeftButton is 0.
+			MouseButton button = static_cast<MouseButton>(keyNum - K_MOUSE1);
+			if (pressed)
+			{
+				return ceguiSys->getDefaultGUIContext().injectMouseButtonDown(button);
+			}
+			else
+			{
+				return ceguiSys->getDefaultGUIContext().injectMouseButtonUp(button);
+			}
 		}
 	}
-	else if( keyNum >= K_MOUSE1 && keyNum < K_MOUSE1 + MouseButtonCount )
-	{
-		// K_MOUSE* are contiguous, so are CEGUI::MouseButton::*Button - and have the same order
-		// (left, right, middle, X1, X2). CEGUI::LeftButton is 0.
-		MouseButton button = static_cast<MouseButton>( keyNum - K_MOUSE1 );
-		if( pressed )
-		{
-			return ceguiSys->getDefaultGUIContext().injectMouseButtonDown( button );
-		}
-		else
-		{
-			return ceguiSys->getDefaultGUIContext().injectMouseButtonUp( button );
-		}
-	}
-	
 	return false;
+}
+
+void Startup()
+{
+	// all functions for console/menu/etc should be here
+	// this will create a cegui console for idConsole to use
+	console->Init();
+}
+void Shutdown()
+{
+	// all functions for console/menu/etc should be here
+	console->Shutdown();
 }
 
 } //anon namespace
 
 bool idCEGUI::Init()
 {
-	initRenderer();
+	initSystem();
 	initResourceProvider();
 	initResourceGroups();
 	initResources();
 	createWindow();
 	
-	ceguiSys = &( System::getSingleton() );
-	oldTimePulseSec = 0.001 * Sys_Milliseconds();
-	
+	if (isInitialized())
+	{
+		ceguiSys = &(System::getSingleton());
+		oldTimePulseSec = 0.001 * Sys_Milliseconds();
+	}
+
+	Startup();
+
 	return true;
 }
 
 void idCEGUI::NotifyDisplaySizeChanged( int width, int height )
 {
-	ceguiSys->notifyDisplaySizeChanged( Sizef( width, height ) );
+	if (isInitialized())
+	{
+		ceguiSys->notifyDisplaySizeChanged(Sizef(width, height));
+	}
 }
 
 // inject a sys event
 bool idCEGUI::InjectSysEvent( const sysEvent_t* event )
 {
-	if( event == NULL )
+	if (isInitialized())
 	{
-		assert( 0 ); // I think this shouldn't happen
-		return false;
-	}
-	
-	const sysEvent_t& ev = *event;
-	
-	switch( ev.evType )
-	{
+		if (event == NULL)
+		{
+			assert(0); // I think this shouldn't happen
+			return false;
+		}
+
+		const sysEvent_t& ev = *event;
+
+		switch (ev.evType)
+		{
 		case SE_KEY:
-			return HandleKeyEvent( ev );
+			return HandleKeyEvent(ev);
 		case SE_MOUSE_ABSOLUTE:
-			return ceguiSys->getDefaultGUIContext().injectMousePosition( ev.evValue, ev.evValue2 );
+			return ceguiSys->getDefaultGUIContext().injectMousePosition(ev.evValue, ev.evValue2);
 		case SE_CHAR:
-			return ceguiSys->getDefaultGUIContext().injectChar( ev.evValue );
+			return ceguiSys->getDefaultGUIContext().injectChar(ev.evValue);
 		case SE_MOUSE_LEAVE:
 			// not sure why this is interesting (and mouse entering again not), but whatever..
 			return ceguiSys->getDefaultGUIContext().injectMouseLeaves();
-			
+
 		default:
 			break;
+		}
 	}
-	
 	return false;
 }
 
 bool idCEGUI::InjectMouseWheel( int delta )
 {
-	// TODO: d3bfg uses int for the deltas, cegui uses float - do we need a factor?
-	return ceguiSys->getDefaultGUIContext().injectMouseWheelChange( delta );
+	if (isInitialized())
+	{
+		// TODO: d3bfg uses int for the deltas, cegui uses float - do we need a factor?
+		return ceguiSys->getDefaultGUIContext().injectMouseWheelChange(delta);
+	}
+	return false;
 }
 
 void idCEGUI::Update()
@@ -254,4 +295,29 @@ void idCEGUI::Update()
 	RenderGUIContexts();
 }
 
+void idCEGUI::Destroy()
+{
+	if (isInitialized())
+	{
+		Shutdown();
+		CEGUI::OpenGLRenderer *renderer = static_cast<CEGUI::OpenGLRenderer*>(CEGUI::System::getSingleton().getRenderer());
+		CEGUI::System::getSingleton().destroy();
+		CEGUI::OpenGLRenderer::destroy(*renderer);
+	}
+}
+
+bool idCEGUI::isInitialized()
+{
+	// checks if cegui is up and running
+	if( CEGUI::System::getSingletonPtr() != NULL )
+	{
+		return true;
+	}
+	else
+	{
+		// this should not happen
+		assert( CEGUI::System::getSingletonPtr() == NULL );
+		return false;
+	}
+}
 #endif // USE_CEGUI

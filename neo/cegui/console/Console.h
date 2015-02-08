@@ -15,6 +15,7 @@ namespace CEGUIConsole
 
 class Console: public virtual idConsole
 {
+	friend class ConsoleImpl;
 public:
 	Console();
 	virtual ~Console();
@@ -33,11 +34,11 @@ public:
 	// process console event, like toggle show hide, and other keys
 	bool	ProcessEvent( const sysEvent_t* event, bool forceAccept );
 	
-	
+	void	Init();
+	void	Shutdown();
+
 	// unimplemented
-	
-	void	Init() { };
-	void	Shutdown() { };
+
 	// clear the timers on any recent prints that are displayed in the notify lines
 	void	ClearNotifyLines() { };
 	void	Draw( bool forceFullScreen ) { };
@@ -50,7 +51,7 @@ public:
 	
 private:
 	bool isInitialized();
-	
+
 	void TabComplete( void );
 	
 	struct ConsoleVars;

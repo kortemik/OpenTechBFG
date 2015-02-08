@@ -11,6 +11,7 @@
 #include "ConsoleImpl.h"
 #include "ConsoleQueue.h"
 #include "ConsoleMsg.h"
+#include "cegui/CEGUI_Hooks.h" // for initialization check
 
 namespace CEGUIConsole
 {
@@ -29,22 +30,39 @@ Console::Console()
 
 Console::~Console()
 {
+
 }
 
 bool Console::isInitialized()
 {
-	// checks if cegui is up and running
-	if( CEGUI::System::getSingletonPtr() != NULL )
+	if( idCEGUI::isInitialized() )
 	{
-		if( ourVars->consoleInstance == NULL )
-		{
-			// initializes the console singleton
-			ourVars->consoleInstance = &ConsoleImpl::getInstance();
-		}
-		return true;
+		// checks if ceguiPart of the console is up and running
+		// all functionality except messages buffered are disabled
+		// until cegui part is up and running
+		if (ourVars->consoleInstance != NULL)
+			return true;
 	}
-	else
-		return false;
+	return false;
+}
+
+void Console::Init()
+{
+	// this is called first from BFG code and then again once cegui is up from startup
+	if( idCEGUI::isInitialized() )
+	{
+		ourVars->consoleInstance = new ConsoleImpl;
+	}
+}
+
+void Console::Shutdown()
+{
+	// this is called first from idCEGUI shutdown and then again from BFG code
+	if( idCEGUI::isInitialized() )
+	{
+		delete ourVars->consoleInstance;
+		ourVars->consoleInstance = NULL;
+	}
 }
 
 bool Console::Active()
