@@ -10,16 +10,18 @@
 
 #include <CEGUI/widgets/Editbox.h>
 
-namespace CEGUIConsole {
+namespace CEGUIConsole
+{
 
-class ConsoleEditBox: public CEGUI::Editbox {
+class ConsoleEditBox: public CEGUI::Editbox
+{
 public:
-	ConsoleEditBox(const CEGUI::String& type, const CEGUI::String& name)
-	: Editbox(type, name) {};
-
-    static const CEGUI::String WidgetTypeName;
-
-    void onKeyDown(CEGUI::KeyEventArgs& e);
+	ConsoleEditBox( const CEGUI::String& type, const CEGUI::String& name )
+		: Editbox( type, name ) {};
+		
+	static const CEGUI::String WidgetTypeName;
+	
+	void onKeyDown( CEGUI::KeyEventArgs& e );
 };
 
 } /* namespace CEGUIConsole */

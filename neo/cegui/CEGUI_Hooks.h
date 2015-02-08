@@ -38,20 +38,20 @@ If you have questions concerning this license or the applicable additional terms
 
 namespace idCEGUI
 {
-	bool Init();
+bool Init();
 
-	// tell cegui that the (game) window size has changed
-	void NotifyDisplaySizeChanged(int width, int height);
+// tell cegui that the (game) window size has changed
+void NotifyDisplaySizeChanged( int width, int height );
 
-	// inject a sys event (keyboard, mouse, unicode character)
-	bool InjectSysEvent(const sysEvent_t *keyEvent);
+// inject a sys event (keyboard, mouse, unicode character)
+bool InjectSysEvent( const sysEvent_t* keyEvent );
 
-	// inject the current mouse wheel delta for scrolling
-	bool InjectMouseWheel(int delta);
+// inject the current mouse wheel delta for scrolling
+bool InjectMouseWheel( int delta );
 
-	// call this once per frame (at the end) - it'll inject the time pulse and render
-	void Update();
-	// TODO: or is there a good reason to update the timepulse at another time (maybe at the beginning of a frame)?
+// call this once per frame (at the end) - it'll inject the time pulse and render
+void Update();
+// TODO: or is there a good reason to update the timepulse at another time (maybe at the beginning of a frame)?
 }
 
 

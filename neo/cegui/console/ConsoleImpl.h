@@ -13,39 +13,42 @@
 
 #include "ConsoleMsg.h"
 
-namespace CEGUIConsole {
+namespace CEGUIConsole
+{
 
-class ConsoleImpl {
+class ConsoleImpl
+{
 public:
 
-	static ConsoleImpl& getInstance() {
+	static ConsoleImpl& getInstance()
+	{
 		static ConsoleImpl instance;
 		return instance;
 	}
-
-	void setVisible(bool visible);
+	
+	void setVisible( bool visible );
 	bool isVisible();
-	void OutputText(ConsoleMsg outMsg);
-	void TabComplete(void);
-	static void AutoCompleteCallback(const char *s);
-	void TabCompleteListAdd(CEGUI::String option);
-
+	void OutputText( ConsoleMsg outMsg );
+	void TabComplete( void );
+	static void AutoCompleteCallback( const char* s );
+	void TabCompleteListAdd( CEGUI::String option );
+	
 private:
 	void CreateCEGUIWindow();
 	void RegisterHandlers();
-	bool Handle_TextSubmitted(const CEGUI::EventArgs&);
-
-	void Execute(CEGUI::String inMsg);
-	void PopulateHistory(void);
-
+	bool Handle_TextSubmitted( const CEGUI::EventArgs& );
+	
+	void Execute( CEGUI::String inMsg );
+	void PopulateHistory( void );
+	
 	struct ConsoleImplVars;
-	ConsoleImplVars *ourVars;
-
+	ConsoleImplVars* ourVars;
+	
 	ConsoleImpl();
 	virtual ~ConsoleImpl();
-	ConsoleImpl(ConsoleImpl const&);
-	void operator=(ConsoleImpl const&);
-
+	ConsoleImpl( ConsoleImpl const& );
+	void operator=( ConsoleImpl const& );
+	
 	void ScrollBottom();
 };
 

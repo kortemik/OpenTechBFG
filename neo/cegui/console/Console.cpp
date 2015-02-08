@@ -12,26 +12,31 @@
 #include "ConsoleQueue.h"
 #include "ConsoleMsg.h"
 
-namespace CEGUIConsole {
+namespace CEGUIConsole
+{
 
-struct Console::ConsoleVars {
-	ConsoleImpl *consoleInstance;
+struct Console::ConsoleVars
+{
+	ConsoleImpl* consoleInstance;
 	ConsoleQueue msgQueue;
 };
 
 Console::Console()
-: ourVars(new ConsoleVars)
+	: ourVars( new ConsoleVars )
 {
 	ourVars->consoleInstance = NULL;
 }
 
-Console::~Console() {
+Console::~Console()
+{
 }
 
-bool Console::isInitialized() {
+bool Console::isInitialized()
+{
 	// checks if cegui is up and running
-	if (CEGUI::System::getSingletonPtr() != NULL) {
-		if (ourVars->consoleInstance == NULL)
+	if( CEGUI::System::getSingletonPtr() != NULL )
+	{
+		if( ourVars->consoleInstance == NULL )
 		{
 			// initializes the console singleton
 			ourVars->consoleInstance = &ConsoleImpl::getInstance();
@@ -44,7 +49,7 @@ bool Console::isInitialized() {
 
 bool Console::Active()
 {
-	if (isInitialized())
+	if( isInitialized() )
 		return ourVars->consoleInstance->isVisible();
 	else
 		return false;
@@ -52,45 +57,50 @@ bool Console::Active()
 
 void Console::Open()
 {
-	if (isInitialized()) {
-		ourVars->consoleInstance->setVisible(true);
+	if( isInitialized() )
+	{
+		ourVars->consoleInstance->setVisible( true );
 	}
 }
 
 void Console::Close()
 {
-	if (isInitialized()) {
-		ourVars->consoleInstance->setVisible(false);
+	if( isInitialized() )
+	{
+		ourVars->consoleInstance->setVisible( false );
 	}
 }
 
-void Console::TabComplete(void)
+void Console::TabComplete( void )
 {
-	if (isInitialized()) {
+	if( isInitialized() )
+	{
 		ourVars->consoleInstance->TabComplete();
 	}
 }
 
-void Console::Print(const char * text)
+void Console::Print( const char* text )
 {
 
-	ourVars->msgQueue.push(ConsoleMsg(text));
-	if (isInitialized())
+	ourVars->msgQueue.push( ConsoleMsg( text ) );
+	if( isInitialized() )
 	{
-		while (!ourVars->msgQueue.empty()) {
+		while( !ourVars->msgQueue.empty() )
+		{
 			ConsoleMsg outMsg = ourVars->msgQueue.pop();
-			ourVars->consoleInstance->OutputText(outMsg);
+			ourVars->consoleInstance->OutputText( outMsg );
 		}
 	}
 }
 
 bool Console::ProcessEvent( const sysEvent_t* event, bool forceAccept )
 {
-	if (isInitialized()) {
+	if( isInitialized() )
+	{
 		const bool consoleKey = event->evType == SE_KEY && event->evValue == K_GRAVE && com_allowConsole.GetBool();
-
+		
 		const bool tabKey = event->evType == SE_KEY && event->evValue == K_TAB;
-
+		
 		// we always catch the console key event
 		if( !forceAccept && consoleKey )
 		{
@@ -99,7 +109,7 @@ bool Console::ProcessEvent( const sysEvent_t* event, bool forceAccept )
 			{
 				return true;
 			}
-
+			
 			// if window is Active we close it with consoleKey
 			if( Active() )
 			{
@@ -113,29 +123,30 @@ bool Console::ProcessEvent( const sysEvent_t* event, bool forceAccept )
 			}
 			return true;
 		}
-
+		
 		// return event as processed when console open
 		// aka don't pass the input further
 		if( Active() )
 		{
-			if(tabKey) {
+			if( tabKey )
+			{
 				TabComplete();
 			}
 			return true;
 		}
-
+		
 		// if we aren't Active, dump all the other events
 		if( !forceAccept && !Active() )
 		{
 			return false;
 		}
-
-		if (forceAccept)
+		
+		if( forceAccept )
 		{
 			// a dummy here
 			return true;
 		}
-
+		
 		// we don't handle things like mouse, joystick, and network packets
 		return false;
 	}

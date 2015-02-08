@@ -883,9 +883,9 @@ Draws axis and threshold / range rings into an RGBA image
 void	DrawJoypadTexture(
 	const int	size,
 	byte	image[],
-
+	
 	const idVec2 raw,
-
+	
 	const float threshold,
 	const float range,
 	const transferFunction_t shape,
@@ -1382,7 +1382,7 @@ void idUsercmdGenLocal::Mouse()
 			case M_ACTION6:
 			case M_ACTION7:
 			case M_ACTION8:
-
+			
 			// DG: support some more mouse buttons
 			case M_ACTION9:
 			case M_ACTION10:
@@ -1407,9 +1407,9 @@ void idUsercmdGenLocal::Mouse()
 			case M_DELTAZ:	// mouse wheel, may have multiple clicks
 			{
 #ifdef USE_CEGUI // DG: this seems like a good place to inject mousewheel deltas into cegui.
-				idCEGUI::InjectMouseWheel(value);
+				idCEGUI::InjectMouseWheel( value );
 #endif //USE_CEGUI
-
+				
 				int key = value < 0 ? K_MWHEELDOWN : K_MWHEELUP;
 				value = abs( value );
 				while( value-- > 0 )

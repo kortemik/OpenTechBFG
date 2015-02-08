@@ -950,7 +950,7 @@ void idCommonLocal::RenderBink( const char* path )
 		Sys_GenerateEvents();
 		
 		// FIXME: DG: not sure the following code is the right way to do this...
-
+		
 		// queue system events ready for polling
 		Sys_GetEvent();
 		
@@ -1822,9 +1822,9 @@ bool idCommonLocal::ProcessEvent( const sysEvent_t* event )
 #ifdef USE_CEGUI
 	// send events to cegui
 	// TODO: should this always be injected or only if a cegui window is active?
-	idCEGUI::InjectSysEvent(event); // TODO: could check return value?
+	idCEGUI::InjectSysEvent( event ); // TODO: could check return value?
 #endif // USE_CEGUI
-
+	
 	// let the pull-down console take it if desired
 	if( console->ProcessEvent( event, false ) )
 	{

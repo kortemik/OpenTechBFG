@@ -12,23 +12,36 @@
 
 #include "ConsoleMsg.h"
 
-namespace CEGUIConsole {
+namespace CEGUIConsole
+{
 
-class ConsoleQueue {
+class ConsoleQueue
+{
 public:
 	ConsoleQueue();
 	virtual ~ConsoleQueue();
-
-	ConsoleQueue& operator=(const ConsoleQueue& rhs)
+	
+	ConsoleQueue& operator=( const ConsoleQueue& rhs )
 	{
 		return *this;
 	}
-
-	void push(ConsoleMsg in) {messages.push_back(in);};
-	ConsoleMsg pop() {ConsoleMsg out = messages.front(); messages.pop_front(); return out;};
-
-	bool empty() { return messages.empty(); };
-
+	
+	void push( ConsoleMsg in )
+	{
+		messages.push_back( in );
+	};
+	ConsoleMsg pop()
+	{
+		ConsoleMsg out = messages.front();
+		messages.pop_front();
+		return out;
+	};
+	
+	bool empty()
+	{
+		return messages.empty();
+	};
+	
 private:
 	std::list<ConsoleMsg> messages;
 };

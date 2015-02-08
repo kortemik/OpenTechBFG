@@ -745,7 +745,7 @@ void R_SetNewMode( const bool fullInit )
 				// DG: cegui must be initialized after the window has been created, it needs an opengl context
 				idCEGUI::Init();
 #endif // USE_CEGUI
-
+				
 				// it worked
 				break;
 			}
@@ -757,9 +757,9 @@ void R_SetNewMode( const bool fullInit )
 			{
 #ifdef USE_CEGUI
 				// DG: cegui must know about the changed window size
-				idCEGUI::NotifyDisplaySizeChanged(parms.width, parms.height);
+				idCEGUI::NotifyDisplaySizeChanged( parms.width, parms.height );
 #endif // USE_CEGUI
-
+				
 				// it worked
 				break;
 			}

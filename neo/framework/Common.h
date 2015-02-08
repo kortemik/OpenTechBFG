@@ -329,7 +329,7 @@ public:
 	virtual bool				JapaneseCensorship() const = 0;
 	
 	virtual void				QueueShowShell() = 0;		// Will activate the shell on the next frame.
-
+	
 };
 
 extern idCommon* 		common;

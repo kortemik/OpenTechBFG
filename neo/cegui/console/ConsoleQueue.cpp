@@ -7,13 +7,16 @@
 
 #include <cegui/console/ConsoleQueue.h>
 
-namespace CEGUIConsole {
+namespace CEGUIConsole
+{
 
-ConsoleQueue::ConsoleQueue() {
+ConsoleQueue::ConsoleQueue()
+{
 	std::list<ConsoleMsg> messages;
 }
 
-ConsoleQueue::~ConsoleQueue() {
+ConsoleQueue::~ConsoleQueue()
+{
 	messages.clear();
 }
 
