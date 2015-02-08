@@ -37,54 +37,67 @@ ConsoleImpl::~ConsoleImpl()
 	this->ourVars->tabCompletions.clear();
 }
 
+void ConsoleImpl::destroy()
+{
+	// FIXME actually should remove all the windows and subscritions
+}
+
 void ConsoleImpl::CreateCEGUIWindow()
 {
-	CEGUI::WindowFactoryManager::addWindowType<CEGUIConsole::ConsoleEditBox>();
-	
-	CEGUI::System::getSingleton().getDefaultGUIContext()
-	.getRootWindow()->addChild(
-		CEGUI::WindowManager::getSingleton().
-		loadLayoutFromFile( "console.layout" ) );
+	if (CEGUI::System::getSingletonPtr() != NULL)
+	{
+		CEGUI::WindowFactoryManager::addWindowType<CEGUIConsole::ConsoleEditBox>();
+
+		CEGUI::System::getSingleton().getDefaultGUIContext()
+			.getRootWindow()->addChild(
+			CEGUI::WindowManager::getSingleton().
+			loadLayoutFromFile("console.layout"));
+	}
 }
 void ConsoleImpl::RegisterHandlers()
 {
-	CEGUI::Window* ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
-								.getRootWindow()->getChild( "Console" );
-								
-								
-	/*
-	 * handles mouse on submit to input
-	 */
-	ConsoleWin->getChild( "Submit" )->subscribeEvent(
-		CEGUI::PushButton::EventClicked,
-		&ConsoleImpl::Handle_TextSubmitted,
-		( this )
-	);
-	/*
-	 * handles keypress (enter) to input
-	 */
-	
-	// FIXME catches tab too, some way to avoid that?
-	ConsoleWin->getChild( "Combobox" )->subscribeEvent(
-		CEGUI::Combobox::EventTextAccepted,
-		&ConsoleImpl::Handle_TextSubmitted,
-		( this )
-	);
+	if (CEGUI::System::getSingletonPtr() != NULL)
+	{
+		CEGUI::Window* ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
+			.getRootWindow()->getChild("Console");
+
+
+		/*
+		 * handles mouse on submit to input
+		 */
+		ConsoleWin->getChild("Submit")->subscribeEvent(
+			CEGUI::PushButton::EventClicked,
+			&ConsoleImpl::Handle_TextSubmitted,
+			(this)
+			);
+		/*
+		 * handles keypress (enter) to input
+		 */
+
+		// FIXME catches tab too, some way to avoid that?
+		ConsoleWin->getChild("Combobox")->subscribeEvent(
+			CEGUI::Combobox::EventTextAccepted,
+			&ConsoleImpl::Handle_TextSubmitted,
+			(this)
+			);
+	}
 }
 
 bool ConsoleImpl::Handle_TextSubmitted( const CEGUI::EventArgs& args )
 {
-	CEGUI::Window* ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
-								.getRootWindow()->getChild( "Console" );
-								
-	CEGUI::String Line = ConsoleWin->getChild( "Combobox" )->getText();
-	
-	( this )->Execute( Line );
-	
-	ConsoleWin->getChild( "Combobox" )->setText( "" );
-	
-	return true;
-	
+	if (CEGUI::System::getSingletonPtr() != NULL)
+	{
+		CEGUI::Window* ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
+			.getRootWindow()->getChild("Console");
+
+		CEGUI::String Line = ConsoleWin->getChild("Combobox")->getText();
+
+		(this)->Execute(Line);
+
+		ConsoleWin->getChild("Combobox")->setText("");
+
+		return true;
+	}
 }
 
 void ConsoleImpl::OutputText( ConsoleMsg outMsg )
@@ -113,41 +126,50 @@ void ConsoleImpl::OutputText( ConsoleMsg outMsg )
 
 void ConsoleImpl::setVisible( bool visible )
 {
-	CEGUI::Window* ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
-								.getRootWindow()->getChild( "Console" );
-	ConsoleWin->setVisible( visible );
-	
-	if( visible )
+	if (CEGUI::System::getSingletonPtr() != NULL)
 	{
-		ConsoleWin->getChild( "Combobox" )->activate();
-		CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().show();
-	}
-	else
-	{
-		ConsoleWin->getChild( "Combobox" )->deactivate();
-		CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().hide();
+		CEGUI::Window* ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
+			.getRootWindow()->getChild("Console");
+		ConsoleWin->setVisible(visible);
+
+		if (visible)
+		{
+			ConsoleWin->getChild("Combobox")->activate();
+			CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().show();
+		}
+		else
+		{
+			ConsoleWin->getChild("Combobox")->deactivate();
+			CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().hide();
+		}
 	}
 }
 
 bool ConsoleImpl::isVisible()
 {
-	CEGUI::Window* ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
-								.getRootWindow()->getChild( "Console" );
-	return ConsoleWin->isVisible();
+	if (CEGUI::System::getSingletonPtr() != NULL)
+	{
+		CEGUI::Window* ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
+			.getRootWindow()->getChild("Console");
+		return ConsoleWin->isVisible();
+	}
 }
 
 void ConsoleImpl::ScrollBottom()
 {
-	CEGUI::Window* ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
-								.getRootWindow()->getChild( "Console" );
-								
-	CEGUI::Listbox* outputWindow = static_cast<CEGUI::Listbox*>( ConsoleWin->getChild( "History" ) );
-	
-	float document_size = outputWindow->getVertScrollbar()->getDocumentSize();
-	float page_size = outputWindow->getVertScrollbar()->getPageSize();
-	
-	
-	outputWindow->getVertScrollbar()->setScrollPosition( document_size - page_size );
+	if (CEGUI::System::getSingletonPtr() != NULL)
+	{
+		CEGUI::Window* ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
+			.getRootWindow()->getChild("Console");
+
+		CEGUI::Listbox* outputWindow = static_cast<CEGUI::Listbox*>(ConsoleWin->getChild("History"));
+
+		float document_size = outputWindow->getVertScrollbar()->getDocumentSize();
+		float page_size = outputWindow->getVertScrollbar()->getPageSize();
+
+
+		outputWindow->getVertScrollbar()->setScrollPosition(document_size - page_size);
+	}
 }
 
 void ConsoleImpl::Execute( CEGUI::String inMsg )
@@ -170,17 +192,17 @@ void ConsoleImpl::PopulateHistory( void )
 
 void ConsoleImpl::TabComplete( void )
 {
-	CEGUI::Window* ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
-								.getRootWindow()->getChild( "Console" );
-								
-	CEGUI::String cmdStub = ConsoleWin->getChild( "Combobox" )->getText();
-	
-	cmdSystem->CommandCompletion( AutoCompleteCallback ); // function pointer to our static member function
-	// if command is valid
-	cmdSystem->ArgCompletion( cmdStub.c_str(), AutoCompleteCallback );
-	
-	
-	
+	if (CEGUI::System::getSingletonPtr() != NULL)
+	{
+		CEGUI::Window* ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
+			.getRootWindow()->getChild("Console");
+
+		CEGUI::String cmdStub = ConsoleWin->getChild("Combobox")->getText();
+
+		cmdSystem->CommandCompletion(AutoCompleteCallback); // function pointer to our static member function
+		// if command is valid
+		cmdSystem->ArgCompletion(cmdStub.c_str(), AutoCompleteCallback);
+	}
 }
 
 void ConsoleImpl::AutoCompleteCallback( const char* s )

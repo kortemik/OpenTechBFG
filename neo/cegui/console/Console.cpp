@@ -29,6 +29,8 @@ Console::Console()
 
 Console::~Console()
 {
+	ourVars->consoleInstance->destroy();
+	ourVars->consoleInstance = NULL;
 }
 
 bool Console::isInitialized()

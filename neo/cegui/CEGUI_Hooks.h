@@ -52,6 +52,7 @@ bool InjectMouseWheel( int delta );
 // call this once per frame (at the end) - it'll inject the time pulse and render
 void Update();
 // TODO: or is there a good reason to update the timepulse at another time (maybe at the beginning of a frame)?
+void Shutdown();
 }
 
 
