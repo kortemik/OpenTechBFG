@@ -121,6 +121,15 @@ endif()
 
 # cegui
 if(BUNDLED_CEGUI)
+  # set RPATH for Unix-y systems (except for OS X), so they can find the cegui libs.
+  # must be done here so it's used for both the OpenTech executable and the cegui libs
+  if(UNIX AND NOT APPLE AND NOT WIN32)
+    # use $ORIGIN/lib as RPATH to have a relative rpath (lib/ should always be next to the executable)
+    set(CMAKE_INSTALL_RPATH "\$ORIGIN/lib")
+    # this RPATH should be used immediately, not only after installing
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+  endif()
+
   add_subdirectory(libs/cegui)
 endif()
 
