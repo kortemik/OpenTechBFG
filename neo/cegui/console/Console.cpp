@@ -148,6 +148,11 @@ bool Console::ProcessEvent( const sysEvent_t* event, bool forceAccept )
 		{
 			if( tabKey )
 			{
+				// ignore up events
+				if( event->evValue2 == 0 )
+				{
+					return true;
+				}
 				TabComplete();
 			}
 			return true;
