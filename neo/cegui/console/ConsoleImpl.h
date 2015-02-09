@@ -20,11 +20,10 @@ class ConsoleImpl
 {
 public:
 
-	static ConsoleImpl& getInstance()
-	{
-		static ConsoleImpl instance;
-		return instance;
-	}
+	ConsoleImpl();
+	virtual ~ConsoleImpl();
+	ConsoleImpl( ConsoleImpl const& );
+	void operator=( ConsoleImpl const& );
 	
 	void setVisible( bool visible );
 	bool isVisible();
@@ -32,9 +31,7 @@ public:
 	void TabComplete( void );
 	static void AutoCompleteCallback( const char* s );
 	void TabCompleteListAdd( CEGUI::String option );
-	
-	void destroy();
-	
+
 private:
 	void CreateCEGUIWindow();
 	void RegisterHandlers();
@@ -45,11 +42,6 @@ private:
 	
 	struct ConsoleImplVars;
 	ConsoleImplVars* ourVars;
-	
-	ConsoleImpl();
-	virtual ~ConsoleImpl();
-	ConsoleImpl( ConsoleImpl const& );
-	void operator=( ConsoleImpl const& );
 	
 	void ScrollBottom();
 };

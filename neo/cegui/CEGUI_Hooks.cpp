@@ -38,6 +38,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <CEGUI/RendererModules/OpenGL/GLRenderer.h>
 
+#include "console/Console.h"
 
 using namespace CEGUI;
 
@@ -93,7 +94,7 @@ void initSystem( void )
 
 void initResourceProvider( void )
 {
-	if (CEGUI::System::getSingletonPtr() != NULL)
+	if (idCEGUI::isInitialized())
 	{
 		DefaultResourceProvider* rp = static_cast<DefaultResourceProvider*>
 			(CEGUI::System::getSingleton().getResourceProvider());
@@ -111,7 +112,7 @@ void initResourceProvider( void )
 
 void initResourceGroups( void )
 {
-	if (CEGUI::System::getSingletonPtr() != NULL)
+	if (idCEGUI::isInitialized())
 	{
 		// set the default resource groups to be used
 		ImageManager::setImagesetDefaultResourceGroup("imagesets");
@@ -131,7 +132,7 @@ void initResourceGroups( void )
 
 void initResources( void )
 {
-	if (CEGUI::System::getSingletonPtr() != NULL)
+	if (idCEGUI::isInitialized())
 	{
 		SchemeManager::getSingleton().createFromFile("TaharezLook.scheme");
 		FontManager::getSingleton().createFromFile("DejaVuSans-10.font");
@@ -144,7 +145,7 @@ void initResources( void )
 
 void createWindow( void )
 {
-	if (CEGUI::System::getSingletonPtr() != NULL)
+	if (idCEGUI::isInitialized())
 	{
 		WindowManager& wmgr = WindowManager::getSingleton();
 		Window* myRoot = wmgr.createWindow("DefaultWindow", "root");
@@ -165,7 +166,7 @@ void createWindow( void )
 // keyboard keys, mouse keys, mousewheel (TODO: really?)
 bool HandleKeyEvent( const sysEvent_t& keyEvent )
 {
-	if (CEGUI::System::getSingletonPtr() != NULL)
+	if (idCEGUI::isInitialized())
 	{
 		assert(keyEvent.evType == SE_KEY);
 
@@ -204,6 +205,18 @@ bool HandleKeyEvent( const sysEvent_t& keyEvent )
 	return false;
 }
 
+void Startup()
+{
+	// all functions for console/menu/etc should be here
+	// this will create a cegui console for idConsole to use
+	console->Init();
+}
+void Shutdown()
+{
+	// all functions for console/menu/etc should be here
+	console->Shutdown();
+}
+
 } //anon namespace
 
 bool idCEGUI::Init()
@@ -214,17 +227,20 @@ bool idCEGUI::Init()
 	initResources();
 	createWindow();
 	
-	if (CEGUI::System::getSingletonPtr() != NULL)
+	if (isInitialized())
 	{
 		ceguiSys = &(System::getSingleton());
 		oldTimePulseSec = 0.001 * Sys_Milliseconds();
 	}
+
+	Startup();
+
 	return true;
 }
 
 void idCEGUI::NotifyDisplaySizeChanged( int width, int height )
 {
-	if (CEGUI::System::getSingletonPtr() != NULL)
+	if (isInitialized())
 	{
 		ceguiSys->notifyDisplaySizeChanged(Sizef(width, height));
 	}
@@ -233,7 +249,7 @@ void idCEGUI::NotifyDisplaySizeChanged( int width, int height )
 // inject a sys event
 bool idCEGUI::InjectSysEvent( const sysEvent_t* event )
 {
-	if (CEGUI::System::getSingletonPtr() != NULL)
+	if (isInitialized())
 	{
 		if (event == NULL)
 		{
@@ -264,7 +280,7 @@ bool idCEGUI::InjectSysEvent( const sysEvent_t* event )
 
 bool idCEGUI::InjectMouseWheel( int delta )
 {
-	if (CEGUI::System::getSingletonPtr() != NULL)
+	if (isInitialized())
 	{
 		// TODO: d3bfg uses int for the deltas, cegui uses float - do we need a factor?
 		return ceguiSys->getDefaultGUIContext().injectMouseWheelChange(delta);
@@ -279,14 +295,29 @@ void idCEGUI::Update()
 	RenderGUIContexts();
 }
 
-void idCEGUI::Shutdown()
+void idCEGUI::Destroy()
 {
-	if (CEGUI::System::getSingletonPtr() != NULL)
+	if (isInitialized())
 	{
+		Shutdown();
 		CEGUI::OpenGLRenderer *renderer = static_cast<CEGUI::OpenGLRenderer*>(CEGUI::System::getSingleton().getRenderer());
 		CEGUI::System::getSingleton().destroy();
 		CEGUI::OpenGLRenderer::destroy(*renderer);
 	}
 }
 
+bool idCEGUI::isInitialized()
+{
+	// checks if cegui is up and running
+	if( CEGUI::System::getSingletonPtr() != NULL )
+	{
+		return true;
+	}
+	else
+	{
+		// this should not happen
+		assert( CEGUI::System::getSingletonPtr() == NULL );
+		return false;
+	}
+}
 #endif // USE_CEGUI

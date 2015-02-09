@@ -7,6 +7,8 @@
 
 #include <memory>
 #include <list>
+#include "cegui/CEGUI_Hooks.h" // for initialization check
+#include "Console.h"
 #include "ConsoleEditBox.h"
 #include "ConsoleImpl.h"
 #include "ConsoleMsg.h"
@@ -23,7 +25,6 @@ struct ConsoleImpl::ConsoleImplVars
 	std::list<CEGUI::String> tabCompletions;
 };
 
-
 ConsoleImpl::ConsoleImpl() :
 	ourVars( new ConsoleImplVars )
 {
@@ -34,17 +35,13 @@ ConsoleImpl::ConsoleImpl() :
 
 ConsoleImpl::~ConsoleImpl()
 {
+	// FIXME should also remove subscriptions and windows ..
 	this->ourVars->tabCompletions.clear();
-}
-
-void ConsoleImpl::destroy()
-{
-	// FIXME actually should remove all the windows and subscritions
 }
 
 void ConsoleImpl::CreateCEGUIWindow()
 {
-	if (CEGUI::System::getSingletonPtr() != NULL)
+	if (idCEGUI::isInitialized())
 	{
 		CEGUI::WindowFactoryManager::addWindowType<CEGUIConsole::ConsoleEditBox>();
 
@@ -56,7 +53,7 @@ void ConsoleImpl::CreateCEGUIWindow()
 }
 void ConsoleImpl::RegisterHandlers()
 {
-	if (CEGUI::System::getSingletonPtr() != NULL)
+	if (idCEGUI::isInitialized())
 	{
 		CEGUI::Window* ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 			.getRootWindow()->getChild("Console");
@@ -85,7 +82,7 @@ void ConsoleImpl::RegisterHandlers()
 
 bool ConsoleImpl::Handle_TextSubmitted( const CEGUI::EventArgs& args )
 {
-	if (CEGUI::System::getSingletonPtr() != NULL)
+	if (idCEGUI::isInitialized())
 	{
 		CEGUI::Window* ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 			.getRootWindow()->getChild("Console");
@@ -98,6 +95,7 @@ bool ConsoleImpl::Handle_TextSubmitted( const CEGUI::EventArgs& args )
 
 		return true;
 	}
+	return false;
 }
 
 void ConsoleImpl::OutputText( ConsoleMsg outMsg )
@@ -105,7 +103,7 @@ void ConsoleImpl::OutputText( ConsoleMsg outMsg )
 	/*
 	 * checks if cegui is initialized
 	 */
-	if( CEGUI::System::getSingletonPtr() != NULL )
+	if( idCEGUI::isInitialized() )
 	{
 		//ConsoleMsg outMsg = ConsoleMsg(inMsg);
 		
@@ -126,7 +124,7 @@ void ConsoleImpl::OutputText( ConsoleMsg outMsg )
 
 void ConsoleImpl::setVisible( bool visible )
 {
-	if (CEGUI::System::getSingletonPtr() != NULL)
+	if (idCEGUI::isInitialized())
 	{
 		CEGUI::Window* ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 			.getRootWindow()->getChild("Console");
@@ -147,17 +145,18 @@ void ConsoleImpl::setVisible( bool visible )
 
 bool ConsoleImpl::isVisible()
 {
-	if (CEGUI::System::getSingletonPtr() != NULL)
+	if (idCEGUI::isInitialized())
 	{
 		CEGUI::Window* ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 			.getRootWindow()->getChild("Console");
 		return ConsoleWin->isVisible();
 	}
+	return false;
 }
 
 void ConsoleImpl::ScrollBottom()
 {
-	if (CEGUI::System::getSingletonPtr() != NULL)
+	if (idCEGUI::isInitialized())
 	{
 		CEGUI::Window* ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 			.getRootWindow()->getChild("Console");
@@ -192,7 +191,7 @@ void ConsoleImpl::PopulateHistory( void )
 
 void ConsoleImpl::TabComplete( void )
 {
-	if (CEGUI::System::getSingletonPtr() != NULL)
+	if (idCEGUI::isInitialized())
 	{
 		CEGUI::Window* ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 			.getRootWindow()->getChild("Console");
@@ -205,21 +204,27 @@ void ConsoleImpl::TabComplete( void )
 	}
 }
 
+// for accessing friend class CEGUIConsole::Console::ConsoleVars struct
+struct Console::ConsoleVars
+{
+	ConsoleImpl* consoleInstance;
+};
+
 void ConsoleImpl::AutoCompleteCallback( const char* s )
 {
 	// this little fellow just gets all the matches and is responsible for acting accordingly
 	// for now let's test and print..
-	
-	//getInstance().OutputText(ConsoleMsg(s));
-	getInstance().TabCompleteListAdd( CEGUI::String( s ) );
-	
+
+	// accessing friend class
+	CEGUIConsole::Console *ourConsole = dynamic_cast<CEGUIConsole::Console*>(console);
+	ourConsole->ourVars->consoleInstance->TabCompleteListAdd(CEGUI::String( s ));
 }
 
 void ConsoleImpl::TabCompleteListAdd( CEGUI::String option )
 {
 	this->ourVars->tabCompletions.push_back( option );
 #if 0
-	if( CEGUI::System::getSingletonPtr() != NULL )
+	if( idCEGUI::isInitialized() )
 	{
 		CEGUI::Window* ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
 									.getRootWindow()->getChild( "Console" );
