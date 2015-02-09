@@ -35,12 +35,12 @@ Console::~Console()
 
 bool Console::isInitialized()
 {
-	if( idCEGUI::isInitialized() )
+	if( idCEGUI::IsInitialized() )
 	{
 		// checks if ceguiPart of the console is up and running
 		// all functionality except messages buffered are disabled
 		// until cegui part is up and running
-		if (ourVars->consoleInstance != NULL)
+		if( ourVars->consoleInstance != NULL )
 			return true;
 	}
 	return false;
@@ -49,7 +49,7 @@ bool Console::isInitialized()
 void Console::Init()
 {
 	// this is called first from BFG code and then again once cegui is up from startup
-	if( idCEGUI::isInitialized() )
+	if( idCEGUI::IsInitialized() )
 	{
 		ourVars->consoleInstance = new ConsoleImpl;
 	}
@@ -58,7 +58,7 @@ void Console::Init()
 void Console::Shutdown()
 {
 	// this is called first from idCEGUI shutdown and then again from BFG code
-	if( idCEGUI::isInitialized() )
+	if( idCEGUI::IsInitialized() )
 	{
 		delete ourVars->consoleInstance;
 		ourVars->consoleInstance = NULL;
@@ -148,6 +148,11 @@ bool Console::ProcessEvent( const sysEvent_t* event, bool forceAccept )
 		{
 			if( tabKey )
 			{
+				// ignore up events
+				if( event->evValue2 == 0 )
+				{
+					return true;
+				}
 				TabComplete();
 			}
 			return true;

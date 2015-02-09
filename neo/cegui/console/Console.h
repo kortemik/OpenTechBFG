@@ -36,9 +36,9 @@ public:
 	
 	void	Init();
 	void	Shutdown();
-
+	
 	// unimplemented
-
+	
 	// clear the timers on any recent prints that are displayed in the notify lines
 	void	ClearNotifyLines() { };
 	void	Draw( bool forceFullScreen ) { };
@@ -51,7 +51,7 @@ public:
 	
 private:
 	bool isInitialized();
-
+	
 	void TabComplete( void );
 	
 	struct ConsoleVars;

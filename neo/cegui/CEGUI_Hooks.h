@@ -40,7 +40,7 @@ namespace idCEGUI
 {
 bool Init();
 
-bool isInitialized();
+bool IsInitialized();
 
 // tell cegui that the (game) window size has changed
 void NotifyDisplaySizeChanged( int width, int height );
@@ -54,6 +54,7 @@ bool InjectMouseWheel( int delta );
 // call this once per frame (at the end) - it'll inject the time pulse and render
 void Update();
 // TODO: or is there a good reason to update the timepulse at another time (maybe at the beginning of a frame)?
+
 void Destroy();
 }
 
