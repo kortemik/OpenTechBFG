@@ -199,8 +199,18 @@ void ConsoleImpl::TabComplete( void )
 		CEGUI::String cmdStub = ConsoleWin->getChild("Combobox")->getText();
 
 		cmdSystem->CommandCompletion(AutoCompleteCallback); // function pointer to our static member function
-		// if command is valid
 		cmdSystem->ArgCompletion(cmdStub.c_str(), AutoCompleteCallback);
+
+		// TODO perhaps we could cycle the completions in the field with tab
+		this->ourVars->tabCompletions.sort();
+		std::list<CEGUI::String>::iterator it;
+		for (
+				std::list<CEGUI::String>::iterator it = this->ourVars->tabCompletions.begin();
+				it != this->ourVars->tabCompletions.end();
+				it++
+			)
+			OutputText( ConsoleMsg(*it));
+			this->ourVars->tabCompletions.clear();
 	}
 }
 
@@ -215,175 +225,34 @@ void ConsoleImpl::AutoCompleteCallback( const char* s )
 	// this little fellow just gets all the matches and is responsible for acting accordingly
 	// for now let's test and print..
 
-	// accessing friend class
+	// accessing friend class for function pointer
 	CEGUIConsole::Console *ourConsole = dynamic_cast<CEGUIConsole::Console*>(console);
 	ourConsole->ourVars->consoleInstance->TabCompleteListAdd(CEGUI::String( s ));
 }
 
+// this is a iterator function which goes through all options for completion
 void ConsoleImpl::TabCompleteListAdd( CEGUI::String option )
 {
-	this->ourVars->tabCompletions.push_back( option );
-#if 0
-	if( idCEGUI::isInitialized() )
+	if (idCEGUI::isInitialized())
 	{
-		CEGUI::Window* ConsoleWin = CEGUI::System::getSingleton().getDefaultGUIContext()
-									.getRootWindow()->getChild( "Console" );
-		if( ConsoleWin != NULL )
+		CEGUI::Window* ConsoleWin =
+				CEGUI::System::getSingleton()
+					.getDefaultGUIContext().getRootWindow()->getChild("Console");
+		if (ConsoleWin != NULL)
 		{
-			CEGUI::Window* outputWindow = static_cast<CEGUI::Window*>( ConsoleWin->getChild( "TabCompList" ) );
-			outputWindow->setText( option );
-		}
-#endif
-#if 0
-		idStr cmdMatch = ( this )->AutoComplete( cmdStub.c_str() );
-		
-		if( !cmdMatch.IsEmpty() )
-		{
-			ConsoleWin->getChild( "Combobox" )->setText( cmdMatch.c_str() );
-		}
-#endif
-#if 0
-		int		i;
-		const char* completionString = "ma"; //p
-		char* currentMatch;
-		int matchCount = 0;
-		
-		if( idStr::Icmpn( buf, completionString, strlen( completionString ) ) != 0 )
-		{
-			return;
-		}
-		matchCount++;
-		if( matchCount == 1 )
-		{
-			idStr::Copynz( currentMatch, buf, sizeof( currentMatch ) );
-			return;
-		}
-		
-		// cut currentMatch to the amount common with s
-		for( i = 0; buf[i]; i++ )
-		{
-			if( tolower( currentMatch[i] ) != tolower( buf[i] ) )
+			// our console input
+			CEGUI::String cmdStub = ConsoleWin->getChild("Combobox")->getText();
+
+			// stub matches fully to this option
+			if (idStr::Icmpn(option.c_str(), cmdStub.c_str(), strlen(cmdStub.c_str())) == 0)
 			{
-				currentMatch[i] = 0;
-				break;
-			}
-		}
-		currentMatch[i] = 0;
-#endif
-#if 0
-		char completionArgString[MAX_EDIT_LINE];
-		idCmdArgs args;
-		
-		if( !autoComplete.valid )
-		{
-			args.TokenizeString( buffer, false );
-			idStr::Copynz( autoComplete.completionString, args.Argv( 0 ), sizeof( autoComplete.completionString ) );
-			idStr::Copynz( completionArgString, args.Args(), sizeof( completionArgString ) );
-			autoComplete.matchCount = 0;
-			autoComplete.matchIndex = 0;
-			autoComplete.currentMatch[0] = 0;
-			
-			if( strlen( autoComplete.completionString ) == 0 )
-			{
+				// add the partitial match
+				// TODO color the matching part
+				this->ourVars->tabCompletions.push_back( option );
 				return;
 			}
-			
-			globalAutoComplete = autoComplete;
-			
-			cmdSystem->CommandCompletion( FindMatches );
-			cvarSystem->CommandCompletion( FindMatches );
-			
-			autoComplete = globalAutoComplete;
-			
-			if( autoComplete.matchCount == 0 )
-			{
-				return;	// no matches
-			}
-			
-			// when there's only one match or there's an argument
-			if( autoComplete.matchCount == 1 || completionArgString[0] != '\0' )
-			{
-			
-				/// try completing arguments
-				idStr::Append( autoComplete.completionString, sizeof( autoComplete.completionString ), " " );
-				idStr::Append( autoComplete.completionString, sizeof( autoComplete.completionString ), completionArgString );
-				autoComplete.matchCount = 0;
-				
-				globalAutoComplete = autoComplete;
-				
-				cmdSystem->ArgCompletion( autoComplete.completionString, FindMatches );
-				cvarSystem->ArgCompletion( autoComplete.completionString, FindMatches );
-				
-				autoComplete = globalAutoComplete;
-				
-				idStr::snPrintf( buffer, sizeof( buffer ), "%s", autoComplete.currentMatch );
-				
-				if( autoComplete.matchCount == 0 )
-				{
-					// no argument matches
-					idStr::Append( buffer, sizeof( buffer ), " " );
-					idStr::Append( buffer, sizeof( buffer ), completionArgString );
-					SetCursor( strlen( buffer ) );
-					return;
-				}
-			}
-			else
-			{
-			
-				// multiple matches, complete to shortest
-				idStr::snPrintf( buffer, sizeof( buffer ), "%s", autoComplete.currentMatch );
-				if( strlen( completionArgString ) )
-				{
-					idStr::Append( buffer, sizeof( buffer ), " " );
-					idStr::Append( buffer, sizeof( buffer ), completionArgString );
-				}
-			}
-			
-			autoComplete.length = strlen( buffer );
-			autoComplete.valid = ( autoComplete.matchCount != 1 );
-			SetCursor( autoComplete.length );
-			
-			common->Printf( "]%s\n", buffer );
-			
-			// run through again, printing matches
-			globalAutoComplete = autoComplete;
-			
-			cmdSystem->CommandCompletion( PrintMatches );
-			cmdSystem->ArgCompletion( autoComplete.completionString, PrintMatches );
-			cvarSystem->CommandCompletion( PrintCvarMatches );
-			cvarSystem->ArgCompletion( autoComplete.completionString, PrintMatches );
-			
-		}
-		else if( autoComplete.matchCount != 1 )
-		{
-		
-			// get the next match and show instead
-			autoComplete.matchIndex++;
-			if( autoComplete.matchIndex == autoComplete.matchCount )
-			{
-				autoComplete.matchIndex = 0;
-			}
-			autoComplete.findMatchIndex = 0;
-			
-			globalAutoComplete = autoComplete;
-			
-			cmdSystem->CommandCompletion( FindIndexMatch );
-			cmdSystem->ArgCompletion( autoComplete.completionString, FindIndexMatch );
-			cvarSystem->CommandCompletion( FindIndexMatch );
-			cvarSystem->ArgCompletion( autoComplete.completionString, FindIndexMatch );
-			
-			autoComplete = globalAutoComplete;
-			
-			// and print it
-			idStr::snPrintf( buffer, sizeof( buffer ), autoComplete.currentMatch );
-			if( autoComplete.length > ( int )strlen( buffer ) )
-			{
-				autoComplete.length = strlen( buffer );
-			}
-			SetCursor( autoComplete.length );
 		}
 	}
-#endif
 }
 
 } /* namespace CEGUIConsole */
