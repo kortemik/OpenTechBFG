@@ -54,6 +54,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/RenderSystem.h"
 #include "../sys/sys_public.h"
 #include "renderer/tr_local.h"
+#include "framework/Console.h" // TODO remove once L1173 is done
 #include "sdl_local.h"
 
 #ifdef USE_CEGUI
@@ -1170,7 +1171,9 @@ sysEvent_t Sys_GetEvent()
 			case SDL_MOUSEMOTION:
 				// DG: return event with absolute mouse-coordinates when in menu
 				// to fix cursor problems in windowed mode
-				if( game && game->Shell_IsActive() )
+
+				// TODO we should have some method to tell if we want absolute or relative mouse
+				if( (game && game->Shell_IsActive()) || (console && console->Active()))
 				{
 					res.evType = SE_MOUSE_ABSOLUTE;
 					res.evValue = ev.motion.x;
