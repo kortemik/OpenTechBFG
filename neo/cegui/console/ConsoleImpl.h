@@ -31,7 +31,7 @@ public:
 	void TabComplete( void );
 	static void AutoCompleteCallback( const char* s );
 	void TabCompleteListAdd( CEGUI::String option );
-
+	
 private:
 	void CreateCEGUIWindow();
 	void RegisterHandlers();

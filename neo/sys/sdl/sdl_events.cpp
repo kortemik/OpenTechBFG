@@ -1171,9 +1171,9 @@ sysEvent_t Sys_GetEvent()
 			case SDL_MOUSEMOTION:
 				// DG: return event with absolute mouse-coordinates when in menu
 				// to fix cursor problems in windowed mode
-
+				
 				// TODO we should have some method to tell if we want absolute or relative mouse
-				if( (game && game->Shell_IsActive()) || (console && console->Active()))
+				if( ( game && game->Shell_IsActive() ) || ( console && console->Active() ) )
 				{
 					res.evType = SE_MOUSE_ABSOLUTE;
 					res.evValue = ev.motion.x;
