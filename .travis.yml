@@ -1,3 +1,17 @@
+language: cpp
+os:
+  - linux
+  - osx
+
+compiler:
+  - gcc
+  - clang
+  - CXX=g++-mingw-w64-x86-64; g++
+
+matrix:
+  allow_failures:
+    - os: osx  
+
 env:
   global:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
@@ -10,21 +24,11 @@ addons:
       name: "kortemik/OpenTechBFG"
       description: "Build submitted via Travis CI"
     notification_email: kordex@gmail.com
-    build_command_prepend: mkdir build && cd build &&  if [ "$CXX" = "g++-mingw-w64-x86-64" ]; then cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../scripts/mingw32.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug -DSDL2=OFF ../ ;else cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DSDL2=OFF ../;fi
+    build_command_prepend: "mkdir build && cd build &&  if [ \"$CXX\" = \"g++-mingw-w64-x86-64\" ]; then cmake -G \"Eclipse CDT4 - Unix Makefiles\" -DCMAKE_TOOLCHAIN_FILE=../scripts/mingw32.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug -DSDL2=OFF ../ ;else cmake -G \"Eclipse CDT4 - Unix Makefiles\" -DCMAKE_BUILD_TYPE=Debug -DSDL2=OFF ../;fi"
     build_command:   "make -j 9"
     branch_pattern: master
 
-language: cpp
-os:
-  - linux
-  - osx
-matrix:
-  allow_failures:
-    - os: osx  
-compiler:
-  - gcc
-  - clang
-  - CXX=g++-mingw-w64-x86-64; g++
+
 install:
  - if [ "$CXX" = "g++" ]; then sudo sed -i 's/precise/trusty/g' /etc/apt/sources.list; fi
  - if [ "$CXX" = "g++-mingw-w64-x86-64" ]; then sudo sed -i 's/precise/trusty/g' /etc/apt/sources.list; fi
@@ -32,4 +36,6 @@ install:
  - sudo apt-get install libsdl1.2-dev libopenal-dev
  - if [ "$CXX" = "g++" ]; then sudo apt-get install -qqy gcc g++; fi
  - if [ "$CXX" = "g++-mingw-w64-x86-64" ]; then sudo apt-get install -qqy g++-mingw-w64-x86-64; fi
-script: mkdir build && cd build &&  if [ "$CXX" = "g++-mingw-w64-x86-64" ]; then cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../scripts/mingw32.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug -DSDL2=OFF ../ ;else cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DSDL2=OFF ../;fi && make -j9
+
+#script: mkdir build && cd build &&  if [ "$CXX" = "g++-mingw-w64-x86-64" ]; then cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../scripts/mingw32.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug -DSDL2=OFF ../ ;else cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DSDL2=OFF ../;fi && make -j9
+script: make -j 9
