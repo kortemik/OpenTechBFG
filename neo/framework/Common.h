@@ -256,10 +256,12 @@ public:
 	
 	// Issues a C++ throw. Normal errors just abort to the game loop,
 	// which is appropriate for media or dynamic logic errors.
+	// coverity[+kill]
 	virtual void				Error( VERIFY_FORMAT_STRING const char* fmt, ... ) ID_INSTANCE_ATTRIBUTE_PRINTF( 1, 2 ) = 0;
 	
 	// Fatal errors quit all the way to a system dialog box, which is appropriate for
 	// static internal errors or cases where the system may be corrupted.
+	// coverity[+kill]
 	virtual void                FatalError( VERIFY_FORMAT_STRING const char* fmt, ... ) ID_INSTANCE_ATTRIBUTE_PRINTF( 1, 2 ) = 0;
 	
 	// Returns key bound to the command
