@@ -9,6 +9,10 @@ _________________________________________
 
 [![Build Status](https://travis-ci.org/OpenTechEngine/OpenTechBFG.svg?branch=projectLayout)](https://travis-ci.org/OpenTechEngine/OpenTechBFG)
 
+[![Coverity Scan](https://scan.coverity.com/projects/4342/badge.svg)](https://scan.coverity.com/projects/4342)
+
+
+
 RBDOOM-3-BFG Readme - https://github.com/RobertBeckebans/RBDOOM-3-BFG
 
 Thank you for downloading RBDOOM-3-BFG.
