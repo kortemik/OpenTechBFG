@@ -487,6 +487,7 @@ void idCommonLocal::DumpWarnings()
 idCommonLocal::Error
 ==================
 */
+// coverity[+kill]
 void idCommonLocal::Error( const char* fmt, ... )
 {
 	va_list		argptr;
@@ -595,6 +596,7 @@ idCommonLocal::FatalError
 Dump out of the game to a system dialog
 ==================
 */
+// coverity[+kill]
 void idCommonLocal::FatalError( const char* fmt, ... )
 {
 	va_list		argptr;
