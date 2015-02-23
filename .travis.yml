@@ -1,3 +1,19 @@
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "OVFsMCOzYNHU1nOuQ1SIG3QR/bY/NuO9drC7V4Eu0r5qBhir4XAcgW1qia6N+hdCuzRNLWPHGPwtDJOYaK8rKW80F2HAmLpFZ3E8pXQjdphChLQq1H0yImOGUz8pn4iUalEiA0i/L7RMLi/EeYb7Fsa95N8Q9EGW/PQ8Wf5x2co="
+
+addons:
+  coverity_scan:
+    project:
+      name: "kortemik/OpenTechBFG"
+      description: "Build submitted via Travis CI"
+    notification_email: kordex@gmail.com
+    build_command_prepend: "mkdir build && cd build &&  if [ "$CXX" = "g++-mingw-w64-x86-64" ]; then cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../scripts/mingw32.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug -DSDL2=OFF ../ ;else cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DSDL2=OFF ../;fi"
+    build_command:   "make -j 9"
+    branch_pattern: master
+
 language: cpp
 os:
   - linux
