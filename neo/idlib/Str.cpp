@@ -166,7 +166,6 @@ void idStr::FreeData()
 #ifdef USE_STRING_DATA_ALLOCATOR
 		stringDataAllocator.Free( data );
 #else
-		// coverity[free]
 		delete[] data;
 #endif
 		data = baseBuffer;
