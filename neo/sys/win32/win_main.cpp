@@ -223,6 +223,7 @@ Sys_Error
 Show the early console as an error dialog
 =============
 */
+// coverity[+kill]
 void Sys_Error( const char *error, ... ) {
 	va_list		argptr;
 	char		text[4096];

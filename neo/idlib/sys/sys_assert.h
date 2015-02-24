@@ -60,8 +60,10 @@ bool AssertFailed( const char* file, int line, const char* expression );
 
 // RB: __analysis_assume only necessary with MSVC
 #if defined(_MSC_VER)
+// coverity[+kill]
 #define assert( x )		__analysis_assume( x ) ; idassert( x )
 #else
+// coverity[+kill]
 #define assert( x )		idassert( x )
 #endif
 // RB end

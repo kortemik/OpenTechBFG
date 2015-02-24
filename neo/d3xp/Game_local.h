@@ -459,6 +459,7 @@ public:
 	void					DPrintf( VERIFY_FORMAT_STRING const char* fmt, ... ) const;
 	void					Warning( VERIFY_FORMAT_STRING const char* fmt, ... ) const;
 	void					DWarning( VERIFY_FORMAT_STRING const char* fmt, ... ) const;
+	// coverity[+kill]
 	void					Error( VERIFY_FORMAT_STRING const char* fmt, ... ) const;
 	
 	// Initializes all map variables common to both save games and spawned games

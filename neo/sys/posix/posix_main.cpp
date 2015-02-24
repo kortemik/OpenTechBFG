@@ -1608,6 +1608,7 @@ void Sys_VPrintf( const char* fmt, va_list arg )
 Sys_Error
 ================
 */
+// coverity[+kill]
 void Sys_Error( const char* error, ... )
 {
 	va_list argptr;

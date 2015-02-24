@@ -942,6 +942,7 @@ void idGameLocal::DWarning( const char* fmt, ... ) const
 idGameLocal::Error
 ============
 */
+// coverity[+kill]
 void idGameLocal::Error( const char* fmt, ... ) const
 {
 	va_list		argptr;

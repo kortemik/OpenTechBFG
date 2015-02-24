@@ -211,6 +211,7 @@ void UnpackColor( const dword color, idVec3& unpackedColor )
 idLib::FatalError
 ===============
 */
+// coverity[+kill]
 void idLib::FatalError( const char* fmt, ... )
 {
 	va_list		argptr;
@@ -228,6 +229,7 @@ void idLib::FatalError( const char* fmt, ... )
 idLib::Error
 ===============
 */
+// coverity[+kill]
 void idLib::Error( const char* fmt, ... )
 {
 	va_list		argptr;
