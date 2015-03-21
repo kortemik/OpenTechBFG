@@ -471,6 +471,8 @@ if(CEGUI)
   file(GLOB CEGUI_CONSOLE_INCLUDES cegui/console/*.h)
   file(GLOB CEGUI_CONSOLE_SOURCES cegui/console/*.cpp)
 
+  file(GLOB CEGUI_MENU_INCLUDES cegui/menu/*.h)
+  file(GLOB CEGUI_MENU_SOURCES cegui/menu/*.cpp)
 
   list(APPEND CEGUI_INCLUDES
     ${CEGUI_CONSOLE_INCLUDES}
@@ -480,6 +482,14 @@ if(CEGUI)
     ${CEGUI_CONSOLE_SOURCES}
     )
 
+	 list(APPEND CEGUI_INCLUDES
+    ${CEGUI_MENU_INCLUDES}
+    )
+  
+  list(APPEND CEGUI_SOURCES
+    ${CEGUI_MENU_SOURCES}
+    )
+	
   source_group("cegui" FILES ${CEGUI_INCLUDES})
   source_group("cegui" FILES ${CEGUI_SOURCES})
 
