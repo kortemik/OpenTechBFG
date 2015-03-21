@@ -35,7 +35,7 @@ ConsoleImpl::ConsoleImpl() :
 
 ConsoleImpl::~ConsoleImpl()
 {
-	// FIXME should also remove subscriptions and windows ..
+	// TODO should also remove subscriptions and windows ..
 	this->ourVars->tabCompletions.clear();
 }
 
@@ -43,6 +43,7 @@ void ConsoleImpl::CreateCEGUIWindow()
 {
 	if( idCEGUI::IsInitialized() )
 	{
+		// add our custom editbox, where tab does not insert enter
 		CEGUI::WindowFactoryManager::addWindowType<CEGUIConsole::ConsoleEditBox>();
 		
 		CEGUI::System::getSingleton().getDefaultGUIContext()
@@ -182,6 +183,7 @@ void ConsoleImpl::Execute( CEGUI::String inMsg )
 		consoleHistory.AddToHistory( cmd );
 	}
 }
+
 void ConsoleImpl::PopulateHistory( void )
 {
 	// TODO implement cegui window historylist aka the dropdown list,
