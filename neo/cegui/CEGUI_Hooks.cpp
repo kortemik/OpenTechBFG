@@ -40,8 +40,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "console/Console.h"
 
-using namespace CEGUI;
-
 namespace // anon. namespace for helper functions and global state
 {
 CEGUI::System* ceguiSys = NULL; // the CEGUI System Singleton, available after Init()
@@ -87,17 +85,17 @@ void initSystem( void )
 {
 	// create renderer
 	
-	OpenGLRenderer& myRenderer = OpenGLRenderer::create();
+	CEGUI::OpenGLRenderer& myRenderer = CEGUI::OpenGLRenderer::create();
 	myRenderer.enableExtraStateSettings( true );
-	System::create( myRenderer );
+	CEGUI::System::create( myRenderer );
 }
 
 void initResourceProvider( void )
 {
 	if( idCEGUI::IsInitialized() )
 	{
-		DefaultResourceProvider* rp = static_cast<DefaultResourceProvider*>
-									  ( CEGUI::System::getSingleton().getResourceProvider() );
+		CEGUI::DefaultResourceProvider* rp = static_cast<CEGUI::DefaultResourceProvider*>
+											 ( CEGUI::System::getSingleton().getResourceProvider() );
 		rp->setResourceGroupDirectory( "schemes", "base/cegui/schemes/" );
 		rp->setResourceGroupDirectory( "imagesets", "base/cegui/imagesets/" );
 		rp->setResourceGroupDirectory( "fonts", "base/cegui/fonts/" );
@@ -115,14 +113,14 @@ void initResourceGroups( void )
 	if( idCEGUI::IsInitialized() )
 	{
 		// set the default resource groups to be used
-		ImageManager::setImagesetDefaultResourceGroup( "imagesets" );
-		Font::setDefaultResourceGroup( "fonts" );
-		Scheme::setDefaultResourceGroup( "schemes" );
-		WidgetLookManager::setDefaultResourceGroup( "looknfeels" );
-		WindowManager::setDefaultResourceGroup( "layouts" );
-		ScriptModule::setDefaultResourceGroup( "lua_scripts" );
+		CEGUI::ImageManager::setImagesetDefaultResourceGroup( "imagesets" );
+		CEGUI::Font::setDefaultResourceGroup( "fonts" );
+		CEGUI::Scheme::setDefaultResourceGroup( "schemes" );
+		CEGUI::WidgetLookManager::setDefaultResourceGroup( "looknfeels" );
+		CEGUI::WindowManager::setDefaultResourceGroup( "layouts" );
+		CEGUI::ScriptModule::setDefaultResourceGroup( "lua_scripts" );
 		// setup default group for validation schemas
-		XMLParser* parser = System::getSingleton().getXMLParser();
+		CEGUI::XMLParser* parser = CEGUI::System::getSingleton().getXMLParser();
 		if( parser->isPropertyPresent( "SchemaDefaultResourceGroup" ) )
 		{
 			parser->setProperty( "SchemaDefaultResourceGroup", "schemas" );
@@ -134,12 +132,12 @@ void initResources( void )
 {
 	if( idCEGUI::IsInitialized() )
 	{
-		SchemeManager::getSingleton().createFromFile( "TaharezLook.scheme" );
-		FontManager::getSingleton().createFromFile( "DejaVuSans-10.font" );
+		CEGUI::SchemeManager::getSingleton().createFromFile( "TaharezLook.scheme" );
+		CEGUI::FontManager::getSingleton().createFromFile( "DejaVuSans-10.font" );
 		
-		System::getSingleton().getDefaultGUIContext().setDefaultFont( "DejaVuSans-10" );
-		System::getSingleton().getDefaultGUIContext().getMouseCursor().setDefaultImage( "TaharezLook/MouseArrow" );
-		System::getSingleton().getDefaultGUIContext().setDefaultTooltipType( "TaharezLook/Tooltip" );
+		CEGUI::System::getSingleton().getDefaultGUIContext().setDefaultFont( "DejaVuSans-10" );
+		CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().setDefaultImage( "TaharezLook/MouseArrow" );
+		CEGUI::System::getSingleton().getDefaultGUIContext().setDefaultTooltipType( "TaharezLook/Tooltip" );
 	}
 }
 
@@ -147,9 +145,9 @@ void createWindow( void )
 {
 	if( idCEGUI::IsInitialized() )
 	{
-		WindowManager& wmgr = WindowManager::getSingleton();
-		Window* myRoot = wmgr.createWindow( "DefaultWindow", "root" );
-		System::getSingleton().getDefaultGUIContext().setRootWindow( myRoot );
+		CEGUI::WindowManager& wmgr = CEGUI::WindowManager::getSingleton();
+		CEGUI::Window* myRoot = wmgr.createWindow( "DefaultWindow", "root" );
+		CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow( myRoot );
 		/*
 		FrameWindow* fWnd = static_cast<FrameWindow*>(wmgr.createWindow(
 		"TaharezLook/FrameWindow", "testWindow"));
@@ -176,7 +174,7 @@ bool HandleKeyEvent( const sysEvent_t& keyEvent )
 		if( keyNum < K_JOY1 )
 		{
 			// Key::Scan is dinput keynums, and so is keyNum_t (at least for everything below K_JOY1)
-			Key::Scan key = static_cast<Key::Scan>( keyEvent.evValue );
+			CEGUI::Key::Scan key = static_cast<CEGUI::Key::Scan>( keyEvent.evValue );
 			
 			if( pressed ) // 1 if pressed, 0 if released
 			{
@@ -187,11 +185,11 @@ bool HandleKeyEvent( const sysEvent_t& keyEvent )
 				return ceguiSys->getDefaultGUIContext().injectKeyUp( key );
 			}
 		}
-		else if( keyNum >= K_MOUSE1 && keyNum < K_MOUSE1 + MouseButtonCount )
+		else if( keyNum >= K_MOUSE1 && keyNum < K_MOUSE1 + CEGUI::MouseButtonCount )
 		{
 			// K_MOUSE* are contiguous, so are CEGUI::MouseButton::*Button - and have the same order
 			// (left, right, middle, X1, X2). CEGUI::LeftButton is 0.
-			MouseButton button = static_cast<MouseButton>( keyNum - K_MOUSE1 );
+			CEGUI::MouseButton button = static_cast<CEGUI::MouseButton>( keyNum - K_MOUSE1 );
 			if( pressed )
 			{
 				return ceguiSys->getDefaultGUIContext().injectMouseButtonDown( button );
@@ -230,7 +228,7 @@ bool idCEGUI::Init()
 	
 	if( IsInitialized() )
 	{
-		ceguiSys = &( System::getSingleton() );
+		ceguiSys = &( CEGUI::System::getSingleton() );
 		oldTimePulseSec = 0.001 * Sys_Milliseconds();
 	}
 	
@@ -243,7 +241,7 @@ void idCEGUI::NotifyDisplaySizeChanged( int width, int height )
 {
 	if( IsInitialized() )
 	{
-		ceguiSys->notifyDisplaySizeChanged( Sizef( width, height ) );
+		ceguiSys->notifyDisplaySizeChanged( CEGUI::Sizef( width, height ) );
 	}
 }
 
