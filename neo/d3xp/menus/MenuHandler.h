@@ -35,6 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../swf/SWF_SpriteInstance.h"  // for idSWFSpriteInstance
 #include "../framework/DeclPDA.h"       // for idDeclAudio
 
+#include "../d3xp/menus/MenuHandlerAbstract.h" // for Abstracts
 #include "../d3xp/menus/MenuScreen.h"   // for idMenuScreen, etc
 
 enum shellAreas_t
@@ -70,21 +71,6 @@ enum shellAreas_t
 	SHELL_AREA_BROWSER,
 	SHELL_AREA_CREDITS,
 	SHELL_NUM_AREAS
-};
-
-enum shellState_t
-{
-	SHELL_STATE_INVALID = -1,
-	SHELL_STATE_PRESS_START,
-	SHELL_STATE_IDLE,
-	SHELL_STATE_PARTY_LOBBY,
-	SHELL_STATE_GAME_LOBBY,
-	SHELL_STATE_PAUSED,
-	SHELL_STATE_CONNECTING,
-	SHELL_STATE_SEARCHING,
-	SHELL_STATE_LOADING,
-	SHELL_STATE_BUSY,
-	SHELL_STATE_IN_GAME
 };
 
 enum pdaAreas_t
@@ -247,7 +233,7 @@ public:
 idMenuHandler
 ================================================
 */
-class idMenuHandler
+class idMenuHandler : public idMenuHandlerAbstract
 {
 public:
 	idMenuHandler();
@@ -343,7 +329,7 @@ struct lobbyPlayerInfo_t
 idMenuHandler_Shell
 ================================================
 */
-class idMenuHandler_Shell : public idMenuHandler
+class idMenuHandler_Shell : public idMenuHandler_ShellAbstract, public idMenuHandler
 {
 public:
 	idMenuHandler_Shell() :
@@ -378,6 +364,10 @@ public:
 	virtual bool			HandleAction( idWidgetAction& action, const idWidgetEvent& event, idMenuWidget* widget, bool forceHandled = false );
 	virtual idMenuScreen* 	GetMenuScreen( int index );
 	virtual bool			HandleGuiEvent( const sysEvent_t* sev );
+	virtual bool			IsActive()
+	{
+		return idMenuHandler::IsActive();
+	}
 	
 	void					UpdateSavedGames();
 	void					ShowSmallFrame( bool show );
@@ -502,7 +492,7 @@ private:
 idMenuHandler_PDA
 ================================================
 */
-class idMenuHandler_PDA : public idMenuHandler
+class idMenuHandler_PDA : public idMenuHandler_PDAAbstract, public idMenuHandler
 {
 public:
 	idMenuHandler_PDA() :
@@ -519,6 +509,11 @@ public:
 	virtual void			Initialize( const char* swfFile, idSoundWorld* sw );
 	virtual bool			HandleAction( idWidgetAction& action, const idWidgetEvent& event, idMenuWidget* widget, bool forceHandled = false );
 	virtual idMenuScreen* 	GetMenuScreen( int index );
+	virtual bool			IsActive()
+	{
+		return idMenuHandler::IsActive();
+	}
+	
 	void					UpdateAudioLogPlaying( bool playing );
 	void					UdpateVideoPlaying( bool playing );
 	void					ClearVideoPlaying()
@@ -547,7 +542,7 @@ protected:
 idMenuHandler_PDA
 ================================================
 */
-class idMenuHandler_HUD : public idMenuHandler
+class idMenuHandler_HUD : public idMenuHandler_HUDAbstract, public idMenuHandler
 {
 public:
 
@@ -563,6 +558,10 @@ public:
 	virtual void			ActivateMenu( bool show );
 	virtual void			Initialize( const char* swfFile, idSoundWorld* sw );
 	virtual idMenuScreen* 	GetMenuScreen( int index );
+	virtual bool			IsActive()
+	{
+		return idMenuHandler::IsActive();
+	}
 	
 	idMenuScreen_HUD* 		GetHud();
 	void					ShowTip( const char* title, const char* tip, bool autoHide );
@@ -586,7 +585,7 @@ protected:
 idMenuHandler_Scoreboard
 ================================================
 */
-class idMenuHandler_Scoreboard : public idMenuHandler
+class idMenuHandler_Scoreboard : public idMenuHandler_ScoreboardAbstract, public idMenuHandler
 {
 public:
 
@@ -603,6 +602,10 @@ public:
 	virtual void			Initialize( const char* swfFile, idSoundWorld* sw );
 	virtual idMenuScreen* 	GetMenuScreen( int index );
 	virtual bool			HandleAction( idWidgetAction& action, const idWidgetEvent& event, idMenuWidget* widget, bool forceHandled = false );
+	virtual bool			IsActive()
+	{
+		return idMenuHandler::IsActive();
+	}
 	
 	void					AddPlayerInfo( int index, voiceStateDisplay_t voiceState, int team, idStr name, int score, int wins, int ping, idStr spectateData );
 	void					UpdateScoreboard( idList< mpScoreboardInfo >& data, idStr gameInfo );
