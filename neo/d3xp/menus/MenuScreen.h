@@ -39,6 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../sys/sys_signin.h"          // for idSignInManagerBase
 
+#include "../d3xp/menus/MenuScreenAbstract.h" // for idMenuScreen_HUDAbstract
 #include "../d3xp/menus/MenuWidget.h"   // for idMenuWidget
 
 enum mainMenuTransition_t
@@ -48,15 +49,6 @@ enum mainMenuTransition_t
 	MENU_TRANSITION_ADVANCE,
 	MENU_TRANSITION_BACK,
 	MENU_TRANSITION_FORCE
-};
-
-enum cursorState_t
-{
-	CURSOR_NONE,
-	CURSOR_IN_COMBAT,
-	CURSOR_TALK,
-	CURSOR_GRABBER,
-	CURSOR_ITEM,
 };
 
 /*
@@ -1582,7 +1574,7 @@ private:
 //idMenuScreen_HUD
 //================================================
 //*/
-class idMenuScreen_HUD : public idMenuScreen
+class idMenuScreen_HUD : public idMenuScreen_HUDAbstract, public idMenuScreen
 {
 public:
 
