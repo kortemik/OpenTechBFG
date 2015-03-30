@@ -26,8 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#ifndef __MENUSCREEN_H__
-#define __MENUSCREEN_H__
+#ifndef __MENUSCREENSWF_H__
+#define __MENUSCREENSWF_H__
 
 #include "../../renderer/tr_local.h"
 
@@ -39,17 +39,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../sys/sys_signin.h"          // for idSignInManagerBase
 
-#include "../d3xp/menus/MenuScreenAbstract.h" // for idMenuScreen_HUDAbstract
-#include "../d3xp/menus/MenuWidget.h"   // for idMenuWidget
+#include "../d3xp/menus/MenuScreen_Interface.h" // for idMenuScreen_HUD_Interface
+#include "../d3xp/menus/MenuState.h"
 
-enum mainMenuTransition_t
-{
-	MENU_TRANSITION_INVALID = -1,
-	MENU_TRANSITION_SIMPLE,
-	MENU_TRANSITION_ADVANCE,
-	MENU_TRANSITION_BACK,
-	MENU_TRANSITION_FORCE
-};
+#include "../d3xp/menus/MenuWidget.h"   // for idMenuWidget
 
 /*
 ================================================
@@ -1571,10 +1564,10 @@ private:
 
 //*
 //================================================
-//idMenuScreen_HUD
+//idMenuScreen
 //================================================
 //*/
-class idMenuScreen_HUD : public idMenuScreen_HUDAbstract, public idMenuScreen
+class idMenuScreen_HUD : public idMenuScreen_HUD_Interface, public idMenuScreen
 {
 public:
 
@@ -1845,4 +1838,5 @@ inline void InvitePartyOrFriends()
 	}
 }
 
-#endif
+
+#endif // __MENUSCREENSWF_H__
