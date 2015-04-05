@@ -4,7 +4,7 @@
 
 #include "framework/Common.h" // TODO remove temp include
 
-#include "MenuLocator.h"
+#include "menu/MenuLocator.h"
 
 /* Notes
 
@@ -48,7 +48,7 @@ SetShellState 4
 
 struct idMenuHandler::MenuVars
 {
-	CEGUIMenu::GameMenu* GameMenu;
+
 };
 
 
@@ -67,7 +67,7 @@ idMenuHandler::~idMenuHandler() {}
 bool idMenuHandler::IsActive()
 {
 	//common->Printf("idMenuHandler::IsActive\n");
-	return CEGUIMenu::MenuLocator::getMain().isVisible();
+	return CEGUIMenu::MenuLocator::getMain()->isVisible();
 }
 void idMenuHandler::ClearWidgetActionRepeater()
 {
@@ -75,7 +75,7 @@ void idMenuHandler::ClearWidgetActionRepeater()
 }
 bool idMenuHandler::HandleGuiEvent( const sysEvent_t* sev )
 {
-	common->Printf("idMenuHandler::HandleGuiEvent\n");
+	//common->Printf("idMenuHandler::HandleGuiEvent\n");
 	return true;
 }
 
@@ -103,7 +103,7 @@ void idMenuHandler_Shell::Update()
 
 void idMenuHandler_Shell::ActivateMenu( bool show )
 {
-	CEGUIMenu::MenuLocator::getMain().setVisible(show);
+	CEGUIMenu::MenuLocator::getMain()->setVisible(show);
 	common->Printf("idMenuHandler_Shell::ActivateMenu %d\n", show);
 // show hide?
 }

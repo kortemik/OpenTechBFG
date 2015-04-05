@@ -8,8 +8,8 @@
 #ifndef _MENULOCATOR_H_
 #define _MENULOCATOR_H_
 
-#include "GameMenu.h"
-#include "MainMenu.h"
+#include "MenuInterface.h"
+#include "NullMenu.h"
 
 namespace CEGUIMenu {
 
@@ -18,13 +18,27 @@ public:
 	MenuLocator();
 	virtual ~MenuLocator();
 
-	static GameMenu& getMain() { return localMainMenu; }
+	static MenuInterface* getMain()
+	{
+		if (service_)
+		{
+			return service_;
+		}
+		else {
+			return nullService_;
+		}
+
+	}
+
+	static void provideMain(MenuInterface* service)
+	{
+		service_ = service;
+	}
 
 private:
-	static MainMenu localMainMenu;
+	static MenuInterface* nullService_;
+	static MenuInterface* service_;
 };
-
-MainMenu MenuLocator::localMainMenu;
 
 } /* namespace CEGUIMenu */
 

@@ -8,13 +8,14 @@
 #ifndef GAMEMENU_H
 #define GAMEMENU_H
 
+#include "MenuInterface.h"
 #include "GameMenu.h"
 #include "cegui/wrap_cegui.h"
 
 
 namespace CEGUIMenu {
 
-class GameMenu {
+class GameMenu : public MenuInterface {
 public:
 	GameMenu();
 	GameMenu(CEGUI::String layoutFile, CEGUI::String rootWindowName);
