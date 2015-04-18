@@ -23,7 +23,7 @@ void MainMenu::RegisterHandlers()
 		/*
 		 * handles mouse on submit to input
 		 */
-		rootWindow->getChild( "DemoMapClickArea" )->subscribeEvent(
+		rootWindow->getChild("Bottom/Left/Campaign")->subscribeEvent(
 			CEGUI::PushButton::EventClicked,
 			&MainMenu::Handle_DemoMapClick,
 			( this )
@@ -31,9 +31,8 @@ void MainMenu::RegisterHandlers()
 		/*
 		* handles keypress (enter) to input
 		*/
-		
-		// FIXME catches tab too, some way to avoid that?
-		rootWindow->getChild( "QuitClickArea" )->subscribeEvent(
+
+		rootWindow->getChild("Bottom/Left/Quit")->subscribeEvent(
 			CEGUI::Combobox::EventTextAccepted,
 			&MainMenu::Handle_QuitClick,
 			( this )
