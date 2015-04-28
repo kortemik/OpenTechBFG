@@ -11,62 +11,33 @@
 namespace CEGUIMenu
 {
 
-
-GameMenu::GameMenu() :
-	layoutFile(),
-	rootWindowName(),
-	rootWindow( static_cast<CEGUI::Window*>( 0 ) )
+GameMenu::GameMenu( CEGUI::String layoutFile ) :
+	window( static_cast<CEGUI::Window*>( 0 ) ),
+	layoutFile( layoutFile )
 {
-	/*
-	CreateCEGUIWindow();
-	RegisterHandlers();
-	setVisible( true );
-	*/
-}
 
-GameMenu::GameMenu( CEGUI::String layoutFile, CEGUI::String rootWindowName ) :
-	layoutFile( layoutFile ),
-	rootWindowName( rootWindowName ),
-	rootWindow( static_cast<CEGUI::Window*>( 0 ) )
-{
-	CreateCEGUIWindow();
-	//	RegisterHandlers();
-	setVisible( false );
 }
 
 GameMenu::~GameMenu()
 {
-	// TODO GameMenu destructor
+
 }
 
 void GameMenu::CreateCEGUIWindow()
 {
 	if( idCEGUI::IsInitialized() )
 	{
-		CEGUI::System::getSingleton().getDefaultGUIContext()
-		.getRootWindow()->addChild(
-			CEGUI::WindowManager::getSingleton().
-			loadLayoutFromFile( layoutFile ) );
-			
-		rootWindow = CEGUI::System::getSingleton().getDefaultGUIContext()
-					 .getRootWindow()->getChild( rootWindowName );
+		window = CEGUI::WindowManager::getSingleton().
+				loadLayoutFromFile( layoutFile );
 	}
 }
 
+// FIXME can't i call this out of tree ?
 void GameMenu::setVisible( bool visible )
 {
 	if( idCEGUI::IsInitialized() )
 	{
-		rootWindow->setVisible( visible );
-		
-		if( visible )
-		{
-			CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().show();
-		}
-		else
-		{
-			CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().hide();
-		}
+		window->setVisible( visible );
 	}
 }
 
@@ -74,7 +45,7 @@ bool GameMenu::isVisible()
 {
 	if( idCEGUI::IsInitialized() )
 	{
-		return rootWindow->isVisible();
+		return window->isVisible();
 	}
 	return false;
 }
