@@ -130,6 +130,7 @@ bool MainMenu::Handle_SettingsClick( const CEGUI::EventArgs& )
 {
 	if( idCEGUI::IsInitialized() )
 	{
+		settings->setVisible(true);
 		return true;
 	}
 	return false;

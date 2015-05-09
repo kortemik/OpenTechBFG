@@ -20,9 +20,13 @@ public:
 	virtual void init();
 	virtual void destroy();
 
+
 protected:
 	virtual void LoadNestedWindows();
 	virtual void RegisterHandlers();
+
+private:
+	void hide();
 };
 
 } /* namespace CEGUIMenu */

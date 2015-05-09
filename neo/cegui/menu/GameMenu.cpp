@@ -32,7 +32,6 @@ void GameMenu::CreateCEGUIWindow()
 	}
 }
 
-// FIXME can't i call this out of tree ?
 void GameMenu::setVisible( bool visible )
 {
 	if( idCEGUI::IsInitialized() )

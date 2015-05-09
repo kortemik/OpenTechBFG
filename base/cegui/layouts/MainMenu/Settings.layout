@@ -5,6 +5,7 @@
         <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
         <Property name="Font" value="DejaVuSans-12" />
         <Property name="Text" value="Settings" />
+        <Property name="AlwaysOnTop" value="true" />
         <Window type="TaharezLook/TabControl" name="TabScreen" >
             <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
             <Property name="TabHeight" value="{0,-1}" />

@@ -23,7 +23,7 @@ Settings::~Settings() {
 void Settings::init()
 {
 	CreateCEGUIWindow();
-	setVisible( true );
+	setVisible( false );
 
 	LoadNestedWindows();
 	RegisterHandlers();
@@ -41,7 +41,16 @@ void Settings::LoadNestedWindows()
 
 void Settings::RegisterHandlers()
 {
+	window->subscribeEvent(
+		CEGUI::FrameWindow::EventCloseClicked,
+		&Settings::hide,
+		( this )
+	);
+}
 
+void Settings::hide()
+{
+	setVisible( false );
 }
 
 } /* namespace CEGUIMenu */
