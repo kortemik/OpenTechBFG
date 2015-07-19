@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -199,7 +200,7 @@ IEEE_FLT_IS_IND
 ========================
 */
 ID_INLINE_EXTERN bool IEEE_FLT_IS_IND( float x ) {
-	return	(reinterpret_cast<const unsigned int &>(x) == 0xffc00000); 
+	return	(reinterpret_cast<const unsigned int &>(x) == 0xffc00000);
 }
 
 /*
@@ -209,7 +210,7 @@ IEEE_FLT_IS_DENORMAL
 */
 ID_INLINE_EXTERN bool IEEE_FLT_IS_DENORMAL( float x ) {
 	return ((reinterpret_cast<const unsigned int &>(x) & 0x7f800000) == 0x00000000 &&
-			(reinterpret_cast<const unsigned int &>(x) & 0x007fffff) != 0x00000000 ); 
+			(reinterpret_cast<const unsigned int &>(x) & 0x007fffff) != 0x00000000 );
 }
 
 
@@ -250,7 +251,7 @@ IsValid
 ========================
 */
 template<>
-ID_INLINE_EXTERN bool IsValid( const float & f ) {	// these parameter must be a reference for the function to be considered a specialization
+ID_INLINE bool IsValid( const float & f ) {	// these parameter must be a reference for the function to be considered a specialization
 	return !( IEEE_FLT_IS_NAN( f ) || IEEE_FLT_IS_INF( f ) || IEEE_FLT_IS_IND( f ) || IEEE_FLT_IS_DENORMAL( f ) );
 }
 
@@ -260,7 +261,7 @@ IsNAN
 ========================
 */
 template<>
-ID_INLINE_EXTERN bool IsNAN( const float & f ) {	// these parameter must be a reference for the function to be considered a specialization
+ID_INLINE bool IsNAN( const float & f ) {	// these parameter must be a reference for the function to be considered a specialization
 	if ( IEEE_FLT_IS_NAN( f ) || IEEE_FLT_IS_INF( f ) || IEEE_FLT_IS_IND( f ) ) {
 		return true;
 	}
@@ -419,6 +420,7 @@ public:
 	static const float			FLT_EPSILON;				// smallest positive number such that 1.0+FLT_EPSILON != 1.0
 	static const float			FLT_SMALLEST_NON_DENORMAL;	// smallest non-denormal 32-bit floating point value
 
+#if defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN )
 	static const __m128				SIMD_SP_zero;
 	static const __m128				SIMD_SP_255;
 	static const __m128				SIMD_SP_min_char;
@@ -429,12 +431,24 @@ public:
 	static const __m128				SIMD_SP_tiny;
 	static const __m128				SIMD_SP_rsqrt_c0;
 	static const __m128				SIMD_SP_rsqrt_c1;
+#elif defined( ID_QNX_ARM_NEON )
+	static const float32x4_t		SIMD_SP_zero;
+	static const float32x4_t		SIMD_SP_255;
+	static const float32x4_t		SIMD_SP_min_char;
+	static const float32x4_t		SIMD_SP_max_char;
+	static const float32x4_t		SIMD_SP_min_short;
+	static const float32x4_t		SIMD_SP_max_short;
+	static const float32x4_t		SIMD_SP_smallestNonDenorm;
+	static const float32x4_t		SIMD_SP_tiny;
+	static const float32x4_t		SIMD_SP_rsqrt_c0;
+	static const float32x4_t		SIMD_SP_rsqrt_c1;
+#endif
 
 private:
 	enum {
-		LOOKUP_BITS				= 8,							
-		EXP_POS					= 23,							
-		EXP_BIAS				= 127,							
+		LOOKUP_BITS				= 8,
+		EXP_POS					= 23,
+		EXP_BIAS				= 127,
 		LOOKUP_POS				= (EXP_POS-LOOKUP_BITS),
 		SEED_POS				= (EXP_POS-8),
 		SQRT_TABLE_SIZE			= (2<<LOOKUP_BITS),
@@ -450,8 +464,8 @@ private:
 	static bool					initialized;
 };
 
-ID_INLINE byte CLAMP_BYTE( int x )	{ 
-	return ( (x) < 0 ? (0) : ( (x) > 255 ? 255 : (byte)(x) ) ); 
+ID_INLINE byte CLAMP_BYTE( int x )	{
+	return ( (x) < 0 ? (0) : ( (x) > 255 ? 255 : (byte)(x) ) );
 }
 
 /*
@@ -460,9 +474,15 @@ idMath::InvSqrt
 ========================
 */
 ID_INLINE float idMath::InvSqrt( float x ) {
+#if defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN )
 
 	return ( x > FLT_SMALLEST_NON_DENORMAL ) ? sqrtf( 1.0f / x ) : INFINITY;
 
+#else
+
+	return ( x > FLT_SMALLEST_NON_DENORMAL ) ? sqrtf( 1.0f / x ) : INFINITY;
+
+#endif
 }
 
 /*
@@ -471,9 +491,15 @@ idMath::InvSqrt16
 ========================
 */
 ID_INLINE float idMath::InvSqrt16( float x ) {
+#if defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN )
 
 	return ( x > FLT_SMALLEST_NON_DENORMAL ) ? sqrtf( 1.0f / x ) : INFINITY;
 
+#else
+
+	return ( x > FLT_SMALLEST_NON_DENORMAL ) ? sqrtf( 1.0f / x ) : INFINITY;
+
+#endif
 }
 
 /*
@@ -482,7 +508,11 @@ idMath::Sqrt
 ========================
 */
 ID_INLINE float idMath::Sqrt( float x ) {
+#if defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN )
 	return ( x >= 0.0f ) ?  x * InvSqrt( x ) : 0.0f;
+#else
+	return ( x >= 0.0f ) ? sqrtf( x ) : 0.0f;
+#endif
 }
 
 /*
@@ -491,7 +521,11 @@ idMath::Sqrt16
 ========================
 */
 ID_INLINE float idMath::Sqrt16( float x ) {
+#if defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN )
 	return ( x >= 0.0f ) ?  x * InvSqrt16( x ) : 0.0f;
+#else
+	return ( x >= 0.0f ) ? sqrtf( x ) : 0.0f;
+#endif
 }
 
 /*
@@ -601,6 +635,7 @@ idMath::SinCos
 ========================
 */
 ID_INLINE void idMath::SinCos( float a, float &s, float &c ) {
+#if defined( ID_WIN_X86_ASM )
 	_asm {
 		fld		a
 		fsincos
@@ -609,6 +644,18 @@ ID_INLINE void idMath::SinCos( float a, float &s, float &c ) {
 		fstp	dword ptr [ecx]
 		fstp	dword ptr [edx]
 	}
+#elif defined( ID_QNX_X86_ASM )
+	__asm__ __volatile__(
+		"fld %[a]\n"
+		"fsincos\n"
+		"fstp (%[c])\n"
+		"fstp (%[s])\n"
+		: [s] "=r" (s), [c] "=r" (c) : [a] "g" (a) :);
+	//ARM does not have any functions to compute sine or cosine...
+#else
+	s = sinf( a );
+	c = cosf( a );
+#endif
 }
 
 /*
@@ -1128,11 +1175,35 @@ idMath::Ftoi
 ========================
 */
 ID_INLINE int idMath::Ftoi( float f ) {
+#if defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN )
 	// If a converted result is larger than the maximum signed doubleword integer,
 	// the floating-point invalid exception is raised, and if this exception is masked,
 	// the indefinite integer value (80000000H) is returned.
 	__m128 x = _mm_load_ss( &f );
 	return _mm_cvttss_si32( x );
+#elif defined( ID_QNX_ARM_NEON_INTRIN )
+	float32x4_t x = vld1q_dup_f32( &f );
+	return vgetq_lane_s32( vcvtq_s32_f32( x ), 0 );
+#elif defined( ID_QNX_ARM_NEON_ASM )
+	int res;
+	__asm__(
+		"VLD1.32 {d0[]}, [%[f]]\n"
+		"VCVT.S32.F32 d0, d0\n"
+		"VST1.32 {d0[0]}, [%[res]]"
+		:: [f] "r" (&f), [res] "r" (&res) : "q0");
+	return res;
+#elif 0 // round chop (C/C++ standard)
+	int i, s, e, m, shift;
+	i = *reinterpret_cast<int *>(&f);
+	s = i >> IEEE_FLT_SIGN_BIT;
+	e = ( ( i >> IEEE_FLT_MANTISSA_BITS ) & ( ( 1 << IEEE_FLT_EXPONENT_BITS ) - 1 ) ) - IEEE_FLT_EXPONENT_BIAS;
+	m = ( i & ( ( 1 << IEEE_FLT_MANTISSA_BITS ) - 1 ) ) | ( 1 << IEEE_FLT_MANTISSA_BITS );
+	shift = e - IEEE_FLT_MANTISSA_BITS;
+	return ( ( ( ( m >> -shift ) | ( m << shift ) ) & ~( e >> INT32_SIGN_BIT ) ) ^ s ) - s;
+#else
+	// If a converted result is larger than the maximum signed doubleword integer the result is undefined.
+	return C_FLOAT_TO_INT( f );
+#endif
 }
 
 /*
@@ -1141,10 +1212,38 @@ idMath::Ftoi8
 ========================
 */
 ID_INLINE char idMath::Ftoi8( float f ) {
+#if defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN )
 	__m128 x = _mm_load_ss( &f );
 	x = _mm_max_ss( x, SIMD_SP_min_char );
 	x = _mm_min_ss( x, SIMD_SP_max_char );
 	return static_cast<char>( _mm_cvttss_si32( x ) );
+#elif defined( ID_QNX_ARM_NEON_INTRIN )
+	float32x4_t x = vld1q_dup_f32( &f );
+	x = vmaxq_f32( x, SIMD_SP_min_char );
+	x = vminq_f32( x, SIMD_SP_max_char );
+	return static_cast<char>( vgetq_lane_s32( vcvtq_s32_f32( x ), 0 ) );
+#elif defined( ID_QNX_ARM_NEON_ASM )
+	int res;
+	__asm__(
+		"VLD1.32 {d0[]}, [%[f]]\n"
+		"VLD1.32 {d1, d2}, [%[min]]\n"
+		"VLD1.32 {d3, d4}, [%[max]]\n"
+		"VMAX.F32 d0, d0, d1\n"
+		"VMIN.F32 d0, d0, d3\n"
+		"VCVT.S32.F32 d0, d0\n"
+		"VST1.32 {d0[0]}, [%[res]]"
+		:: [f] "r" (&f), [res] "r" (&res), [min] "r" (&SIMD_SP_min_char), [max] "r" (&SIMD_SP_max_char) : "q0", "q1");
+	return static_cast<char>( res );
+#else
+	// The converted result is clamped to the range [-128,127].
+	int i = C_FLOAT_TO_INT( f );
+	if ( i < -128 ) {
+		return -128;
+	} else if ( i > 127 ) {
+		return 127;
+	}
+	return static_cast<char>( i );
+#endif
 }
 
 /*
@@ -1153,10 +1252,38 @@ idMath::Ftoi16
 ========================
 */
 ID_INLINE short idMath::Ftoi16( float f ) {
+#if defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN )
 	__m128 x = _mm_load_ss( &f );
 	x = _mm_max_ss( x, SIMD_SP_min_short );
 	x = _mm_min_ss( x, SIMD_SP_max_short );
 	return static_cast<short>( _mm_cvttss_si32( x ) );
+#elif defined( ID_QNX_ARM_NEON_INTRIN )
+	float32x4_t x = vld1q_dup_f32( &f );
+	x = vmaxq_f32( x, SIMD_SP_min_short );
+	x = vminq_f32( x, SIMD_SP_max_short );
+	return static_cast<short>( vgetq_lane_s32( vcvtq_s32_f32( x ), 0 ) );
+#elif defined( ID_QNX_ARM_NEON_ASM )
+	int res;
+	__asm__(
+		"VLD1.32 {d0[]}, [%[f]]\n"
+		"VLD1.32 {d1, d2}, [%[min]]\n"
+		"VLD1.32 {d3, d4}, [%[max]]\n"
+		"VMAX.F32 d0, d0, d1\n"
+		"VMIN.F32 d0, d0, d3\n"
+		"VCVT.S32.F32 d0, d0\n"
+		"VST1.32 {d0[0]}, [%[res]]"
+		:: [f] "r" (&f), [res] "r" (&res), [min] "r" (&SIMD_SP_min_short), [max] "r" (&SIMD_SP_max_short) : "q0", "q1");
+	return static_cast<short>( res );
+#else
+	// The converted result is clamped to the range [-32768,32767].
+	int i = C_FLOAT_TO_INT( f );
+	if ( i < -32768 ) {
+		return -32768;
+	} else if ( i > 32767 ) {
+		return 32767;
+	}
+	return static_cast<short>( i );
+#endif
 }
 
 /*
@@ -1183,12 +1310,40 @@ idMath::Ftob
 ========================
 */
 ID_INLINE byte idMath::Ftob( float f ) {
+#if defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN )
 	// If a converted result is negative the value (0) is returned and if the
 	// converted result is larger than the maximum byte the value (255) is returned.
 	__m128 x = _mm_load_ss( &f );
 	x = _mm_max_ss( x, SIMD_SP_zero );
 	x = _mm_min_ss( x, SIMD_SP_255 );
 	return static_cast<byte>( _mm_cvttss_si32( x ) );
+#elif defined( ID_QNX_ARM_NEON_INTRIN )
+	float32x4_t x = vld1q_dup_f32( &f );
+	x = vmaxq_f32( x, SIMD_SP_zero );
+	x = vminq_f32( x, SIMD_SP_255 );
+	return static_cast<byte>( vgetq_lane_s32( vcvtq_s32_f32( x ), 0 ) );
+#elif defined( ID_QNX_ARM_NEON_ASM )
+	int res;
+	__asm__(
+		"VLD1.32 {d0[]}, [%[f]]\n"
+		"VLD1.32 {d1, d2}, [%[min]]\n"
+		"VLD1.32 {d3, d4}, [%[max]]\n"
+		"VMAX.F32 d0, d0, d1\n"
+		"VMIN.F32 d0, d0, d3\n"
+		"VCVT.S32.F32 d0, d0\n"
+		"VST1.32 {d0[0]}, [%[res]]"
+		:: [f] "r" (&f), [res] "r" (&res), [min] "r" (&SIMD_SP_zero), [max] "r" (&SIMD_SP_255) : "q0", "q1");
+	return static_cast<byte>( res );
+#else
+	// The converted result is clamped to the range [0,255].
+	int i = C_FLOAT_TO_INT( f );
+	if ( i < 0 ) {
+		return 0;
+	} else if ( i > 255 ) {
+		return 255;
+	}
+	return static_cast<byte>( i );
+#endif
 }
 
 /*
@@ -1296,12 +1451,12 @@ ID_INLINE int idMath::FloatHash( const float *array, const int numFloats ) {
 }
 
 template< typename T >
-ID_INLINE_EXTERN T Lerp( const T from, const T to, float f ) { 
+ID_INLINE_EXTERN T Lerp( const T from, const T to, float f ) {
 	return from + ( ( to - from ) * f );
 }
 
 template<>
-ID_INLINE_EXTERN int Lerp( const int from, const int to, float f ) { 
+ID_INLINE int Lerp( const int from, const int to, float f ) {
 	return idMath::Ftoi( (float) from + ( ( (float) to - (float) from ) * f ) );
 }
 

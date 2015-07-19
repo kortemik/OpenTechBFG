@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -80,14 +81,14 @@ public:
 	bool	IsLoaded() { return ( frameRate > 0 ); }
 	bool	IsActive() { return isActive; }
 	void	Activate( bool b );
-	
+
 	const char * GetName() { return filename; }
 
 	void Pause() { mainspriteInstance->Stop(); paused = true; }
 	void Resume() { mainspriteInstance->Play(); paused = false; }
 	bool IsPaused() { return paused; }
 	void SetPausedRender( bool valid ) { pausedRender = valid; }
-	bool GetPausedRender() { return pausedRender; } 
+	bool GetPausedRender() { return pausedRender; }
 
 	void Render( idRenderSystem * gui, int time = 0, bool isSplitscreen = false );
 	bool HandleEvent( const sysEvent_t * event );
@@ -154,7 +155,7 @@ private:
 
 	// certain screens need to be rendered when the pause menu is up so if this flag is
 	// set on the gui we will allow it to render at a paused state;
-	bool			pausedRender;	
+	bool			pausedRender;
 
 	bool			mouseEnabled;
 	bool			useMouse;
@@ -187,6 +188,13 @@ private:
 
 	idBlockAlloc< idSWFSpriteInstance, 16 >	spriteInstanceAllocator;
 	idBlockAlloc< idSWFTextInstance, 16 >	textInstanceAllocator;
+
+#ifdef TRIINDEX_IS_32BIT
+	triIndex_t *			tmpIndices;
+	int						tmpIndicesSize;
+
+	const triIndex_t *	LoadTmpIndexBuffer( int numIndexes, const uint16 *oriIndexes );
+#endif
 
 #define SWF_NATIVE_FUNCTION_SWF_DECLARE( x ) \
 	class idSWFScriptFunction_##x : public idSWFScriptFunction_Nested< idSWF > { \
@@ -245,7 +253,7 @@ private:
 			xbImage = "";
 			psImage = "";
 			width = 0;
-			height = 0; 
+			height = 0;
 			baseline = 0;
 		}
 
@@ -254,7 +262,7 @@ private:
 			xbImage = _xbImage;
 			psImage = _psImage;
 			width = w;
-			height = h; 
+			height = h;
 			baseline = _baseline;
 		}
 

@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -42,8 +43,8 @@ idCVar stereoRender_warpParmZ( "stereoRender_warpParmZ", "0", CVAR_RENDERER | CV
 idCVar stereoRender_warpParmW( "stereoRender_warpParmW", "0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "development parm" );
 idCVar stereoRender_warpTargetFraction( "stereoRender_warpTargetFraction", "1.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "fraction of half-width the through-lens view covers" );
 
-idCVar r_showSwapBuffers( "r_showSwapBuffers", "0", CVAR_BOOL, "Show timings from GL_BlockingSwapBuffers" ); 
-idCVar r_syncEveryFrame( "r_syncEveryFrame", "1", CVAR_BOOL, "Don't let the GPU buffer execution past swapbuffers" ); 
+idCVar r_showSwapBuffers( "r_showSwapBuffers", "0", CVAR_BOOL, "Show timings from GL_BlockingSwapBuffers" );
+idCVar r_syncEveryFrame( "r_syncEveryFrame", "1", CVAR_BOOL, "Don't let the GPU buffer execution past swapbuffers" );
 
 static int		swapIndex;		// 0 or 1 into renderSync
 static GLsync	renderSync[2];
@@ -121,7 +122,7 @@ const void GL_BlockingSwapBuffers() {
 	const int beforeFinish = Sys_Milliseconds();
 
 	if ( !glConfig.syncAvailable ) {
-		glFinish();
+		qglFinish();
 	}
 
 	const int beforeSwap = Sys_Milliseconds();
@@ -205,7 +206,7 @@ Renders the draw list twice, with slight modifications for left eye / right eye
 */
 void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t * const allCmds ) {
 	uint64 backEndStartTime = Sys_Microseconds();
-	
+
 	// If we are in a monoscopic context, this draws to the only buffer, and is
 	// the same as GL_BACK.  In a quad-buffer stereo context, this is necessary
 	// to prevent GL from forcing the rendering to go to both BACK_LEFT and
@@ -242,7 +243,7 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t * const allCmds
 	for ( int stereoEye = 1; stereoEye >= -1; stereoEye -= 2 ) {
 		// set up the target texture we will draw to
 		const int targetEye = ( stereoEye == 1 ) ? 1 : 0;
-		
+
 		// Set the back end into a known default state to fix any stale render state issues
 		GL_SetDefaultState();
 		renderProgManager.Unbind();
@@ -306,14 +307,14 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t * const allCmds
 	// performance on most cards and drivers, but it is better than getting
 	// a confusing, half-ghosted view.
 	if ( renderSystem->GetStereo3DMode() != STEREO3D_QUAD_BUFFER ) {
-		glDrawBuffer( GL_BACK );
+		qglDrawBuffer( GL_BACK );
 	}
 
 	GL_State( GLS_DEPTHFUNC_ALWAYS );
 	GL_Cull( CT_TWO_SIDED );
 
 	// We just want to do a quad pass - so make sure we disable any texgen and
-	// set the texture matrix to the identity so we don't get anomalies from 
+	// set the texture matrix to the identity so we don't get anomalies from
 	// any stale uniform data being present from a previous draw call
 	const float texS[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
 	const float texT[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
@@ -329,14 +330,14 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t * const allCmds
 
 	switch( renderSystem->GetStereo3DMode() ) {
 	case STEREO3D_QUAD_BUFFER:
-		glDrawBuffer( GL_BACK_RIGHT );
+		qglDrawBuffer( GL_BACK_RIGHT );
 		GL_SelectTexture( 0 );
 		stereoRenderImages[1]->Bind();
 		GL_SelectTexture( 1 );
 		stereoRenderImages[0]->Bind();
 		RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
 
-		glDrawBuffer( GL_BACK_LEFT );
+		qglDrawBuffer( GL_BACK_LEFT );
 		GL_SelectTexture( 1 );
 		stereoRenderImages[1]->Bind();
 		GL_SelectTexture( 0 );
@@ -361,8 +362,8 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t * const allCmds
 		RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
 
 		// force the HDMI 720P 3D guard band to a constant color
-		glScissor( 0, 720, 1280, 30 );
-		glClear( GL_COLOR_BUFFER_BIT );
+		qglScissor( 0, 720, 1280, 30 );
+		qglClear( GL_COLOR_BUFFER_BIT );
 		break;
 	default:
 	case STEREO3D_SIDE_BY_SIDE:
@@ -376,9 +377,9 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t * const allCmds
 			// clear the entire screen to black
 			// we could be smart and only clear the areas we aren't going to draw on, but
 			// clears are fast...
-			glScissor ( 0, 0, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight );
-			glClearColor( 0, 0, 0, 0 );
-			glClear( GL_COLOR_BUFFER_BIT );
+			qglScissor ( 0, 0, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight );
+			qglClearColor( 0, 0, 0, 0 );
+			qglClear( GL_COLOR_BUFFER_BIT );
 
 			// the size of the box that will get the warped pixels
 			// With the 7" displays, this will be less than half the screen width
@@ -387,10 +388,10 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t * const allCmds
 			// Always scissor to the half-screen boundary, but the viewports
 			// might cross that boundary if the lenses can be adjusted closer
 			// together.
-			glViewport( ( glConfig.nativeScreenWidth >> 1 ) - pixelDimensions, 
-				( glConfig.nativeScreenHeight >> 1 ) - ( pixelDimensions >> 1 ), 
+			qglViewport( ( glConfig.nativeScreenWidth >> 1 ) - pixelDimensions,
+				( glConfig.nativeScreenHeight >> 1 ) - ( pixelDimensions >> 1 ),
 				pixelDimensions, pixelDimensions );
-			glScissor ( 0, 0, glConfig.nativeScreenWidth >> 1, glConfig.nativeScreenHeight );
+			qglScissor ( 0, 0, glConfig.nativeScreenWidth >> 1, glConfig.nativeScreenHeight );
 
 			idVec4	color( stereoRender_warpCenterX.GetFloat(), stereoRender_warpCenterY.GetFloat(), stereoRender_warpParmZ.GetFloat(), stereoRender_warpParmW.GetFloat() );
 			// don't use GL_Color(), because we don't want to clamp
@@ -406,10 +407,10 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t * const allCmds
 			// don't use GL_Color(), because we don't want to clamp
 			renderProgManager.SetRenderParm( RENDERPARM_COLOR, color2.ToFloatPtr() );
 
-			glViewport( ( glConfig.nativeScreenWidth >> 1 ),
-				( glConfig.nativeScreenHeight >> 1 ) - ( pixelDimensions >> 1 ), 
+			qglViewport( ( glConfig.nativeScreenWidth >> 1 ),
+				( glConfig.nativeScreenHeight >> 1 ) - ( pixelDimensions >> 1 ),
 				pixelDimensions, pixelDimensions );
-			glScissor ( glConfig.nativeScreenWidth >> 1, 0, glConfig.nativeScreenWidth >> 1, glConfig.nativeScreenHeight );
+			qglScissor ( glConfig.nativeScreenWidth >> 1, 0, glConfig.nativeScreenWidth >> 1, glConfig.nativeScreenHeight );
 
 			GL_SelectTexture( 0 );
 			stereoRenderImages[1]->Bind();

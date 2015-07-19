@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -159,7 +160,7 @@ The resulting surface will be a subset of the original triangles,
 it will never clip triangles, but it may cull on a per-triangle basis.
 ====================
 */
-static srfTriangles_t *R_CreateInteractionLightTris( const idRenderEntityLocal *ent, 
+static srfTriangles_t *R_CreateInteractionLightTris( const idRenderEntityLocal *ent,
 									 const srfTriangles_t *tri, const idRenderLightLocal *light,
 									 const idMaterial *shader ) {
 
@@ -323,7 +324,7 @@ a triangle outside the light frustum is considered facing and the "fake triangle
 the outside of the dangling edge is also set to facing: cullInfo.facing[numFaces] = 1;
 =====================
 */
-static srfTriangles_t *R_CreateInteractionShadowVolume( const idRenderEntityLocal * ent, 
+static srfTriangles_t *R_CreateInteractionShadowVolume( const idRenderEntityLocal * ent,
 														const srfTriangles_t * tri, const idRenderLightLocal * light ) {
 	SCOPED_PROFILE_EVENT( "R_CreateInteractionShadowVolume" );
 
@@ -609,7 +610,7 @@ Relinks the interaction at the end of both the light and entity chains
 and adds the INTERACTION_EMPTY marker to the interactionTable.
 
 It is necessary to keep the empty interaction so when entities or lights move
-they can set all the interactionTable values to NULL. 
+they can set all the interactionTable values to NULL.
 ===============
 */
 void idInteraction::MakeEmpty() {
@@ -686,6 +687,8 @@ void idInteraction::CreateStaticInteraction() {
 	bool interactionGenerated = false;
 
 	// check each surface in the model
+	triIndex_t * tmpIndices = NULL;
+	int tmpIndicesSize = 0;
 	for ( int c = 0 ; c < model->NumSurfaces() ; c++ ) {
 		const modelSurface_t * surf = model->Surface( c );
 		const srfTriangles_t * tri = surf->geometry;
@@ -696,7 +699,7 @@ void idInteraction::CreateStaticInteraction() {
 		// determine the shader for this surface, possibly by skinning
 		// Note that this will be wrong if customSkin/customShader are
 		// changed after map load time without invalidating the interaction!
-		const idMaterial * const shader = R_RemapShaderBySkin( surf->shader, 
+		const idMaterial * const shader = R_RemapShaderBySkin( surf->shader,
 												entityDef->parms.customSkin, entityDef->parms.customShader );
 		if ( shader == NULL ) {
 			continue;
@@ -716,7 +719,29 @@ void idInteraction::CreateStaticInteraction() {
 			if ( lightTris != NULL ) {
 				// make a static index cache
 				sint->numLightTrisIndexes = lightTris->numIndexes;
-				sint->lightTrisIndexCache = vertexCache.AllocStaticIndex( lightTris->indexes, ALIGN( lightTris->numIndexes * sizeof( lightTris->indexes[0] ), INDEX_CACHE_ALIGN ) );
+				int vertexOffset = vertexCache.GetCacheVertexOffset( tri->ambientCache ) / sizeof ( idDrawVert );
+				int byteSize = ALIGN( lightTris->numIndexes * sizeof( lightTris->indexes[0] ), INDEX_CACHE_ALIGN );
+				const triIndex_t * indexes = lightTris->indexes;
+				if ( vertexOffset != 0 ) {
+					if ( !tmpIndices || tmpIndicesSize < byteSize ) {
+						if ( tmpIndices ) {
+							Mem_Free16( tmpIndices );
+						}
+						tmpIndices = (triIndex_t *)Mem_Alloc16( byteSize, TAG_TEMP );
+						tmpIndicesSize = byteSize;
+					}
+					indexes = tmpIndices;
+					if ( lightTris->numIndexes & 1 ) {
+						for ( int i = 0; i < lightTris->numIndexes; i++ ) {
+							tmpIndices[i] = lightTris->indexes[i] + vertexOffset;
+						}
+					} else {
+						for ( int i = 0; i < lightTris->numIndexes; i += 2 ) {
+							WriteIndexPair( &tmpIndices[i], lightTris->indexes[i + 0] + vertexOffset, lightTris->indexes[i + 1] + vertexOffset );
+						}
+					}
+				}
+				sint->lightTrisIndexCache = vertexCache.AllocStaticIndex( indexes, byteSize );
 
 				interactionGenerated = true;
 				R_FreeStaticTriSurf( lightTris );
@@ -731,7 +756,29 @@ void idInteraction::CreateStaticInteraction() {
 				srfTriangles_t * shadowTris = R_CreateInteractionShadowVolume( entityDef, tri, lightDef );
 				if ( shadowTris != NULL ) {
 					// make a static index cache
-					sint->shadowIndexCache = vertexCache.AllocStaticIndex( shadowTris->indexes, ALIGN( shadowTris->numIndexes * sizeof( shadowTris->indexes[0] ), INDEX_CACHE_ALIGN ) );
+					int vertexOffset = vertexCache.GetCacheVertexOffset( tri->shadowCache ) / sizeof ( idShadowVert ); //TODO: is this the proper type for sizeof?
+					int byteSize = ALIGN( shadowTris->numIndexes * sizeof( shadowTris->indexes[0] ), INDEX_CACHE_ALIGN );
+					const triIndex_t * indexes = shadowTris->indexes;
+					if ( vertexOffset != 0 ) {
+						if ( !tmpIndices || tmpIndicesSize < byteSize ) {
+							if ( tmpIndices ) {
+								Mem_Free16( tmpIndices );
+							}
+							tmpIndices = (triIndex_t *)Mem_Alloc16( byteSize, TAG_TEMP );
+							tmpIndicesSize = byteSize;
+						}
+						indexes = tmpIndices;
+						if ( shadowTris->numIndexes & 1 ) {
+							for ( int i = 0; i < shadowTris->numIndexes; i++ ) {
+								tmpIndices[i] = shadowTris->indexes[i] + vertexOffset;
+							}
+						} else {
+							for ( int i = 0; i < shadowTris->numIndexes; i += 2 ) {
+								WriteIndexPair( &tmpIndices[i], shadowTris->indexes[i + 0] + vertexOffset, shadowTris->indexes[i + 1] + vertexOffset );
+							}
+						}
+					}
+					sint->shadowIndexCache = vertexCache.AllocStaticIndex( indexes, byteSize );
 					sint->numShadowIndexes = shadowTris->numIndexes;
 #if defined( KEEP_INTERACTION_CPU_DATA )
 					sint->shadowIndexes = shadowTris->indexes;
@@ -750,6 +797,9 @@ void idInteraction::CreateStaticInteraction() {
 				interactionGenerated = true;
 			}
 		}
+	}
+	if ( tmpIndices ) {
+		Mem_Free16( tmpIndices );
 	}
 
 	// if none of the surfaces generated anything, don't even bother checking?

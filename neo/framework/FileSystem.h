@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -51,12 +51,16 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 static const ID_TIME_T	FILE_NOT_FOUND_TIMESTAMP	= (ID_TIME_T)-1;
+#ifdef PATH_MAX
+static const int		MAX_OSPATH					= PATH_MAX;
+#else
 static const int		MAX_OSPATH					= 256;
+#endif
 
 // modes for OpenFileByMode
 typedef enum {
-	FS_READ			= 0,
-	FS_WRITE		= 1,
+	FS_READ		= 0,
+	FS_WRITE	= 1,
 	FS_APPEND	= 2
 } fsMode_t;
 
@@ -171,7 +175,7 @@ public:
 		ReadFile( relativePath, NULL, &timestamp );
 		return timestamp;
 	}
-	
+
 	// Returns length of file, -1 if no file exists
 	virtual int				GetFileLength( const char * relativePath ) = 0;
 

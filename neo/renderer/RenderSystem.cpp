@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -60,14 +61,14 @@ static void R_PerformanceCounters() {
 			tr.pc.c_deformedIndexes/3,
 			tr.pc.c_tangentIndexes/3,
 			tr.pc.c_guiSurfs
-			); 
+			);
 	}
 
 	if ( r_showCull.GetBool() ) {
 		common->Printf( "%i box in %i box out\n",
 			tr.pc.c_box_cull_in, tr.pc.c_box_cull_out );
 	}
-	
+
 	if ( r_showAddModel.GetBool() ) {
 		common->Printf( "callback:%i createInteractions:%i createShadowVolumes:%i\n",
 			tr.pc.c_entityDefCallbacks, tr.pc.c_createInteractions, tr.pc.c_createShadowVolumes );
@@ -75,7 +76,7 @@ static void R_PerformanceCounters() {
 			tr.pc.c_shadowViewEntities, tr.pc.c_viewLights );
 	}
 	if ( r_showUpdates.GetBool() ) {
-		common->Printf( "entityUpdates:%i  entityRefs:%i  lightUpdates:%i  lightRefs:%i\n", 
+		common->Printf( "entityUpdates:%i  entityRefs:%i  lightUpdates:%i  lightRefs:%i\n",
 			tr.pc.c_entityUpdates, tr.pc.c_entityReferences,
 			tr.pc.c_lightUpdates, tr.pc.c_lightReferences );
 	}
@@ -111,7 +112,7 @@ void idRenderSystemLocal::RenderCommandBuffers( const emptyCommand_t * const cmd
 	// are going to a file, or r_skipBackEnd is later disabled,
 	// usefull data can be received.
 
-	// r_skipRender is usually more usefull, because it will still
+	// r_skipRender is usually more useful, because it will still
 	// draw 2D graphics
 	if ( !r_skipBackEnd.GetBool() ) {
 		if ( glConfig.timerQueryAvailable ) {
@@ -135,7 +136,7 @@ void idRenderSystemLocal::RenderCommandBuffers( const emptyCommand_t * const cmd
 ============
 R_GetCommandBuffer
 
-Returns memory for a command buffer (stretchPicCommand_t, 
+Returns memory for a command buffer (stretchPicCommand_t,
 drawSurfsCommand_t, etc) and links it to the end of the
 current command chain.
 ============
@@ -237,34 +238,60 @@ static void R_CheckCvars() {
 	if ( r_useSeamlessCubeMap.IsModified() ) {
 		r_useSeamlessCubeMap.ClearModified();
 		if ( glConfig.seamlessCubeMapAvailable ) {
+#ifdef GL_ES_VERSION_3_0
+			//TODO: OpenGL ES 3.0 spec, section 3.8.9. If Texture filters are set to Linear, then neighboring-face texels will be used
+#else
 			if ( r_useSeamlessCubeMap.GetBool() ) {
 				qglEnable( GL_TEXTURE_CUBE_MAP_SEAMLESS );
 			} else {
 				qglDisable( GL_TEXTURE_CUBE_MAP_SEAMLESS );
 			}
+#endif
 		}
 	}
+
+#ifdef GL_ES_VERSION_2_0
+	bool updateFramebuffers = false;
+#endif
 
 	extern idCVar r_useSRGB;
 	if ( r_useSRGB.IsModified() ) {
 		r_useSRGB.ClearModified();
 		if ( glConfig.sRGBFramebufferAvailable ) {
+#ifdef GL_ES_VERSION_2_0
+			updateFramebuffers = true;
+#else
 			if ( r_useSRGB.GetBool() ) {
 				qglEnable( GL_FRAMEBUFFER_SRGB );
 			} else {
 				qglDisable( GL_FRAMEBUFFER_SRGB );
 			}
+#endif
 		}
 	}
 
 
 	if ( r_multiSamples.IsModified() ) {
+		r_multiSamples.ClearModified();
+#ifdef GL_ES_VERSION_2_0
+#ifdef USE_GLES_MULTISAMPLE_FRAMEBUFFER
+		updateFramebuffers = true;
+#endif
+#else
 		if ( r_multiSamples.GetInteger() > 0 ) {
 			qglEnable( GL_MULTISAMPLE_ARB );
 		} else {
 			qglDisable( GL_MULTISAMPLE_ARB );
 		}
+#endif
 	}
+
+#ifdef GL_ES_VERSION_2_0
+	// Update framebuffers if needed
+	if ( updateFramebuffers ) {
+		R_UpdateFramebuffers();
+	}
+#endif
 
 	// check for changes to logging state
 	GLimp_EnableLogging( r_logFile.GetInteger() != 0 );
@@ -355,7 +382,7 @@ void idRenderSystemLocal::DrawStretchPic( const idVec4 & topLeft, const idVec4 &
 		return;
 	}
 
-	ALIGNTYPE16 idDrawVert localVerts[4];
+	ALIGNTYPE16 idDrawVert localVerts[4] ALIGNTYPE16_POST;
 
 	localVerts[0].Clear();
 	localVerts[0].xyz[0] = topLeft.x;
@@ -408,7 +435,7 @@ void idRenderSystemLocal::DrawStretchTri( const idVec2 & p1, const idVec2 & p2, 
 		return;
 	}
 
-	ALIGNTYPE16 idDrawVert localVerts[3];
+	ALIGNTYPE16 idDrawVert localVerts[3] ALIGNTYPE16_POST;
 
 	localVerts[0].Clear();
 	localVerts[0].xyz[0] = p1.x;
@@ -473,8 +500,8 @@ void idRenderSystemLocal::DrawSmallChar( int x, int y, int ch ) {
 	size = 0.0625f;
 
 	DrawStretchPic( x, y, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT,
-					   fcol, frow, 
-					   fcol + size, frow + size, 
+					   fcol, frow,
+					   fcol + size, frow + size,
 					   charSetMaterial );
 }
 
@@ -546,8 +573,8 @@ void idRenderSystemLocal::DrawBigChar( int x, int y, int ch ) {
 	size = 0.0625f;
 
 	DrawStretchPic( x, y, BIGCHAR_WIDTH, BIGCHAR_HEIGHT,
-					   fcol, frow, 
-					   fcol + size, frow + size, 
+					   fcol, frow,
+					   fcol + size, frow + size,
 					   charSetMaterial );
 }
 
@@ -609,7 +636,7 @@ After this is called, new command buffers can be built up in parallel
 with the rendering of the closed off command buffers by RenderCommandBuffers()
 ====================
 */
-const emptyCommand_t * idRenderSystemLocal::SwapCommandBuffers( 
+const emptyCommand_t * idRenderSystemLocal::SwapCommandBuffers(
 													uint64 * frontEndMicroSec,
 													uint64 * backEndMicroSec,
 													uint64 * shadowMicroSec,
@@ -625,7 +652,7 @@ const emptyCommand_t * idRenderSystemLocal::SwapCommandBuffers(
 idRenderSystemLocal::SwapCommandBuffers_FinishRendering
 =====================
 */
-void idRenderSystemLocal::SwapCommandBuffers_FinishRendering( 
+void idRenderSystemLocal::SwapCommandBuffers_FinishRendering(
 												uint64 * frontEndMicroSec,
 												uint64 * backEndMicroSec,
 												uint64 * shadowMicroSec,
@@ -949,8 +976,8 @@ void idRenderSystemLocal::CaptureRenderToFile( const char *fileName, bool fixAlp
 	// include extra space for OpenGL padding to word boundaries
 	int	c = ( rc.GetWidth() + 3 ) * rc.GetHeight();
 	byte *data = (byte *)R_StaticAlloc( c * 3 );
-	
-	qglReadPixels( rc.x1, rc.y1, rc.GetWidth(), rc.GetHeight(), GL_RGB, GL_UNSIGNED_BYTE, data ); 
+
+	qglReadPixels( rc.x1, rc.y1, rc.GetWidth(), rc.GetHeight(), GL_RGB, GL_UNSIGNED_BYTE, data );
 
 	byte *data2 = (byte *)R_StaticAlloc( c * 4 );
 

@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -30,8 +31,13 @@ If you have questions concerning this license or the applicable additional terms
 #undef private
 #undef protected
 
+#ifdef ID_WIN32
 #include "win32/win_achievements.h"
 #include "win32/win_signin.h"
+#else
+#include "qnx/qnx_achievements.h"
+#include "qnx/qnx_signin.h"
+#endif
 
 #include "sys_lobby_backend.h"
 #include "sys_lobby.h"
@@ -117,7 +123,7 @@ private:
 
 /*
 ================================================
-idSessionLocal 
+idSessionLocal
 ================================================
 */
 class idSessionLocal : public idSession {
@@ -129,7 +135,7 @@ class idSessionLocal : public idSession {
 	friend class idPsnAsyncSubmissionLookupPS3_TitleStorage;
 	friend class idNetSessionPort;
 	friend class lobbyAddress_t;
-	
+
 protected:
 	//=====================================================================================================
 	//	Mixed Common/Platform enums/structs
@@ -148,7 +154,7 @@ protected:
 		STATE_CREATE_AND_MOVE_TO_PARTY_LOBBY,		// We are creating a party lobby, and will move to that state when done
 		STATE_CREATE_AND_MOVE_TO_GAME_LOBBY,		// We are creating a game lobby, and will move to that state when done
 		STATE_CREATE_AND_MOVE_TO_GAME_STATE_LOBBY,	// We are creating a game state lobby, and will move to that state when done
-		STATE_FIND_OR_CREATE_MATCH,							
+		STATE_FIND_OR_CREATE_MATCH,
 		STATE_CONNECT_AND_MOVE_TO_PARTY,
 		STATE_CONNECT_AND_MOVE_TO_GAME,
 		STATE_CONNECT_AND_MOVE_TO_GAME_STATE,
@@ -197,7 +203,7 @@ public:
 	virtual bool			GetSystemMarketplaceHasNewContent() const { return marketplaceHasNewContent; }
 	virtual void			SetSystemMarketplaceHasNewContent( bool hasNewContent ) { marketplaceHasNewContent = hasNewContent; }
 
-	// Lobby management 
+	// Lobby management
 	virtual void			CreatePartyLobby( const idMatchParameters & parms_ );
 	virtual void			FindOrCreateMatch( const idMatchParameters & parms );
 	virtual void			CreateMatch( const idMatchParameters & parms_ );
@@ -215,7 +221,7 @@ public:
 	virtual bool			ShouldShowMigratingDialog() const;	// Note this is not in sys_session.h
 	virtual bool			IsCurrentLobbyMigrating() const;
 	virtual bool			IsLosingConnectionToHost() const;
-	
+
 	// Migration
 	virtual bool			WasMigrationGame() const;
 	virtual bool			ShouldRelaunchMigrationGame() const;
@@ -239,7 +245,7 @@ public:
 
 	virtual sessionState_t	GetState() const;
 	virtual const char *	GetStateString() const ;
-	
+
 	virtual void			SendUsercmds( idBitMsg & msg );
 	virtual void			SendSnapshot( idSnapShot & ss );
 	virtual const char *	GetPeerName( int peerNum );
@@ -295,7 +301,7 @@ public:
 
 	bool					GetFlushedStats() { return flushedStats; }
 	void					SetFlushedStats( bool _flushedStats ) { flushedStats = _flushedStats; }
-	
+
 	//=====================================================================================================
 	// Notifications
 	//=====================================================================================================
@@ -421,12 +427,12 @@ protected:
 
 	idLobby &				GetActingGameStateLobby();
 	const idLobby &			GetActingGameStateLobby() const;
-	
+
 	// GetActivePlatformLobby will return either the game or party lobby, it won't return the game state lobby
 	// This function is generally used for menus, in-game code should refer to GetActingGameStateLobby
 	idLobby *				GetActivePlatformLobby();
 	const idLobby *			GetActivePlatformLobby() const;
-	
+
 	idLobby *				GetLobbyFromType( idLobby::lobbyType_t lobbyType );
 
 	virtual idLobbyBase &	GetPartyLobbyBase()					{ return partyLobby; }
@@ -463,7 +469,7 @@ protected:
 
 	int						currentID;				// The host used this to send out a unique id to all users so we can identify them
 
-	class idVoiceChatMgr *	voiceChat;	
+	class idVoiceChatMgr *	voiceChat;
 	int						lastVoiceSendtime;
 	bool					hasShownVoiceRestrictionDialog;
 
@@ -481,7 +487,7 @@ protected:
 	int						nextGameCoalesceTime;
 	bool					gameLobbyWasCoalesced;
 	int						numFullSnapsReceived;
-	
+
 	bool					flushedStats;
 
 	int						loadingID;
@@ -506,7 +512,7 @@ protected:
 	bool	State_Game_State_Lobby_Host();
 	bool	State_Game_State_Lobby_Peer();
 	bool	State_Loading();
-	bool	State_InGame();	
+	bool	State_InGame();
 	bool	State_Find_Or_Create_Match();
 	bool	State_Create_And_Move_To_Party_Lobby();
 	bool	State_Create_And_Move_To_Game_Lobby();
@@ -569,8 +575,8 @@ protected:
 
 	const leaderboardDefinition_t * ReadLeaderboardFromMsg( idBitMsg & msg, column_t * stats );
 	bool	RequirePersistentMaster();
-	
-	virtual idNetSessionPort &	GetPort( bool dedicated = false ) = 0; 
+
+	virtual idNetSessionPort &	GetPort( bool dedicated = false ) = 0;
 	virtual idLobbyBackend *	CreateLobbyBackend( const idMatchParameters & p, float skillLevel, idLobbyBackend::lobbyBackendType_t lobbyType ) = 0;
 	virtual idLobbyBackend *	FindLobbyBackend( const idMatchParameters & p, int numPartyUsers, float skillLevel, idLobbyBackend::lobbyBackendType_t lobbyType ) = 0;
 	virtual idLobbyBackend *	JoinFromConnectInfo( const lobbyConnectInfo_t & connectInfo , idLobbyBackend::lobbyBackendType_t lobbyType ) = 0;
@@ -583,7 +589,7 @@ protected:
 	void 	HandleDedicatedServerQueryAck( lobbyAddress_t & remoteAddr, idBitMsg & msg );
 
 
-	void	ClearMigrationState();	
+	void	ClearMigrationState();
 	// this is called when the mathc is over and returning to lobby
 	void	EndMatchInternal( bool premature=false );
 	// this is called when the game finished and we are in the end match recap
@@ -650,7 +656,7 @@ public:
 	virtual int						GetUniquePlayerId() const { return sessionLocal->currentID++; }
 	virtual idSignInManagerBase	&	GetSignInManager() { return *sessionLocal->signInManager; }
 	virtual	void					SendRawPacket( const lobbyAddress_t & to, const void * data, int size, bool useDirectPort ) { sessionLocal->SendRawPacket( to, data, size, useDirectPort ); }
-	
+
 	virtual bool					BecomingHost( idLobby & lobby );
 	virtual void					BecameHost( idLobby & lobby );
 	virtual bool					BecomingPeer( idLobby & lobby );
@@ -675,7 +681,7 @@ public:
 	virtual void					ReceivedFullSnap();
 
 	virtual void					LeaveGameLobby();
-	
+
 	virtual void					PrePickNewHost( idLobby & lobby, bool forceMe, bool inviteOldHost );
 	virtual bool					PreMigrateInvite( idLobby & lobby );
 

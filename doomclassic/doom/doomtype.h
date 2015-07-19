@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -35,11 +36,39 @@ If you have questions concerning this license or the applicable additional terms
 #define true 1
 typedef int qboolean;
 
-
-
 typedef float FLOAT;
 
+#ifndef ID_WIN32
 
+#ifndef BOOL
+typedef int BOOL;
+#endif
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
+#ifndef boolean
+typedef int boolean;
+#endif
 
+#ifndef MAXINT
+#ifdef INT_MAX
+#define MAXINT INT_MAX
+#else
+#error Unknown max int
+#endif
+#endif
+
+#ifndef MININT
+#ifdef INT_MIN
+#define MININT INT_MIN
+#else
+#error Unknown min int
+#endif
+#endif
+
+#endif
 
 #endif

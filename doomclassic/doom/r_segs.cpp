@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -80,7 +81,7 @@ R_RenderMaskedSegRange
     postColumn_t*	col;
     int				lightnum;
     int				texnum;
-    
+
     // Calculate light table.
     // Use different light tables
     //   for horizontal / vertical / diagonal. Diagonal?
@@ -89,7 +90,7 @@ R_RenderMaskedSegRange
     ::g->frontsector = ::g->curline->frontsector;
     ::g->backsector = ::g->curline->backsector;
     texnum = ::g->texturetranslation[::g->curline->sidedef->midtexture];
-	
+
     lightnum = (::g->frontsector->lightlevel >> LIGHTSEGSHIFT)+::g->extralight;
 
     if (::g->curline->v1->y == ::g->curline->v2->y)
@@ -97,7 +98,7 @@ R_RenderMaskedSegRange
     else if (::g->curline->v1->x == ::g->curline->v2->x)
 	lightnum++;
 
-    if (lightnum < 0)		
+    if (lightnum < 0)
 	::g->walllights = ::g->scalelight[0];
     else if (lightnum >= LIGHTLEVELS)
 	::g->walllights = ::g->scalelight[LIGHTLEVELS-1];
@@ -106,11 +107,11 @@ R_RenderMaskedSegRange
 
     ::g->maskedtexturecol = ds->maskedtexturecol;
 
-    ::g->rw_scalestep = ds->scalestep;		
+    ::g->rw_scalestep = ds->scalestep;
     ::g->spryscale = ds->scale1 + (x1 - ds->x1)*::g->rw_scalestep;
     ::g->mfloorclip = ds->sprbottomclip;
     ::g->mceilingclip = ds->sprtopclip;
-    
+
     // find positioning
     if (::g->curline->linedef->flags & ML_DONTPEGBOTTOM)
     {
@@ -125,10 +126,10 @@ R_RenderMaskedSegRange
 	::g->dc_texturemid = ::g->dc_texturemid - ::g->viewz;
     }
     ::g->dc_texturemid += ::g->curline->sidedef->rowoffset;
-			
+
     if (::g->fixedcolormap)
 	::g->dc_colormap = ::g->fixedcolormap;
-    
+
     // draw the columns
     for (::g->dc_x = x1 ; ::g->dc_x <= x2 ; ::g->dc_x++)
     {
@@ -144,20 +145,20 @@ R_RenderMaskedSegRange
 
 		::g->dc_colormap = ::g->walllights[index];
 	    }
-			
+
 	    ::g->sprtopscreen = ::g->centeryfrac - FixedMul(::g->dc_texturemid, ::g->spryscale);
 	    ::g->dc_iscale = 0xffffffffu / (unsigned)::g->spryscale;
-	    
+
 	    // draw the texture
-	    col = (postColumn_t *)( 
+	    col = (postColumn_t *)(
 		(byte *)R_GetColumn(texnum,::g->maskedtexturecol[::g->dc_x]) -3);
-			
+
 	    R_DrawMaskedColumn (col);
 	    ::g->maskedtexturecol[::g->dc_x] = SHRT_MAX;
 	}
 	::g->spryscale += ::g->rw_scalestep;
     }
-	
+
 }
 
 
@@ -184,7 +185,7 @@ void R_RenderSegLoop (void)
     int			bottom;
 
     texturecolumn = 0;				// shut up compiler warning
-	
+
     for ( ; ::g->rw_x < ::g->rw_stopx ; ::g->rw_x++)
     {
 		// mark floor / ceiling areas
@@ -193,7 +194,7 @@ void R_RenderSegLoop (void)
 		// no space above wall?
 		if (yl < ::g->ceilingclip[::g->rw_x]+1)
 			yl = ::g->ceilingclip[::g->rw_x]+1;
-		
+
 		if (::g->markceiling)
 		{
 			top = ::g->ceilingclip[::g->rw_x]+1;
@@ -208,7 +209,7 @@ void R_RenderSegLoop (void)
 				::g->ceilingplane->bottom[::g->rw_x] = bottom;
 			}
 		}
-		
+
 		yh = ::g->bottomfrac>>HEIGHTBITS;
 
 		if (yh >= ::g->floorclip[::g->rw_x])
@@ -226,7 +227,7 @@ void R_RenderSegLoop (void)
 				::g->floorplane->bottom[::g->rw_x] = bottom;
 			}
 		}
-		
+
 	// texturecolumn and lighting are independent of wall tiers
 	if (::g->segtextured)
 	{
@@ -244,7 +245,7 @@ void R_RenderSegLoop (void)
 	    ::g->dc_x = ::g->rw_x;
 	    ::g->dc_iscale = 0xffffffffu / (unsigned)::g->rw_scale;
 	}
-	
+
 	// draw the wall tiers
 	if (::g->midtexture)
 	{
@@ -287,7 +288,7 @@ void R_RenderSegLoop (void)
 			if (::g->markceiling)
 				::g->ceilingclip[::g->rw_x] = yl-1;
 		}
-			
+
 	    if (::g->bottomtexture)
 	    {
 			// bottom wall
@@ -297,7 +298,7 @@ void R_RenderSegLoop (void)
 			// no space above wall?
 			if (mid <= ::g->ceilingclip[::g->rw_x])
 				mid = ::g->ceilingclip[::g->rw_x]+1;
-			
+
 			if (mid <= yh)
 			{
 				::g->dc_yl = mid;
@@ -317,7 +318,7 @@ void R_RenderSegLoop (void)
 			if (::g->markfloor)
 				::g->floorclip[::g->rw_x] = yh+1;
 			}
-			
+
 			if (::g->maskedtexture)
 			{
 				// save texturecol
@@ -325,7 +326,7 @@ void R_RenderSegLoop (void)
 				::g->maskedtexturecol[::g->rw_x] = texturecolumn;
 			}
 		}
-		
+
 		::g->rw_scale += ::g->rw_scalestep;
 		::g->topfrac += ::g->topstep;
 		::g->bottomfrac += ::g->bottomstep;
@@ -353,23 +354,27 @@ R_StoreWallRange
 
     // don't overflow and crash
     if (::g->ds_p == &::g->drawsegs[MAXDRAWSEGS])
-	return;		
-		
+	return;
+
 #ifdef RANGECHECK
     if (start >=::g->viewwidth || start > stop)
 	I_Error ("Bad R_RenderWallRange: %i to %i", start , stop);
 #endif
-    
+
     ::g->sidedef = ::g->curline->sidedef;
     ::g->linedef = ::g->curline->linedef;
 
     // mark the segment as visible for auto map
     ::g->linedef->flags |= ML_MAPPED;
-    
+
     // calculate ::g->rw_distance for scale calculation
     ::g->rw_normalangle = ::g->curline->angle + ANG90;
+#ifdef ID_WIN32
 	offsetangle = abs((long)(::g->rw_normalangle-::g->rw_angle1));
-    
+#else
+	offsetangle = labs((long)(::g->rw_normalangle-::g->rw_angle1));
+#endif
+
     if (offsetangle > ANG90)
 	offsetangle = ANG90;
 
@@ -377,22 +382,22 @@ R_StoreWallRange
     hyp = R_PointToDist (::g->curline->v1->x, ::g->curline->v1->y);
     sineval = finesine[distangle>>ANGLETOFINESHIFT];
     ::g->rw_distance = FixedMul (hyp, sineval);
-		
-	
+
+
     ::g->ds_p->x1 = ::g->rw_x = start;
     ::g->ds_p->x2 = stop;
     ::g->ds_p->curline = ::g->curline;
     ::g->rw_stopx = stop+1;
-    
+
     // calculate scale at both ends and step
 	extern angle_t GetViewAngle();
-    ::g->ds_p->scale1 = ::g->rw_scale = 
+    ::g->ds_p->scale1 = ::g->rw_scale =
 	R_ScaleFromGlobalAngle (GetViewAngle() + ::g->xtoviewangle[start]);
-    
+
     if (stop > start )
     {
 	::g->ds_p->scale2 = R_ScaleFromGlobalAngle (GetViewAngle() + ::g->xtoviewangle[stop]);
-	::g->ds_p->scalestep = ::g->rw_scalestep = 
+	::g->ds_p->scalestep = ::g->rw_scalestep =
 	    (::g->ds_p->scale2 - ::g->rw_scale) / (stop-start);
     }
     else
@@ -404,26 +409,26 @@ R_StoreWallRange
 	    fixed_t		trx,try;
 	    fixed_t		gxt,gyt;
 
-	extern fixed_t GetViewX(); extern fixed_t GetViewY(); 
+	extern fixed_t GetViewX(); extern fixed_t GetViewY();
 	    trx = ::g->curline->v1->x - GetViewX();
 	    try = ::g->curline->v1->y - GetVewY();
-			
-	    gxt = FixedMul(trx,::g->viewcos); 
-	    gyt = -FixedMul(try,::g->viewsin); 
+
+	    gxt = FixedMul(trx,::g->viewcos);
+	    gyt = -FixedMul(try,::g->viewsin);
 	    ::g->ds_p->scale1 = FixedDiv(::g->projection, gxt-gyt) << ::g->detailshift;
 	}
 #endif
 	::g->ds_p->scale2 = ::g->ds_p->scale1;
     }
-    
+
     // calculate texture boundaries
     //  and decide if floor / ceiling marks are needed
     ::g->worldtop = ::g->frontsector->ceilingheight - ::g->viewz;
     ::g->worldbottom = ::g->frontsector->floorheight - ::g->viewz;
-	
+
     ::g->midtexture = ::g->toptexture = ::g->bottomtexture = ::g->maskedtexture = 0;
     ::g->ds_p->maskedtexturecol = NULL;
-	
+
     if (!::g->backsector)
     {
 	// single sided line
@@ -435,7 +440,7 @@ R_StoreWallRange
 	    vtop = ::g->frontsector->floorheight +
 		::g->s_textureheight[::g->sidedef->midtexture];
 	    // bottom of texture at bottom
-	    ::g->rw_midtexturemid = vtop - ::g->viewz;	
+	    ::g->rw_midtexturemid = vtop - ::g->viewz;
 	}
 	else
 	{
@@ -455,7 +460,7 @@ R_StoreWallRange
 	// two sided line
 	::g->ds_p->sprtopclip = ::g->ds_p->sprbottomclip = NULL;
 	::g->ds_p->silhouette = 0;
-	
+
 	if (::g->frontsector->floorheight > ::g->backsector->floorheight)
 	{
 	    ::g->ds_p->silhouette = SIL_BOTTOM;
@@ -467,7 +472,7 @@ R_StoreWallRange
 	    ::g->ds_p->bsilheight = MAXINT;
 	    // ::g->ds_p->sprbottomclip = ::g->negonearray;
 	}
-	
+
 	if (::g->frontsector->ceilingheight < ::g->backsector->ceilingheight)
 	{
 	    ::g->ds_p->silhouette |= SIL_TOP;
@@ -479,33 +484,33 @@ R_StoreWallRange
 	    ::g->ds_p->tsilheight = MININT;
 	    // ::g->ds_p->sprtopclip = ::g->screenheightarray;
 	}
-		
+
 	if (::g->backsector->ceilingheight <= ::g->frontsector->floorheight)
 	{
 	    ::g->ds_p->sprbottomclip = ::g->negonearray;
 	    ::g->ds_p->bsilheight = MAXINT;
 	    ::g->ds_p->silhouette |= SIL_BOTTOM;
 	}
-	
+
 	if (::g->backsector->floorheight >= ::g->frontsector->ceilingheight)
 	{
 	    ::g->ds_p->sprtopclip = ::g->screenheightarray;
 	    ::g->ds_p->tsilheight = MININT;
 	    ::g->ds_p->silhouette |= SIL_TOP;
 	}
-	
+
 	::g->worldhigh = ::g->backsector->ceilingheight - ::g->viewz;
 	::g->worldlow = ::g->backsector->floorheight - ::g->viewz;
-		
+
 	// hack to allow height changes in outdoor areas
-	if (::g->frontsector->ceilingpic == ::g->skyflatnum 
+	if (::g->frontsector->ceilingpic == ::g->skyflatnum
 	    && ::g->backsector->ceilingpic == ::g->skyflatnum)
 	{
 	    ::g->worldtop = ::g->worldhigh;
 	}
-	
-			
-	if (::g->worldlow != ::g->worldbottom 
+
+
+	if (::g->worldlow != ::g->worldbottom
 	    || ::g->backsector->floorpic != ::g->frontsector->floorpic
 	    || ::g->backsector->lightlevel != ::g->frontsector->lightlevel)
 	{
@@ -516,9 +521,9 @@ R_StoreWallRange
 	    // same plane on both ::g->sides
 	    ::g->markfloor = false;
 	}
-	
-			
-	if (::g->worldhigh != ::g->worldtop 
+
+
+	if (::g->worldhigh != ::g->worldtop
 	    || ::g->backsector->ceilingpic != ::g->frontsector->ceilingpic
 	    || ::g->backsector->lightlevel != ::g->frontsector->lightlevel)
 	{
@@ -529,14 +534,14 @@ R_StoreWallRange
 	    // same plane on both ::g->sides
 	    ::g->markceiling = false;
 	}
-	
+
 	if (::g->backsector->ceilingheight <= ::g->frontsector->floorheight
 	    || ::g->backsector->floorheight >= ::g->frontsector->ceilingheight)
 	{
 	    // closed door
 	    ::g->markceiling = ::g->markfloor = true;
 	}
-	
+
 
 	if (::g->worldhigh < ::g->worldtop)
 	{
@@ -552,9 +557,9 @@ R_StoreWallRange
 		vtop =
 		    ::g->backsector->ceilingheight
 		    + ::g->s_textureheight[::g->sidedef->toptexture];
-		
+
 		// bottom of texture
-		::g->rw_toptexturemid = vtop - ::g->viewz;	
+		::g->rw_toptexturemid = vtop - ::g->viewz;
 	    }
 	}
 	if (::g->worldlow > ::g->worldbottom)
@@ -573,7 +578,7 @@ R_StoreWallRange
 	}
 	::g->rw_toptexturemid += ::g->sidedef->rowoffset;
 	::g->rw_bottomtexturemid += ::g->sidedef->rowoffset;
-	
+
 	// allocate space for masked texture tables
 	if (::g->sidedef->midtexture)
 	{
@@ -583,14 +588,14 @@ R_StoreWallRange
 	    ::g->lastopening += ::g->rw_stopx - ::g->rw_x;
 	}
     }
-    
+
     // calculate ::g->rw_offset (only needed for textured ::g->lines)
     ::g->segtextured = ::g->midtexture | ::g->toptexture | ::g->bottomtexture | ::g->maskedtexture;
 
     if (::g->segtextured)
     {
 		offsetangle = ::g->rw_normalangle-::g->rw_angle1;
-		
+
 		if (offsetangle > ANG180)
 			offsetangle = -offsetangle; // ALANHACK UNSIGNED
 
@@ -605,7 +610,7 @@ R_StoreWallRange
 
 		::g->rw_offset += ::g->sidedef->textureoffset + ::g->curline->offset;
 		::g->rw_centerangle = ANG90 + GetViewAngle() - ::g->rw_normalangle;
-		
+
 		// calculate light table
 		//  use different light tables
 		//  for horizontal / vertical / diagonal
@@ -619,7 +624,7 @@ R_StoreWallRange
 			else if (::g->curline->v1->x == ::g->curline->v2->x)
 			lightnum++;
 
-			if (lightnum < 0)		
+			if (lightnum < 0)
 			::g->walllights = ::g->scalelight[0];
 			else if (lightnum >= LIGHTLEVELS)
 			::g->walllights = ::g->scalelight[LIGHTLEVELS-1];
@@ -627,38 +632,38 @@ R_StoreWallRange
 			::g->walllights = ::g->scalelight[lightnum];
 		}
     }
-    
+
     // if a floor / ceiling plane is on the wrong side
     //  of the view plane, it is definitely invisible
     //  and doesn't need to be marked.
-    
-  
+
+
     if (::g->frontsector->floorheight >= ::g->viewz)
     {
 	// above view plane
 	::g->markfloor = false;
     }
-    
-    if (::g->frontsector->ceilingheight <= ::g->viewz 
+
+    if (::g->frontsector->ceilingheight <= ::g->viewz
 	&& ::g->frontsector->ceilingpic != ::g->skyflatnum)
     {
 	// below view plane
 	::g->markceiling = false;
     }
 
-    
+
     // calculate incremental stepping values for texture edges
     ::g->worldtop >>= 4;
     ::g->worldbottom >>= 4;
-	
+
     ::g->topstep = -FixedMul (::g->rw_scalestep, ::g->worldtop);
     ::g->topfrac = (::g->centeryfrac>>4) - FixedMul (::g->worldtop, ::g->rw_scale);
 
     ::g->bottomstep = -FixedMul (::g->rw_scalestep,::g->worldbottom);
     ::g->bottomfrac = (::g->centeryfrac>>4) - FixedMul (::g->worldbottom, ::g->rw_scale);
-	
+
     if (::g->backsector)
-    {	
+    {
 	::g->worldhigh >>= 4;
 	::g->worldlow >>= 4;
 
@@ -667,14 +672,14 @@ R_StoreWallRange
 	    ::g->pixhigh = (::g->centeryfrac>>4) - FixedMul (::g->worldhigh, ::g->rw_scale);
 	    ::g->pixhighstep = -FixedMul (::g->rw_scalestep,::g->worldhigh);
 	}
-	
+
 	if (::g->worldlow > ::g->worldbottom)
 	{
 	    ::g->pixlow = (::g->centeryfrac>>4) - FixedMul (::g->worldlow, ::g->rw_scale);
 	    ::g->pixlowstep = -FixedMul (::g->rw_scalestep,::g->worldlow);
 	}
     }
-    
+
     // render it
 	 if (::g->markceiling)
 		 ::g->ceilingplane = R_CheckPlane (::g->ceilingplane, ::g->rw_x, ::g->rw_stopx-1);
@@ -684,7 +689,7 @@ R_StoreWallRange
 
     R_RenderSegLoop ();
 
-    
+
     // save sprite clipping info
     if ( ((::g->ds_p->silhouette & SIL_TOP) || ::g->maskedtexture)
 	 && !::g->ds_p->sprtopclip)
@@ -693,13 +698,13 @@ R_StoreWallRange
 	::g->ds_p->sprtopclip = ::g->lastopening - start;
 	::g->lastopening += ::g->rw_stopx - start;
     }
-    
+
     if ( ((::g->ds_p->silhouette & SIL_BOTTOM) || ::g->maskedtexture)
 	 && !::g->ds_p->sprbottomclip)
     {
 	memcpy (::g->lastopening, ::g->floorclip+start, 2*(::g->rw_stopx-start));
 	::g->ds_p->sprbottomclip = ::g->lastopening - start;
-	::g->lastopening += ::g->rw_stopx - start;	
+	::g->lastopening += ::g->rw_stopx - start;
     }
 
     if (::g->maskedtexture && !(::g->ds_p->silhouette&SIL_TOP))

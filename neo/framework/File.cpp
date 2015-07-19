@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -267,7 +268,7 @@ int idFile::Printf( const char *fmt, ... ) {
 	// so notepad formats the lines correctly
   	idStr	work( buf );
  	work.Replace( "\n", "\r\n" );
-  
+
   	return Write( work.c_str(), work.Length() );
 }
 
@@ -394,7 +395,7 @@ int idFile::ReadBool( bool &value ) {
 int idFile::ReadString( idStr &string ) {
 	int len;
 	int result = 0;
-	
+
 	ReadInt( len );
 	if ( len >= 0 ) {
 		string.Fill( ' ', len );
@@ -778,7 +779,7 @@ int idFile_Memory::Write( const void *buffer, int len ) {
 			memcpy( newPtr, filePtr, allocated );
 		}
 		allocated += extra;
-		curPtr = newPtr + ( curPtr - filePtr );		
+		curPtr = newPtr + ( curPtr - filePtr );
 		if ( filePtr ) {
 			Mem_Free( filePtr );
 		}
@@ -847,7 +848,7 @@ void idFile_Memory::PreAllocate( size_t len ) {
 			memcpy( newPtr, filePtr, allocated );
 		}
 		allocated = len;
-		curPtr = newPtr + ( curPtr - filePtr );		
+		curPtr = newPtr + ( curPtr - filePtr );
 		if ( filePtr != NULL ) {
 			Mem_Free( filePtr );
 		}
@@ -929,7 +930,7 @@ int idFile_Memory::Seek( long offset, fsOrigin_t origin ) {
 
 /*
 ========================
-idFile_Memory::SetMaxLength 
+idFile_Memory::SetMaxLength
 ========================
 */
 void idFile_Memory::SetMaxLength( size_t len ) {
@@ -1151,7 +1152,11 @@ idFile_Permanent::idFile_Permanent
 */
 idFile_Permanent::idFile_Permanent() {
 	name = "invalid";
+#ifdef ID_WIN32
 	o = NULL;
+#else
+	o = 0;
+#endif
 	mode = 0;
 	fileSize = 0;
 	handleSync = false;
@@ -1164,7 +1169,11 @@ idFile_Permanent::~idFile_Permanent
 */
 idFile_Permanent::~idFile_Permanent() {
 	if ( o ) {
+#ifdef ID_WIN32
 		CloseHandle( o );
+#else
+		close( o );
+#endif
 	}
 }
 
@@ -1196,11 +1205,18 @@ int idFile_Permanent::Read( void *buffer, int len ) {
 	tries = 0;
 	while( remaining ) {
 		block = remaining;
+#ifdef ID_WIN32
 		DWORD bytesRead;
 		if ( !ReadFile( o, buf, block, &bytesRead, NULL ) ) {
 			idLib::Warning( "idFile_Permanent::Read failed with %d from %s", GetLastError(), name.c_str() );
 		}
 		read = bytesRead;
+#else
+		read = ::read( o, buf, block );
+		if ( read == -1 ) {
+			idLib::Warning( "idFile_Permanent::Read failed with %d from %s", errno, name.c_str() );
+		}
+#endif
 		if ( read == 0 ) {
 			// we might have been trying to read from a CD, which
 			// sometimes returns a 0 read on windows
@@ -1250,9 +1266,13 @@ int idFile_Permanent::Write( const void *buffer, int len ) {
 	tries = 0;
 	while( remaining ) {
 		block = remaining;
+#ifdef ID_WIN32
 		DWORD bytesWritten;
 		WriteFile( o, buf, block, &bytesWritten, NULL );
 		written = bytesWritten;
+#else
+		written = ::write( o, buf, block );
+#endif
 		if ( written == 0 ) {
 			if ( !tries ) {
 				tries = 1;
@@ -1284,7 +1304,9 @@ idFile_Permanent::ForceFlush
 =================
 */
 void idFile_Permanent::ForceFlush() {
+#ifdef ID_WIN32
 	FlushFileBuffers( o );
+#endif
 }
 
 /*
@@ -1293,7 +1315,9 @@ idFile_Permanent::Flush
 =================
 */
 void idFile_Permanent::Flush() {
+#ifdef ID_WIN32
 	FlushFileBuffers( o );
+#endif
 }
 
 /*
@@ -1302,7 +1326,11 @@ idFile_Permanent::Tell
 =================
 */
 int idFile_Permanent::Tell() const {
+#ifdef ID_WIN32
 	return SetFilePointer( o, 0, NULL, FILE_CURRENT );
+#else
+	return ::tell( o );
+#endif
 }
 
 /*
@@ -1332,6 +1360,7 @@ idFile_Permanent::Seek
 =================
 */
 int idFile_Permanent::Seek( long offset, fsOrigin_t origin ) {
+#ifdef ID_WIN32
 	int retVal = INVALID_SET_FILE_POINTER;
 	switch( origin ) {
 		case FS_SEEK_CUR: retVal = SetFilePointer( o, offset, NULL, FILE_CURRENT ); break;
@@ -1339,6 +1368,15 @@ int idFile_Permanent::Seek( long offset, fsOrigin_t origin ) {
 		case FS_SEEK_SET: retVal = SetFilePointer( o, offset, NULL, FILE_BEGIN ); break;
 	}
 	return ( retVal == INVALID_SET_FILE_POINTER ) ? -1 : 0;
+#else
+	int retVal = -1;
+	switch( origin ) {
+		case FS_SEEK_CUR: retVal = ::lseek( o, offset, SEEK_CUR ); break;
+		case FS_SEEK_END: retVal = ::lseek( o, offset, SEEK_END ); break;
+		case FS_SEEK_SET: retVal = ::lseek( o, offset, SEEK_SET ); break;
+	}
+	return ( retVal == -1 ) ? -1 : 0;
+#endif
 }
 
 #if 1

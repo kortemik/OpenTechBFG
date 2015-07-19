@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -87,7 +88,7 @@ M_DrawText
 	    x += 4;
 	    continue;
 	}
-		
+
 	w = SHORT (::g->hu_font[c]->width);
 	if (x+w > SCREENWIDTH)
 	    break;
@@ -106,7 +107,7 @@ M_DrawText
 // M_WriteFile
 //
 boolean M_WriteFile ( char const*	name, void*		source, int		length ) {
-	
+
 	idFile *		handle = NULL;
 	int		count;
 
@@ -157,7 +158,13 @@ int M_ReadFile ( char const*	name, byte**	buffer ) {
 //
 // Write a save game to the specified device using the specified game name.
 //
-static qboolean SaveGame( void* source, DWORD length )
+static qboolean SaveGame( void* source,
+#ifdef ID_WIN32
+		DWORD length
+#else
+		unsigned int length
+#endif
+		)
 {
 	return false;
 }
@@ -215,11 +222,11 @@ void M_SaveDefaults (void)
     int		i;
     int		v;
     FILE*	f;
-	
+
     f = f o pen (::g->defaultfile, "w");
     if (!f)
 	return; // can't write the file, but don't complain
-		
+
     for (i=0 ; i<::g->numdefaults ; i++)
     {
 	if (::g->defaults[i].defaultvalue > -0xfff
@@ -232,7 +239,7 @@ void M_SaveDefaults (void)
 		     * (char **) (::g->defaults[i].location));
 	}
     }
-	
+
     fclose (f);
 */
 }
@@ -252,12 +259,12 @@ void M_LoadDefaults (void)
     //char*	newstring;
     //int		parm;
     //qboolean	isstring;
-    
+
     // set everything to base values
     ::g->numdefaults = sizeof(::g->defaults)/sizeof(::g->defaults[0]);
     for (i=0 ; i < ::g->numdefaults ; i++)
 		*::g->defaults[i].location = ::g->defaults[i].defaultvalue;
-    
+
     // check for a custom default file
     i = M_CheckParm ("-config");
     if (i && i < ::g->myargc-1)
@@ -291,7 +298,7 @@ void M_LoadDefaults (void)
 					sscanf(strparm+2, "%x", &parm);
 				else
 					sscanf(strparm, "%i", &parm);
-				
+
 				for (i=0 ; i<::g->numdefaults ; i++)
 					if (!strcmp(def, ::g->defaults[i].name))
 					{
@@ -303,7 +310,7 @@ void M_LoadDefaults (void)
 					}
 			}
 		}
-			
+
 		fclose (f);
     }
 */
@@ -341,14 +348,14 @@ void M_ScreenShot (void)
     int		i;
     byte*	linear;
     char	lbmname[12];
-    
+
     // munge planar buffer to linear
     linear = ::g->screens[2];
     I_ReadScreen (linear);
-    
+
     // find a file name to save it to
     strcpy(lbmname,"DOOM00.pcx");
-		
+
     for (i=0 ; i<=99 ; i++)
     {
 		lbmname[4] = i/10 + '0';
@@ -358,12 +365,12 @@ void M_ScreenShot (void)
     }
     if (i==100)
 		I_Error ("M_ScreenShot: Couldn't create a PCX");
-    
+
     // save the pcx file
     WritePCXfile (lbmname, linear,
 		  SCREENWIDTH, SCREENHEIGHT,
 		  (byte*)W_CacheLumpName ("PLAYPAL",PU_CACHE_SHARED));
-	
+
     ::g->players[::g->consoleplayer].message = "screen shot";
 */
 }

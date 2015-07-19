@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -48,17 +48,17 @@ ID_INLINE bool ObjectsSame( objJobState_t & newState, objJobState_t & oldState )
 		//assert( newState.data != oldState.data) );
 		return false;		// Can't match if sizes different
 	}
-	
+
 	/*
 	if ( newState.data == oldState.data ) {
 		return true;		// Definite match
 	}
 	*/
-	
+
 	if ( memcmp( newState.data, oldState.data, newState.size ) == 0 ) {
 		return true;		// Byte match, same
 	}
-	
+
 	return false;			// Not the same
 }
 
@@ -76,7 +76,7 @@ void SnapshotObjectJob( objParms_t * parms ) {
 	objJobState_t &	oldState	= parms->oldState;
 	objHeader_t *	header		= parms->destHeader;
 	uint8 *			dataStart	= parms->dest;
-		
+
 	assert( newState.valid || oldState.valid );
 
 	// Setup header
@@ -87,7 +87,7 @@ void SnapshotObjectJob( objParms_t * parms ) {
 	header->data	= dataStart;
 
 	assert( header->size <= MAX_UNSIGNED_TYPE( objectSize_t ) );
-			
+
 	// Setup checksum and tag
 #ifdef SNAPSHOT_CHECKSUMS
 	header->checksum = 0;
@@ -98,20 +98,20 @@ void SnapshotObjectJob( objParms_t * parms ) {
 	bool visChange		= false; // visibility changes will be signified with a 0xffff state size
 	bool visSendState	= false; // the state is sent when an entity is no longer stale
 
-	// Compute visibility changes 
+	// Compute visibility changes
 	// (we need to do this before writing out object id, because we may not need to write out the id if we early out)
 	// (when we don't write out the id, we assume this is an "ack" when we deserialize the objects)
 	if ( newState.valid && oldState.valid ) {
 		// Check visibility
 		assert( newState.objectNum == oldState.objectNum );
-		
+
 		if ( visIndex > 0 ) {
 			bool oldVisible = ( oldState.visMask & ( 1 << visIndex ) ) != 0;
 			bool newVisible = ( newState.visMask & ( 1 << visIndex ) ) != 0;
-			
+
 			// Force visible if we need to either create or destroy this object
-			newVisible |= ( newState.size == 0 ) != ( oldState.size == 0 );	
-			
+			newVisible |= ( newState.size == 0 ) != ( oldState.size == 0 );
+
 			if ( !oldVisible && !newVisible ) {
 				// object is stale and ack'ed for this client, write nothing (see 'same object' below)
 				header->flags |= OBJ_SAME;
@@ -124,9 +124,9 @@ void SnapshotObjectJob( objParms_t * parms ) {
 				//SNAP_VERBOSE_PRINT( "object %d to client %d no longer stale\n", newState->objectNum, visIndex );
 				visChange = true;
 				visSendState = true;
-			}				
+			}
 		}
-		
+
 		// Same object, write a delta (never early out during vis changes)
 		if ( !visChange && ObjectsSame( newState, oldState ) ) {
 			// same state, write nothing
@@ -137,10 +137,10 @@ void SnapshotObjectJob( objParms_t * parms ) {
 
 	// Get the id of the object we are writing out
 	int32 objectNum = ( newState.valid ) ? newState.objectNum : oldState.objectNum;
-				
+
 	// Write out object id
 	header->objID = objectNum;
-	
+
 	if ( !newState.valid ) {
 		// Deleted, write 0 size
 		assert( oldState.valid );
@@ -162,12 +162,12 @@ void SnapshotObjectJob( objParms_t * parms ) {
 		assert( newState.objectNum == oldState.objectNum );
 
 		header->flags |= OBJ_DIFFERENT;
-				
+
 		if ( visChange ) {
 			header->flags |= visSendState ? OBJ_VIS_NOT_STALE : OBJ_VIS_STALE;
 		}
-	
-		if ( !visChange || visSendState ) {			
+
+		if ( !visChange || visSendState ) {
 			int compareSize = Min( newState.size, oldState.size );
 			rleCompressor.Start( dataStart, NULL, OBJ_DEST_SIZE_ALIGN16( newState.size ) );
 			for ( int b = 0; b < compareSize; b++ ) {
@@ -176,12 +176,12 @@ void SnapshotObjectJob( objParms_t * parms ) {
 			}
 			// Get leftover
 			int leftOver = newState.size - compareSize;
-			
+
 			if ( leftOver > 0 ) {
 				rleCompressor.WriteBytes( newState.data + compareSize, leftOver );
 			}
-			
-			header->csize = rleCompressor.End();			
+
+			header->csize = rleCompressor.End();
 
 			if ( header->csize == -1 ) {
 				// Not enough space, don't compress, have lzw job do zrle compression instead
@@ -190,7 +190,7 @@ void SnapshotObjectJob( objParms_t * parms ) {
 				}
 				// Get leftover
 				int leftOver = newState.size - compareSize;
-			
+
 				if ( leftOver > 0 ) {
 					memcpy( dataStart, newState.data + compareSize, leftOver );
 				}
@@ -231,11 +231,11 @@ static void FinishLZWStream( lzwParm_t * parm, idLZWCompressor * lzwCompressor )
 	}
 
 	int size = lzwCompressor->Length();
-	
+
 	pendingDelta.offset			= parm->ioData->lzwBytes;		// Remember offset into buffer
 	pendingDelta.size			= size;							// Remember size
 	pendingDelta.snapSequence	= parm->ioData->snapSequence;	// Remember which snap sequence this delta belongs to
-	
+
 	parm->ioData->lzwBytes += size;
 	parm->ioData->numlzwDeltas++;
 }
@@ -246,11 +246,11 @@ NewLZWStream
 ========================
 */
 static void NewLZWStream( lzwParm_t * parm, idLZWCompressor * lzwCompressor ) {
-	
+
 	// Reset compressor
 	int maxSize = parm->ioData->maxlzwMem - parm->ioData->lzwBytes;
 	lzwCompressor->Start( &parm->ioData->lzwMem[parm->ioData->lzwBytes], maxSize );
-	
+
 	parm->ioData->lastObjId = 0;
 
 	parm->ioData->snapSequence++;
@@ -287,7 +287,7 @@ void LZWJobInternal( lzwParm_t * parm, unsigned int dmaTag ) {
 		// We only send the first one and rely on a full snap being sent to get the whole snap across
 		assert( parm->ioData->numlzwDeltas == 1 );
 		assert( !parm->ioData->fullSnap );
-		return;		
+		return;
 	}
 #endif
 
@@ -310,7 +310,7 @@ void LZWJobInternal( lzwParm_t * parm, unsigned int dmaTag ) {
 
 	for ( int i = 0; i < parm->numObjects; i++ ) {
 
-		// This will eventually be gracefully caught in SnapshotProcessor.cpp.  
+		// This will eventually be gracefully caught in SnapshotProcessor.cpp.
 		// It's nice to know right when it happens though, so you can inspect the situation.
 		assert( !lzwCompressor.IsOverflowed() || numChangedObjProcessed > 1 );
 
@@ -328,7 +328,7 @@ void LZWJobInternal( lzwParm_t * parm, unsigned int dmaTag ) {
 			assert( parm->ioData->numlzwDeltas == 1 );
 			return;
 #endif
-		}		
+		}
 
 		if ( numChangedObjProcessed > 0 ) {
 			// We should be at a good spot in the stream if we've written at least one obj without overflowing, so save it
@@ -387,16 +387,16 @@ void LZWJobInternal( lzwParm_t * parm, unsigned int dmaTag ) {
 		// Write checksum
 		lzwCompressor.WriteAgnostic( header->checksum );
 #endif
-		// This will eventually be gracefully caught in SnapshotProcessor.cpp.  
+		// This will eventually be gracefully caught in SnapshotProcessor.cpp.
 		// It's nice to know right when it happens though, so you can inspect the situation.
-		assert( !lzwCompressor.IsOverflowed() || numChangedObjProcessed > 1 );		
+		assert( !lzwCompressor.IsOverflowed() || numChangedObjProcessed > 1 );
 	}
 
 	if ( !parm->saveDictionary ) {
 		// Write out terminator
 		uint16 objectDelta = 0xFFFF - parm->ioData->lastObjId;
 		lzwCompressor.WriteAgnostic( objectDelta );
-		
+
 		// Last stream
 		FinishLZWStream( parm, &lzwCompressor );
 

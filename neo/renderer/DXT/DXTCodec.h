@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -60,7 +61,7 @@ public:
 
 	// high quality DXT1 compression (no alpha), uses exhaustive search to find a line through color space and is very slow
 	void	CompressImageDXT1HQ( const byte *inBuf, byte *outBuf, int width, int height );
-	
+
 	// fast DXT1 compression (no alpha), for real-time use at the cost of a little quality
 	void	CompressImageDXT1Fast( const byte *inBuf, byte *outBuf, int width, int height );
 	void	CompressImageDXT1Fast_Generic( const byte *inBuf, byte *outBuf, int width, int height );
@@ -93,7 +94,7 @@ public:
 
 	// high quality DXN1 (aka DXT5A or ATI1N) compression, uses exhaustive search to find a line through color space and is very slow
 	void	CompressImageDXN1HQ( const byte *inBuf, byte *outBuf, int width, int height ) { /* not implemented */ assert( 0 ); }
-	
+
 	// fast single channel compression into, DXN1 (aka DXT5A or ATI1N) format, for real-time use
 	void	CompressImageDXN1Fast( const byte *inBuf, byte *outBuf, int width, int height );
 	void	CompressImageDXN1Fast_Generic( const byte *inBuf, byte *outBuf, int width, int height );
@@ -101,7 +102,7 @@ public:
 
 	// high quality YCoCg DXT5 compression, uses exhaustive search to find a line through color space and is very slow
 	void	CompressYCoCgDXT5HQ( const byte *inBuf, byte *outBuf, int width, int height );
-	
+
 	// fast YCoCg DXT5 compression for real-time use (the input is expected to be in CoCg_Y format)
 	void	CompressYCoCgDXT5Fast( const byte *inBuf, byte *outBuf, int width, int height );
 	void	CompressYCoCgDXT5Fast_Generic( const byte *inBuf, byte *outBuf, int width, int height );
@@ -138,7 +139,7 @@ public:
 
 	// high quality tangent space NxNy_ normal map compression into DXN2 (3Dc, ATI2N) format
 	void	CompressNormalMapDXN2HQ( const byte *inBuf, byte *outBuf, int width, int height );
-	
+
 	// fast tangent space NxNy_ normal map compression into DXN2 (3Dc, ATI2N) format, for real-time use
 	void	CompressNormalMapDXN2Fast( const byte *inBuf, byte *outBuf, int width, int height );
 	void	CompressNormalMapDXN2Fast_Generic( const byte *inBuf, byte *outBuf, int width, int height );
@@ -146,7 +147,7 @@ public:
 
 	// fast single channel conversion from DXN1 (aka DXT5A or ATI1N) to DXT1, reasonably fast (also works in-place)
 	void	ConvertImageDXN1_DXT1( const byte *inBuf, byte *outBuf, int width, int height );
-	
+
 	// fast single channel conversion from DXT1 to DXN1 (aka DXT5A or ATI1N), reasonably fast (also works in-place)
 	void	ConvertImageDXT1_DXN1( const byte *inBuf, byte *outBuf, int width, int height ) { /* not implemented */ assert( 0 ); }
 
@@ -258,7 +259,11 @@ idDxtEncoder::CompressImageDXT1Fast
 ========================
 */
 ID_INLINE void idDxtEncoder::CompressImageDXT1Fast( const byte *inBuf, byte *outBuf, int width, int height ) {
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 	CompressImageDXT1Fast_SSE2( inBuf, outBuf, width, height );
+#else
+	CompressImageDXT1Fast_Generic( inBuf, outBuf, width, height );
+#endif
 }
 
 /*
@@ -267,7 +272,11 @@ idDxtEncoder::CompressImageDXT1AlphaFast
 ========================
 */
 ID_INLINE void idDxtEncoder::CompressImageDXT1AlphaFast( const byte *inBuf, byte *outBuf, int width, int height ) {
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 	CompressImageDXT1AlphaFast_SSE2( inBuf, outBuf, width, height );
+#else
+	CompressImageDXT1AlphaFast_Generic( inBuf, outBuf, width, height );
+#endif
 }
 
 /*
@@ -276,7 +285,11 @@ idDxtEncoder::CompressImageDXT5Fast
 ========================
 */
 ID_INLINE void idDxtEncoder::CompressImageDXT5Fast( const byte *inBuf, byte *outBuf, int width, int height ) {
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 	CompressImageDXT5Fast_SSE2( inBuf, outBuf, width, height );
+#else
+	CompressImageDXT5Fast_Generic( inBuf, outBuf, width, height );
+#endif
 }
 
 /*
@@ -294,7 +307,11 @@ idDxtEncoder::CompressYCoCgDXT5Fast
 ========================
 */
 ID_INLINE void idDxtEncoder::CompressYCoCgDXT5Fast( const byte *inBuf, byte *outBuf, int width, int height ) {
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 	CompressYCoCgDXT5Fast_SSE2( inBuf, outBuf, width, height );
+#else
+	CompressYCoCgDXT5Fast_Generic( inBuf, outBuf, width, height );
+#endif
 }
 
 /*
@@ -312,7 +329,11 @@ idDxtEncoder::CompressNormalMapDXT5Fast
 ========================
 */
 ID_INLINE void idDxtEncoder::CompressNormalMapDXT5Fast( const byte *inBuf, byte *outBuf, int width, int height ) {
+#if defined(ID_WIN_X86_SSE2_INTRIN) || defined(ID_QNX_X86_SSE2_INTRIN)
 	CompressNormalMapDXT5Fast_SSE2( inBuf, outBuf, width, height );
+#else
+	CompressNormalMapDXT5Fast_Generic( inBuf, outBuf, width, height );
+#endif
 }
 
 /*
@@ -439,12 +460,12 @@ ID_INLINE byte idDxtEncoder::GreenFrom565( unsigned short c565 ) const {
 
 /*
 ================================================
-idDxtDecoder decodes DXT-compressed Images. Raw output Images are in 
+idDxtDecoder decodes DXT-compressed Images. Raw output Images are in
 4-byte RGBA format. Raw output NormalMaps are in 4-byte tangent-space NxNyNz format.
 ================================================
 */
 class idDxtDecoder {
-public:	
+public:
 
 	// DXT1 decompression (no alpha)
 	void	DecompressImageDXT1( const byte *inBuf, byte *outBuf, int width, int height );

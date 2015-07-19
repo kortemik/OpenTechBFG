@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -50,7 +51,7 @@ NOTE: due to the temporary memory pool idVecX cannot be used by multiple threads
 class idVecX {
 	friend class idMatX;
 
-public:	
+public:
 	ID_INLINE					idVecX();
 	ID_INLINE					explicit idVecX( int length );
 	ID_INLINE					explicit idVecX( int length, float *data );
@@ -213,10 +214,26 @@ ID_INLINE idVecX idVecX::operator-() const {
 	idVecX m;
 
 	m.SetTempSize( size );
-#ifdef VECX_SIMD
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	ALIGN16( unsigned int signBit[4] ) = { IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK };
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( m.p + i, _mm_xor_ps( _mm_load_ps( p + i ), (__m128 &) signBit[0] ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
+	for ( int i = 0; i < size; i += 4 ) {
+		vst1q_f32( (float32_t *)(m.p + i), vnegq_f32( vld1q_f32( (float32_t *)(p + i) ) ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM ) && defined( VECX_SIMD )
+	for ( int i = 0; i < size; i += 4 ) {
+		__asm__ __volatile__(
+				"MOV r1, #4\n"
+				"MLA r0, %[i], r1, %[s]\n"
+				"MLA r1, %[i], r1, %[d]\n"
+				"VLD1.32 {D0, D1}, [r0]\n"
+				"VNEG.F32 D0, D0\n"
+				"VNEG.F32 D1, D1\n"
+				"VST1.32 {D0, D1}, [r1]"
+				: [d] "+r" (m.p) : [i] "r" (i), [s] "r" (p) : "r0", "r1", "q0", "memory");
 	}
 #else
 	for ( int i = 0; i < size; i++ ) {
@@ -231,11 +248,25 @@ ID_INLINE idVecX idVecX::operator-() const {
 idVecX::operator=
 ========================
 */
-ID_INLINE idVecX &idVecX::operator=( const idVecX &a ) { 
+ID_INLINE idVecX &idVecX::operator=( const idVecX &a ) {
 	SetSize( a.size );
-#ifdef VECX_SIMD
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	for ( int i = 0; i < a.size; i += 4 ) {
 		_mm_store_ps( p + i, _mm_load_ps( a.p + i ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
+	for ( int i = 0; i < a.size; i += 4 ) {
+		vst1q_f32( (float32_t *)(p + i), vld1q_f32( (float32_t *)(a.p + i) ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM ) && defined( VECX_SIMD )
+	for ( int i = 0; i < a.size; i += 4 ) {
+		__asm__ __volatile__(
+				"MOV r1, #4\n"
+				"MLA r0, %[i], r1, %[s]\n"
+				"MLA r1, %[i], r1, %[d]\n"
+				"VLD1.32 {D0, D1}, [r0]\n"
+				"VST1.32 {D0, D1}, [r1]"
+				: [d] "+r" (p) : [i] "r" (i), [s] "r" (a.p) : "r0", "r1", "q0", "memory");
 	}
 #else
 	memcpy( p, a.p, a.size * sizeof( float ) );
@@ -254,9 +285,27 @@ ID_INLINE idVecX idVecX::operator+( const idVecX &a ) const {
 
 	assert( size == a.size );
 	m.SetTempSize( size );
-#ifdef VECX_SIMD
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( m.p + i, _mm_add_ps( _mm_load_ps( p + i ), _mm_load_ps( a.p + i ) ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
+	for ( int i = 0; i < size; i += 4 ) {
+		vst1q_f32( (float32_t *)(m.p + i), vaddq_f32( vld1q_f32( (float32_t *)(p + i) ), vld1q_f32( (float32_t *)(a.p + i) ) ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM ) && defined( VECX_SIMD )
+	for ( int i = 0; i < size; i += 4 ) {
+		__asm__ __volatile__(
+				"MOV r2, #4\n"
+				"MLA r0, %[i], r2, %[s]\n"
+				"MLA r1, %[i], r2, %[d]\n"
+				"MLA r2, %[i], r2, %[e]\n"
+				"VLD1.32 {D0, D1}, [r0]\n"
+				"VLD1.32 {D2, D3}, [r2]\n"
+				"VADD.F32 D0, D0, D2\n"
+				"VADD.F32 D1, D1, D3\n"
+				"VST1.32 {D0, D1}, [r1]"
+				: [d] "+r" (m.p) : [i] "r" (i), [s] "r" (p), [e] "r" (a.p) : "r0", "r1", "r2", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < size; i++ ) {
@@ -276,9 +325,27 @@ ID_INLINE idVecX idVecX::operator-( const idVecX &a ) const {
 
 	assert( size == a.size );
 	m.SetTempSize( size );
-#ifdef VECX_SIMD
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( m.p + i, _mm_sub_ps( _mm_load_ps( p + i ), _mm_load_ps( a.p + i ) ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
+	for ( int i = 0; i < size; i += 4 ) {
+		vst1q_f32( (float32_t *)(m.p + i), vsubq_f32( vld1q_f32( (float32_t *)(p + i) ), vld1q_f32( (float32_t *)(a.p + i) ) ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM ) && defined( VECX_SIMD )
+	for ( int i = 0; i < size; i += 4 ) {
+		__asm__ __volatile__(
+				"MOV r2, #4\n"
+				"MLA r0, %[i], r2, %[s]\n"
+				"MLA r1, %[i], r2, %[d]\n"
+				"MLA r2, %[i], r2, %[e]\n"
+				"VLD1.32 {D0, D1}, [r0]\n"
+				"VLD1.32 {D2, D3}, [r2]\n"
+				"VSUB.F32 D0, D0, D2\n"
+				"VSUB.F32 D1, D1, D3\n"
+				"VST1.32 {D0, D1}, [r1]"
+				: [d] "+r" (m.p) : [i] "r" (i), [s] "r" (p), [e] "r" (a.p) : "r0", "r1", "r2", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < size; i++ ) {
@@ -295,9 +362,26 @@ idVecX::operator+=
 */
 ID_INLINE idVecX &idVecX::operator+=( const idVecX &a ) {
 	assert( size == a.size );
-#ifdef VECX_SIMD
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( p + i, _mm_add_ps( _mm_load_ps( p + i ), _mm_load_ps( a.p + i ) ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
+	for ( int i = 0; i < size; i += 4 ) {
+		vst1q_f32( (float32_t *)(p + i), vaddq_f32( vld1q_f32( (float32_t *)(p + i) ), vld1q_f32( (float32_t *)(a.p + i) ) ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM ) && defined( VECX_SIMD )
+	for ( int i = 0; i < size; i += 4 ) {
+		__asm__ __volatile__(
+				"MOV r1, #4\n"
+				"MLA r0, %[i], r1, %[s]\n"
+				"MLA r1, %[i], r1, %[e]\n"
+				"VLD1.32 {D0, D1}, [r0]\n"
+				"VLD1.32 {D2, D3}, [r1]\n"
+				"VADD.F32 D0, D0, D2\n"
+				"VADD.F32 D1, D1, D3\n"
+				"VST1.32 {D0, D1}, [r0]"
+				: [s] "+r" (p) : [i] "r" (i), [e] "r" (a.p) : "r0", "r1", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < size; i++ ) {
@@ -315,9 +399,26 @@ idVecX::operator-=
 */
 ID_INLINE idVecX &idVecX::operator-=( const idVecX &a ) {
 	assert( size == a.size );
-#ifdef VECX_SIMD
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( p + i, _mm_sub_ps( _mm_load_ps( p + i ), _mm_load_ps( a.p + i ) ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
+	for ( int i = 0; i < size; i += 4 ) {
+		vst1q_f32( (float32_t *)(p + i), vsubq_f32( vld1q_f32( (float32_t *)(p + i) ), vld1q_f32( (float32_t *)(a.p + i) ) ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM ) && defined( VECX_SIMD )
+	for ( int i = 0; i < size; i += 4 ) {
+		__asm__ __volatile__(
+				"MOV r1, #4\n"
+				"MLA r0, %[i], r1, %[s]\n"
+				"MLA r1, %[i], r1, %[e]\n"
+				"VLD1.32 {D0, D1}, [r0]\n"
+				"VLD1.32 {D2, D3}, [r1]\n"
+				"VSUB.F32 D0, D0, D2\n"
+				"VSUB.F32 D1, D1, D3\n"
+				"VST1.32 {D0, D1}, [r0]"
+				: [s] "+r" (p) : [i] "r" (i), [e] "r" (a.p) : "r0", "r1", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < size; i++ ) {
@@ -337,10 +438,28 @@ ID_INLINE idVecX idVecX::operator*( const float a ) const {
 	idVecX m;
 
 	m.SetTempSize( size );
-#ifdef VECX_SIMD
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	__m128 va = _mm_load1_ps( & a );
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( m.p + i, _mm_mul_ps( _mm_load_ps( p + i ), va ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
+	float32x4_t va = vld1q_dup_f32( & a );
+	for ( int i = 0; i < size; i += 4 ) {
+		vst1q_f32( (float32_t *)(m.p + i), vmulq_f32( vld1q_f32( (float32_t *)(p + i) ), va ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM ) && defined( VECX_SIMD )
+	for ( int i = 0; i < size; i += 4 ) {
+		__asm__ __volatile__(
+				"MOV r1, #4\n"
+				"MLA r0, %[i], r1, %[s]\n"
+				"MLA r1, %[i], r1, %[d]\n"
+				"VLD1.32 {D2[0]}, [%[f]]\n"
+				"VLD1.32 {D0, D1}, [r0]\n"
+				"VMUL.F32 D0, D0, D2[0]\n"
+				"VMUL.F32 D1, D1, D2[0]\n"
+				"VST1.32 {D0, D1}, [r1]"
+				: [d] "+r" (m.p) : [i] "r" (i), [s] "r" (p), [f] "r" (&a) : "r0", "r1", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < size; i++ ) {
@@ -356,10 +475,27 @@ idVecX::operator*=
 ========================
 */
 ID_INLINE idVecX &idVecX::operator*=( const float a ) {
-#ifdef VECX_SIMD
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	__m128 va = _mm_load1_ps( & a );
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( p + i, _mm_mul_ps( _mm_load_ps( p + i ), va ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
+	float32x4_t va = vld1q_dup_f32( & a );
+	for ( int i = 0; i < size; i += 4 ) {
+		vst1q_f32( (float32_t *)(p + i), vmulq_f32( vld1q_f32( (float32_t *)(p + i) ), va ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM ) && defined( VECX_SIMD )
+	for ( int i = 0; i < size; i += 4 ) {
+		__asm__ __volatile__(
+				"MOV r0, #4\n"
+				"MLA r0, %[i], r0, %[s]\n"
+				"VLD1.32 {D2[0]}, [%[f]]\n"
+				"VLD1.32 {D0, D1}, [r0]\n"
+				"VMUL.F32 D0, D0, D2[0]\n"
+				"VMUL.F32 D1, D1, D2[0]\n"
+				"VST1.32 {D0, D1}, [r0]"
+				: [s] "+r" (p) : [i] "r" (i), [f] "r" (&a) : "r0", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < size; i++ ) {
@@ -551,9 +687,23 @@ idVecX::Zero
 ========================
 */
 ID_INLINE void idVecX::Zero() {
-#ifdef VECX_SIMD
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( p + i, _mm_setzero_ps() );
+	}
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
+	int32x4_t va = vdupq_n_s32( 0 );
+	for ( int i = 0; i < size; i += 4 ) {
+		vst1q_s32( (int32_t *)(p + i), va );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM ) && defined( VECX_SIMD )
+	for ( int i = 0; i < size; i += 4 ) {
+		__asm__ __volatile__(
+				"MOV r0, #4\n"
+				"MLA r0, %[i], r0, %[s]\n"
+				"VBIC.I32 q0, #0\n"
+				"VST1.32 {d0, d1}, [r0]"
+				: [s] "+r" (p) : [i] "r" (i) : "r0", "q0", "memory");
 	}
 #else
 	memset( p, 0, size * sizeof( float ) );
@@ -567,9 +717,23 @@ idVecX::Zero
 */
 ID_INLINE void idVecX::Zero( int length ) {
 	SetSize( length );
-#ifdef VECX_SIMD
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	for ( int i = 0; i < length; i += 4 ) {
 		_mm_store_ps( p + i, _mm_setzero_ps() );
+	}
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
+	int32x4_t va = vdupq_n_s32( 0 );
+	for ( int i = 0; i < length; i += 4 ) {
+		vst1q_s32( (int32_t *)(p + i), va );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM ) && defined( VECX_SIMD )
+	for ( int i = 0; i < size; i += 4 ) {
+		__asm__ __volatile__(
+				"MOV r0, #4\n"
+				"MLA r0, %[i], r0, %[s]\n"
+				"VBIC.I32 q0, #0\n"
+				"VST1.32 {d0, d1}, [r0]"
+				: [s] "+r" (p) : [i] "r" (i) : "r0", "q0", "memory");
 	}
 #else
 	memset( p, 0, length * sizeof( float ) );
@@ -611,10 +775,26 @@ idVecX::Negate
 ========================
 */
 ID_INLINE void idVecX::Negate() {
-#ifdef VECX_SIMD
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( VECX_SIMD )
 	ALIGN16( const unsigned int signBit[4] ) = { IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK };
 	for ( int i = 0; i < size; i += 4 ) {
 		_mm_store_ps( p + i, _mm_xor_ps( _mm_load_ps( p + i ), (__m128 &) signBit[0] ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( VECX_SIMD )
+	ALIGN16( const unsigned int signBit[4] ) = { IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK };
+	for ( int i = 0; i < size; i += 4 ) {
+		vst1q_u32( (uint32_t *)(p + i), veorq_u32( vld1q_u32( (uint32_t *)(p + i) ), (uint32x4_t &) signBit[0] ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM ) && defined( VECX_SIMD )
+	for ( int i = 0; i < size; i += 4 ) {
+		__asm__ __volatile__(
+				"MOV r0, #4\n"
+				"MLA r0, %[i], r0, %[s]\n"
+				"VLD1.32 {D0, D1}, [r0]\n"
+				"VNEG.F32 D0, D0\n"
+				"VNEG.F32 D1, D1\n"
+				"VST1.32 {D0, D1}, [r0]"
+				: [s] "+r" (p) : [i] "r" (i) : "r0", "q0", "memory");
 	}
 #else
 	for ( int i = 0; i < size; i++ ) {

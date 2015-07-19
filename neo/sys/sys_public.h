@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -40,23 +41,28 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 enum cpuid_t {
-	CPUID_NONE							= 0x00000,
-	CPUID_UNSUPPORTED					= 0x00001,	// unsupported (386/486)
-	CPUID_GENERIC						= 0x00002,	// unrecognized processor
-	CPUID_INTEL							= 0x00004,	// Intel
-	CPUID_AMD							= 0x00008,	// AMD
-	CPUID_MMX							= 0x00010,	// Multi Media Extensions
-	CPUID_3DNOW							= 0x00020,	// 3DNow!
-	CPUID_SSE							= 0x00040,	// Streaming SIMD Extensions
-	CPUID_SSE2							= 0x00080,	// Streaming SIMD Extensions 2
-	CPUID_SSE3							= 0x00100,	// Streaming SIMD Extentions 3 aka Prescott's New Instructions
-	CPUID_ALTIVEC						= 0x00200,	// AltiVec
-	CPUID_HTT							= 0x01000,	// Hyper-Threading Technology
-	CPUID_CMOV							= 0x02000,	// Conditional Move (CMOV) and fast floating point comparison (FCOMI) instructions
-	CPUID_FTZ							= 0x04000,	// Flush-To-Zero mode (denormal results are flushed to zero)
-	CPUID_DAZ							= 0x08000,	// Denormals-Are-Zero mode (denormal source operands are set to zero)
-	CPUID_XENON							= 0x10000,	// Xbox 360
-	CPUID_CELL							= 0x20000	// PS3
+	CPUID_NONE							= 0x000000,
+	CPUID_UNSUPPORTED					= 0x000001,	// unsupported (386/486)
+	CPUID_GENERIC						= 0x000002,	// unrecognized processor
+	CPUID_INTEL							= 0x000004,	// Intel
+	CPUID_AMD							= 0x000008,	// AMD
+	CPUID_MMX							= 0x000010,	// Multi Media Extensions
+	CPUID_3DNOW							= 0x000020,	// 3DNow!
+	CPUID_SSE							= 0x000040,	// Streaming SIMD Extensions
+	CPUID_SSE2							= 0x000080,	// Streaming SIMD Extensions 2
+	CPUID_SSE3							= 0x000100,	// Streaming SIMD Extentions 3 aka Prescott's New Instructions
+	CPUID_ALTIVEC						= 0x000200,	// AltiVec
+	CPUID_HTT							= 0x001000,	// Hyper-Threading Technology
+	CPUID_CMOV							= 0x002000,	// Conditional Move (CMOV) and fast floating point comparison (FCOMI) instructions
+	CPUID_FTZ							= 0x004000,	// Flush-To-Zero mode (denormal results are flushed to zero)
+	CPUID_DAZ							= 0x008000,	// Denormals-Are-Zero mode (denormal source operands are set to zero)
+	CPUID_XENON							= 0x010000,	// Xbox 360
+	CPUID_CELL							= 0x020000,	// PS3
+	CPUID_TI							= 0x040000,	// Texas Instruments
+	CPUID_QC							= 0x080000,	// Qualcomm
+	CPUID_VFP							= 0x100000,	// Vector Floating Point
+	CPUID_NEON							= 0x200000,	// ARM Advanced SIMD
+	CPUID_WMMX2							= 0x400000	// iWMMX2 support
 };
 
 enum fpuExceptions_t {
@@ -81,6 +87,11 @@ enum fpuRounding_t {
 	FPU_ROUNDING_TO_ZERO				= 3
 };
 
+enum fpuVfpStride {
+	FPU_VFP_STRIDE_ONE					= 0,
+	FPU_VFP_STRIDE_TWO					= 3
+};
+
 enum joystickAxis_t {
 	AXIS_LEFT_X,
 	AXIS_LEFT_Y,
@@ -95,10 +106,10 @@ enum sysEventType_t {
 	SE_NONE,				// evTime is still valid
 	SE_KEY,					// evValue is a key code, evValue2 is the down flag
 	SE_CHAR,				// evValue is an ascii char
-	SE_MOUSE,				// evValue and evValue2 are reletive signed x / y moves
+	SE_MOUSE,				// evValue and evValue2 are relative signed x / y moves
 	SE_MOUSE_ABSOLUTE,		// evValue and evValue2 are absolute coordinates in the window's client area.
-	SE_MOUSE_LEAVE,			// evValue and evValue2 are meaninless, this indicates the mouse has left the client area.
-	SE_JOYSTICK,		// evValue is an axis number and evValue2 is the current state (-127 to 127)
+	SE_MOUSE_LEAVE,			// evValue and evValue2 are meaningless, this indicates the mouse has left the client area.
+	SE_JOYSTICK,			// evValue is an axis number and evValue2 is the current state (-127 to 127)
 	SE_CONSOLE				// evPtr is a char*, from typing something at a non-game console
 };
 
@@ -393,6 +404,7 @@ struct sysMemoryStats_t {
 typedef unsigned long address_t;
 
 void			Sys_Init();
+void			Sys_InitPostFilesystem();
 void			Sys_Shutdown();
 void			Sys_Error( const char *error, ...);
 const char *	Sys_GetCmdLine();
@@ -460,6 +472,9 @@ void			Sys_FPU_SetFTZ( bool enable );
 // sets Denormals-Are-Zero mode (only available when CPUID_DAZ is set)
 void			Sys_FPU_SetDAZ( bool enable );
 
+// set VFP vector length and offset (only available when CPUID_VFP is set and CPU is ARM architecture)
+void			Sys_FPU_VFP_SetLEN_STRIDE( int length, int stride );
+
 // returns amount of system ram
 int				Sys_GetSystemRam();
 
@@ -500,7 +515,7 @@ void			Sys_GenerateEvents();
 sysEvent_t		Sys_GetEvent();
 void			Sys_ClearEvents();
 
-// input is tied to windows, so it needs to be started up and shut down whenever 
+// input is tied to windows, so it needs to be started up and shut down whenever
 // the main window is recreated
 void			Sys_InitInput();
 void			Sys_ShutdownInput();
@@ -531,7 +546,11 @@ void			Sys_ShowConsole( int visLevel, bool quitOnClose );
 
 // This really isn't the right place to have this, but since this is the 'top level' include
 // and has a function signature with 'FILE' in it, it kinda needs to be here =/
+#ifdef ID_WIN32
 typedef HANDLE idFileHandle;
+#else
+typedef int idFileHandle;
+#endif
 
 
 ID_TIME_T		Sys_FileTimeStamp( idFileHandle fp );
@@ -548,11 +567,11 @@ void			Sys_SetFatalError( const char *error );
 // Execute the specified process and wait until it's done, calling workFn every waitMS milliseconds.
 // If showOutput == true, std IO from the executed process will be output to the console.
 // Note that the return value is not an indication of the exit code of the process, but is false
-// only if the process could not be created at all. If you wish to check the exit code of the 
+// only if the process could not be created at all. If you wish to check the exit code of the
 // spawned process, check the value returned in exitCode.
 typedef bool ( *execProcessWorkFunction_t )();
 typedef void ( *execOutputFunction_t)( const char * text );
-bool Sys_Exec(	const char * appPath, const char * workingPath, const char * args, 
+bool Sys_Exec(	const char * appPath, const char * workingPath, const char * args,
 	execProcessWorkFunction_t workFn, execOutputFunction_t outputFn, const int waitMS,
 	unsigned int & exitCode );
 
@@ -610,8 +629,8 @@ public:
 	void		Close();
 
 	bool		GetPacket( netadr_t &from, void *data, int &size, int maxSize );
-	
-	bool		GetPacketBlocking( netadr_t &from, void *data, int &size, int maxSize, 
+
+	bool		GetPacketBlocking( netadr_t &from, void *data, int &size, int maxSize,
 								   int timeout );
 
 	void		SendPacket( const netadr_t to, const void *data, int size );
@@ -654,7 +673,7 @@ void			Sys_ShutdownNetworking();
 
 /*
 ================================================
-idJoystick is managed by each platform's local Sys implementation, and 
+idJoystick is managed by each platform's local Sys implementation, and
 provides full *Joy Pad* support (the most common device, these days).
 ================================================
 */
@@ -694,6 +713,7 @@ public:
 	virtual bool			FPU_StackIsEmpty() = 0;
 	virtual void			FPU_SetFTZ( bool enable ) = 0;
 	virtual void			FPU_SetDAZ( bool enable ) = 0;
+	virtual void			FPU_VFP_SetLEN_STRIDE( int length, int stride ) = 0;
 
 	virtual void			FPU_EnableExceptions( int exceptions ) = 0;
 

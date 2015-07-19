@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -56,6 +57,8 @@ ID_INLINE_EXTERN float __frndz( float x )						{	return (float)( (int)( x ) ); }
 ================================================================================================
 */
 
+#if defined( ID_WIN_X86_SSE2_INTRIN ) || defined( ID_QNX_X86_SSE2_INTRIN )
+
 // The code below assumes that a cache line is 64 bytes.
 // We specify the cache line size as 128 here to make the code consistent with the consoles.
 #define CACHE_LINE_SIZE						128
@@ -83,6 +86,74 @@ ID_FORCE_INLINE void FlushCacheLine( const void * ptr, int offset ) {
 	_mm_clflush( bytePtr +  0 );
 	_mm_clflush( bytePtr + 64 );
 }
+
+#elif defined( ID_QNX_ARM_ASM )
+
+// The code below assumes that a cache line is 64 bytes.
+// We specify the cache line size as 128 here to make the code consistent with the consoles.
+#define CACHE_LINE_SIZE						128
+
+ID_FORCE_INLINE void Prefetch( const void * ptr, int offset ) {
+	__asm__ __volatile__("PLD [%[base], +%[off]]" :: [base] "r" (ptr), [off] "r" (offset) :);
+}
+ID_FORCE_INLINE void ZeroCacheLine( void * ptr, int offset ) {
+	assert_128_byte_aligned( ptr );
+#ifdef ID_QNX_ARM_NEON_INTRIN
+	char * bytePtr = ( (char *) ptr ) + offset;
+	int32_t a = 0;
+	int32x4_t zero = vld1q_dup_s32( & a );
+	vst1q_s32( (int32_t *)( bytePtr + 0*16 ), zero );
+	vst1q_s32( (int32_t *)( bytePtr + 1*16 ), zero );
+	vst1q_s32( (int32_t *)( bytePtr + 2*16 ), zero );
+	vst1q_s32( (int32_t *)( bytePtr + 3*16 ), zero );
+	vst1q_s32( (int32_t *)( bytePtr + 4*16 ), zero );
+	vst1q_s32( (int32_t *)( bytePtr + 5*16 ), zero );
+	vst1q_s32( (int32_t *)( bytePtr + 6*16 ), zero );
+	vst1q_s32( (int32_t *)( bytePtr + 7*16 ), zero );
+#elif defined( ID_QNX_ARM_NEON_ASM )
+	__asm__ __volatile__(
+		"ADD %[ptr], %[ptr], %[off]\n"
+		"VBIC.I32 q0, #0\n"
+		"VMOV q1, q0\n"
+		"VST1.32 {q0-q1}, [%[ptr]]!\n"
+		"VST1.32 {q0-q1}, [%[ptr]]!\n"
+		"VST1.32 {q0-q1}, [%[ptr]]!\n"
+		"VST1.32 {q0-q1}, [%[ptr]]"
+		: [ptr] "+&r" (ptr) : [off] "r" (offset) : "q0", "q1", "memory");
+#else
+	char * bytePtr = ( (char *) ptr ) + offset;
+	memset( bytePtr, 0, CACHE_LINE_SIZE );
+#endif
+}
+ID_FORCE_INLINE void FlushCacheLine( const void * ptr, int offset ) {
+	off64_t addr;
+	char * bytePtr = ( (char *) ptr ) + offset;
+	if( mem_offset64( bytePtr, NOFD, CACHE_LINE_SIZE, &addr, NULL ) == 0) {
+		//cache_ctrl could probably be stored somewhere else so it doesn't get loaded every time, but no functions use FlushCacheLine so it's not needed
+		struct cache_ctrl ctrl;
+		cache_init( 0, &ctrl, NULL );
+		CACHE_FLUSH( &ctrl, bytePtr, addr, CACHE_LINE_SIZE );
+		cache_fini( &ctrl );
+	}
+}
+
+/*
+================================================
+	Other
+================================================
+*/
+#else
+
+#define CACHE_LINE_SIZE						128
+
+ID_INLINE void Prefetch( const void * ptr, int offset ) {}
+ID_INLINE void ZeroCacheLine( void * ptr, int offset ) {
+	byte * bytePtr = (byte *)( ( ( (UINT_PTR) ( ptr ) ) + ( offset ) ) & ~( CACHE_LINE_SIZE - 1 ) );
+	memset( bytePtr, 0, CACHE_LINE_SIZE );
+}
+ID_INLINE void FlushCacheLine( const void * ptr, int offset ) {}
+
+#endif
 
 /*
 ================================================
@@ -127,7 +198,7 @@ ID_INLINE_EXTERN int CACHE_LINE_CLEAR_OVERFLOW_COUNT( int size ) {
 
 /*
 ================================================
-	PC Windows
+	x86
 ================================================
 */
 
@@ -135,8 +206,16 @@ ID_INLINE_EXTERN int CACHE_LINE_CLEAR_OVERFLOW_COUNT( int size ) {
 #define R_SHUFFLE_D( x, y, z, w )	(( (w) & 3 ) << 6 | ( (z) & 3 ) << 4 | ( (y) & 3 ) << 2 | ( (x) & 3 ))
 #endif
 
+#if defined( ID_WIN_X86_SSE2_INTRIN ) || ( defined( ID_QNX_X86_SSE_INTRIN ) && defined( ID_QNX_X86_SSE2_INTRIN ) )
+
+#ifdef ID_WIN_X86_SSE2_INTRIN
+#define DS_INTRIN_TYPE __declspec(intrin_type)
+#else
+#define DS_INTRIN_TYPE
+#endif
+
 // make the intrinsics "type unsafe"
-typedef union __declspec(intrin_type) _CRT_ALIGN(16) __m128c {
+typedef union DS_INTRIN_TYPE ALIGNTYPE16 __m128c {
 				__m128c() {}
 				__m128c( __m128 f ) { m128 = f; }
 				__m128c( __m128i i ) { m128i = i; }
@@ -144,7 +223,7 @@ typedef union __declspec(intrin_type) _CRT_ALIGN(16) __m128c {
 	operator	__m128i() { return m128i; }
 	__m128		m128;
 	__m128i		m128i;
-} __m128c;
+} ALIGNTYPE16_POST __m128c;
 
 #define _mm_madd_ps( a, b, c )				_mm_add_ps( _mm_mul_ps( (a), (b) ), (c) )
 #define _mm_nmsub_ps( a, b, c )				_mm_sub_ps( (c), _mm_mul_ps( (a), (b) ) )
@@ -196,5 +275,50 @@ ID_FORCE_INLINE_EXTERN __m128 _mm_div16_ps( __m128 x, __m128 y ) {
 #define _mm_loadu_bounds_0( bounds )		_mm_perm_ps( _mm_loadh_pi( _mm_load_ss( & bounds[0].x ), (__m64 *) & bounds[0].y ), _MM_SHUFFLE( 1, 3, 2, 0 ) )
 // load idBounds::GetMaxs()
 #define _mm_loadu_bounds_1( bounds )		_mm_perm_ps( _mm_loadh_pi( _mm_load_ss( & bounds[1].x ), (__m64 *) & bounds[1].y ), _MM_SHUFFLE( 1, 3, 2, 0 ) )
+#endif
+
+/*
+================================================
+	ARM
+================================================
+*/
+
+#ifdef ID_QNX_ARM_NEON_INTRIN
+
+#define neon_swapq_sub_f32(x)		vcombine_f32( vget_high_f32( x ), vget_low_f32( x ) )
+#define neon_selq_u32( a, b, c )	vorrq_u32( vbicq_u32( c, a ), vandq_u32( c, b ) )
+
+// floating-point mask creation from most significant bits
+ID_FORCE_INLINE_EXTERN int32_t neon_movemaskq_u32( uint32x4_t input ) {
+	// Based off concepts presented: http://stackoverflow.com/questions/11870910/sse-mm-movemask-epi8-equivalent-method-for-arm-neon
+	// XXX Might be able to be merged info one chain instead of of getting the high and low pair and working on them separate
+
+	static const int32_t __attribute__((aligned (16))) xr[2] = { -31,-30 };
+	uint32x2_t mask_and = vdup_n_u32( 0x80000000 );
+	int32x2_t mask_shift = vld1_s32( xr );
+
+	return ( vpaddl_u32( vshl_u32( vand_u32( vget_high_u32( input ), mask_and ), mask_shift ) ) << 2 ) |
+			 vpaddl_u32( vshl_u32( vand_u32( vget_low_u32(  input ), mask_and ), mask_shift ) );
+}
+#define neon_movemaskq_f32( i ) neon_movemaskq_u32( vreinterpretq_u32_f32( i ) )
+
+// floating-point reciprocal with close to full precision
+ID_FORCE_INLINE_EXTERN float32x4_t neon_rcp32q_f32( float32x4_t x ) {
+	float32x4_t r = vrecpeq_f32( x );
+	r = vsubq_f32( vaddq_f32( r, r ), vmulq_f32( vmulq_f32( x, r ), r ) );
+	r = vsubq_f32( vaddq_f32( r, r ), vmulq_f32( vmulq_f32( x, r ), r ) );
+	return r;
+}
+// floating-point divide with close to full precision
+ID_FORCE_INLINE_EXTERN float32x4_t _mm_div32_ps( float32x4_t x, float32x4_t y ) {
+	return vmulq_f32( x, neon_rcp32q_f32( y ) );
+}
+
+// load idBounds::GetMins()
+#define neon_load_bounds_0_f32( bounds )	vsetq_lane_f32( bounds[0].z, vcombine_f32( vld1_f32( & bounds[0].x ), vdup_n_f32( 0.0f ) ), 2 )
+// load idBounds::GetMaxs()
+#define neon_load_bounds_1_f32( bounds )	vsetq_lane_f32( bounds[1].z, vcombine_f32( vld1_f32( & bounds[1].x ), vdup_n_f32( 0.0f ) ), 2 )
+
+#endif
 
 #endif	// !__SYS_INTRIINSICS_H__

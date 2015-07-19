@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -60,7 +61,7 @@ struct rumble_t
 	bool			waiting;
 	int				left;
 	int				right;
-	
+
 };
 
 enum gameSKU_t {
@@ -93,8 +94,13 @@ struct ExpansionData {
 
 namespace DoomLib
 {
+#ifdef ID_WIN32
 	typedef int ( *RecvFunc)( char* buff, DWORD *numRecv );
 	typedef int ( *SendFunc)( const char* buff, DWORD size, sockaddr_in *target, int toNode );
+#else
+	typedef int ( *RecvFunc)( char* buff, unsigned int *numRecv );
+	typedef int ( *SendFunc)( const char* buff, unsigned int size, struct sockaddr_in *target, int toNode );
+#endif
 	typedef int ( *SendRemoteFunc)();
 
 	void InitGlobals( void *ptr = NULL );
@@ -109,7 +115,7 @@ namespace DoomLib
 	void Shutdown();
 
 	void SetNetworking( RecvFunc rf, SendFunc sf, SendRemoteFunc sendRemote );
-	
+
 	void SetPlayer( int id );
 	int GetPlayer();
 
@@ -139,7 +145,13 @@ namespace DoomLib
 	extern bool					expansionDirty;
 
 	extern bool					skipToLoad;
+#ifdef MAX_PATH
 	extern char					loadGamePath[MAX_PATH];
+#elif defined(PATH_MAX)
+	extern char					loadGamePath[PATH_MAX];
+#else
+#error Unknown max path constant
+#endif
 
 	extern bool					skipToNew;
 	extern int					chosenSkill;
@@ -162,7 +174,7 @@ namespace DoomLib
 	void						ShowXToContinue( bool activate );
 	gameSKU_t					GetGameSKU();
 	void						HandleEndMatch();
-	
+
 };
 
 

@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -32,12 +33,16 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../Game_local.h"
 
+#ifdef ID_WIN32
 #include "TypeInfo.h"
+#else
+#include <typeinfo>
+#endif
 
 /*
 Save game related helper classes.
 
-Save games are implemented in two classes, idSaveGame and idRestoreGame, that implement write/read functions for 
+Save games are implemented in two classes, idSaveGame and idRestoreGame, that implement write/read functions for
 common types.  They're passed in to each entity and object for them to archive themselves.  Each class
 implements save/restore functions for it's own data.  When restoring, all the objects are instantiated,
 then the restore function is called on each, superclass first, then subclasses.
@@ -179,7 +184,7 @@ void idSaveGame::CallSave_r( const idTypeInfo *cls, const idClass *obj ) {
 			return;
 		}
 	}
-	
+
 	( obj->*cls->Save )( this );
 }
 
@@ -268,7 +273,7 @@ void idSaveGame::WriteBool( const bool value ) {
 ================
 idSaveGame::WriteString
 ================
-*/  
+*/
 void idSaveGame::WriteString( const char *string ) {
 	if ( string == NULL || *string == 0 ) {
 		WriteInt( -1 );
@@ -751,7 +756,7 @@ void idSaveGame::WriteTrace( const trace_t &trace ) {
  */
 void idSaveGame::WriteTraceModel( const idTraceModel &trace ) {
 	int j, k;
-	
+
 	WriteInt( (int&)trace.type );
 	WriteInt( trace.numVerts );
 	for ( j = 0; j < MAX_TRACEMODEL_VERTS; j++ ) {
@@ -817,7 +822,7 @@ void idSaveGame::WriteBuildNumber( const int value ) {
 /***********************************************************************
 
 	idRestoreGame
-	
+
 ***********************************************************************/
 
 /*
@@ -968,7 +973,7 @@ void idRestoreGame::CallRestore_r( const idTypeInfo *cls, idClass *obj ) {
 			return;
 		}
 	}
-	
+
 	( obj->*cls->Restore )( this );
 }
 
@@ -1543,7 +1548,7 @@ void idRestoreGame::ReadTrace( trace_t &trace ) {
  */
 void idRestoreGame::ReadTraceModel( idTraceModel &trace ) {
 	int j, k;
-	
+
 	ReadInt( (int&)trace.type );
 	ReadInt( trace.numVerts );
 	for ( j = 0; j < MAX_TRACEMODEL_VERTS; j++ ) {

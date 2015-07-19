@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -72,6 +73,7 @@ R_MatrixMultiply
 ==========================
 */
 void R_MatrixMultiply( const float a[16], const float b[16], float out[16] ) {
+#if defined( ID_WIN_X86_SSE2_INTRIN ) || defined( ID_QNX_X86_SSE2_INTRIN )
 
 	__m128 a0 = _mm_loadu_ps( a + 0*4 );
 	__m128 a1 = _mm_loadu_ps( a + 1*4 );
@@ -108,6 +110,112 @@ void R_MatrixMultiply( const float a[16], const float b[16], float out[16] ) {
 	_mm_storeu_ps( out + 2*4, t2 );
 	_mm_storeu_ps( out + 3*4, t3 );
 
+#elif defined( ID_QNX_ARM_NEON_INTRIN )
+
+	float32x4_t a0 = vld1q_f32( (float32_t *)( a + 0*4 ) );
+	float32x4_t a1 = vld1q_f32( (float32_t *)( a + 1*4 ) );
+	float32x4_t a2 = vld1q_f32( (float32_t *)( a + 2*4 ) );
+	float32x4_t a3 = vld1q_f32( (float32_t *)( a + 3*4 ) );
+
+	float32x4_t b0 = vld1q_f32( (float32_t *)( b + 0*4 ) );
+	float32x4_t b1 = vld1q_f32( (float32_t *)( b + 1*4 ) );
+	float32x4_t b2 = vld1q_f32( (float32_t *)( b + 2*4 ) );
+	float32x4_t b3 = vld1q_f32( (float32_t *)( b + 3*4 ) );
+
+	float32x4_t t0 = vmulq_lane_f32( b0, vget_low_f32( a0 ), 0 );
+	float32x4_t t1 = vmulq_lane_f32( b0, vget_low_f32( a1 ), 0 );
+	float32x4_t t2 = vmulq_lane_f32( b0, vget_low_f32( a2 ), 0 );
+	float32x4_t t3 = vmulq_lane_f32( b0, vget_low_f32( a3 ), 0 );
+
+	t0 = vmlaq_lane_f32( t0, b1, vget_low_f32( a0 ), 1 );
+	t1 = vmlaq_lane_f32( t1, b1, vget_low_f32( a1 ), 1 );
+	t2 = vmlaq_lane_f32( t2, b1, vget_low_f32( a2 ), 1 );
+	t3 = vmlaq_lane_f32( t3, b1, vget_low_f32( a3 ), 1 );
+
+	t0 = vmlaq_lane_f32( t0, b2, vget_high_f32( a0 ), 0 );
+	t1 = vmlaq_lane_f32( t1, b2, vget_high_f32( a1 ), 0 );
+	t2 = vmlaq_lane_f32( t2, b2, vget_high_f32( a2 ), 0 );
+	t3 = vmlaq_lane_f32( t3, b2, vget_high_f32( a3 ), 0 );
+
+	t0 = vmlaq_lane_f32( t0, b3, vget_high_f32( a0 ), 1 );
+	t1 = vmlaq_lane_f32( t1, b3, vget_high_f32( a1 ), 1 );
+	t2 = vmlaq_lane_f32( t2, b3, vget_high_f32( a2 ), 1 );
+	t3 = vmlaq_lane_f32( t3, b3, vget_high_f32( a3 ), 1 );
+
+	vst1q_f32( (float32_t *)( out + 0*4 ), t0 );
+	vst1q_f32( (float32_t *)( out + 1*4 ), t1 );
+	vst1q_f32( (float32_t *)( out + 2*4 ), t2 );
+	vst1q_f32( (float32_t *)( out + 3*4 ), t3 );
+
+#elif defined( ID_QNX_ARM_NEON_ASM )
+
+	__asm__ __volatile__(
+			"VLD1.32 {q0,q1}, [%[a]]!\n"
+			"VLD1.32 {q2,q3}, [%[a]]\n"
+			"VLD1.32 {q4,q5}, [%[b]]!\n"
+			"VLD1.32 {q6,q7}, [%[b]]\n"
+
+			"VMUL.F32 q8, q4, d0[0]\n"
+			"VMUL.F32 q9, q4, d2[0]\n"
+			"VMUL.F32 q10, q4, d4[0]\n"
+			"VMUL.F32 q11, q4, d6[0]\n"
+
+			"VMLA.F32 q8, q5, d0[1]\n"
+			"VMLA.F32 q9, q5, d2[1]\n"
+			"VMLA.F32 q10, q5, d4[1]\n"
+			"VMLA.F32 q11, q5, d6[1]\n"
+
+			"VMLA.F32 q8, q6, d1[0]\n"
+			"VMLA.F32 q9, q6, d3[0]\n"
+			"VMLA.F32 q10, q6, d5[0]\n"
+			"VMLA.F32 q11, q6, d7[0]\n"
+
+			"VMLA.F32 q8, q7, d1[1]\n"
+			"VMLA.F32 q9, q7, d3[1]\n"
+			"VMLA.F32 q10, q7, d5[1]\n"
+			"VMLA.F32 q11, q7, d7[1]\n"
+
+			"VST1.32 {q8,q9}, [%[d]]!\n"
+			"VST1.32 {q10,q11}, [%[d]]"
+			: [d] "+r" (out)
+			: [a] "r" (a), [b] "r" (b)
+			: "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "memory");
+
+#else
+
+	/*
+	for ( int i = 0; i < 4; i++ ) {
+		for ( int j = 0; j < 4; j++ ) {
+			out[ i * 4 + j ] =
+				a[ i * 4 + 0 ] * b[ 0 * 4 + j ] +
+				a[ i * 4 + 1 ] * b[ 1 * 4 + j ] +
+				a[ i * 4 + 2 ] * b[ 2 * 4 + j ] +
+				a[ i * 4 + 3 ] * b[ 3 * 4 + j ];
+		}
+	}
+	*/
+
+	out[0*4+0] = a[0*4+0]*b[0*4+0] + a[0*4+1]*b[1*4+0] + a[0*4+2]*b[2*4+0] + a[0*4+3]*b[3*4+0];
+	out[0*4+1] = a[0*4+0]*b[0*4+1] + a[0*4+1]*b[1*4+1] + a[0*4+2]*b[2*4+1] + a[0*4+3]*b[3*4+1];
+	out[0*4+2] = a[0*4+0]*b[0*4+2] + a[0*4+1]*b[1*4+2] + a[0*4+2]*b[2*4+2] + a[0*4+3]*b[3*4+2];
+	out[0*4+3] = a[0*4+0]*b[0*4+3] + a[0*4+1]*b[1*4+3] + a[0*4+2]*b[2*4+3] + a[0*4+3]*b[3*4+3];
+
+	out[1*4+0] = a[1*4+0]*b[0*4+0] + a[1*4+1]*b[1*4+0] + a[1*4+2]*b[2*4+0] + a[1*4+3]*b[3*4+0];
+	out[1*4+1] = a[1*4+0]*b[0*4+1] + a[1*4+1]*b[1*4+1] + a[1*4+2]*b[2*4+1] + a[1*4+3]*b[3*4+1];
+	out[1*4+2] = a[1*4+0]*b[0*4+2] + a[1*4+1]*b[1*4+2] + a[1*4+2]*b[2*4+2] + a[1*4+3]*b[3*4+2];
+	out[1*4+3] = a[1*4+0]*b[0*4+3] + a[1*4+1]*b[1*4+3] + a[1*4+2]*b[2*4+3] + a[1*4+3]*b[3*4+3];
+
+	out[2*4+0] = a[2*4+0]*b[0*4+0] + a[2*4+1]*b[1*4+0] + a[2*4+2]*b[2*4+0] + a[2*4+3]*b[3*4+0];
+	out[2*4+1] = a[2*4+0]*b[0*4+1] + a[2*4+1]*b[1*4+1] + a[2*4+2]*b[2*4+1] + a[2*4+3]*b[3*4+1];
+	out[2*4+2] = a[2*4+0]*b[0*4+2] + a[2*4+1]*b[1*4+2] + a[2*4+2]*b[2*4+2] + a[2*4+3]*b[3*4+2];
+	out[2*4+3] = a[2*4+0]*b[0*4+3] + a[2*4+1]*b[1*4+3] + a[2*4+2]*b[2*4+3] + a[2*4+3]*b[3*4+3];
+
+	out[3*4+0] = a[3*4+0]*b[0*4+0] + a[3*4+1]*b[1*4+0] + a[3*4+2]*b[2*4+0] + a[3*4+3]*b[3*4+0];
+	out[3*4+1] = a[3*4+0]*b[0*4+1] + a[3*4+1]*b[1*4+1] + a[3*4+2]*b[2*4+1] + a[3*4+3]*b[3*4+1];
+	out[3*4+2] = a[3*4+0]*b[0*4+2] + a[3*4+1]*b[1*4+2] + a[3*4+2]*b[2*4+2] + a[3*4+3]*b[3*4+2];
+	out[3*4+3] = a[3*4+0]*b[0*4+3] + a[3*4+1]*b[1*4+3] + a[3*4+2]*b[2*4+3] + a[3*4+3]*b[3*4+3];
+
+#endif
 }
 
 /*

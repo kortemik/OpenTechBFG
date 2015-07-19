@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -31,9 +32,14 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
-
-
 idRenderProgManager renderProgManager;
+
+#ifndef ID_QNX
+#define SHADOW_FRAGMENT -1
+#else
+// GLES requires that all shader programs have a vertex and fragment shader. A shader program cannot only have a vertex shader or only a fragment shader.
+#define SHADOW_FRAGMENT FindFragmentShader( "invisible.vp" )
+#endif
 
 /*
 ================================================================================================
@@ -56,9 +62,26 @@ idRenderProgManager::~idRenderProgManager() {
 R_ReloadShaders
 ================================================================================================
 */
-static void R_ReloadShaders( const idCmdArgs &args ) {	
+static void R_ReloadShaders( const idCmdArgs &args ) {
 	renderProgManager.KillAllShaders();
 	renderProgManager.LoadAllShaders();
+}
+
+/*
+================
+idRenderProgManager::R_ExportCGShaders
+================
+*/
+void idRenderProgManager::R_ExportCGShaders( const idCmdArgs &args ) {
+	// vertex shaders
+	for ( int i = 0; i < renderProgManager.GetProgramCount(); i++ ) {
+		renderProgManager.SaveCGShader( GL_VERTEX_SHADER, renderProgManager.GetProgramName( i ) );
+	}
+
+	// fragment shaders
+	for ( int i = 0; i < renderProgManager.GetProgramCount(); i++ ) {
+		renderProgManager.SaveCGShader( GL_FRAGMENT_SHADER, renderProgManager.GetProgramName( i ) );
+	}
 }
 
 /*
@@ -68,7 +91,6 @@ idRenderProgManager::Init()
 */
 void idRenderProgManager::Init() {
 	common->Printf( "----- Initializing Render Shaders -----\n" );
-
 
 	for ( int i = 0; i < MAX_BUILTINS; i++ ) {
 		builtinShaders[i] = -1;
@@ -130,8 +152,8 @@ void idRenderProgManager::Init() {
 	builtinShaders[BUILTIN_SHADOW] = FindVertexShader( "shadow.vp" );
 	builtinShaders[BUILTIN_SHADOW_SKINNED] = FindVertexShader( "shadow_skinned.vp" );
 
-	FindGLSLProgram( "shadow.vp", builtinShaders[BUILTIN_SHADOW], -1 );
-	FindGLSLProgram( "shadow_skinned.vp", builtinShaders[BUILTIN_SHADOW_SKINNED], -1 );
+	FindGLSLProgram( "shadow.vp", builtinShaders[BUILTIN_SHADOW], SHADOW_FRAGMENT );
+	FindGLSLProgram( "shadow_skinned.vp", builtinShaders[BUILTIN_SHADOW_SKINNED], SHADOW_FRAGMENT );
 
 	glslUniforms.SetNum( RENDERPARM_USER + MAX_GLSL_USER_PARMS, vec4_zero );
 
@@ -146,6 +168,9 @@ void idRenderProgManager::Init() {
 	vertexShaders[builtinShaders[BUILTIN_FOG_SKINNED]].usesJoints = true;
 
 	cmdSystem->AddCommand( "reloadShaders", R_ReloadShaders, CMD_FL_RENDERER, "reloads shaders" );
+#ifdef _DEBUG
+	cmdSystem->AddCommand( "exportcgshaders", R_ExportCGShaders, CMD_FL_RENDERER, "export CG shaders" );
+#endif
 }
 
 /*
@@ -200,6 +225,16 @@ idRenderProgManager::Shutdown()
 */
 void idRenderProgManager::Shutdown() {
 	KillAllShaders();
+}
+
+/*
+================================================================================================
+idRenderProgManager::GetProgramName
+================================================================================================
+*/
+const char *idRenderProgManager::GetProgramName( int index ) const {
+	assert( index >= 0 && index < glslPrograms.Num() );
+	return glslPrograms[index].name.c_str();
 }
 
 /*
@@ -285,6 +320,10 @@ idRenderProgManager::LoadShader
 ================================================================================================
 */
 GLuint idRenderProgManager::LoadShader( GLenum target, const char * name, const char * startToken ) {
+
+#ifdef GL_ES_VERSION_2_0
+	common->FatalError( "idRenderProgManager::LoadShader: unsupported" );
+#endif
 
 	idStr fullPath = "renderprogs\\gl\\";
 	fullPath += name;

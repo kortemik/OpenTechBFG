@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -82,9 +82,9 @@ public:
 	void	Raise() { Sys_SignalRaise( handle ); }
 	void	Clear() { Sys_SignalClear( handle ); }
 
-	// Wait returns true if the object is in a signalled state and
-	// returns false if the wait timed out. Wait also clears the signalled
-	// state when the signalled state is reached within the time out period.
+	// Wait returns true if the object is in a signaled state and
+	// returns false if the wait timed out. Wait also clears the signaled
+	// state when the signaled state is reached within the time out period.
 	bool	Wait( int timeout = WAIT_INFINITE ) { return Sys_SignalWait( handle, timeout ); }
 
 private:
@@ -138,8 +138,8 @@ public:
 			idSysInterlockedPointer() : ptr( NULL ) {}
 
 	// atomically sets the pointer and returns the previous pointer value
-	T *		Set( T * newPtr ) { 
-				return (T *) Sys_InterlockedExchangePointer( (void * &) ptr, newPtr ); 
+	T *		Set( T * newPtr ) {
+				return (T *) Sys_InterlockedExchangePointer( (void * &) ptr, newPtr );
 			}
 
 	// atomically sets the pointer to 'newPtr' only if the previous pointer is equal to 'comparePtr'
@@ -158,7 +158,7 @@ private:
 /*
 ================================================
 idSysThread is an abstract base class, to be extended by classes implementing the
-idSysThread::Run() method. 
+idSysThread::Run() method.
 
 	class idMyThread : public idSysThread {
 	public:
@@ -188,7 +188,7 @@ Note that the Sys_CreateThread function does not support the concept of worker t
 
 	idMyWorkerThread thread;
 	thread.StartThread( "myWorkerThread" );
- 
+
 	// main thread loop
 	for ( ; ; ) {
 		// setup work for the thread here (by modifying class data on the thread)
@@ -222,11 +222,11 @@ public:
 	// Thread Start/Stop/Wait
 	//------------------------
 
-	bool			StartThread( const char * name, core_t core, 
+	bool			StartThread( const char * name, core_t core,
 								 xthreadPriority priority = THREAD_NORMAL,
 								 int stackSize = DEFAULT_THREAD_STACK_SIZE );
 
-	bool			StartWorkerThread( const char * name, core_t core, 
+	bool			StartWorkerThread( const char * name, core_t core,
 									   xthreadPriority priority = THREAD_NORMAL,
 									   int stackSize = DEFAULT_THREAD_STACK_SIZE );
 
@@ -274,7 +274,7 @@ private:
 
 /*
 ================================================
-idSysWorkerThreadGroup implements a group of worker threads that 
+idSysWorkerThreadGroup implements a group of worker threads that
 typically crunch through a collection of similar tasks.
 
 	class idMyWorkerThread : public idSysThread {
@@ -327,7 +327,7 @@ idSysWorkerThreadGroup<threadType>::idSysWorkerThreadGroup
 ========================
 */
 template<class threadType>
-ID_INLINE idSysWorkerThreadGroup<threadType>::idSysWorkerThreadGroup( const char * name, 
+ID_INLINE idSysWorkerThreadGroup<threadType>::idSysWorkerThreadGroup( const char * name,
 			int numThreads, xthreadPriority priority, int stackSize ) {
 	runOneThreadInline = ( numThreads < 0 );
 	singleThreaded = false;
@@ -375,7 +375,7 @@ ID_INLINE void idSysWorkerThreadGroup<threadType>::SignalWorkAndWait() {
 
 /*
 ================================================
-idSysThreadSynchronizer, allows a group of threads to 
+idSysThreadSynchronizer, allows a group of threads to
 synchronize with each other half-way through execution.
 
 	idSysThreadSynchronizer sync;

@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -197,6 +197,26 @@ ID_INLINE idCVar::idCVar( const char *name, const char *value, int flags, const 
 							const char **valueStrings, argCompletion_t valueCompletion ) {
 	Init( name, value, flags, description, 1, -1, valueStrings, valueCompletion );
 }
+
+/*
+===============================================================================
+
+	idAdjustableMinMaxCVar
+
+===============================================================================
+*/
+
+class idAdjustableMinMaxCVar : public idCVar {
+public:
+							idAdjustableMinMaxCVar( const char *name, const char *value, int flags, const char *description,
+													float valueMin, float valueMax, argCompletion_t valueCompletion = NULL )
+													: idCVar( name, value, flags, description, valueMin, valueMax, valueCompletion ) {}
+	virtual					~idAdjustableMinMaxCVar() {}
+
+	// Should really adjust internalVar instead of "this"
+	void					SetMinValue( const float value ) { this->valueMin = value; }
+	void					SetMaxValue( const float value ) { this->valueMax = value; }
+};
 
 
 /*

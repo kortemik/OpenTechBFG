@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -224,7 +225,7 @@ qhandle_t idRenderWorldLocal::AddEntityDef( const renderEntity_t *re ){
 	}
 
 	UpdateEntityDef( entityHandle, re );
-	
+
 	return entityHandle;
 }
 
@@ -445,7 +446,7 @@ void idRenderWorldLocal::UpdateLightDef( qhandle_t lightHandle, const renderLigh
 			 rlight->noShadows == light->parms.noShadows && rlight->origin == light->parms.origin &&
 			 rlight->parallel == light->parms.parallel && rlight->pointLight == light->parms.pointLight &&
 			 rlight->right == light->parms.right && rlight->start == light->parms.start &&
-			 rlight->target == light->parms.target && rlight->up == light->parms.up && 
+			 rlight->target == light->parms.target && rlight->up == light->parms.up &&
 			 rlight->shader == light->lightShader && rlight->prelightModel == light->parms.prelightModel ) {
 			justUpdate = true;
 		} else {
@@ -968,7 +969,7 @@ int idRenderWorldLocal::PointInArea( const idVec3 &point ) const {
 	areaNode_t	*node;
 	int			nodeNum;
 	float		d;
-	
+
 	node = areaNodes;
 	if ( !node ) {
 		return -1;
@@ -992,7 +993,7 @@ int idRenderWorldLocal::PointInArea( const idVec3 &point ) const {
 		}
 		node = areaNodes + nodeNum;
 	}
-	
+
 	return -1;
 }
 
@@ -1085,7 +1086,7 @@ guiPoint_t idRenderWorldLocal::GuiTrace( qhandle_t entityHandle, const idVec3 st
 		return pt;
 	}
 
-	idRenderEntityLocal * def = entityDefs[entityHandle];	
+	idRenderEntityLocal * def = entityDefs[entityHandle];
 	if ( def == NULL ) {
 		common->Printf( "idRenderWorld::GuiTrace: handle %i is NULL\n", entityHandle );
 		return pt;
@@ -1547,7 +1548,7 @@ void idRenderWorldLocal::GenerateAllInteractions() {
 	int	size =  interactionTableWidth * interactionTableHeight * sizeof( *interactionTable );
 	interactionTable = (idInteraction **)R_ClearedStaticAlloc( size );
 
-	// itterate through all lights
+	// iterate through all lights
 	int	count = 0;
 	for ( int i = 0; i < this->lightDefs.Num(); i++ ) {
 		idRenderLightLocal	*ldef = this->lightDefs[i];
@@ -1703,7 +1704,7 @@ void idRenderWorldLocal::PushFrustumIntoTree( idRenderEntityLocal *def, idRender
 	}
 
 	// calculate the corners of the frustum in word space
-	ALIGNTYPE16 frustumCorners_t corners;
+	ALIGNTYPE16 frustumCorners_t corners ALIGNTYPE16_POST;
 	idRenderMatrix::GetFrustumCorners( corners, frustumTransform, frustumBounds );
 
 	PushFrustumIntoTree_r( def, light, corners, 0 );
@@ -2074,7 +2075,7 @@ bool R_GlobalShaderOverride( const idMaterial **shader ) {
 		*shader = declManager->FindMaterial( r_materialOverride.GetString() );
 		return true;
 	}
-	
+
 	return false;
 }
 

@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -98,7 +99,7 @@ EmitSurfaces
 For full screen GUIs, we can add in per-surface stereoscopic depth effects
 ================
 */
-void idGuiModel::EmitSurfaces( float modelMatrix[16], float modelViewMatrix[16], 
+void idGuiModel::EmitSurfaces( float modelMatrix[16], float modelViewMatrix[16],
 	bool depthHack, bool allowFullScreenStereoDepth, bool linkAsEntity ) {
 
 	viewEntity_t * guiSpace = (viewEntity_t *)R_ClearedFrameAlloc( sizeof( *guiSpace ), FRAME_ALLOC_VIEW_ENTITY );
@@ -275,7 +276,7 @@ void idGuiModel::EmitFullScreen() {
 	viewDef_t * oldViewDef = tr.viewDef;
 	tr.viewDef = viewDef;
 
-	EmitSurfaces( viewDef->worldSpace.modelMatrix, viewDef->worldSpace.modelViewMatrix, 
+	EmitSurfaces( viewDef->worldSpace.modelMatrix, viewDef->worldSpace.modelViewMatrix,
 		false /* depthHack */ , stereoEnabled /* stereoDepthSort */, false /* link as entity */ );
 
 	tr.viewDef = oldViewDef;
@@ -355,15 +356,17 @@ idDrawVert * idGuiModel::AllocTris( int vertCount, const triIndex_t * tempIndexe
 
 	surf->numIndexes += indexCount;
 
+	const int vertexOffset = vertexCache.GetCacheVertexOffset( vertexBlock ) / sizeof ( idDrawVert );
+
 	if ( ( startIndex & 1 ) || ( indexCount & 1 ) ) {
 		// slow for write combined memory!
 		// this should be very rare, since quads are always an even index count
 		for ( int i = 0; i < indexCount; i++ ) {
-			indexPointer[startIndex + i] = startVert + tempIndexes[i];
+			indexPointer[startIndex + i] = startVert + tempIndexes[i] + vertexOffset;
 		}
 	} else {
 		for ( int i = 0; i < indexCount; i += 2 ) {
-			WriteIndexPair( indexPointer + startIndex + i, startVert + tempIndexes[i], startVert + tempIndexes[i+1] );
+			WriteIndexPair( indexPointer + startIndex + i, startVert + tempIndexes[i] + vertexOffset, startVert + tempIndexes[i+1] + vertexOffset );
 		}
 	}
 

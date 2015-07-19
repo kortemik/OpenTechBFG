@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,7 +35,7 @@ static const int	PC_KEYBOARD_WAIT	= 20000;
 
 /*
 ================================================
-Dialog box message types 
+Dialog box message types
 ================================================
 */
 enum gameDialogMessages_t {
@@ -93,7 +94,7 @@ enum gameDialogMessages_t {
 	GDM_DELETE_AUTOSAVE,
 	GDM_QUICK_SAVE,
 	GDM_MULTI_RETRY,
-	GDM_MULTI_SELF_DESTRUCT,	
+	GDM_MULTI_SELF_DESTRUCT,
 	GDM_MULTI_VDM_QUIT,
 	GDM_MULTI_COOP_QUIT,
 	GDM_LOADING_PROFILE,
@@ -177,6 +178,7 @@ enum gameDialogMessages_t {
 	GDM_XBOX_DEPLOYMENT_TYPE_FAIL,
 	GDM_SAVEGAME_WRONG_LANGUAGE,
 	GDM_GAME_RESTART_REQUIRED,
+	GDM_WARNING_LOW_BATTERY,
 	GDM_MAX
 };
 
@@ -251,7 +253,7 @@ public:
 
 /*
 ================================================
-idLoadScreenInfo 
+idLoadScreenInfo
 ================================================
 */
 class idLoadScreenInfo {

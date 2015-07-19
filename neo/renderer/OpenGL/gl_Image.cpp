@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -35,6 +36,41 @@ Contains the Image implementation for OpenGL.
 */
 
 #include "../tr_local.h"
+
+#ifdef GL_ES_VERSION_2_0
+
+void SwapBytes_16bit( uint16 *dst, const uint16 *src, int len ) {
+	int i = 0;
+	// X86 might be useful, but SSE lacks an ability to swap bytes, only elements and doesn't support byte elements
+#if defined( ID_QNX_ARM_NEON_INTRIN )
+	for ( ; i + 16 <= len; i += 16 ) {
+		uint8x16x2_t data = vld2q_u8( (uint8_t *)&src[i] );
+
+		uint8x16_t tmp = data.val[0];
+		data.val[0] = data.val[1];
+		data.val[1] = tmp;
+
+		vst2q_u8( (uint8_t *)&dst[i], data );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM )
+	for ( ; i + 16 <= len; i += 16 ) {
+		__asm__ __volatile__(
+				"MOV r1, #2\n"
+				"MLA r0, %[i], r1, %[s]\n"
+				"MLA r1, %[i], r1, %[d]\n"
+				"VLD2.8 {q0, q1}, [r0]\n"
+				"VSWP q0, q1\n"
+				"VST2.8 {q0, q1}, [r1]"
+				: [d] "+r" (dst) : [i] "r" (i), [s] "r" (src) : "r0", "r1", "q0", "q1", "memory");
+	}
+#endif
+	for ( ; i < len; i++ ) {
+		uint16 s = src[i];
+		dst[i] = ( ( s & 0xFF00 ) >> 8 ) | ( ( s & 0x00FF ) << 8 );
+	}
+}
+
+#endif
 
 /*
 ========================
@@ -87,11 +123,24 @@ void idImage::SubImageUpload( int mipLevel, int x, int y, int z, int width, int 
 
 	qglBindTexture( target, texnum );
 
-	if ( pixelPitch != 0 ) {
+	if ( pixelPitch != 0 && glConfig.textureUnpackRowLengthAvaliable ) {
 		qglPixelStorei( GL_UNPACK_ROW_LENGTH, pixelPitch );
 	}
 	if ( opts.format == FMT_RGB565 ) {
-		glPixelStorei( GL_UNPACK_SWAP_BYTES, GL_TRUE );
+#ifndef GL_ES_VERSION_2_0
+		qglPixelStorei( GL_UNPACK_SWAP_BYTES, GL_TRUE );
+#else
+		assert( pixelPitch == 0 ); //XXX
+
+#if 1
+		uint16 * dst = (uint16 *)_alloca16( width * height * sizeof( uint16 ) );
+		SwapBytes_16bit( dst, (uint16 *)pic, width * height );
+#else
+		memcpy( dst, pic, width * height * sizeof( uint16 ) );
+		idSwap::BigArray( dst, width * height );
+#endif
+		pic = dst;
+#endif
 	}
 #ifdef DEBUG
 	GL_CheckErrors();
@@ -115,10 +164,12 @@ void idImage::SubImageUpload( int mipLevel, int x, int y, int z, int width, int 
 #ifdef DEBUG
 	GL_CheckErrors();
 #endif
+#ifndef GL_ES_VERSION_2_0
 	if ( opts.format == FMT_RGB565 ) {
-		glPixelStorei( GL_UNPACK_SWAP_BYTES, GL_FALSE );
+		qglPixelStorei( GL_UNPACK_SWAP_BYTES, GL_FALSE );
 	}
-	if ( pixelPitch != 0 ) {
+#endif
+	if ( pixelPitch != 0 && glConfig.textureUnpackRowLengthAvaliable ) {
 		qglPixelStorei( GL_UNPACK_ROW_LENGTH, 0 );
 	}
 }
@@ -151,6 +202,10 @@ void idImage::SetTexParameters() {
 			return;
 	}
 
+#if !defined( GL_ES_VERSION_2_0 ) || defined( GL_ES_VERSION_3_0 )
+#ifdef GL_ES_VERSION_3_0
+	if ( glConfig.textureSwizzleAvailable ) {
+#endif
 	// ALPHA, LUMINANCE, LUMINANCE_ALPHA, and INTENSITY have been removed
 	// in OpenGL 3.2. In order to mimic those modes, we use the swizzle operators
 #if defined( USE_CORE_PROFILE )
@@ -198,6 +253,17 @@ void idImage::SetTexParameters() {
 		qglTexParameteri( target, GL_TEXTURE_SWIZZLE_A, GL_RED );
 	}
 #endif
+#ifdef GL_ES_VERSION_3_0
+	} else {
+#endif
+#endif //!defined( GL_ES_VERSION_2_0 ) || defined( GL_ES_VERSION_3_0 )
+#ifdef GL_ES_VERSION_2_0
+#ifndef GL_ES_VERSION_3_0
+	{
+#endif
+	//TODO: GLES 2.0 texture swizzling (possibly a shader modification)
+	}
+#endif
 
 	switch( filter ) {
 		case TF_DEFAULT:
@@ -235,9 +301,15 @@ void idImage::SetTexParameters() {
 			qglTexParameterf(target, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1 );
 		}
 	}
-	if ( glConfig.textureLODBiasAvailable && ( usage != TD_FONT ) ) {
+	if ( ( glConfig.textureLODBiasAvailable || glConfig.textureLODBiasShaderOnlyAvailable ) && ( usage != TD_FONT ) ) {
 		// use a blurring LOD bias in combination with high anisotropy to fix our aliasing grate textures...
-		qglTexParameterf(target, GL_TEXTURE_LOD_BIAS_EXT, r_lodBias.GetFloat() );
+		if ( glConfig.textureLODBiasAvailable ) {
+			qglTexParameterf(target, GL_TEXTURE_LOD_BIAS_EXT, r_lodBias.GetFloat() );
+		} else {
+			// while potentially problematic for fonts, this can be a uniform as opposed to per-texture since r_logBias is a global CVar
+			idVec4 bias( r_lodBias.GetFloat() );
+			renderProgManager.SetRenderParm( RENDERPARM_TEXBIAS, bias.ToFloatPtr() );
+		}
 	}
 
 	// set the wrap/clamp modes
@@ -247,15 +319,19 @@ void idImage::SetTexParameters() {
 			qglTexParameterf( target, GL_TEXTURE_WRAP_T, GL_REPEAT );
 			break;
 		case TR_CLAMP_TO_ZERO: {
-			float color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-			qglTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, color );
+			if ( glConfig.clampToBorderAvailable ) {
+				float color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+				qglTexParameterfv( target, GL_TEXTURE_BORDER_COLOR, color );
+			}
 			qglTexParameterf( target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
 			qglTexParameterf( target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
 			}
 			break;
 		case TR_CLAMP_TO_ZERO_ALPHA: {
-			float color[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-			qglTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, color );
+			if ( glConfig.clampToBorderAvailable ) {
+				float color[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+				qglTexParameterfv( target, GL_TEXTURE_BORDER_COLOR, color );
+			}
 			qglTexParameterf( target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
 			qglTexParameterf( target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
 			}
@@ -273,7 +349,7 @@ void idImage::SetTexParameters() {
 ========================
 idImage::AllocImage
 
-Every image will pass through this function. Allocates all the necessary MipMap levels for the 
+Every image will pass through this function. Allocates all the necessary MipMap levels for the
 Image, but doesn't put anything in them.
 
 This should not be done during normal game-play, if you can avoid it.
@@ -295,7 +371,15 @@ void idImage::AllocImage() {
 		dataType = GL_UNSIGNED_BYTE;
 		break;
 	case FMT_RGB565:
+#ifdef GL_ES_VERSION_3_0
+		if ( glConfig.glVersion >= 3.0 ) {
+			internalFormat = GL_RGB565;
+		} else {
+			internalFormat = GL_RGB;
+		}
+#else
 		internalFormat = GL_RGB;
+#endif
 		dataFormat = GL_RGB;
 		dataType = GL_UNSIGNED_SHORT_5_6_5;
 		break;
@@ -352,18 +436,51 @@ void idImage::AllocImage() {
 	case FMT_DEPTH:
 		internalFormat = GL_DEPTH_COMPONENT;
 		dataFormat = GL_DEPTH_COMPONENT;
+#ifndef GL_ES_VERSION_2_0
 		dataType = GL_UNSIGNED_BYTE;
+#else
+		dataType = GL_UNSIGNED_INT;
+#endif
 		break;
 	case FMT_X16:
+#ifndef GL_ES_VERSION_2_0
 		internalFormat = GL_INTENSITY16;
+#else
+		internalFormat = GL_LUMINANCE; // No code returns FMT_X16, so this will never occur
+#endif
 		dataFormat = GL_LUMINANCE;
 		dataType = GL_UNSIGNED_SHORT;
 		break;
 	case FMT_Y16_X16:
+#ifndef GL_ES_VERSION_2_0
 		internalFormat = GL_LUMINANCE16_ALPHA16;
+#else
+		internalFormat = GL_LUMINANCE_ALPHA; // No code returns FMT_Y16_X16, so this will never occur
+#endif
 		dataFormat = GL_LUMINANCE_ALPHA;
 		dataType = GL_UNSIGNED_SHORT;
 		break;
+#ifdef GL_ES_VERSION_2_0
+	case FMT_ETC1:
+		if ( glConfig.glVersion >= 3.0f ) {
+			internalFormat = GL_COMPRESSED_RGB8_ETC2;
+		} else {
+			internalFormat = GL_ETC1_RGB8_OES;
+		}
+		dataFormat = GL_RGB;
+		dataType = GL_UNSIGNED_BYTE;
+		break;
+	case FMT_ETC2_PUNCH:
+		internalFormat = GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2;
+		dataFormat = GL_RGBA;
+		dataType = GL_UNSIGNED_BYTE;
+		break;
+	case FMT_ETC2_ALPHA:
+		internalFormat = GL_COMPRESSED_RGBA8_ETC2_EAC;
+		dataFormat = GL_RGBA;
+		dataType = GL_UNSIGNED_BYTE;
+		break;
+#endif
 	default:
 		idLib::Error( "Unhandled image format %d in %s\n", opts.format, GetName() );
 	}
@@ -416,6 +533,7 @@ void idImage::AllocImage() {
 			if ( IsCompressed() ) {
 				int compressedSize = ( ((w+3)/4) * ((h+3)/4) * int64( 16 ) * BitsForFormat( opts.format ) ) / 8;
 
+#ifndef GL_ES_VERSION_2_0
 				// Even though the OpenGL specification allows the 'data' pointer to be NULL, for some
 				// drivers we actually need to upload data to get it to allocate the texture.
 				// However, on 32-bit systems we may fail to allocate a large block of memory for large
@@ -429,7 +547,12 @@ void idImage::AllocImage() {
 				if ( data != NULL ) {
 					HeapFree( GetProcessHeap(), 0, data );
 				}
+#else
+				qglCompressedTexImage2DARB( uploadTarget+side, level, internalFormat, w, h, 0, compressedSize, NULL );
+#endif
 			} else {
+				// In OpenGL ES, glTexStorage2D could be used. But this causes the resulting texture to be immutable.
+				// This causes issues if any function is used that could/does change dimensions is used, such as glCopyTexImage2D.
 				qglTexImage2D( uploadTarget + side, level, internalFormat, w, h, 0, dataFormat, dataType, NULL );
 			}
 
@@ -440,7 +563,9 @@ void idImage::AllocImage() {
 		}
 	}
 
-	qglTexParameteri( target, GL_TEXTURE_MAX_LEVEL, opts.numLevels - 1 );
+	if ( glConfig.textureMaxLevelAvailable ) {
+		qglTexParameteri( target, GL_TEXTURE_MAX_LEVEL, opts.numLevels - 1 );
+	}
 
 	// see if we messed anything up
 	GL_CheckErrors();
@@ -479,4 +604,17 @@ void idImage::Resize( int width, int height ) {
 	opts.width = width;
 	opts.height = height;
 	AllocImage();
+}
+
+/*
+========================
+idImage::IsCompressed
+========================
+*/
+bool idImage::IsCompressed() const {
+#ifndef GL_ES_VERSION_2_0
+	return ( opts.format == FMT_DXT1 || opts.format == FMT_DXT5 );
+#else
+	return ( opts.format == FMT_DXT1 || opts.format == FMT_DXT5 || opts.format == FMT_ETC1 || opts.format == FMT_ETC2_PUNCH || opts.format == FMT_ETC2_ALPHA );
+#endif
 }

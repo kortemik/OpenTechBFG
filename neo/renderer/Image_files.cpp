@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -40,6 +41,9 @@ void R_LoadImage( const char *name, byte **pic, int *width, int *height, bool ma
 
 */
 
+#ifdef USE_OS_LIBJPEG
+#include <jpeglib.h>
+#else
 /*
  * Include file for users of JPEG library.
  * You will need to have included system headers that define at least
@@ -49,6 +53,7 @@ void R_LoadImage( const char *name, byte **pic, int *width, int *height, bool ma
  */
 
 #include "jpeg-6/jpeglib.h"
+#endif
 
 // hooks from jpeg lib to our system
 
@@ -173,7 +178,7 @@ static void LoadTGA( const char *name, byte **pic, int *width, int *height, ID_T
 	targa_header.id_length = *buf_p++;
 	targa_header.colormap_type = *buf_p++;
 	targa_header.image_type = *buf_p++;
-	
+
 	targa_header.colormap_index = LittleShort ( *(short *)buf_p );
 	buf_p += 2;
 	targa_header.colormap_length = LittleShort ( *(short *)buf_p );
@@ -226,9 +231,9 @@ static void LoadTGA( const char *name, byte **pic, int *width, int *height, ID_T
 	if ( targa_header.id_length != 0 ) {
 		buf_p += targa_header.id_length;  // skip TARGA image comment
 	}
-	
+
 	if ( targa_header.image_type == 2 || targa_header.image_type == 3 )
-	{ 
+	{
 		// Uncompressed RGB or gray scale image
 		for( row = rows - 1; row >= 0; row-- )
 		{
@@ -238,7 +243,7 @@ static void LoadTGA( const char *name, byte **pic, int *width, int *height, ID_T
 				unsigned char red,green,blue,alphabyte;
 				switch( targa_header.pixel_size )
 				{
-					
+
 				case 8:
 					blue = *buf_p++;
 					green = blue;
@@ -306,7 +311,7 @@ static void LoadTGA( const char *name, byte **pic, int *width, int *height, ID_T
 							common->Error( "LoadTGA( %s ): illegal pixel_size '%d'\n", name, targa_header.pixel_size );
 							break;
 					}
-	
+
 					for( j = 0; j < packetSize; j++ ) {
 						*pixbuf++=red;
 						*pixbuf++=green;
@@ -361,7 +366,7 @@ static void LoadTGA( const char *name, byte **pic, int *width, int *height, ID_T
 								goto breakOut;
 							}
 							pixbuf = targa_rgba + row*columns*4;
-						}						
+						}
 					}
 				}
 			}
@@ -416,6 +421,9 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
   unsigned char *out;
   byte	*fbuffer;
   byte  *bbuf;
+#ifdef USE_OS_LIBJPEG
+  int len;
+#endif
 
   /* In this example we want to open the input file before doing anything else,
    * so that the setjmp() error recovery below can assume the file is open.
@@ -429,7 +437,9 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
 	*pic = NULL;		// until proven otherwise
   }
   {
+#ifndef USE_OS_LIBJPEG
 		int		len;
+#endif
 		idFile *f;
 
 		f = fileSystem->OpenFileRead( filename );
@@ -464,7 +474,11 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
 
   /* Step 2: specify data source (eg, a file) */
 
+#ifdef USE_OS_LIBJPEG
+  jpeg_mem_src(&cinfo, fbuffer, len);
+#else
   jpeg_stdio_src(&cinfo, fbuffer);
+#endif
 
   /* Step 3: read file parameters with jpeg_read_header() */
 
@@ -493,12 +507,12 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
    * output image dimensions available, as well as the output colormap
    * if we asked for color quantization.
    * In this example, we need to make an output work buffer of the right size.
-   */ 
+   */
   /* JSAMPLEs per row in output buffer */
   row_stride = cinfo.output_width * cinfo.output_components;
 
   if (cinfo.output_components!=4) {
-		common->DWarning( "JPG %s is unsupported color depth (%d)", 
+		common->DWarning( "JPG %s is unsupported color depth (%d)",
 			filename, cinfo.output_components);
   }
   out = (byte *)R_StaticAlloc(cinfo.output_width*cinfo.output_height*4, TAG_IMAGE);
@@ -670,9 +684,9 @@ Loads six files with proper extensions
 */
 bool R_LoadCubeImages( const char *imgName, cubeFiles_t extensions, byte *pics[6], int *outSize, ID_TIME_T *timestamp ) {
 	int		i, j;
-	char	*cameraSides[6] =  { "_forward.tga", "_back.tga", "_left.tga", "_right.tga", 
+	char	*cameraSides[6] =  { "_forward.tga", "_back.tga", "_left.tga", "_right.tga",
 		"_up.tga", "_down.tga" };
-	char	*axisSides[6] =  { "_px.tga", "_nx.tga", "_py.tga", "_ny.tga", 
+	char	*axisSides[6] =  { "_px.tga", "_nx.tga", "_py.tga", "_ny.tga",
 		"_pz.tga", "_nz.tga" };
 	char	**sides;
 	char	fullName[MAX_IMAGE_NAME];

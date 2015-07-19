@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -47,7 +48,23 @@ R_FinishDeform
 */
 static drawSurf_t * R_FinishDeform( drawSurf_t * surf, srfTriangles_t * newTri, const idDrawVert * newVerts, const triIndex_t * newIndexes ) {
 	newTri->ambientCache = vertexCache.AllocVertex( newVerts, ALIGN( newTri->numVerts * sizeof( idDrawVert ), VERTEX_CACHE_ALIGN ) );
-	newTri->indexCache = vertexCache.AllocIndex( newIndexes, ALIGN( newTri->numIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN ) );
+
+	int vertexOffset = vertexCache.GetCacheVertexOffset( newTri->ambientCache ) / sizeof ( idDrawVert );
+	const triIndex_t * indexes = newIndexes;
+	if ( vertexOffset != 0 ) {
+		triIndex_t * nIndexes = (triIndex_t *)_alloca16( ALIGN( newTri->numIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN ) );
+		indexes = nIndexes;
+		if ( newTri->numIndexes & 1 ) {
+			for ( int i = 0; i < newTri->numIndexes; i++ ) {
+				nIndexes[i] = newIndexes[i] + vertexOffset;
+			}
+		} else {
+			for ( int i = 0; i < newTri->numIndexes; i += 2 ) {
+				WriteIndexPair( &nIndexes[i], newIndexes[i + 0] + vertexOffset, newIndexes[i + 1] + vertexOffset );
+			}
+		}
+	}
+	newTri->indexCache = vertexCache.AllocIndex( indexes, ALIGN( newTri->numIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN ) );
 
 	surf->frontEndGeo = newTri;
 	surf->numIndexes = newTri->numIndexes;
@@ -120,7 +137,7 @@ static drawSurf_t * R_AutospriteDeform( drawSurf_t *surf ) {
 		newVerts[i+0].xyz = mid + left + up;
 		newVerts[i+0].SetTexCoord( 0, 0 );
 		newVerts[i+1].xyz = mid - left + up;
-		newVerts[i+1].SetTexCoord( 1, 0 ); 
+		newVerts[i+1].SetTexCoord( 1, 0 );
 		newVerts[i+2].xyz = mid - left - up;
 		newVerts[i+2].SetTexCoord( 1, 1 );
 		newVerts[i+3].xyz = mid + left - up;
@@ -233,7 +250,7 @@ static drawSurf_t * R_TubeDeform( drawSurf_t * surf ) {
 			newVerts[i2] = idDrawVert::GetSkinnedDrawVert( srcTri->verts[i2], joints );
 
 			const float l = 0.5f * lengths[j];
-			
+
 			// cross this with the view direction to get minor axis
 			idVec3 dir = mid[j] - localView;
 			idVec3 minor;
@@ -274,7 +291,7 @@ int	R_WindingFromTriangles( const srfTriangles_t *tri, triIndex_t indexes[MAX_TR
 				if ( tri->indexes[i*3+j] != indexes[numIndexes-1] ) {
 					continue;
 				}
-				int next = tri->indexes[i*3+(j+1)%3];
+				uint32 next = tri->indexes[i*3+(j+1)%3];
 
 				// make sure it isn't already used
 				if ( numIndexes == 1 ) {
@@ -298,7 +315,7 @@ int	R_WindingFromTriangles( const srfTriangles_t *tri, triIndex_t indexes[MAX_TR
 						continue;
 					}
 					for ( l = 0; l < 3; l++ ) {
-						int	a, b;
+						uint32	a, b;
 
 						a = tri->indexes[k*3+l];
 						if ( a != next ) {
@@ -415,13 +432,13 @@ static drawSurf_t * R_FlareDeform( drawSurf_t * surf ) {
 		idVec3 toEye = srcTri->verts[ indexes[i] ].xyz - localViewer;
 		toEye.Normalize();
 
-		idVec3 d1 = srcTri->verts[ indexes[(i+1)%4] ].xyz - localViewer; 
+		idVec3 d1 = srcTri->verts[ indexes[(i+1)%4] ].xyz - localViewer;
 		d1.Normalize();
 		edgeDir[i][2].Cross( toEye, d1 );
 		edgeDir[i][2].Normalize();
 		edgeDir[i][2] = vec3_origin - edgeDir[i][2];
 
-		idVec3 d2 = srcTri->verts[ indexes[(i+3)%4] ].xyz - localViewer; 
+		idVec3 d2 = srcTri->verts[ indexes[(i+3)%4] ].xyz - localViewer;
 		d2.Normalize();
 		edgeDir[i][0].Cross( toEye, d2 );
 		edgeDir[i][0].Normalize();
@@ -453,7 +470,7 @@ static drawSurf_t * R_FlareDeform( drawSurf_t * surf ) {
 		newVerts[i].color[3] = 255;
 	}
 
-	ALIGNTYPE16 static triIndex_t triIndexes[18*3 + 10] = {
+	ALIGNTYPE16 static triIndex_t triIndexes[18*3 + 10] ALIGNTYPE16_POST = {
 		 0, 4,5,  0,5, 6,  0,6,7,  0,7, 1,  1,7, 8,  1,8, 9,
 		15, 4,0, 15,0, 3,  3,0,1,  3,1, 2,  2,1, 9,  2,9,10,
 		14,15,3, 14,3,13, 13,3,2, 13,2,12, 12,2,11, 11,2,10,
@@ -590,9 +607,9 @@ static void AddTriangleToIsland_r( const srfTriangles_t *tri, int triangleNum, b
 	const idJointMat * joints = ( tri->staticModelWithJoints != NULL && r_useGPUSkinning.GetBool() ) ? tri->staticModelWithJoints->jointsInverted : NULL;
 
 	// recurse into all neighbors
-	const int a = tri->indexes[triangleNum*3+0];
-	const int b = tri->indexes[triangleNum*3+1];
-	const int c = tri->indexes[triangleNum*3+2];
+	const uint32 a = tri->indexes[triangleNum*3+0];
+	const uint32 b = tri->indexes[triangleNum*3+1];
+	const uint32 c = tri->indexes[triangleNum*3+2];
 
 	const idVec3 va = idDrawVert::GetSkinnedDrawVertPosition( tri->verts[a], joints );
 	const idVec3 vb = idDrawVert::GetSkinnedDrawVertPosition( tri->verts[b], joints );
@@ -607,14 +624,14 @@ static void AddTriangleToIsland_r( const srfTriangles_t *tri, int triangleNum, b
 		if ( usedList[i] ) {
 			continue;
 		}
-		if ( tri->indexes[i*3+0] == a 
-			|| tri->indexes[i*3+1] == a 
-			|| tri->indexes[i*3+2] == a 
-			|| tri->indexes[i*3+0] == b 
-			|| tri->indexes[i*3+1] == b 
-			|| tri->indexes[i*3+2] == b 
-			|| tri->indexes[i*3+0] == c 
-			|| tri->indexes[i*3+1] == c 
+		if ( tri->indexes[i*3+0] == a
+			|| tri->indexes[i*3+1] == a
+			|| tri->indexes[i*3+2] == a
+			|| tri->indexes[i*3+0] == b
+			|| tri->indexes[i*3+1] == b
+			|| tri->indexes[i*3+2] == b
+			|| tri->indexes[i*3+0] == c
+			|| tri->indexes[i*3+1] == c
 			|| tri->indexes[i*3+2] == c ) {
 			AddTriangleToIsland_r( tri, i, usedList, island );
 		}
@@ -874,7 +891,7 @@ static drawSurf_t * R_ParticleDeform( drawSurf_t *surf, bool useArea ) {
 				steppingRandom.RandomInt();
 				steppingRandom2.RandomInt();
 
-				// calculate local age for this index 
+				// calculate local age for this index
 				int bunchOffset = idMath::Ftoi( stage->particleLife * 1000 * stage->spawnBunching * index / maxStageParticles[stageNum] );
 
 				int particleAge = stageAge - bunchOffset;
@@ -890,7 +907,7 @@ static drawSurf_t * R_ParticleDeform( drawSurf_t *surf, bool useArea ) {
 
 				int inCycleTime = particleAge - particleCycle * stage->cycleMsec;
 
-				if ( renderEntity->shaderParms[SHADERPARM_PARTICLE_STOPTIME] != 0.0f && 
+				if ( renderEntity->shaderParms[SHADERPARM_PARTICLE_STOPTIME] != 0.0f &&
 					g.renderView->time[renderEntity->timeGroup] - inCycleTime >= renderEntity->shaderParms[SHADERPARM_PARTICLE_STOPTIME] * 1000.0f ) {
 					// don't fire any more particles
 					continue;
@@ -954,20 +971,25 @@ static drawSurf_t * R_ParticleDeform( drawSurf_t *surf, bool useArea ) {
 				numVerts += stage->CreateParticle( &g, newVerts + numVerts );
 			}
 		}
-	
+
 		if ( numVerts == 0 ) {
 			continue;
 		}
 
+		// create ambient cache here so we can use it when building indixes
+		vertCacheHandle_t ambientCache = vertexCache.AllocVertex( newVerts, ALIGN( numVerts * sizeof( idDrawVert ), VERTEX_CACHE_ALIGN ) );
+		int vertexOffset = vertexCache.GetCacheVertexOffset( ambientCache ) / sizeof ( idDrawVert );
+
 		// build the index list
 		int numIndexes = 0;
 		for ( int i = 0; i < numVerts; i += 4 ) {
-			newIndexes[numIndexes + 0] = i + 0;
-			newIndexes[numIndexes + 1] = i + 2;
-			newIndexes[numIndexes + 2] = i + 3;
-			newIndexes[numIndexes + 3] = i + 0;
-			newIndexes[numIndexes + 4] = i + 3;
-			newIndexes[numIndexes + 5] = i + 1;
+			int off = i + vertexOffset;
+			newIndexes[numIndexes + 0] = off + 0;
+			newIndexes[numIndexes + 1] = off + 2;
+			newIndexes[numIndexes + 2] = off + 3;
+			newIndexes[numIndexes + 3] = off + 0;
+			newIndexes[numIndexes + 4] = off + 3;
+			newIndexes[numIndexes + 5] = off + 1;
 			numIndexes += 6;
 		}
 
@@ -976,7 +998,7 @@ static drawSurf_t * R_ParticleDeform( drawSurf_t *surf, bool useArea ) {
 		newTri->bounds = stage->bounds;		// just always draw the particles
 		newTri->numVerts = numVerts;
 		newTri->numIndexes = numIndexes;
-		newTri->ambientCache = vertexCache.AllocVertex( newVerts, ALIGN( numVerts * sizeof( idDrawVert ), VERTEX_CACHE_ALIGN ) );
+		newTri->ambientCache = ambientCache;
 		newTri->indexCache = vertexCache.AllocIndex( newIndexes, ALIGN( numIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN ) );
 
 		drawSurf_t * drawSurf = (drawSurf_t *)R_FrameAlloc( sizeof( *drawSurf ), FRAME_ALLOC_DRAW_SURFACE );

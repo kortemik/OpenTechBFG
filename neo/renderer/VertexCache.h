@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -43,14 +44,18 @@ const int STATIC_VERTEX_MEMORY = 31 * 1024 * 1024;	// make sure it fits in VERTC
 typedef uint64 vertCacheHandle_t;
 const int VERTCACHE_STATIC = 1;					// in the static set, not the per-frame set
 const int VERTCACHE_SIZE_SHIFT = 1;
-const int VERTCACHE_SIZE_MASK = 0x7fffff;		// 8 megs 
+const int VERTCACHE_SIZE_MASK = 0x7fffff;		// 8 megs
 const int VERTCACHE_OFFSET_SHIFT = 24;
-const int VERTCACHE_OFFSET_MASK = 0x1ffffff;	// 32 megs 
+const int VERTCACHE_OFFSET_MASK = 0x1ffffff;	// 32 megs
 const int VERTCACHE_FRAME_SHIFT = 49;
 const int VERTCACHE_FRAME_MASK = 0x7fff;		// 15 bits = 32k frames to wrap around
 
 const int VERTEX_CACHE_ALIGN		= 32;
+#ifdef TRIINDEX_IS_32BIT
+const int INDEX_CACHE_ALIGN			= 32;
+#else
 const int INDEX_CACHE_ALIGN			= 16;
+#endif
 const int JOINT_CACHE_ALIGN			= 16;
 
 enum cacheType_t {
@@ -75,7 +80,7 @@ struct geoBufferSet_t {
 class idVertexCache {
 public:
 	void			Init( bool restart = false );
-	void			Shutdown();
+	void			Shutdown( bool staticBuffers = false );
 	void			PurgeAll();
 
 	// call on loading a new map
@@ -140,6 +145,11 @@ public:
 	static bool		CacheIsStatic( const vertCacheHandle_t handle ) {
 		return ( handle & VERTCACHE_STATIC ) != 0;
 	}
+
+	// Due to glDrawElementsBaseVertex not being available on OpenGL ES, it needs to be faked.
+	// In order to make it work, the indices themselves need to be adjusted. This gets the offset
+	// that they need to be adjusted by
+	static int		GetCacheVertexOffset ( const vertCacheHandle_t handle );
 
 	// vb/ib is a temporary reference -- don't store it
 	bool			GetVertexBuffer( vertCacheHandle_t handle, idVertexBuffer * vb );

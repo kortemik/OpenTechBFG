@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -447,7 +448,7 @@ void R_RangeCheckIndexes( const srfTriangles_t *tri ) {
 	}
 
 	for ( i = 0; i < tri->numIndexes; i++ ) {
-		if ( tri->indexes[i] >= tri->numVerts ) {
+		if ( tri->indexes[i] >= (uint32)tri->numVerts ) {
 			common->Error( "R_RangeCheckIndexes: index out of range" );
 		}
 	}
@@ -600,13 +601,13 @@ static void R_DefineEdge( const int v1, const int v2, const int planeNum, const 
 	hashKey = silEdgeHash.GenerateKey( v1, v2 );
 	// search for a matching other side
 	for ( i = silEdgeHash.First( hashKey ); i >= 0 && i < MAX_SIL_EDGES; i = silEdgeHash.Next( i ) ) {
-		if ( silEdges[i].v1 == v1 && silEdges[i].v2 == v2 ) {
+		if ( silEdges[i].v1 == (const uint32)v1 && silEdges[i].v2 == (const uint32)v2 ) {
 			c_duplicatedEdges++;
 			// allow it to still create a new edge
 			continue;
 		}
-		if ( silEdges[i].v2 == v1 && silEdges[i].v1 == v2 ) {
-			if ( silEdges[i].p2 != numPlanes )  {
+		if ( silEdges[i].v2 == (const uint32)v1 && silEdges[i].v1 == (const uint32)v2 ) {
+			if ( silEdges[i].p2 != (const uint32)numPlanes )  {
 				c_tripledEdges++;
 				// allow it to still create a new edge
 				continue;
@@ -718,7 +719,7 @@ void R_IdentifySilEdges( srfTriangles_t *tri, bool omitCoplanarEdges ) {
 			int			j;
 			float		d;
 
-			if ( silEdges[i].p2 == numPlanes ) {	// the fake dangling edge
+			if ( silEdges[i].p2 == (uint32)numPlanes ) {	// the fake dangling edge
 				continue;
 			}
 
@@ -765,7 +766,7 @@ void R_IdentifySilEdges( srfTriangles_t *tri, bool omitCoplanarEdges ) {
 	shared = 0;
 	single = 0;
 	for ( i = 0; i < silEdges.Num(); i++ ) {
-		if ( silEdges[i].p2 == numPlanes ) {
+		if ( silEdges[i].p2 == (uint32)numPlanes ) {
 			single++;
 		} else {
 			shared++;
@@ -1237,7 +1238,7 @@ void R_DeriveTangentsWithoutNormals( srfTriangles_t *tri ) {
         temp[2] = ( d0[2] * d1[4] - d0[4] * d1[2] ) * inva;
 		temp.Normalize();
 		triangleTangents[i / 3] = temp;
-        
+
         temp[0] = ( d0[3] * d1[0] - d0[0] * d1[3] ) * inva;
         temp[1] = ( d0[3] * d1[1] - d0[1] * d1[3] ) * inva;
         temp[2] = ( d0[3] * d1[2] - d0[2] * d1[3] ) * inva;
@@ -1249,7 +1250,7 @@ void R_DeriveTangentsWithoutNormals( srfTriangles_t *tri ) {
         temp[2] = ( d0[2] * d1[4] - d0[4] * d1[2] );
 		temp.Normalize();
 		triangleTangents[i / 3] = temp;
-        
+
         temp[0] = ( d0[3] * d1[0] - d0[0] * d1[3] );
         temp[1] = ( d0[3] * d1[1] - d0[1] * d1[3] );
         temp[2] = ( d0[3] * d1[2] - d0[2] * d1[3] );
@@ -1353,7 +1354,7 @@ void R_BuildDominantTris( srfTriangles_t *tri ) {
 			int	i1 = tri->indexes[ind[i+j].faceNum * 3 + 0];
 			int	i2 = tri->indexes[ind[i+j].faceNum * 3 + 1];
 			int	i3 = tri->indexes[ind[i+j].faceNum * 3 + 2];
-			
+
 			a = tri->verts + i1;
 			b = tri->verts + i2;
 			c = tri->verts + i3;
@@ -1414,7 +1415,7 @@ void R_BuildDominantTris( srfTriangles_t *tri ) {
 				len = 0.001f;
 			}
 			dt[vertNum].normalizationScale[0] = ( area > 0 ? 1 : -1 ) / len;	// tangents[0]
-	        
+
 			bitangent[0] = ( d0[3] * d1[0] - d0[0] * d1[3] );
 			bitangent[1] = ( d0[3] * d1[1] - d0[1] * d1[3] );
 			bitangent[2] = ( d0[3] * d1[2] - d0[2] * d1[3] );
@@ -1470,7 +1471,7 @@ triangles could have different texture coordinates.
 void R_RemoveDuplicatedTriangles( srfTriangles_t *tri ) {
 	int		c_removed;
 	int		i, j, r;
-	int		a, b, c;
+	uint32	a, b, c;
 
 	c_removed = 0;
 
@@ -1767,7 +1768,7 @@ DEFORMED SURFACES
 R_BuildDeformInfo
 ===================
 */
-deformInfo_t *R_BuildDeformInfo( int numVerts, const idDrawVert *verts, int numIndexes, const int *indexes, 
+deformInfo_t *R_BuildDeformInfo( int numVerts, const idDrawVert *verts, int numIndexes, const int *indexes,
 									bool useUnsmoothedTangents ) {
 	srfTriangles_t	tri;
 	memset( &tri, 0, sizeof( srfTriangles_t ) );
@@ -1823,7 +1824,24 @@ deformInfo_t *R_BuildDeformInfo( int numVerts, const idDrawVert *verts, int numI
 	idShadowVertSkinned::CreateShadowCache( shadowVerts, deform->verts, deform->numOutputVerts );
 
 	deform->staticAmbientCache = vertexCache.AllocStaticVertex( deform->verts, ALIGN( deform->numOutputVerts * sizeof( idDrawVert ), VERTEX_CACHE_ALIGN ) );
-	deform->staticIndexCache = vertexCache.AllocStaticIndex( deform->indexes, ALIGN( deform->numIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN ) );
+
+	int vertexOffset = vertexCache.GetCacheVertexOffset( deform->staticAmbientCache ) / sizeof( idDrawVert );
+	int deformIndexSize = ALIGN( deform->numIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN );
+	triIndex_t * nIndexes = deform->indexes;
+	if ( vertexOffset != 0 ) {
+		nIndexes = (triIndex_t *)_alloca16( deformIndexSize );
+		if ( deform->numIndexes & 1 ) {
+			for ( int i = 0; i < deform->numIndexes; i++ ) {
+				nIndexes[i] = deform->indexes[i] + vertexOffset;
+			}
+		} else {
+			for ( int i = 0; i < deform->numIndexes; i += 2 ) {
+				WriteIndexPair( &nIndexes[i], deform->indexes[i + 0] + vertexOffset, deform->indexes[i + 1] + vertexOffset );
+			}
+		}
+	}
+	deform->staticIndexCache = vertexCache.AllocStaticIndex( nIndexes, deformIndexSize );
+
 	deform->staticShadowCache = vertexCache.AllocStaticVertex( shadowVerts, ALIGN( deform->numOutputVerts * 2 * sizeof( idShadowVertSkinned ), VERTEX_CACHE_ALIGN ) );
 
 	Mem_Free( shadowVerts );
@@ -1919,7 +1937,23 @@ void R_InitDrawSurfFromTri( drawSurf_t & ds, srfTriangles_t & tri ) {
 		tri.ambientCache = vertexCache.AllocVertex( tri.verts, ALIGN( tri.numVerts * sizeof( tri.verts[0] ), VERTEX_CACHE_ALIGN ) );
 	}
 	if ( !vertexCache.CacheIsCurrent( tri.indexCache ) ) {
-		tri.indexCache = vertexCache.AllocIndex( tri.indexes, ALIGN( tri.numIndexes * sizeof( tri.indexes[0] ), INDEX_CACHE_ALIGN ) );
+		// Adjust vertex offset within indices
+		int vertexOffset = vertexCache.GetCacheVertexOffset( tri.ambientCache ) / sizeof ( idDrawVert );
+		int indexSize = ALIGN( tri.numIndexes * sizeof( tri.indexes[0] ), INDEX_CACHE_ALIGN );
+		triIndex_t * indexes = tri.indexes;
+		if ( vertexOffset != 0 ) {
+			indexes = (triIndex_t *)_alloca16( indexSize );
+			if ( tri.numIndexes & 1 ) {
+				for ( int i = 0; i < tri.numIndexes; i++ ) {
+					indexes[i] = tri.indexes[i] + vertexOffset;
+				}
+			} else {
+				for ( int i = 0; i < tri.numIndexes; i += 2 ) {
+					WriteIndexPair( &indexes[i], tri.indexes[i + 0] + vertexOffset, tri.indexes[i + 1] + vertexOffset );
+				}
+			}
+		}
+		tri.indexCache = vertexCache.AllocIndex( indexes, indexSize );
 	}
 
 	ds.numIndexes = tri.numIndexes;
@@ -1941,11 +1975,6 @@ void R_CreateStaticBuffersForTri( srfTriangles_t & tri ) {
 	tri.indexCache = 0;
 	tri.ambientCache = 0;
 	tri.shadowCache = 0;
-
-	// index cache
-	if ( tri.indexes != NULL ) {
-		tri.indexCache = vertexCache.AllocStaticIndex( tri.indexes, ALIGN( tri.numIndexes * sizeof( tri.indexes[0] ), INDEX_CACHE_ALIGN ) );
-	}
 
 	// vertex cache
 	if ( tri.verts != NULL ) {
@@ -1972,5 +2001,31 @@ void R_CreateStaticBuffersForTri( srfTriangles_t & tri ) {
 		Mem_Free( tri.staticShadowVertexes );
 		tri.staticShadowVertexes = NULL;
 #endif
+	}
+
+	// index cache
+	if ( tri.indexes != NULL ) {
+		// Adjust vertex offset within indices
+		int vertexOffset = 0;
+		if ( tri.verts != NULL ) {
+			vertexOffset = vertexCache.GetCacheVertexOffset( tri.ambientCache ) / sizeof( tri.verts[0] );
+		} else if ( tri.preLightShadowVertexes != NULL ) {
+			vertexOffset = vertexCache.GetCacheVertexOffset( tri.shadowCache ) / sizeof( idShadowVert );
+		}
+		int indexSize = ALIGN( tri.numIndexes * sizeof( tri.indexes[0] ), INDEX_CACHE_ALIGN );
+		triIndex_t * indexes = tri.indexes;
+		if ( vertexOffset != 0 ) {
+			indexes = (triIndex_t *)_alloca16( indexSize );
+			if ( tri.numIndexes & 1 ) {
+				for ( int i = 0; i < tri.numIndexes; i++ ) {
+					indexes[i] = tri.indexes[i] + vertexOffset;
+				}
+			} else {
+				for ( int i = 0; i < tri.numIndexes; i += 2 ) {
+					WriteIndexPair( &indexes[i], tri.indexes[i + 0] + vertexOffset, tri.indexes[i + 1] + vertexOffset );
+				}
+			}
+		}
+		tri.indexCache = vertexCache.AllocStaticIndex( indexes, indexSize );
 	}
 }

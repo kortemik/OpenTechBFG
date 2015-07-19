@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -130,12 +131,21 @@ void GL_DepthBoundsTest( const float zmin, const float zmax ) {
 		return;
 	}
 
+#ifndef GL_ES_VERSION_2_0
 	if ( zmin == 0.0f && zmax == 0.0f ) {
 		qglDisable( GL_DEPTH_BOUNDS_TEST_EXT );
 	} else {
 		qglEnable( GL_DEPTH_BOUNDS_TEST_EXT );
 		qglDepthBoundsEXT( zmin, zmax );
 	}
+#else
+	// GL_DEPTH_TEST is always enabled, so we can do this
+	float newZmax = zmax;
+	if ( zmin == 0.0f && zmax == 0.0f ) {
+		newZmax = 1.0f; // Reset range
+	}
+	qglDepthRange( zmin, newZmax );
+#endif
 }
 
 /*
@@ -247,11 +257,15 @@ void GL_SetDefaultState() {
 	qglDepthFunc( GL_LESS );
 	qglDisable( GL_STENCIL_TEST );
 	qglDisable( GL_POLYGON_OFFSET_FILL );
+#ifndef GL_ES_VERSION_2_0
 	qglDisable( GL_POLYGON_OFFSET_LINE );
 	qglPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+#endif
 
 	// These should never be changed
+#ifndef GL_ES_VERSION_2_0
 	qglShadeModel( GL_SMOOTH );
+#endif
 	qglEnable( GL_DEPTH_TEST );
 	qglEnable( GL_BLEND );
 	qglEnable( GL_SCISSOR_TEST );
@@ -272,7 +286,7 @@ This routine is responsible for setting the most commonly changed state
 */
 void GL_State( uint64 stateBits, bool forceGlState ) {
 	uint64 diff = stateBits ^ backEnd.glState.glStateBits;
-	
+
 	if ( !r_useStateCaching.GetBool() || forceGlState ) {
 		// make sure everything is set all the time, so we
 		// can see if our delta checking is screwing up
@@ -359,6 +373,8 @@ void GL_State( uint64 stateBits, bool forceGlState ) {
 		qglColorMask( r, g, b, a );
 	}
 
+#ifndef GL_ES_VERSION_2_0
+	//XXX Polygon rendering needs to be adjusted. GL_FILL is normal rendering, GL_LINE is essentially an edge shader
 	//
 	// fill/line mode
 	//
@@ -369,6 +385,7 @@ void GL_State( uint64 stateBits, bool forceGlState ) {
 			qglPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 		}
 	}
+#endif
 
 	//
 	// polygon offset
@@ -377,10 +394,14 @@ void GL_State( uint64 stateBits, bool forceGlState ) {
 		if ( stateBits & GLS_POLYGON_OFFSET ) {
 			qglPolygonOffset( backEnd.glState.polyOfsScale, backEnd.glState.polyOfsBias );
 			qglEnable( GL_POLYGON_OFFSET_FILL );
-			qglEnable( GL_POLYGON_OFFSET_LINE );
+#ifndef GL_ES_VERSION_2_0
+			qglEnable( GL_POLYGON_OFFSET_LINE ); //XXX Only used when polygon mode is GL_LINE
+#endif
 		} else {
 			qglDisable( GL_POLYGON_OFFSET_FILL );
+#ifndef GL_ES_VERSION_2_0
 			qglDisable( GL_POLYGON_OFFSET_LINE );
+#endif
 		}
 	}
 

@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -143,8 +144,8 @@ static const char * dialogStateToString[ GDM_MAX + 1 ] = {
 	ASSERT_ENUM_STRING( GDM_DLC_ERROR_MISSING_GENERIC, 105 ),
 	ASSERT_ENUM_STRING( GDM_DISC_SWAP, 106 ),
 	ASSERT_ENUM_STRING( GDM_NEEDS_INSTALL, 107 ),
-	ASSERT_ENUM_STRING( GDM_NO_SAVEGAMES_AVAILABLE, 108 ),	
-	ASSERT_ENUM_STRING( GDM_ERROR_JOIN_TWO_PROFILES_ONE_BOX, 109 ),	
+	ASSERT_ENUM_STRING( GDM_NO_SAVEGAMES_AVAILABLE, 108 ),
+	ASSERT_ENUM_STRING( GDM_ERROR_JOIN_TWO_PROFILES_ONE_BOX, 109 ),
 	ASSERT_ENUM_STRING( GDM_WARNING_PLAYING_COOP_SOLO, 110 ),
 	ASSERT_ENUM_STRING( GDM_MULTI_COOP_QUIT_LOSE_LEADERBOARDS, 111 ),
 	ASSERT_ENUM_STRING( GDM_CORRUPT_CONTINUE, 112 ),
@@ -174,7 +175,8 @@ static const char * dialogStateToString[ GDM_MAX + 1 ] = {
 	ASSERT_ENUM_STRING( GDM_XBOX_DEPLOYMENT_TYPE_FAIL, 136 ),
 	ASSERT_ENUM_STRING( GDM_SAVEGAME_WRONG_LANGUAGE, 137 ),
 	ASSERT_ENUM_STRING( GDM_GAME_RESTART_REQUIRED, 138 ),
-	ASSERT_ENUM_STRING( GDM_MAX, 139 )
+	ASSERT_ENUM_STRING( GDM_WARNING_LOW_BATTERY, 139 ),
+	ASSERT_ENUM_STRING( GDM_MAX, 140 )
 };
 
 idCVar dialog_saveClearLevel( "dialog_saveClearLevel", "1000", CVAR_INTEGER, "Time required to show long message" );
@@ -193,6 +195,7 @@ bool DialogMsgShouldWait( gameDialogMessages_t msg ) {
 		case GDM_LOADING_PROFILE:
 		case GDM_INSTALLING_TROPHIES:
 		case GDM_REFRESHING:
+		case GDM_WARNING_LOW_BATTERY:
 			return true;
 		default:
 			return false;
@@ -215,7 +218,7 @@ void idCommonDialog::ClearDialogs( bool forceClear ) {
 				topMessageCleared = true;
 			}
 			index--;
-		}		
+		}
 	}
 
 	if ( topMessageCleared ) {
@@ -239,12 +242,12 @@ void idCommonDialog::AddDialogIntVal( const char * name, int val ) {
 idCommonDialog::AddDialog
 ================================================
 */
-void idCommonDialog::AddDialog( gameDialogMessages_t msg, dialogType_t type, idSWFScriptFunction * acceptCallback, 
+void idCommonDialog::AddDialog( gameDialogMessages_t msg, dialogType_t type, idSWFScriptFunction * acceptCallback,
 								idSWFScriptFunction * cancelCallback, bool pause, const char * location, int lineNumber,
 								bool leaveOnMapHeapReset, bool waitOnAtlas, bool renderDuringLoad ) {
 
 	idKeyInput::ClearStates();
-	
+
 	// TODO_D3_PORT:
 	//sys->ClearEvents();
 
@@ -274,10 +277,10 @@ void idCommonDialog::AddDialog( gameDialogMessages_t msg, dialogType_t type, idS
 idCommonDialog::AddDynamicDialog
 ========================
 */
-void idCommonDialog::AddDynamicDialog( gameDialogMessages_t msg, const idStaticList< idSWFScriptFunction *, 4 > & callbacks, 
+void idCommonDialog::AddDynamicDialog( gameDialogMessages_t msg, const idStaticList< idSWFScriptFunction *, 4 > & callbacks,
 										const idStaticList< idStrId, 4 > & optionText, bool pause, idStrStatic< 256 > overrideMsg,
 										bool leaveOnMapHeapReset, bool waitOnAtlas, bool renderDuringLoad ) {
-	
+
 	if ( dialog == NULL ) {
 		return;
 	}
@@ -388,7 +391,7 @@ idCommonDialog::ShowDialog
 ================================================
 */
 void idCommonDialog::ShowDialog( const idDialogInfo & info ) {
-	idLib::PrintfIf( popupDialog_debug.GetBool(), "[%s] msg: %s, m.clear = %d, m.waitClear = %d, m.killTime = %d\n", 
+	idLib::PrintfIf( popupDialog_debug.GetBool(), "[%s] msg: %s, m.clear = %d, m.waitClear = %d, m.killTime = %d\n",
 		__FUNCTION__, dialogStateToString[info.msg], info.clear, info.waitClear, info.killTime );
 
 	// here instead of add dialog to make sure we meet the TCR, otherwise it has a chance to be visible for less than 1 second
@@ -481,9 +484,9 @@ idCommonDialog::RemoveSaveDialog
 
 From TCR# 047
 Games must display a message during storage writes for the following conditions and the respective amount of time:
-- Writes longer than one second require the standard message be displayed for three seconds. 
-- Writes longer than three seconds require the standard message be displayed for the length of the write. 
-- Writes that last one second or less require the shorter message be displayed for one second or the standard message for three seconds. 
+- Writes longer than one second require the standard message be displayed for three seconds.
+- Writes longer than three seconds require the standard message be displayed for the length of the write.
+- Writes that last one second or less require the shorter message be displayed for one second or the standard message for three seconds.
 
 ========================
 */
@@ -555,7 +558,7 @@ void idCommonDialog::ClearDialog( gameDialogMessages_t msg, const char * locatio
 
 		if ( info.msg == msg && !info.clear ) {
 			if ( DialogMsgShouldWait( info.msg ) ) {
-				
+
 				// you can have 2 saving dialogs simultaneously, if you clear back-to-back, we need to let the 2nd dialog
 				// get the clear message
 				if ( messageList[index].waitClear ) {
@@ -563,7 +566,7 @@ void idCommonDialog::ClearDialog( gameDialogMessages_t msg, const char * locatio
 				}
 
 				int timeShown = Sys_Milliseconds() - messageList[index].startTime;
-				
+
 				// for the time being always use the long saves
 				if ( timeShown < dialog_saveClearLevel.GetInteger() ) {
 					messageList[index].killTime = Sys_Milliseconds() + ( dialog_saveClearLevel.GetInteger() - timeShown );
@@ -581,7 +584,7 @@ void idCommonDialog::ClearDialog( gameDialogMessages_t msg, const char * locatio
 				}
 			}
 			assert( info.msg >= GDM_INVALID && info.msg < GDM_MAX );	// not sure why /analyze complains about this
-			idLib::PrintfIf( popupDialog_debug.GetBool(), "[%s] msg: %s, from: %s:%d, topMessageCleared = %d, m.clear = %d, m.waitClear = %d, m.killTime = %d\n", 
+			idLib::PrintfIf( popupDialog_debug.GetBool(), "[%s] msg: %s, from: %s:%d, topMessageCleared = %d, m.clear = %d, m.waitClear = %d, m.killTime = %d\n",
 				__FUNCTION__, dialogStateToString[info.msg], location == NULL ? "NULL" : location, lineNumber,
 				topMessageCleared, messageList[index].clear,
 				messageList[index].waitClear, messageList[index].killTime );
@@ -664,7 +667,7 @@ void idCommonDialog::Render( bool loading ) {
 	}
 
 	// Decrement the time remaining on the save indicator or turn it off
-	if ( !dialogShowingSaveIndicatorRequested && saveIndicator->IsActive() ) { 
+	if ( !dialogShowingSaveIndicatorRequested && saveIndicator->IsActive() ) {
 		ShowSaveIndicator( false );
 	}
 
@@ -672,7 +675,7 @@ void idCommonDialog::Render( bool loading ) {
 		int startTime = messageList[0].startTime;
 		int endTime = startTime + PC_KEYBOARD_WAIT;
 		int timeRemaining = ( endTime - Sys_Milliseconds() ) / 1000;
-		
+
 		if ( timeRemaining <= 0 ) {
 			if ( messageList[0].cancelCB != NULL ) {
 				idSWFParmList parms;
@@ -764,8 +767,8 @@ idCommonDialog::GetDialogMsg
 ================================================
 */
 idStr idCommonDialog::GetDialogMsg( gameDialogMessages_t msg, idStr & message, idStr & title ) {
-	
-		message = "#str_dlg_pc_";
+
+	message = "#str_dlg_pc_";
 
 	switch ( msg ) {
 		case GDM_SWAP_DISKS_TO1: {
@@ -971,7 +974,7 @@ idStr idCommonDialog::GetDialogMsg( gameDialogMessages_t msg, idStr & message, i
 		case GDM_BECAME_HOST_GAME_STATS_DROPPED: {
 			message = "#str_dlg_became_host_game_stats_dropped";
 			break;
-		}		
+		}
 		case GDM_LOBBY_DISBANDED: {
 			message.Append( "lobby_disbanded" );
 			break;
@@ -1305,6 +1308,10 @@ idStr idCommonDialog::GetDialogMsg( gameDialogMessages_t msg, idStr & message, i
 			message = "#str_dlg_game_restart_required";
 			break;
 		}
+		case GDM_WARNING_LOW_BATTERY: {
+			message = "#str_dlg_warn_low_battery";
+			break;
+		}
 		default: {
 			message = "MESSAGE TYPE NOT DEFINED";
 			break;
@@ -1393,7 +1400,7 @@ CONSOLE_COMMAND( testShowDialogBug, "show a dynamic dialog", 0 ) {
 	common->Dialog().ShowSaveIndicator( true );
 	common->Dialog().ShowSaveIndicator( false );
 
-	// This locks the game because it thinks it's paused because we're passing in pause = true but the 
+	// This locks the game because it thinks it's paused because we're passing in pause = true but the
 	// dialog isn't ever added because of the abuse of dialog->isActive when the save indicator is shown.
 	int dialogId = atoi( args.Argv( 1 ) );
 	common->Dialog().AddDialog( (gameDialogMessages_t)dialogId, DIALOG_ACCEPT, NULL, NULL, true );

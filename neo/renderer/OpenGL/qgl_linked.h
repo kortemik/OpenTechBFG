@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,6 +27,7 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#ifndef GL_ES_VERSION_2_0
 #define qglAccum glAccum
 #define qglAlphaFunc glAlphaFunc
 #define qglAreTexturesResident glAreTexturesResident
@@ -362,6 +364,336 @@ If you have questions concerning this license or the applicable additional terms
 #define qglVertex4sv glVertex4sv
 #define qglVertexPointer glVertexPointer
 #define qglViewport glViewport
+#else
+#define qglActiveTexture glActiveTexture
+//#define qglAttachShader glAttachShader
+//#define qglBindAttribLocation glBindAttribLocation
+#define qglBindBuffer glBindBuffer
+#define qglBindFramebuffer glBindFramebuffer
+#define qglBindRenderbuffer glBindRenderbuffer
+#define qglBindTexture glBindTexture
+#define qglBlendColor glBlendColor
+#define qglBlendEquation glBlendEquation
+#define qglBlendEquationSeparate glBlendEquationSeparate
+#define qglBlendFunc glBlendFunc
+#define qglBlendFuncSeparate glBlendFuncSeparate
+#define qglBufferData glBufferData
+#define qglBufferSubData glBufferSubData
+#define qglCheckFramebufferStatus glCheckFramebufferStatus
+#define qglClear glClear
+#define qglClearColor glClearColor
+#ifdef glClearDepth
+#define qglClearDepth glClearDepth
+#else
+#define qglClearDepth glClearDepthf
+#endif
+#define qglClearStencil glClearStencil
+#define qglColorMask glColorMask
+//#define qglCompileShader glCompileShader
+#define qglCompressedTexImage2D glCompressedTexImage2D
+#define qglCompressedTexSubImage2D glCompressedTexSubImage2D
+//#define qglCopyTexImage2D glCopyTexImage2D
+//#define qglCopyTexSubImage2D glCopyTexSubImage2D
+//#define qglCreateProgram glCreateProgram
+//#define qglCreateShader glCreateShader
+#define qglCullFace glCullFace
+#define qglDeleteBuffers glDeleteBuffers
+#define qglDeleteFramebuffers glDeleteFramebuffers
+//#define qglDeleteProgram glDeleteProgram
+#define qglDeleteRenderbuffers glDeleteRenderbuffers
+//#define qglDeleteShader glDeleteShader
+#define qglDeleteTextures glDeleteTextures
+#define qglDepthFunc glDepthFunc
+#define qglDepthMask glDepthMask
+#ifdef glDepthRange
+#define qglDepthRange glDepthRange
+#else
+#define qglDepthRange glDepthRangef
+#endif
+//#define qglDetachShader glDetachShader
+#define qglDisable glDisable
+#define qglDisableVertexAttribArray glDisableVertexAttribArray
+#define qglDrawArrays glDrawArrays
+#define qglDrawElements glDrawElements
+#define qglEnable glEnable
+#define qglEnableVertexAttribArray glEnableVertexAttribArray
+#define qglFinish glFinish
+#define qglFlush glFlush
+#define qglFramebufferRenderbuffer glFramebufferRenderbuffer
+#define qglFramebufferTexture2D glFramebufferTexture2D
+#define qglFrontFace glFrontFace
+#define qglGenBuffers glGenBuffers
+#define qglGenerateMipmap glGenerateMipmap
+#define qglGenFramebuffers glGenFramebuffers
+#define qglGenRenderbuffers glGenRenderbuffers
+#define qglGenTextures glGenTextures
+#define qglGetActiveAttrib glGetActiveAttrib
+#define qglGetActiveUniform glGetActiveUniform
+#define qglGetAttachedShaders glGetAttachedShaders
+#define qglGetAttribLocation glGetAttribLocation
+#define qglGetBooleanv glGetBooleanv
+#define qglGetBufferParameteriv glGetBufferParameteriv
+#define qglGetError glGetError
+#define qglGetFloatv glGetFloatv
+#define qglGetFramebufferAttachmentParameteriv glGetFramebufferAttachmentParameteriv
+#define qglGetIntegerv glGetIntegerv
+//#define qglGetProgramiv glGetProgramiv
+//#define qglGetProgramInfoLog glGetProgramInfoLog
+#define qglGetRenderbufferParameteriv glGetRenderbufferParameteriv
+//#define qglGetShaderiv glGetShaderiv
+//#define qglGetShaderInfoLog glGetShaderInfoLog
+#define qglGetShaderPrecisionFormat glGetShaderPrecisionFormat
+#define qglGetShaderSource glGetShaderSource
+#define qglGetString glGetString
+#define qglGetTexParameterfv glGetTexParameterfv
+#define qglGetTexParameteriv glGetTexParameteriv
+#define qglGetUniformfv glGetUniformfv
+#define qglGetUniformiv glGetUniformiv
+//#define qglGetUniformLocation glGetUniformLocation
+#define qglGetVertexAttribfv glGetVertexAttribfv
+#define qglGetVertexAttribiv glGetVertexAttribiv
+#define qglGetVertexAttribPointerv glGetVertexAttribPointerv
+#define qglHint glHint
+#define qglIsBuffer glIsBuffer
+#define qglIsEnabled glIsEnabled
+#define qglIsFramebuffer glIsFramebuffer
+#define qglIsProgram glIsProgram
+#define qglIsRenderbuffer glIsRenderbuffer
+#define qglIsShader glIsShader
+#define qglIsTexture glIsTexture
+#define qglLineWidth glLineWidth
+//#define qglLinkProgram glLinkProgram
+#define qglPixelStorei glPixelStorei
+#define qglPolygonOffset glPolygonOffset
+//#define qglReadPixels glReadPixels
+#define qglReleaseShaderCompiler glReleaseShaderCompiler
+#define qglRenderbufferStorage glRenderbufferStorage
+#define qglSampleCoverage glSampleCoverage
+#define qglScissor glScissor
+#define qglShaderBinary glShaderBinary
+//#define qglShaderSource glShaderSource
+#define qglStencilFunc glStencilFunc
+//#define qglStencilFuncSeparate glStencilFuncSeparate
+#define qglStencilMask glStencilMask
+#define qglStencilMaskSeparate glStencilMaskSeparate
+#define qglStencilOp glStencilOp
+//#define qglStencilOpSeparate glStencilOpSeparate
+#define qglTexImage2D glTexImage2D
+#define qglTexParameterf glTexParameterf
+#define qglTexParameterfv glTexParameterfv
+#define qglTexParameteri glTexParameteri
+#define qglTexParameteriv glTexParameteriv
+#define qglTexSubImage2D glTexSubImage2D
+#define qglUniform1f glUniform1f
+#define qglUniform1fv glUniform1fv
+//#define qglUniform1i glUniform1i
+#define qglUniform1iv glUniform1iv
+#define qglUniform2f glUniform2f
+#define qglUniform2fv glUniform2fv
+#define qglUniform2i glUniform2i
+#define qglUniform2iv glUniform2iv
+#define qglUniform3f glUniform3f
+#define qglUniform3fv glUniform3fv
+#define qglUniform3i glUniform3i
+#define qglUniform3iv glUniform3iv
+#define qglUniform4f glUniform4f
+//#define qglUniform4fv glUniform4fv
+#define qglUniform4i glUniform4i
+#define qglUniform4iv glUniform4iv
+#define qglUniformMatrix2fv glUniformMatrix2fv
+#define qglUniformMatrix3fv glUniformMatrix3fv
+#define qglUniformMatrix4fv glUniformMatrix4fv
+//#define qglUseProgram glUseProgram
+#define qglValidateProgram glValidateProgram
+#define qglVertexAttrib1f glVertexAttrib1f
+#define qglVertexAttrib1fv glVertexAttrib1fv
+#define qglVertexAttrib2f glVertexAttrib2f
+#define qglVertexAttrib2fv glVertexAttrib2fv
+#define qglVertexAttrib3f glVertexAttrib3f
+#define qglVertexAttrib3fv glVertexAttrib3fv
+#define qglVertexAttrib4f glVertexAttrib4f
+#define qglVertexAttrib4fv glVertexAttrib4fv
+#define qglVertexAttribPointer glVertexAttribPointer
+#define qglViewport glViewport
+
+#ifdef GL_ES_VERSION_3_0
+//#define qglReadBuffer glReadBuffer
+#define qglDrawRangeElements glDrawRangeElements
+#define qglTexImage3D glTexImage3D
+#define qglTexSubImage3D glTexSubImage3D
+//#define qglCopyTexSubImage3D glCopyTexSubImage3D
+#define qglCompressedTexImage3D glCompressedTexImage3D
+#define qglCompressedTexSubImage3D glCompressedTexSubImage3D
+#define qglGenQueries glGenQueries
+#define qglDeleteQueries glDeleteQueries
+#define qglIsQuery glIsQuery
+#define qglBeginQuery glBeginQuery
+#define qglEndQuery glEndQuery
+#define qglGetQueryiv glGetQueryiv
+#define qglGetQueryObjectuiv glGetQueryObjectuiv
+#define qglUnmapBuffer glUnmapBuffer
+#define qglGetBufferPointerv glGetBufferPointerv
+#define qglDrawBuffers glDrawBuffers
+#define qglUniformMatrix2x3fv glUniformMatrix2x3fv
+#define qglUniformMatrix3x2fv glUniformMatrix3x2fv
+#define qglUniformMatrix2x4fv glUniformMatrix2x4fv
+#define qglUniformMatrix4x2fv glUniformMatrix4x2fv
+#define qglUniformMatrix3x4fv glUniformMatrix3x4fv
+#define qglUniformMatrix4x3fv glUniformMatrix4x3fv
+#define qglBlitFramebuffer glBlitFramebuffer
+#define qglRenderbufferStorageMultisample glRenderbufferStorageMultisample
+#define qglFramebufferTextureLayer glFramebufferTextureLayer
+#define qglMapBufferRange glMapBufferRange
+#define qglFlushMappedBufferRange glFlushMappedBufferRange
+#define qglBindVertexArray glBindVertexArray
+#define qglDeleteVertexArrays glDeleteVertexArrays
+#define qglGenVertexArrays glGenVertexArrays
+#define qglIsVertexArray glIsVertexArray
+#define qglGetIntegeri_v glGetIntegeri_v
+#define qglBeginTransformFeedback glBeginTransformFeedback
+#define qglEndTransformFeedback glEndTransformFeedback
+#define qglBindBufferRange glBindBufferRange
+#define qglBindBufferBase glBindBufferBase
+#define qglTransformFeedbackVaryings glTransformFeedbackVaryings
+#define qglGetTransformFeedbackVarying glGetTransformFeedbackVarying
+#define qglVertexAttribIPointer glVertexAttribIPointer
+#define qglGetVertexAttribIiv glGetVertexAttribIiv
+#define qglGetVertexAttribIuiv glGetVertexAttribIuiv
+#define qglVertexAttribI4i glVertexAttribI4i
+#define qglVertexAttribI4ui glVertexAttribI4ui
+#define qglVertexAttribI4iv glVertexAttribI4iv
+#define qglVertexAttribI4uiv glVertexAttribI4uiv
+#define qglGetUniformuiv glGetUniformuiv
+#define qglGetFragDataLocation glGetFragDataLocation
+#define qglUniform1ui glUniform1ui
+#define qglUniform2ui glUniform2ui
+#define qglUniform3ui glUniform3ui
+#define qglUniform4ui glUniform4ui
+#define qglUniform1uiv glUniform1uiv
+#define qglUniform2uiv glUniform2uiv
+#define qglUniform3uiv glUniform3uiv
+#define qglUniform4uiv glUniform4uiv
+#define qglClearBufferiv glClearBufferiv
+#define qglClearBufferuiv glClearBufferuiv
+#define qglClearBufferfv glClearBufferfv
+#define qglClearBufferfi glClearBufferfi
+#define qglGetStringi glGetStringi
+#define qglCopyBufferSubData glCopyBufferSubData
+#define qglGetUniformIndices glGetUniformIndices
+#define qglGetActiveUniformsiv glGetActiveUniformsiv
+//#define qglGetUniformBlockIndex glGetUniformBlockIndex
+#define qglGetActiveUniformBlockiv glGetActiveUniformBlockiv
+#define qglGetActiveUniformBlockName glGetActiveUniformBlockName
+//#define qglUniformBlockBinding glUniformBlockBinding
+#define qglDrawArraysInstanced glDrawArraysInstanced
+#define qglDrawElementsInstanced glDrawElementsInstanced
+//#define qglFenceSync glFenceSync
+//#define qglIsSync glIsSync
+//#define qglDeleteSync glDeleteSync
+//#define qglClientWaitSync glClientWaitSync
+#define qglWaitSync glWaitSync
+#define qglGetInteger64v glGetInteger64v
+#define qglGetSynciv glGetSynciv
+#define qglGetInteger64i_v glGetInteger64i_v
+#define qglGetBufferParameteri64v glGetBufferParameteri64v
+#define qglGenSamplers glGenSamplers
+#define qglDeleteSamplers glDeleteSamplers
+#define qglIsSampler glIsSampler
+#define qglBindSampler glBindSampler
+#define qglSamplerParameteri glSamplerParameteri
+#define qglSamplerParameteriv glSamplerParameteriv
+#define qglSamplerParameterf glSamplerParameterf
+#define qglSamplerParameterfv glSamplerParameterfv
+#define qglGetSamplerParameteriv glGetSamplerParameteriv
+#define qglGetSamplerParameterfv glGetSamplerParameterfv
+#define qglVertexAttribDivisor glVertexAttribDivisor
+#define qglBindTransformFeedback glBindTransformFeedback
+#define qglDeleteTransformFeedbacks glDeleteTransformFeedbacks
+#define qglGenTransformFeedbacks glGenTransformFeedbacks
+#define qglIsTransformFeedback glIsTransformFeedback
+#define qglPauseTransformFeedback glPauseTransformFeedback
+#define qglResumeTransformFeedback glResumeTransformFeedback
+#define qglGetProgramBinary glGetProgramBinary
+#define qglProgramBinary glProgramBinary
+//#define qglProgramParameteri glProgramParameteri
+#define qglInvalidateFramebuffer glInvalidateFramebuffer
+#define qglInvalidateSubFramebuffer glInvalidateSubFramebuffer
+#define qglTexStorage2D glTexStorage2D
+#define qglTexStorage3D glTexStorage3D
+#define qglGetInternalformativ glGetInternalformativ
+
+#ifdef GL_ES_VERSION_3_1
+#define qglDispatchCompute glDispatchCompute
+#define qglDispatchComputeIndirect glDispatchComputeIndirect
+#define qglDrawArraysIndirect glDrawArraysIndirect
+#define qglDrawElementsIndirect glDrawElementsIndirect
+#define qglFramebufferParameteri glFramebufferParameteri
+#define qglGetFramebufferParameteriv glGetFramebufferParameteriv
+#define qglGetProgramInterfaceiv glGetProgramInterfaceiv
+#define qglGetProgramResourceIndex glGetProgramResourceIndex
+#define qglGetProgramResourceName glGetProgramResourceName
+#define qglGetProgramResourceiv glGetProgramResourceiv
+#define qglGetProgramResourceLocation glGetProgramResourceLocation
+#define qglUseProgramStages glUseProgramStages
+#define qglActiveShaderProgram glActiveShaderProgram
+#define qglCreateShaderProgramv glCreateShaderProgramv
+#define qglBindProgramPipeline glBindProgramPipeline
+#define qglDeleteProgramPipelines glDeleteProgramPipelines
+#define qglGenProgramPipelines glGenProgramPipelines
+#define qglIsProgramPipeline glIsProgramPipeline
+#define qglGetProgramPipelineiv glGetProgramPipelineiv
+#define qglProgramUniform1i glProgramUniform1i
+#define qglProgramUniform2i glProgramUniform2i
+#define qglProgramUniform3i glProgramUniform3i
+#define qglProgramUniform4i glProgramUniform4i
+#define qglProgramUniform1ui glProgramUniform1ui
+#define qglProgramUniform2ui glProgramUniform2ui
+#define qglProgramUniform3ui glProgramUniform3ui
+#define qglProgramUniform4ui glProgramUniform4ui
+#define qglProgramUniform1f glProgramUniform1f
+#define qglProgramUniform2f glProgramUniform2f
+#define qglProgramUniform3f glProgramUniform3f
+#define qglProgramUniform4f glProgramUniform4f
+#define qglProgramUniform1iv glProgramUniform1iv
+#define qglProgramUniform2iv glProgramUniform2iv
+#define qglProgramUniform3iv glProgramUniform3iv
+#define qglProgramUniform4iv glProgramUniform4iv
+#define qglProgramUniform1uiv glProgramUniform1uiv
+#define qglProgramUniform2uiv glProgramUniform2uiv
+#define qglProgramUniform3uiv glProgramUniform3uiv
+#define qglProgramUniform4uiv glProgramUniform4uiv
+#define qglProgramUniform1fv glProgramUniform1fv
+#define qglProgramUniform2fv glProgramUniform2fv
+#define qglProgramUniform3fv glProgramUniform3fv
+#define qglProgramUniform4fv glProgramUniform4fv
+#define qglProgramUniformMatrix2fv glProgramUniformMatrix2fv
+#define qglProgramUniformMatrix3fv glProgramUniformMatrix3fv
+#define qglProgramUniformMatrix4fv glProgramUniformMatrix4fv
+#define qglProgramUniformMatrix2x3fv glProgramUniformMatrix2x3fv
+#define qglProgramUniformMatrix3x2fv glProgramUniformMatrix3x2fv
+#define qglProgramUniformMatrix2x4fv glProgramUniformMatrix2x4fv
+#define qglProgramUniformMatrix4x2fv glProgramUniformMatrix4x2fv
+#define qglProgramUniformMatrix3x4fv glProgramUniformMatrix3x4fv
+#define qglProgramUniformMatrix4x3fv glProgramUniformMatrix4x3fv
+#define qglValidateProgramPipeline glValidateProgramPipeline
+#define qglGetProgramPipelineInfoLog glGetProgramPipelineInfoLog
+#define qglBindImageTexture glBindImageTexture
+#define qglGetBooleani_v glGetBooleani_v
+#define qglMemoryBarrier glMemoryBarrier
+#define qglMemoryBarrierByRegion glMemoryBarrierByRegion
+#define qglTexStorage2DMultisample glTexStorage2DMultisample
+#define qglGetMultisamplefv glGetMultisamplefv
+#define qglSampleMaski glSampleMaski
+#define qglGetTexLevelParameteriv glGetTexLevelParameteriv
+#define qglGetTexLevelParameterfv glGetTexLevelParameterfv
+#define qglBindVertexBuffer glBindVertexBuffer
+#define qglVertexAttribFormat glVertexAttribFormat
+#define qglVertexAttribIFormat glVertexAttribIFormat
+#define qglVertexAttribBinding glVertexAttribBinding
+#define qglVertexBindingDivisor glVertexBindingDivisor
+#endif // GL_ES_VERSION_3_1
+#endif // GL_ES_VERSION_3_0
+#endif
 
 #ifdef GLX_VERSION_1_1 // catch all for any GLX-aware situation
 #define qglXChooseVisual glXChooseVisual
@@ -370,4 +702,61 @@ If you have questions concerning this license or the applicable additional terms
 #define qglXMakeCurrent glXMakeCurrent
 #define qglXSwapBuffers glXSwapBuffers
 #define qglXGetProcAddressARB glXGetProcAddressARB
+#endif
+
+#ifdef EGL_VERSION_1_0
+#define qeglGetError eglGetError
+#define qeglGetDisplay eglGetDisplay
+#define qeglInitialize eglInitialize
+#define qeglTerminate eglTerminate
+#define qeglQueryString eglQueryString
+#define qeglGetConfigs eglGetConfigs
+#define qeglChooseConfig eglChooseConfig
+#define qeglGetConfigAttrib eglGetConfigAttrib
+#define qeglCreateWindowSurface eglCreateWindowSurface
+#define qeglCreatePbufferSurface eglCreatePbufferSurface
+#define qeglCreatePixmapSurface eglCreatePixmapSurface
+#define qeglDestroySurface eglDestroySurface
+#define qeglQuerySurface eglQuerySurface
+#define qeglCreateContext eglCreateContext
+#define qeglDestroyContext eglDestroyContext
+#define qeglMakeCurrent eglMakeCurrent
+#define qeglGetCurrentSurface eglGetCurrentSurface
+#define qeglGetCurrentDisplay eglGetCurrentDisplay
+#define qeglQueryContext eglQueryContext
+#define qeglWaitGL eglWaitGL
+#define qeglWaitNative eglWaitNative
+#define qeglSwapBuffers eglSwapBuffers
+#define qeglCopyBuffers eglCopyBuffers
+#define qeglGetProcAddress eglGetProcAddress
+#endif
+
+#ifdef EGL_VERSION_1_1
+#define qeglBindTexImage eglBindTexImage
+#define qeglReleaseTexImage eglReleaseTexImage
+#define qeglSurfaceAttrib eglSurfaceAttrib
+#define qeglSwapInterval eglSwapInterval
+#endif
+
+#ifdef EGL_VERSION_1_2
+#define qeglBindAPI eglBindAPI
+#define qeglQueryAPI eglQueryAPI
+#define qeglCreatePbufferFromClientBuffer eglCreatePbufferFromClientBuffer
+#define qeglReleaseThread eglReleaseThread
+#define qeglWaitClient eglWaitClient
+#endif
+
+#ifdef EGL_VERSION_1_4
+#define qeglGetCurrentContext eglGetCurrentContext
+#endif
+
+#ifdef EGL_VERSION_1_5
+#define qeglCreateSync eglCreateSync
+#define qeglDestroySync eglDestroySync
+#define qeglClientWaitSync eglClientWaitSync
+#define qeglGetSyncAttrib eglGetSyncAttrib
+#define qeglGetPlatformDisplay eglGetPlatformDisplay
+#define qeglCreatePlatformWindowSurface eglCreatePlatformWindowSurface
+#define qeglCreatePlatformPixmapSurface eglCreatePlatformPixmapSurface
+#define qeglWaitSync eglWaitSync
 #endif

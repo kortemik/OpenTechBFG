@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ public:
 
 							// Takes a null terminated string and breaks the string up into arg tokens.
 							// Does not need to be /n terminated.
-							// Set keepAsStrings to true to only seperate tokens from whitespace and comments, ignoring punctuation
+							// Set keepAsStrings to true to only separate tokens from whitespace and comments, ignoring punctuation
 	void					TokenizeString( const char *text, bool keepAsStrings );
 
 	void					AppendArg( const char *text );

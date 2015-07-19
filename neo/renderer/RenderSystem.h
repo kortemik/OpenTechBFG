@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -54,8 +55,8 @@ enum stereo3DMode_t {
 
 	// two full resolution views stacked with a 30 pixel guard band
 	// On the PC this can be configured as a custom video timing, but
-	// it definitely isn't a consumer level task.  The quad_buffer
-	// support can handle 720P-3D with apropriate driver support.
+	// it definitely isn't a consumer level task. The quad_buffer
+	// support can handle 720P-3D with appropriate driver support.
 	STEREO3D_HDMI_720
 };
 
@@ -77,7 +78,12 @@ enum stereoDepthType_t {
 enum graphicsVendor_t {
 	VENDOR_NVIDIA,
 	VENDOR_AMD,
-	VENDOR_INTEL
+	VENDOR_INTEL,
+	VENDOR_ARM,
+	VENDOR_QC,
+	VENDOR_IMG,
+	VENDOR_QNX,
+	VENDOR_VM
 };
 
 // Contains variables specific to the OpenGL configuration being run right now.
@@ -87,7 +93,14 @@ struct glconfig_t {
 	const char *		vendor_string;
 	const char *		version_string;
 	const char *		extensions_string;
+#ifdef ID_WIN32
 	const char *		wgl_extensions_string;
+#endif
+#ifdef GL_ES_VERSION_2_0
+	const char *		egl_version_string;
+	float				eglVersion;
+	const char *		egl_extensions_string;
+#endif
 	const char *		shading_language_string;
 
 	float				glVersion;				// atof( version_string )
@@ -98,6 +111,9 @@ struct glconfig_t {
 	int					maxTextureImageUnits;
 	int					uniformBufferOffsetAlignment;
 	float				maxTextureAnisotropy;
+#ifdef GL_ES_VERSION_2_0
+	int					maxMultisamples;
+#endif
 
 	int					colorBits;
 	int					depthBits;
@@ -106,14 +122,33 @@ struct glconfig_t {
 	bool				multitextureAvailable;
 	bool				directStateAccess;
 	bool				textureCompressionAvailable;
+#ifdef GL_ES_VERSION_2_0
+	bool				textureCompressionFakeAvailable;
+	bool				textureCompressionDXTAvailable;
+	bool				textureCompressionETC1Available;
+	bool				textureCompressionETC2Available;
+	bool				qcomDriverControlAvailable;
+	int					qcomDriverTextureCompress;
+#endif
 	bool				anisotropicFilterAvailable;
 	bool				textureLODBiasAvailable;
+	bool				textureLODBiasShaderOnlyAvailable;
 	bool				seamlessCubeMapAvailable;
+	bool				textureUnpackRowLengthAvaliable;
 	bool				sRGBFramebufferAvailable;
 	bool				vertexBufferObjectAvailable;
 	bool				mapBufferRangeAvailable;
 	bool				vertexArrayObjectAvailable;
 	bool				drawElementsBaseVertexAvailable;
+	bool				drawElementsBaseVertexFakeAvailable;
+#ifdef GL_ES_VERSION_3_0
+	bool				textureSwizzleAvailable;
+#endif
+#ifdef GL_ES_VERSION_2_0
+	bool				vertexHalfFloatAvailable;
+#endif
+	bool				clampToBorderAvailable;
+	bool				textureMaxLevelAvailable;
 	bool				fragmentProgramAvailable;
 	bool				glslAvailable;
 	bool				uniformBufferAvailable;
@@ -124,6 +159,17 @@ struct glconfig_t {
 	bool				occlusionQueryAvailable;
 	bool				debugOutputAvailable;
 	bool				swapControlTearAvailable;
+
+#ifdef GL_ES_VERSION_2_0
+	GLenum				ID_GLES_VAR_DEF( GL_RGBA8 );
+	GLenum				ID_GLES_VAR_DEF( GL_RGBA8_FB );
+	GLenum				ID_GLES_VAR_DEF( GL_CLAMP_TO_BORDER );
+	GLenum				ID_GLES_VAR_DEF( GL_RED );
+	GLenum				ID_GLES_VAR_DEF( GL_RG );
+	GLenum				ID_GLES_VAR_DEF( GL_R8 );
+	GLenum				ID_GLES_VAR_DEF( GL_RG8 );
+	GLenum				ID_GLES_VAR_DEF( GL_HALF_FLOAT );
+#endif
 
 	stereo3DMode_t		stereo3Dmode;
 	int					nativeScreenWidth; // this is the native screen width resolution of the renderer
@@ -139,7 +185,7 @@ struct glconfig_t {
 	// Screen separation for stereoscopic rendering is set based on this.
 	// PC vid code sets this, converting from diagonals / inches / whatever as needed.
 	// If the value can't be determined, set something reasonable, like 50cm.
-	float				physicalScreenWidthInCentimeters;	
+	float				physicalScreenWidthInCentimeters;
 
 	float				pixelAspect;
 

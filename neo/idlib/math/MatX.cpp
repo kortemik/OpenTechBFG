@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -171,6 +172,7 @@ void idMatX::CopyLowerToUpperTriangle() {
 	assert( ( GetNumColumns() & 3 ) == 0 );
 	assert( GetNumColumns() >= GetNumRows() );
 
+#if defined( ID_WIN_X86_SSE_INTRIN ) || ( defined( ID_QNX_X86_SSE_INTRIN ) && defined( ID_QNX_X86_SSE2_INTRIN ) )
 
 	const int n = GetNumColumns();
 	const int m = GetNumRows();
@@ -307,6 +309,472 @@ void idMatX::CopyLowerToUpperTriangle() {
 		_mm_store_ps( basePtr + n0, r0 );
 	}
 
+#elif defined( ID_QNX_ARM_NEON_INTRIN )
+
+	const int n = GetNumColumns();
+	const int m = GetNumRows();
+
+	const int n0 = 0;
+	const int n1 = n;
+	const int n2 = ( n << 1 );
+	const int n3 = ( n << 1 ) + n;
+	const int n4 = ( n << 2 );
+
+	const int b1 = ( ( m - 0 ) >> 1 ) & 1;	// ( m & 3 ) > 1
+	const int b2 = ( ( m - 1 ) >> 1 ) & 1;	// ( m & 3 ) > 2 (provided ( m & 3 ) > 0)
+
+	const int n1_masked = ( n & -b1 );
+	const int n2_masked = ( n & -b1 ) + ( n & -b2 );
+
+	const int32x4_t mask0 = {  0,  0,  0, -1 };
+	const int32x4_t mask1 = {  0,  0, -1, -1 };
+	const int32x4_t mask2 = {  0, -1, -1, -1 };
+	const int32x4_t mask3 = { -1, -1, -1, -1 };
+
+	const int32x4_t bottomMask[2] = { vdupq_n_s32( 0 ), vdupq_n_s32( -1 ) };
+
+	float * __restrict basePtr = ToFloatPtr();
+
+	for ( int i = 0; i < m - 3; i += 4 ) {
+
+		// copy top left diagonal 4x4 block elements
+		int32x4_t r0 = vandq_s32( vld1q_s32( ( int32_t* )( basePtr + n0 ) ), mask0 );
+		int32x4_t r1 = vandq_s32( vld1q_s32( ( int32_t* )( basePtr + n1 ) ), mask1 );
+		int32x4_t r2 = vandq_s32( vld1q_s32( ( int32_t* )( basePtr + n2 ) ), mask2 );
+		int32x4_t r3 = vandq_s32( vld1q_s32( ( int32_t* )( basePtr + n3 ) ), mask3 );
+
+		// t0.val[0] x0, z0, x1, z1
+		// t0.val[1] x2, z2, x3, z3
+		int32x4x2_t t0 = vzipq_s32( r0, r2 );
+
+		// t1.val[0] y0, w0, y1, w1
+		// t1.val[1] y2, w2, y3, w3
+		int32x4x2_t t1 = vzipq_s32( r1, r3 );
+
+		// s0.val[0] x0, y0, z0, w0
+		// s0.val[1] x1, y1, z1, w1
+		int32x4x2_t s0 = vzipq_s32( t0.val[0], t1.val[0] );
+
+		// s1.val[0] x2, y2, z2, w2
+		// s1.val[1] x3, y3, z3, w3
+		int32x4x2_t s1 = vzipq_s32( t0.val[1], t1.val[1] );
+
+		r0 = vorrq_s32( r0, s0.val[0] );
+		r1 = vorrq_s32( r1, s0.val[1] );
+		r2 = vorrq_s32( r2, s1.val[0] );
+		r3 = vorrq_s32( r3, s1.val[1] );
+
+		vst1q_s32( ( int32_t* )( basePtr + n0 ), r0 );
+		vst1q_s32( ( int32_t* )( basePtr + n1 ), r1 );
+		vst1q_s32( ( int32_t* )( basePtr + n2 ), r2 );
+		vst1q_s32( ( int32_t* )( basePtr + n3 ), r3 );
+
+		// copy one column of 4x4 blocks to one row of 4x4 blocks
+		const float * __restrict srcPtr = basePtr;
+		float * __restrict dstPtr = basePtr;
+
+		for ( int j = i + 4; j < m - 3; j += 4 ) {
+			srcPtr += n4;
+			dstPtr += 4;
+
+			int32x4_t r0 = vld1q_s32( ( int32_t* )( srcPtr + n0 ) );
+			int32x4_t r1 = vld1q_s32( ( int32_t* )( srcPtr + n1 ) );
+			int32x4_t r2 = vld1q_s32( ( int32_t* )( srcPtr + n2 ) );
+			int32x4_t r3 = vld1q_s32( ( int32_t* )( srcPtr + n3 ) );
+
+			// t0.val[0] x0, z0, x1, z1
+			// t0.val[1] x2, z2, x3, z3
+			int32x4x2_t t0 = vzipq_s32( r0, r2 );
+
+			// t1.val[0] y0, w0, y1, w1
+			// t1.val[1] y2, w2, y3, w3
+			int32x4x2_t t1 = vzipq_s32( r1, r3 );
+
+			// s0.val[0] x0, y0, z0, w0
+			// s0.val[1] x1, y1, z1, w1
+			int32x4x2_t s0 = vzipq_s32( t0.val[0], t1.val[0] );
+
+			// s1.val[0] x2, y2, z2, w2
+			// s1.val[1] x3, y3, z3, w3
+			int32x4x2_t s1 = vzipq_s32( t0.val[1], t1.val[1] );
+
+			vst1q_s32( ( int32_t* )( dstPtr + n0 ), s0.val[0] );
+			vst1q_s32( ( int32_t* )( dstPtr + n1 ), s0.val[1] );
+			vst1q_s32( ( int32_t* )( dstPtr + n2 ), s1.val[0] );
+			vst1q_s32( ( int32_t* )( dstPtr + n3 ), s1.val[1] );
+		}
+
+		// copy the last partial 4x4 block elements
+		if ( m & 3 ) {
+			srcPtr += n4;
+			dstPtr += 4;
+
+			int32x4_t r0 = vld1q_s32( ( int32_t* )( srcPtr + n0 ) );
+			int32x4_t r1 = vandq_s32( vld1q_s32( ( int32_t* )( srcPtr + n1_masked ) ), bottomMask[b1] );
+			int32x4_t r2 = vandq_s32( vld1q_s32( ( int32_t* )( srcPtr + n2_masked ) ), bottomMask[b2] );
+			int32x4_t r3 = vdupq_n_s32( 0 );
+
+			// t0.val[0] x0, z0, x1, z1
+			// t0.val[1] x2, z2, x3, z3
+			int32x4x2_t t0 = vzipq_s32( r0, r2 );
+
+			// t1.val[0] y0, w0, y1, w1
+			// t1.val[1] y2, w2, y3, w3
+			int32x4x2_t t1 = vzipq_s32( r1, r3 );
+
+			// s0.val[0] x0, y0, z0, w0
+			// s0.val[1] x1, y1, z1, w1
+			int32x4x2_t s0 = vzipq_s32( t0.val[0], t1.val[0] );
+
+			// s1.val[0] x2, y2, z2, w2
+			// s1.val[1] x3, y3, z3, w3
+			int32x4x2_t s1 = vzipq_s32( t0.val[1], t1.val[1] );
+
+			vst1q_s32( ( int32_t* )( dstPtr + n0 ), s0.val[0] );
+			vst1q_s32( ( int32_t* )( dstPtr + n1 ), s0.val[1] );
+			vst1q_s32( ( int32_t* )( dstPtr + n2 ), s1.val[0] );
+			vst1q_s32( ( int32_t* )( dstPtr + n3 ), s1.val[1] );
+		}
+
+		basePtr += n4 + 4;
+	}
+
+	// copy the lower right partial diagonal 4x4 block elements
+	if ( m & 3 ) {
+		int32x4_t r0 = vandq_s32( vld1q_s32( ( int32_t* )( basePtr + n0 ) ), mask0 );
+		int32x4_t r1 = vandq_s32( vld1q_s32( ( int32_t* )( basePtr + n1_masked ) ), vandq_s32( mask1, bottomMask[b1] ) );
+		int32x4_t r2 = vandq_s32( vld1q_s32( ( int32_t* )( basePtr + n2_masked ) ), vandq_s32( mask2, bottomMask[b2] ) );
+		int32x4_t r3 = vdupq_n_s32( 0 );
+
+		// t0.val[0] x0, z0, x1, z1
+		// t0.val[1] x2, z2, x3, z3
+		int32x4x2_t t0 = vzipq_s32( r0, r2 );
+
+		// t1.val[0] y0, w0, y1, w1
+		// t1.val[1] y2, w2, y3, w3
+		int32x4x2_t t1 = vzipq_s32( r1, r3 );
+
+		// s0.val[0] x0, y0, z0, w0
+		// s0.val[1] x1, y1, z1, w1
+		int32x4x2_t s0 = vzipq_s32( t0.val[0], t1.val[0] );
+
+		// s1.val[0] x2, y2, z2, w2
+		// s1.val[1] x3, y3, z3, w3
+		int32x4x2_t s1 = vzipq_s32( t0.val[1], t1.val[1] );
+
+		r0 = vorrq_s32( r0, s0.val[0] );
+		r1 = vorrq_s32( r1, s0.val[1] );
+		r2 = vorrq_s32( r2, s1.val[0] );
+
+		vst1q_s32( ( int32_t* )( basePtr + n2_masked ), r2 );
+		vst1q_s32( ( int32_t* )( basePtr + n1_masked ), r1 );
+		vst1q_s32( ( int32_t* )( basePtr + n0 ), r0 );
+	}
+
+#elif defined( ID_QNX_ARM_NEON_ASM )
+
+	const int n = GetNumColumns();
+	const int m = GetNumRows();
+
+	const int n0 = 0;
+	const int n1 = n;
+	const int n2 = ( n << 1 );
+	const int n3 = ( n << 1 ) + n;
+	const int n4 = ( n << 2 );
+
+	const int b1 = ( ( m - 0 ) >> 1 ) & 1;	// ( m & 3 ) > 1
+	const int b2 = ( ( m - 1 ) >> 1 ) & 1;	// ( m & 3 ) > 2 (provided ( m & 3 ) > 0)
+
+	const int n1_masked = ( n & -b1 );
+	const int n2_masked = ( n & -b1 ) + ( n & -b2 );
+
+	//Setup consts
+	//Q0 = { 0, 0, 0, 0} //bottomMask[0]
+	//Q1 = { 0, 0, 0,-1} //mask0
+	//Q2 = { 0, 0,-1,-1} //mask1
+	//Q3 = { 0,-1,-1,-1} //mask2
+	//Q4 = {-1,-1,-1,-1} //mask3, bottomMask[1]
+	int32_t negOne = -1;
+	__asm__ __volatile__(
+			"VBIC.I32 q0, #0\n"					//Q0 = {0,0,0,0}
+			"VLD1.32 {d8[], d9[]}, [%[nOne]]\n"	//Q4 = {-1,-1,-1,-1} (VORR.I32 Q4, #0xFFFFFFFF causes error)
+			"VMOV q1, q0\n"
+			"VMOV q2, q0\n"
+			"VMOV q3, q0\n"
+			"VMOV d5, d8\n"						//Q2 = {0,0,-1,-1}
+			"VMOV d7, d8\n"						//Q3* = {0,x,-1,-1}
+			"VLD1.32 {d3[1]}, [%[nOne]]\n"		//Q1 = {0,0,0,-1}
+			"VLD1.32 {d6[1]}, [%[nOne]]\n"		//Q3 = {0,-1,-1,-1}
+			:: [nOne] "r" (&negOne) : /*"q0", "q1", "q2", "q3", "q4"*/);
+	//Risky to do so, but don't indicate the registers used. We don't want them changed before the rest of the code executes (they are playing the role of constants)
+
+	float * __restrict basePtr = ToFloatPtr();
+
+	for ( int i = 0; i < m - 3; i += 4 ) {
+
+		__asm__ __volatile__(
+				//Get addresses for vectors
+				"MOV r3, #4\n"
+				"MLA r0, %[n0], r3, %[d]\n"
+				"MLA r1, %[n1], r3, %[d]\n"
+				"MLA r2, %[n2], r3, %[d]\n"
+				"MLA r3, %[n3], r3, %[d]\n"
+
+				//Load vectors
+				// copy top left diagonal 4x4 block elements
+				"VLD1.32 {q5}, [r0]\n"
+				"VLD1.32 {q6}, [r1]\n"
+				"VLD1.32 {q7}, [r2]\n"
+				"VLD1.32 {q8}, [r3]\n"
+
+				//ANDing operations
+				"VAND q5, q5, q1\n"
+				"VAND q6, q6, q2\n"
+				"VAND q7, q7, q3\n"
+				"VAND q8, q8, q4\n"
+
+				//Transpose matrix
+
+				"VMOV q9, q5\n"
+				"VMOV q10, q7\n"
+				"VMOV q11, q6\n" // note the reversed elements...
+				"VMOV q12, q8\n"
+
+				// Q9: x0, z0, x1, z1
+				// Q10: x2, z2, x3, z3
+				"VZIP.32 q9, q10\n"
+				// Q11: y0, w0, y1, w1
+				// Q12: y2, w2, y3, w3
+				"VZIP.32 q11, q12\n"
+				// Q9: x0, y0, z0, w0
+				// Q11: x1, y1, z1, w1
+				"VZIP.32 q9, q11\n"
+				// Q10: x2, y2, z2, w2
+				// Q12: x3, y3, z3, w3
+				"VZIP.32 q10, q12\n"
+
+				//OR vectors and masks
+				"VORR q5, q5, q9\n"
+				"VORR q6, q6, q11\n"
+				"VORR q7, q7, q10\n" //...so using them will be reversed too
+				"VORR q8, q8, q12\n"
+
+				//Store vectors
+				"VST1.32 {q5}, [r0]\n"
+				"VST1.32 {q6}, [r1]\n"
+				"VST1.32 {q7}, [r2]\n"
+				"VST1.32 {q8}, [r3]\n"
+				: [d] "+r" (basePtr)
+				: [n0] "r" (n0), [n1] "r" (n1), [n2] "r" (n2), [n3] "r" (n3)
+				: "r0", "r1", "r2", "r3", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12", "memory");
+
+		// copy one column of 4x4 blocks to one row of 4x4 blocks
+		const float * __restrict srcPtr = basePtr;
+		float * __restrict dstPtr = basePtr;
+
+		for ( int j = i + 4; j < m - 3; j += 4 ) {
+			srcPtr += n4;
+			dstPtr += 4;
+
+			__asm__ __volatile__(
+					//Get addresses for vectors
+					"MOV r3, #4\n"
+					"MLA r0, %[n0], r3, %[s]\n"
+					"MLA r1, %[n1], r3, %[s]\n"
+					"MLA r2, %[n2], r3, %[s]\n"
+					"MLA r3, %[n3], r3, %[s]\n"
+
+					//Load vectors
+					"VLD1.32 {q9}, [r0]\n"
+					"VLD1.32 {q10}, [r1]\n"
+					"VLD1.32 {q11}, [r2]\n"
+					"VLD1.32 {q12}, [r3]\n"
+
+					//Transpose matrix
+
+					// Q9: x0, z0, x1, z1
+					// Q11: x2, z2, x3, z3
+					"VZIP.32 q9, q11\n"
+					// Q10: y0, w0, y1, w1
+					// Q12: y2, w2, y3, w3
+					"VZIP.32 q10, q12\n"
+					// Q9: x0, y0, z0, w0
+					// Q10: x1, y1, z1, w1
+					"VZIP.32 q9, q10\n"
+					// Q11: x2, y2, z2, w2
+					// Q12: x3, y3, z3, w3
+					"VZIP.32 q11, q12\n"
+
+					//Get destination addresses for vectors
+					"SUB r4, %[s], %[d]\n"
+					"ADD r0, r0, r4\n"
+					"ADD r1, r1, r4\n"
+					"ADD r2, r2, r4\n"
+					"ADD r3, r3, r4\n"
+
+					//Save vectors
+					"VST1.32 {q9}, [r0]\n"
+					"VST1.32 {q10}, [r1]\n"
+					"VST1.32 {q11}, [r2]\n"
+					"VST1.32 {q12}, [r3]\n"
+					: [d] "+&r" (dstPtr)
+					: [s] "r" (srcPtr), [n0] "r" (n0), [n1] "r" (n1), [n2] "r" (n2), [n3] "r" (n3)
+					: "r0", "r1", "r2", "r3", "r4", "q9", "q10", "q11", "q12", "memory");
+		}
+
+		// copy the last partial 4x4 block elements
+		if ( m & 3 ) {
+			srcPtr += n4;
+			dstPtr += 4;
+
+			//Too many general registers are used, so we need to store it externally
+			int values[] = {n1_masked, n2_masked, b1, b2};
+
+			__asm__ __volatile__(
+					//Get addresses for vectors
+					"MOV r3, #4\n"
+					"MLA r0, %[n0], r3, %[s]\n"
+					"LDR r1, [%[v]]\n" //n1_masked
+					"MLA r1, r1, r3, %[s]\n"
+					"LDR r2, [%[v], #4]\n" //n2_masked
+					"MLA r2, r2, r3, %[s]\n"
+
+					//Load vectors
+					"VLD1.32 {q9}, [r0]\n"
+					"VLD1.32 {q10}, [r1]\n"
+					"VLD1.32 {q11}, [r2]\n"
+					"VMOV q12, q0\n"
+
+					//Perform ANDing operations
+					"LDR r3, [%[v], #8]\n" //b1
+					"CMP r3, #1\n"
+					"ITE EQ\n"
+					"VANDEQ q10, q10, q0\n"
+					"VANDNE q10, q10, q4\n"
+
+					"LDR r3, [%[v], #12]\n" //b2
+					"CMP r3, #1\n"
+					"ITE EQ\n"
+					"VANDEQ q11, q11, q0\n"
+					"VANDNE q11, q11, q4\n"
+
+					//Transpose matrix
+
+					// Q9: x0, z0, x1, z1
+					// Q11: x2, z2, x3, z3
+					"VZIP.32 q9, q11\n"
+					// Q10: y0, w0, y1, w1
+					// Q12: y2, w2, y3, w3
+					"VZIP.32 q10, q12\n"
+					// Q9: x0, y0, z0, w0
+					// Q10: x1, y1, z1, w1
+					"VZIP.32 q9, q10\n"
+					// Q11: x2, y2, z2, w2
+					// Q12: x3, y3, z3, w3
+					"VZIP.32 q11, q12\n"
+
+					//Get destination addresses for vectors
+					"MOV r3, #4\n"
+					"MLA r0, %[n0], r3, %[d]\n"
+					"MLA r1, %[n1], r3, %[d]\n"
+					"MLA r2, %[n2], r3, %[d]\n"
+					"MLA r3, %[n3], r3, %[d]\n"
+
+					//Save vectors
+					"VST1.32 {q9}, [r0]\n"
+					"VST1.32 {q10}, [r1]\n"
+					"VST1.32 {q11}, [r2]\n"
+					"VST1.32 {q12}, [r3]\n"
+					: [d] "+&r" (dstPtr)
+					: [s] "r" (srcPtr), [n0] "r" (n0), [n1] "r" (n1), [n2] "r" (n2), [n3] "r" (n3), [v] "r" (values)
+					: "r0", "r1", "r2", "r3", "q0", "q1", "q2", "q3", "q9", "q10", "q11", "q12", "memory", "cc");
+		}
+
+		basePtr += n4 + 4;
+	}
+
+	// copy the lower right partial diagonal 4x4 block elements
+	if ( m & 3 ) {
+		int values[] = {n1_masked, n2_masked, b1, b2};
+
+		__asm__ __volatile__(
+				//Get addresses for vectors
+				"MOV r2, #4\n"
+				"MLA r0, %[n0], r2, %[d]\n"
+				"MLA r1, %[n1m], r2, %[d]\n"
+				"MLA r2, %[n2m], r2, %[d]\n"
+
+				//Load vectors
+				"VLD1.32 {q5}, [r0]\n"
+				"VLD1.32 {q6}, [r1]\n"
+				"VLD1.32 {q7}, [r2]\n"
+				"VMOV q8, q0\n"
+
+				//Perform ANDing operations
+				"VAND q5, q5, q1\n"
+
+				"VMOV q9, q2\n"
+				"CMP %[b1], #1\n"
+				"ITE EQ\n"
+				"VANDEQ q9, q9, q0\n"
+				"VANDNE q9, q9, q4\n"
+				"VAND q6, q6, q9\n"
+
+				"VMOV q9, q3\n"
+				"CMP %[b2], #1\n"
+				"ITE EQ\n"
+				"VANDEQ q9, q9, q0\n"
+				"VANDNE q9, q9, q4\n"
+				"VAND q7, q7, q9\n"
+
+				//Transpose matrix
+
+				"VMOV q9, q5\n"
+				"VMOV q10, q7\n"
+				"VMOV q11, q6\n"
+				"VMOV q12, q8\n"
+
+				// Q9: x0, z0, x1, z1
+				// Q10: x2, z2, x3, z3
+				"VZIP.32 q9, q10\n"
+				// Q11: y0, w0, y1, w1
+				// Q12: y2, w2, y3, w3
+				"VZIP.32 q11, q12\n"
+				// Q9: x0, y0, z0, w0
+				// Q11: x1, y1, z1, w1
+				"VZIP.32 q9, q11\n"
+				// Q10: x2, y2, z2, w2
+				// Q12: x3, y3, z3, w3
+				"VZIP.32 q10, q12\n"
+
+				//OR vectors and masks
+				"VORR q5, q5, q9\n"
+				"VORR q6, q6, q11\n"
+				"VORR q7, q7, q10\n"
+
+				//Save vectors
+				"VST1.32 {q5}, [r0]\n"
+				"VST1.32 {q6}, [r1]\n"
+				"VST1.32 {q7}, [r2]\n"
+				: [d] "+r" (basePtr)
+				: [n0] "r" (n0), [n1m] "r" (n1_masked), [n2m] "r" (n2_masked), [b1] "r" (b1), [b2] "r" (b2)
+				: "r0", "r1", "r2", "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12", "memory", "cc");
+	}
+
+#else
+
+	const int n = GetNumColumns();
+	const int m = GetNumRows();
+	for ( int i = 0; i < m; i++ ) {
+		const float * __restrict ptr = ToFloatPtr() + ( i + 1 ) * n + i;
+		float * __restrict dstPtr = ToFloatPtr() + i * n;
+		for ( int j = i + 1; j < m; j++ ) {
+			dstPtr[j] = ptr[0];
+			ptr += n;
+		}
+	}
+
+#endif
 
 #ifdef _DEBUG
 	for ( int i = 0; i < numRows; i++ ) {
@@ -1189,7 +1657,7 @@ bool idMatX::LU_Factor( int *index, float *det ) {
 	}
 
 	return true;
-}   
+}
 
 /*
 ============
@@ -2660,8 +3128,8 @@ bool idMatX::Cholesky_UpdateRowColumn( const idVecX &v, int r ) {
 		if ( numColumns == 1 ) {
 			double v0 = v[0];
 			sum = (*this)[0][0];
-			sum = sum * sum; 
-			sum = sum + v0; 
+			sum = sum * sum;
+			sum = sum + v0;
 			if ( sum <= 0.0f ) {
 				return false;
 			}
@@ -3964,7 +4432,7 @@ bool idMatX::HessenbergToRealSchur( idMatX &H, idVecX &realEigenValues, idVecX &
 			}
 			l--;
 		}
-	   
+
 		// check for convergence
 		if ( l == n ) {			// one root found
 			H[n][n] = H[n][n] + exshift;
@@ -4172,7 +4640,7 @@ bool idMatX::HessenbergToRealSchur( idMatX &H, idVecX &realEigenValues, idVecX &
 			}
 		}
 	}
-	
+
 	// backsubstitute to find vectors of upper triangular form
 	if ( norm == 0.0f ) {
 		return false;
@@ -4506,7 +4974,7 @@ void idMatX::Test() {
 	// invert m1
 	m1.Inverse_GaussJordan();
 
-	// modify and invert m2 
+	// modify and invert m2
 	m2.Update_RankOne( v, w, 1.0f );
 	if ( !m2.Inverse_GaussJordan() ) {
 		assert( 0 );
@@ -4562,7 +5030,7 @@ void idMatX::Test() {
 	// invert m1
 	m1.Inverse_GaussJordan();
 
-	// modify and invert m2 
+	// modify and invert m2
 	m2.Update_Increment( v, w );
 	if ( !m2.Inverse_GaussJordan() ) {
 		assert( 0 );
@@ -4634,7 +5102,7 @@ void idMatX::Test() {
 	// factor m1
 	m1.LU_Factor( index1 );
 
-	// modify and factor m2 
+	// modify and factor m2
 	m2.Update_RankOne( v, w, 1.0f );
 	if ( !m2.LU_Factor( index2 ) ) {
 		assert( 0 );
@@ -4698,7 +5166,7 @@ void idMatX::Test() {
 	// factor m1
 	m1.LU_Factor( index1 );
 
-	// modify and factor m2 
+	// modify and factor m2
 	m2.Update_Increment( v, w );
 	if ( !m2.LU_Factor( index2 ) ) {
 		assert( 0 );
@@ -4804,7 +5272,7 @@ void idMatX::Test() {
 	m1.QR_Factor( c, d );
 	m1.QR_UnpackFactors( q1, r1, c, d );
 
-	// modify and factor m2 
+	// modify and factor m2
 	m2.Update_RankOne( v, w, 1.0f );
 	if ( !m2.QR_Factor( c, d ) ) {
 		assert( 0 );
@@ -4874,7 +5342,7 @@ void idMatX::Test() {
 	m1.QR_Factor( c, d );
 	m1.QR_UnpackFactors( q1, r1, c, d );
 
-	// modify and factor m2 
+	// modify and factor m2
 	m2.Update_Increment( v, w );
 	if ( !m2.QR_Factor( c, d ) ) {
 		assert( 0 );
@@ -5000,7 +5468,7 @@ void idMatX::Test() {
 	m1.Cholesky_Factor();
 	m1.ClearUpperTriangle();
 
-	// modify and factor m2 
+	// modify and factor m2
 	m2.Update_RankOneSymmetric( w, 1.0f );
 	if ( !m2.Cholesky_Factor() ) {
 		assert( 0 );
@@ -5063,7 +5531,7 @@ void idMatX::Test() {
 	// factor m1
 	m1.Cholesky_Factor();
 
-	// modify and factor m2 
+	// modify and factor m2
 	m2.Update_IncrementSymmetric( w );
 	if ( !m2.Cholesky_Factor() ) {
 		assert( 0 );
@@ -5156,7 +5624,7 @@ void idMatX::Test() {
 	m1.LDLT_Factor();
 	m1.ClearUpperTriangle();
 
-	// modify and factor m2 
+	// modify and factor m2
 	m2.Update_RankOneSymmetric( w, 1.0f );
 	if ( !m2.LDLT_Factor() ) {
 		assert( 0 );
@@ -5217,7 +5685,7 @@ void idMatX::Test() {
 	// factor m1
 	m1.LDLT_Factor();
 
-	// modify and factor m2 
+	// modify and factor m2
 	m2.Update_IncrementSymmetric( w );
 	if ( !m2.LDLT_Factor() ) {
 		assert( 0 );

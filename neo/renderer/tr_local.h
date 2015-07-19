@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -243,7 +244,7 @@ public:
 
 
 	// the local bounds used to place entityRefs, either from parms for dynamic entities, or a model bounds
-	idBounds				localReferenceBounds;	
+	idBounds				localReferenceBounds;
 
 	// axis aligned bounding box in world space, derived from refernceBounds and
 	// modelMatrix in R_CreateEntityRefs()
@@ -344,7 +345,7 @@ struct viewEntity_t {
 
 	bool					weaponDepthHack;
 	float					modelDepthHack;
-		
+
 	float					modelMatrix[16];		// local coords to global coords
 	float					modelViewMatrix[16];	// local coords to eye coords
 
@@ -401,7 +402,7 @@ struct viewDef_t {
 	// these are real physical pixel values, possibly scaled and offset from the
 	// renderView x/y/width/height
 
-	viewDef_t *			superView;				// never go into an infinite subview loop 
+	viewDef_t *			superView;				// never go into an infinite subview loop
 	const drawSurf_t *	subviewSurface;
 
 	// drawSurfs are the visible surfaces of the viewEntities, sorted
@@ -440,7 +441,7 @@ struct drawInteraction_t {
 	idVec4				specularColor;	// may have a light color baked into it
 	stageVertexColor_t	vertexColor;	// applies to both diffuse and specular
 
-	int					ambientLight;	// use tr.ambientNormalMap instead of normalization cube map 
+	int					ambientLight;	// use tr.ambientNormalMap instead of normalization cube map
 
 	// these are loaded into the vertex program
 	idVec4				bumpMatrix[2];
@@ -638,7 +639,7 @@ struct backEndCounters_t {
 
 	int		c_copyFrameBuffer;
 
-	float	c_overDraw;	
+	float	c_overDraw;
 
 	int		totalMicroSec;			// total microseconds for backend run
 	int		shadowMicroSec;
@@ -738,7 +739,7 @@ public:
 	virtual void			UnCrop();
 	virtual bool			UploadImage( const char *imageName, const byte *data, int width, int height );
 
-	
+
 
 public:
 	// internal functions
@@ -806,7 +807,7 @@ public:
 	srfTriangles_t *		testImageTriangles;
 
 	// these are allocated at buffer swap time, but
-	// the back end should only use the ones in the backEnd stucture,
+	// the back end should only use the ones in the backEnd structure,
 	// which are copied over from the frame that was just swapped.
 	drawSurf_t				unitSquareSurface_;
 	drawSurf_t				zeroOneCubeSurface_;
@@ -826,6 +827,9 @@ extern glconfig_t			glConfig;		// outside of TR since it shouldn't be cleared du
 //
 extern idCVar r_debugContext;				// enable various levels of context debug
 extern idCVar r_glDriver;					// "opengl32", etc
+#ifdef GL_ES_VERSION_2_0
+extern idCVar r_eglDriver;					// "libEGL", etc
+#endif
 extern idCVar r_skipIntelWorkarounds;		// skip work arounds for Intel driver bugs
 extern idCVar r_vidMode;					// video mode number
 extern idCVar r_displayRefresh;				// optional display refresh rate option for vid mode
@@ -850,7 +854,11 @@ extern idCVar r_brightness;					// changes gamma tables
 extern idCVar r_checkBounds;				// compare all surface bounds with precalculated ones
 extern idCVar r_maxAnisotropicFiltering;	// texture filtering parameter
 extern idCVar r_useTrilinearFiltering;		// Extra quality filtering
+#ifdef GL_ES_VERSION_2_0
+extern idAdjustableMinMaxCVar r_lodBias;	// lod bias
+#else
 extern idCVar r_lodBias;					// lod bias
+#endif
 
 extern idCVar r_useLightPortalFlow;			// 1 = do a more precise area reference determination
 extern idCVar r_useShadowSurfaceScissor;	// 1 = scissor shadows by the scissor rect of the interaction surfaces
@@ -972,6 +980,12 @@ INITIALIZATION
 void R_Init();
 void R_InitOpenGL();
 
+#ifdef GL_ES_VERSION_2_0
+void R_SetupFramebuffers();
+void R_UpdateFramebuffers();
+void R_UpdateGLESVersion();
+#endif
+
 void R_SetColorMappings();
 
 void R_ScreenShot_f( const idCmdArgs &args );
@@ -1014,7 +1028,7 @@ struct glimpParms_t {
 
 bool		GLimp_Init( glimpParms_t parms );
 // If the desired mode can't be set satisfactorily, false will be returned.
-// If succesful, sets glConfig.nativeScreenWidth, glConfig.nativeScreenHeight, and glConfig.pixelAspect
+// If successful, sets glConfig.nativeScreenWidth, glConfig.nativeScreenHeight, and glConfig.pixelAspect
 
 // The renderer will then reset the glimpParms to "safe mode" of 640x480
 // fullscreen and try again.  If that also fails, the error will be fatal.
@@ -1026,7 +1040,7 @@ void		GLimp_Shutdown();
 // Destroys the rendering context, closes the window, resets the resolution,
 // and resets the gamma ramps.
 
-void		GLimp_SetGamma( unsigned short red[256], 
+void		GLimp_SetGamma( unsigned short red[256],
 						    unsigned short green[256],
 							unsigned short blue[256] );
 // Sets the hardware gamma ramps for gamma and brightness adjustment.
@@ -1040,16 +1054,16 @@ bool		GLimp_SpawnRenderThread( void (*function)() );
 void *		GLimp_BackEndSleep();
 void		GLimp_FrontEndSleep();
 void		GLimp_WakeBackEnd( void *data );
-// these functions implement the dual processor syncronization
+// these functions implement the dual processor synchronization
 
 void		GLimp_ActivateContext();
 void		GLimp_DeactivateContext();
 // These are used for managing SMP handoffs of the OpenGL context
-// between threads, and as a performance tunining aid.  Setting
+// between threads, and as a performance tuning aid.  Setting
 // 'r_skipRenderContext 1' will call GLimp_DeactivateContext() before
 // the 3D rendering code, and GLimp_ActivateContext() afterwards.  On
 // most OpenGL implementations, this will result in all OpenGL calls
-// being immediate returns, which lets us guage how much time is
+// being immediate returns, which lets us gauge how much time is
 // being spent inside OpenGL.
 
 void		GLimp_EnableLogging( bool enable );
@@ -1269,7 +1283,7 @@ struct deformInfo_t {
 
 
 // if outputVertexes is not NULL, it will point to a newly allocated set of verts that includes the mirrored ones
-deformInfo_t *		R_BuildDeformInfo( int numVerts, const idDrawVert *verts, int numIndexes, const int *indexes, 
+deformInfo_t *		R_BuildDeformInfo( int numVerts, const idDrawVert *verts, int numIndexes, const int *indexes,
 										bool useUnsmoothedTangents );
 void				R_FreeDeformInfo( deformInfo_t *deformInfo );
 int					R_DeformInfoMemoryUsed( deformInfo_t *deformInfo );

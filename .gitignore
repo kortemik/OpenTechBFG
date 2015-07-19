@@ -1,0 +1,19 @@
+# Folders
+build
+.settings
+Device-Debug
+Debug
+Release
+blackberry/resources
+blackberry/asmtest
+blackberry/texgenpack
+blackberry/GLES2_Doom_Test
+
+# File types
+*.user
+*.opensdf
+*.sdf
+*.suo
+*.ipch
+*.o
+*.a

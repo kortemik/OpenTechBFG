@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,6 +27,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#pragma hdrstop
+#include "../../idlib/precompiled.h"
 #include "../../idlib/ParallelJobList_JobHeaders.h"
 #include "../../idlib/SoftwareCache.h"
 
@@ -87,6 +90,7 @@ static void R_ShadowVolumeCullBits( byte *cullBits, byte &totalOr, const float r
 	assert_16_byte_aligned( cullBits );
 	assert_16_byte_aligned( verts );
 
+#ifdef ID_WIN_X86_SSE2_INTRIN
 
 	idODSStreamedArray< idShadowVert, 16, SBT_DOUBLE, 4 > vertsODS( verts, numVerts );
 
@@ -208,6 +212,54 @@ static void R_ShadowVolumeCullBits( byte *cullBits, byte &totalOr, const float r
 
 	totalOr = (byte) _mm_cvtsi128_si32( vecTotalOrByte );
 
+#else
+
+	idODSStreamedArray< idShadowVert, 16, SBT_DOUBLE, 1 > vertsODS( verts, numVerts );
+
+	byte tOr = 0;
+	for ( int i = 0; i < numVerts; ) {
+
+		const int nextNumVerts = vertsODS.FetchNextBatch() - 1;
+
+		for ( ; i <= nextNumVerts; i++ ) {
+			const idVec3 & v = vertsODS[i].xyzw.ToVec3();
+
+			const float d0 = planes[0].Distance( v );
+			const float d1 = planes[1].Distance( v );
+			const float d2 = planes[2].Distance( v );
+			const float d3 = planes[3].Distance( v );
+
+			const float t0 = d0 + radius;
+			const float t1 = d1 + radius;
+			const float t2 = d2 + radius;
+			const float t3 = d3 + radius;
+
+			const float s0 = d0 - radius;
+			const float s1 = d1 - radius;
+			const float s2 = d2 - radius;
+			const float s3 = d3 - radius;
+
+			byte bits;
+			bits  = IEEE_FLT_SIGNBITSET( t0 ) << 0;
+			bits |= IEEE_FLT_SIGNBITSET( t1 ) << 1;
+			bits |= IEEE_FLT_SIGNBITSET( t2 ) << 2;
+			bits |= IEEE_FLT_SIGNBITSET( t3 ) << 3;
+
+			bits |= IEEE_FLT_SIGNBITSET( s0 ) << 4;
+			bits |= IEEE_FLT_SIGNBITSET( s1 ) << 5;
+			bits |= IEEE_FLT_SIGNBITSET( s2 ) << 6;
+			bits |= IEEE_FLT_SIGNBITSET( s3 ) << 7;
+
+			bits ^= 0x0F;		// flip lower four bits
+
+			tOr |= bits;
+			cullBits[i] = bits;
+		}
+	}
+
+	totalOr = tOr;
+
+#endif
 }
 
 /*
@@ -220,7 +272,7 @@ static float R_SegmentToSegmentDistanceSquare( const idVec3 & start1, const idVe
 	const idVec3 dir0 = start1 - start2;
 	const idVec3 dir1 = end1 - start1;
 	const idVec3 dir2 = end2 - start2;
-	
+
 	const float dotDir1Dir1 = dir1 * dir1;
 	const float dotDir2Dir2 = dir2 * dir2;
 	const float dotDir1Dir2 = dir1 * dir2;
@@ -243,7 +295,7 @@ static float R_SegmentToSegmentDistanceSquare( const idVec3 & start1, const idVe
 		// The parallel case is not relevent here though.
 		return ( start2 - start1 ).LengthSqr();
 	}
-	
+
 	const float n = dotDir0Dir2 * dotDir1Dir2 - dotDir0Dir1 * dotDir2Dir2;
 
 	const float t1 = n / d;
@@ -329,7 +381,7 @@ Rendering with Z-fail can be significantly slower even on today's hardware.
 bool R_ViewInsideShadowVolume( byte * cullBits, const idShadowVert * verts, int numVerts, const triIndex_t * indexes, int numIndexes,
 								const idVec3 & localLightOrigin, const idVec3 & localViewOrigin, const float zNear ) {
 
-	ALIGNTYPE16 idPlane planes[4];
+	ALIGNTYPE16 idPlane planes[4] ALIGNTYPE16_POST;
 	// create two planes orthogonal to each other that intersect along the trace
 	idVec3 startDir = localLightOrigin - localViewOrigin;
 	startDir.Normalize();

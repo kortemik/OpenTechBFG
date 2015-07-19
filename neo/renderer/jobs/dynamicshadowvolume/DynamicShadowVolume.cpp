@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,11 +27,13 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#pragma hdrstop
 #include "DynamicShadowVolume_local.h"
 
 #include "../../../idlib/sys/sys_intrinsics.h"
 #include "../../../idlib/geometry/DrawVert_intrinsics.h"
 
+#ifdef ID_WIN_X86_SSE2_INTRIN
 
 static const __m128i vector_int_neg_one		= _mm_set_epi32( -1, -1, -1, -1 );
 
@@ -126,6 +129,69 @@ static __forceinline __m128i TriangleCulled_SSE2(	const __m128 & vert0X, const _
 	return _mm_castps_si128( _mm_cmpeq_ps( b0, zero ) );
 }
 
+#else
+
+/*
+=====================
+TriangleFacing
+
+Returns 255 if the triangle is facing the light origin, otherwise returns 0.
+=====================
+*/
+static byte TriangleFacing_Generic( const idVec3 & v1, const idVec3 & v2, const idVec3 & v3, const idVec3 & lightOrigin ) {
+	const float sx = v2.x - v1.x;
+	const float sy = v2.y - v1.y;
+	const float sz = v2.z - v1.z;
+
+	const float tx = v3.x - v1.x;
+	const float ty = v3.y - v1.y;
+	const float tz = v3.z - v1.z;
+
+	const float normalX = ty * sz - tz * sy;
+	const float normalY = tz * sx - tx * sz;
+	const float normalZ = tx * sy - ty * sx;
+	const float normalW = normalX * v1.x + normalY * v1.y + normalZ * v1.z;
+
+	const float d = lightOrigin.x * normalX + lightOrigin.y * normalY + lightOrigin.z * normalZ - normalW;
+	return ( d > 0.0f ) ? 255 : 0;
+}
+
+/*
+=====================
+TriangleCulled
+
+Returns 255 if the triangle is culled to the light projection matrix, otherwise returns 0.
+The clip space of the 'lightProject' is assumed to be in the range [0, 1].
+=====================
+*/
+static byte TriangleCulled_Generic( const idVec3 & v1, const idVec3 & v2, const idVec3 & v3, const idRenderMatrix & lightProject ) {
+	// transform the triangle
+	idVec4 c[3];
+	for ( int i = 0; i < 4; i++ ) {
+		c[0][i] = v1[0] * lightProject[i][0] + v1[1] * lightProject[i][1] + v1[2] * lightProject[i][2] + lightProject[i][3];
+		c[1][i] = v2[0] * lightProject[i][0] + v2[1] * lightProject[i][1] + v2[2] * lightProject[i][2] + lightProject[i][3];
+		c[2][i] = v3[0] * lightProject[i][0] + v3[1] * lightProject[i][1] + v3[2] * lightProject[i][2] + lightProject[i][3];
+	}
+
+	// calculate the culled bits
+	int bits = 0;
+	for ( int i = 0; i < 3; i++ ) {
+		const float minW = 0.0f;
+		const float maxW = c[i][3];
+
+		if ( c[i][0] > minW ) { bits |= ( 1 << 0 ); }
+		if ( c[i][0] < maxW ) { bits |= ( 1 << 1 ); }
+		if ( c[i][1] > minW ) { bits |= ( 1 << 2 ); }
+		if ( c[i][1] < maxW ) { bits |= ( 1 << 3 ); }
+		if ( c[i][2] > minW ) { bits |= ( 1 << 4 ); }
+		if ( c[i][2] < maxW ) { bits |= ( 1 << 5 ); }
+	}
+
+	// if any bits weren't set, the triangle is completely off one side of the frustum
+	return ( bits != 63 ) ? 255 : 0;
+}
+
+#endif
 
 /*
 =====================
@@ -155,6 +221,7 @@ static int CalculateTriangleFacingCulledStatic( byte * __restrict facing, byte *
 	const idVec3 lineDir = lineDelta * lineLengthRcp;
 	const float lineLength = lineLengthSqr * lineLengthRcp;
 
+#ifdef ID_WIN_X86_SSE2_INTRIN
 
 	idODSStreamedIndexedArray< idDrawVert, triIndex_t, 32, SBT_QUAD, 4 * 3 > indexedVertsODS( verts, numVerts, indexes, numIndexes );
 
@@ -261,6 +328,55 @@ static int CalculateTriangleFacingCulledStatic( byte * __restrict facing, byte *
 
 	return _mm_cvtsi128_si32( numFrontFacing );
 
+#else
+
+	idODSStreamedIndexedArray< idDrawVert, triIndex_t, 32, SBT_QUAD, 1 > indexedVertsODS( verts, numVerts, indexes, numIndexes );
+
+	const byte cullShadowTrianglesToLightMask = cullShadowTrianglesToLight ? 255 : 0;
+
+	int numFrontFacing = 0;
+
+	for ( int i = 0, j = 0; i < numIndexes; ) {
+
+		const int batchStart = i;
+		const int batchEnd = indexedVertsODS.FetchNextBatch();
+		const int indexStart = j;
+
+		for ( ; i <= batchEnd - 3; i += 3, j++ ) {
+			const idVec3 & v1 = indexedVertsODS[i + 0].xyz;
+			const idVec3 & v2 = indexedVertsODS[i + 1].xyz;
+			const idVec3 & v3 = indexedVertsODS[i + 2].xyz;
+
+			const byte triangleCulled = TriangleCulled_Generic( v1, v2, v3, lightProject );
+
+			byte triangleFacing = TriangleFacing_Generic( v1, v2, v3, lightOrigin );
+
+			// optionally make triangles that are outside the light frustum facing so they do not contribute to the shadow volume
+			triangleFacing |= ( triangleCulled & cullShadowTrianglesToLightMask );
+
+			culled[j] = triangleCulled;
+			facing[j] = triangleFacing;
+
+			// count the number of facing triangles
+			numFrontFacing += ( triangleFacing & 1 );
+		}
+
+		if ( insideShadowVolume != NULL ) {
+			for ( int k = batchStart, n = indexStart; k <= batchEnd - 3; k += 3, n++ ) {
+				if ( !facing[n] ) {
+					if ( R_LineIntersectsTriangleExpandedWithSphere( lineStart, lineEnd, lineDir, lineLength, radius, indexedVertsODS[k + 2].xyz, indexedVertsODS[k + 1].xyz, indexedVertsODS[k + 0].xyz ) ) {
+						*insideShadowVolume = true;
+						insideShadowVolume = NULL;
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	return numFrontFacing;
+
+#endif
 }
 
 /*
@@ -291,6 +407,7 @@ static int CalculateTriangleFacingCulledSkinned( byte * __restrict facing, byte 
 	const idVec3 lineDir = lineDelta * lineLengthRcp;
 	const float lineLength = lineLengthSqr * lineLengthRcp;
 
+#ifdef ID_WIN_X86_SSE2_INTRIN
 
 	idODSStreamedArray< idDrawVert, 32, SBT_DOUBLE, 1 > vertsODS( verts, numVerts );
 
@@ -406,7 +523,7 @@ static int CalculateTriangleFacingCulledSkinned( byte * __restrict facing, byte 
 			// count the number of facing triangles
 			numFrontFacing = _mm_add_epi32( numFrontFacing, _mm_and_si128( triangleFacing, vector_int_one ) );
 		}
-	
+
 		if ( insideShadowVolume != NULL ) {
 			for ( int k = batchStart, n = indexStart; k <= batchEnd - 3; k += 3, n++ ) {
 				if ( !facing[n] ) {
@@ -428,42 +545,207 @@ static int CalculateTriangleFacingCulledSkinned( byte * __restrict facing, byte 
 
 	return _mm_cvtsi128_si32( numFrontFacing );
 
+#else
+
+	idODSStreamedArray< idDrawVert, 32, SBT_DOUBLE, 1 > vertsODS( verts, numVerts );
+
+	for ( int i = 0; i < numVerts; ) {
+
+		const int nextNumVerts = vertsODS.FetchNextBatch() - 1;
+
+		for ( ; i <= nextNumVerts; i++ ) {
+			tempVerts[i].ToVec3() = Scalar_LoadSkinnedDrawVertPosition( vertsODS[i], joints );
+			tempVerts[i].w = 1.0f;
+		}
+	}
+
+	idODSStreamedArray< triIndex_t, 256, SBT_QUAD, 1 > indexesODS( indexes, numIndexes );
+
+	const byte cullShadowTrianglesToLightMask = cullShadowTrianglesToLight ? 255 : 0;
+
+	int numFrontFacing = 0;
+
+	for ( int i = 0, j = 0; i < numIndexes; ) {
+
+		const int batchStart = i;
+		const int batchEnd = indexesODS.FetchNextBatch();
+		const int indexStart = j;
+
+		for ( ; i <= batchEnd - 3; i += 3, j++ ) {
+			const int i0 = indexesODS[i + 0];
+			const int i1 = indexesODS[i + 1];
+			const int i2 = indexesODS[i + 2];
+
+			const idVec3 & v1 = tempVerts[i0].ToVec3();
+			const idVec3 & v2 = tempVerts[i1].ToVec3();
+			const idVec3 & v3 = tempVerts[i2].ToVec3();
+
+			const byte triangleCulled = TriangleCulled_Generic( v1, v2, v3, lightProject );
+
+			byte triangleFacing = TriangleFacing_Generic( v1, v2, v3, lightOrigin );
+
+			// optionally make triangles that are outside the light frustum facing so they do not contribute to the shadow volume
+			triangleFacing |= ( triangleCulled & cullShadowTrianglesToLightMask );
+
+			culled[j] = triangleCulled;
+			facing[j] = triangleFacing;
+
+			// count the number of facing triangles
+			numFrontFacing += ( triangleFacing & 1 );
+		}
+
+		if ( insideShadowVolume != NULL ) {
+			for ( int k = batchStart, n = indexStart; k <= batchEnd - 3; k += 3, n++ ) {
+				if ( !facing[n] ) {
+					const int i0 = indexesODS[k + 0];
+					const int i1 = indexesODS[k + 1];
+					const int i2 = indexesODS[k + 2];
+					if ( R_LineIntersectsTriangleExpandedWithSphere( lineStart, lineEnd, lineDir, lineLength, radius, tempVerts[i2].ToVec3(), tempVerts[i1].ToVec3(), tempVerts[i0].ToVec3() ) ) {
+						*insideShadowVolume = true;
+						insideShadowVolume = NULL;
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	return numFrontFacing;
+
+#endif
 }
 
+/*
+============
+StreamOutIndexes
+============
+*/
+static void StreamOutIndexes( triIndex_t * dst, const triIndex_t * src, int numBytes, const int vertexOffset ) {
+	numBytes = ( numBytes + 15 ) & ~15;
+	assert_16_byte_aligned( dst );
+	assert_16_byte_aligned( src );
+
+	if ( vertexOffset == 0 ) {
+#ifdef ID_WIN_X86_SSE2_INTRIN
+		int i = 0;
+		for ( ; i + 128 <= numBytes; i += 128 ) {
+			__m128i d0 = _mm_load_si128( (const __m128i *)( (byte *)src + i + 0*16 ) );
+			__m128i d1 = _mm_load_si128( (const __m128i *)( (byte *)src + i + 1*16 ) );
+			__m128i d2 = _mm_load_si128( (const __m128i *)( (byte *)src + i + 2*16 ) );
+			__m128i d3 = _mm_load_si128( (const __m128i *)( (byte *)src + i + 3*16 ) );
+			__m128i d4 = _mm_load_si128( (const __m128i *)( (byte *)src + i + 4*16 ) );
+			__m128i d5 = _mm_load_si128( (const __m128i *)( (byte *)src + i + 5*16 ) );
+			__m128i d6 = _mm_load_si128( (const __m128i *)( (byte *)src + i + 6*16 ) );
+			__m128i d7 = _mm_load_si128( (const __m128i *)( (byte *)src + i + 7*16 ) );
+			_mm_stream_si128( (__m128i *)( (byte *)dst + i + 0*16 ), d0 );
+			_mm_stream_si128( (__m128i *)( (byte *)dst + i + 1*16 ), d1 );
+			_mm_stream_si128( (__m128i *)( (byte *)dst + i + 2*16 ), d2 );
+			_mm_stream_si128( (__m128i *)( (byte *)dst + i + 3*16 ), d3 );
+			_mm_stream_si128( (__m128i *)( (byte *)dst + i + 4*16 ), d4 );
+			_mm_stream_si128( (__m128i *)( (byte *)dst + i + 5*16 ), d5 );
+			_mm_stream_si128( (__m128i *)( (byte *)dst + i + 6*16 ), d6 );
+			_mm_stream_si128( (__m128i *)( (byte *)dst + i + 7*16 ), d7 );
+		}
+		for ( ; i + 16 <= numBytes; i += 16 ) {
+			__m128i d = _mm_load_si128( (__m128i *)( (byte *)src + i ) );
+			_mm_stream_si128( (__m128i *)( (byte *)dst + i ), d );
+		}
+#else
+		memcpy( dst, src, numBytes );
+#endif
+	} else {
+		int elementCount = numBytes / sizeof( triIndex_t );
+		int i = 0;
+
+#ifdef ID_WIN_X86_SSE2_INTRIN
+		const __m128i vector_int_vertex_offset = _mm_shuffle_epi32( _mm_cvtsi32_si128( vertexOffset ), 0 );
+#ifndef TRIINDEX_IS_32BIT
+		const __m128i vector_short_vertex_offset = _mm_packs_epi32( vector_int_vertex_offset, vector_int_vertex_offset );
+#endif
+
+#ifdef TRIINDEX_IS_32BIT
+		for ( ; i + 32 <= elementCount; i += 32 ) {
+			__m128i vi0 = _mm_load_si128( (const __m128i *)( &src[i+ 0] ) );
+			__m128i vi1 = _mm_load_si128( (const __m128i *)( &src[i+ 4] ) );
+			__m128i vi2 = _mm_load_si128( (const __m128i *)( &src[i+ 8] ) );
+			__m128i vi3 = _mm_load_si128( (const __m128i *)( &src[i+12] ) );
+			__m128i vi4 = _mm_load_si128( (const __m128i *)( &src[i+16] ) );
+			__m128i vi5 = _mm_load_si128( (const __m128i *)( &src[i+20] ) );
+			__m128i vi6 = _mm_load_si128( (const __m128i *)( &src[i+24] ) );
+			__m128i vi7 = _mm_load_si128( (const __m128i *)( &src[i+28] ) );
+			vi0 = _mm_add_epi32( vi0, vector_int_vertex_offset );
+			vi1 = _mm_add_epi32( vi1, vector_int_vertex_offset );
+			vi2 = _mm_add_epi32( vi2, vector_int_vertex_offset );
+			vi3 = _mm_add_epi32( vi3, vector_int_vertex_offset );
+			vi4 = _mm_add_epi32( vi4, vector_int_vertex_offset );
+			vi5 = _mm_add_epi32( vi5, vector_int_vertex_offset );
+			vi6 = _mm_add_epi32( vi6, vector_int_vertex_offset );
+			vi7 = _mm_add_epi32( vi7, vector_int_vertex_offset );
+			_mm_stream_si128( (__m128i *)( &dst[i+ 0] ), vi0 );
+			_mm_stream_si128( (__m128i *)( &dst[i+ 4] ), vi1 );
+			_mm_stream_si128( (__m128i *)( &dst[i+ 8] ), vi2 );
+			_mm_stream_si128( (__m128i *)( &dst[i+12] ), vi3 );
+			_mm_stream_si128( (__m128i *)( &dst[i+16] ), vi4 );
+			_mm_stream_si128( (__m128i *)( &dst[i+20] ), vi5 );
+			_mm_stream_si128( (__m128i *)( &dst[i+24] ), vi6 );
+			_mm_stream_si128( (__m128i *)( &dst[i+28] ), vi7 );
+		}
+		for ( ; i + 4 <= elementCount; i += 4 ) {
+			__m128i vi = _mm_load_si128( (const __m128i *)( &src[i] ) );
+			vi = _mm_add_epi32( vi, vector_int_vertex_offset );
+			_mm_stream_si128( (__m128i *)( &dst[i] ), vi );
+		}
+#else
+		for ( ; i + 64 <= elementCount; i += 64 ) {
+			__m128i vi0 = _mm_load_si128( (const __m128i *)( &src[i+ 0] ) );
+			__m128i vi1 = _mm_load_si128( (const __m128i *)( &src[i+ 8] ) );
+			__m128i vi2 = _mm_load_si128( (const __m128i *)( &src[i+16] ) );
+			__m128i vi3 = _mm_load_si128( (const __m128i *)( &src[i+24] ) );
+			__m128i vi4 = _mm_load_si128( (const __m128i *)( &src[i+32] ) );
+			__m128i vi5 = _mm_load_si128( (const __m128i *)( &src[i+40] ) );
+			__m128i vi6 = _mm_load_si128( (const __m128i *)( &src[i+48] ) );
+			__m128i vi7 = _mm_load_si128( (const __m128i *)( &src[i+56] ) );
+			vi0 = _mm_add_epi32( vi0, vector_short_vertex_offset );
+			vi1 = _mm_add_epi32( vi1, vector_short_vertex_offset );
+			vi2 = _mm_add_epi32( vi2, vector_short_vertex_offset );
+			vi3 = _mm_add_epi32( vi3, vector_short_vertex_offset );
+			vi4 = _mm_add_epi32( vi4, vector_short_vertex_offset );
+			vi5 = _mm_add_epi32( vi5, vector_short_vertex_offset );
+			vi6 = _mm_add_epi32( vi6, vector_short_vertex_offset );
+			vi7 = _mm_add_epi32( vi7, vector_short_vertex_offset );
+			_mm_stream_si128( (__m128i *)( &dst[i+ 0] ), vi0 );
+			_mm_stream_si128( (__m128i *)( &dst[i+ 8] ), vi1 );
+			_mm_stream_si128( (__m128i *)( &dst[i+16] ), vi2 );
+			_mm_stream_si128( (__m128i *)( &dst[i+24] ), vi3 );
+			_mm_stream_si128( (__m128i *)( &dst[i+32] ), vi4 );
+			_mm_stream_si128( (__m128i *)( &dst[i+40] ), vi5 );
+			_mm_stream_si128( (__m128i *)( &dst[i+48] ), vi6 );
+			_mm_stream_si128( (__m128i *)( &dst[i+56] ), vi7 );
+		}
+		for ( ; i + 8 <= elementCount; i += 8 ) {
+			__m128i vi = _mm_load_si128( (const __m128i *)( &src[i] ) );
+			vi = _mm_add_epi16( vi, vector_short_vertex_offset );
+			_mm_stream_si128( (__m128i *)( &dst[i] ), vi );
+		}
+#endif
+
+#endif
+		for ( ; i < elementCount; i++ ) {
+			dst[i] = src[i] + vertexOffset;
+		}
+	}
+}
+
+#if 0
 /*
 ============
 StreamOut
 ============
 */
 static void StreamOut( void * dst, const void * src, int numBytes ) {
-	numBytes = ( numBytes + 15 ) & ~15;
-	assert_16_byte_aligned( dst );
-	assert_16_byte_aligned( src );
-
-	int i = 0;
-	for ( ; i + 128 <= numBytes; i += 128 ) {
-		__m128i d0 = _mm_load_si128( (const __m128i *)( (byte *)src + i + 0*16 ) );
-		__m128i d1 = _mm_load_si128( (const __m128i *)( (byte *)src + i + 1*16 ) );
-		__m128i d2 = _mm_load_si128( (const __m128i *)( (byte *)src + i + 2*16 ) );
-		__m128i d3 = _mm_load_si128( (const __m128i *)( (byte *)src + i + 3*16 ) );
-		__m128i d4 = _mm_load_si128( (const __m128i *)( (byte *)src + i + 4*16 ) );
-		__m128i d5 = _mm_load_si128( (const __m128i *)( (byte *)src + i + 5*16 ) );
-		__m128i d6 = _mm_load_si128( (const __m128i *)( (byte *)src + i + 6*16 ) );
-		__m128i d7 = _mm_load_si128( (const __m128i *)( (byte *)src + i + 7*16 ) );
-		_mm_stream_si128( (__m128i *)( (byte *)dst + i + 0*16 ), d0 );
-		_mm_stream_si128( (__m128i *)( (byte *)dst + i + 1*16 ), d1 );
-		_mm_stream_si128( (__m128i *)( (byte *)dst + i + 2*16 ), d2 );
-		_mm_stream_si128( (__m128i *)( (byte *)dst + i + 3*16 ), d3 );
-		_mm_stream_si128( (__m128i *)( (byte *)dst + i + 4*16 ), d4 );
-		_mm_stream_si128( (__m128i *)( (byte *)dst + i + 5*16 ), d5 );
-		_mm_stream_si128( (__m128i *)( (byte *)dst + i + 6*16 ), d6 );
-		_mm_stream_si128( (__m128i *)( (byte *)dst + i + 7*16 ), d7 );
-	}
-	for ( ; i + 16 <= numBytes; i += 16 ) {
-		__m128i d = _mm_load_si128( (__m128i *)( (byte *)src + i ) );
-		_mm_stream_si128( (__m128i *)( (byte *)dst + i ), d );
-	}
+	StreamOutIndexes( (triIndex_t *)dst, (const triIndex_t *)src, numBytes, 0 );
 }
+#endif
 
 /*
 ============
@@ -472,7 +754,7 @@ R_CreateShadowVolumeTriangles
 */
 static void R_CreateShadowVolumeTriangles( triIndex_t *__restrict shadowIndices, triIndex_t *__restrict indexBuffer, int & numShadowIndexesTotal,
 												const byte *__restrict facing, const silEdge_t *__restrict silEdges, const int numSilEdges,
-												const triIndex_t *__restrict indexes, const int numIndexes, const bool includeCaps ) {
+												const triIndex_t *__restrict indexes, const int numIndexes, const bool includeCaps, const int vertexOffset ) {
 	assert_spu_local_store( facing );
 	assert_not_spu_local_store( shadowIndices );
 	assert_not_spu_local_store( silEdges );
@@ -500,7 +782,7 @@ static void R_CreateShadowVolumeTriangles( triIndex_t *__restrict shadowIndices,
 
 			// NOTE: we rely on FetchNextBatch() to wait for all previous DMAs to complete
 			while( numShadowIndices - numStreamedIndices >= OUT_BUFFER_SIZE ) {
-				StreamOut( shadowIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], OUT_BUFFER_SIZE * sizeof( triIndex_t ) );
+				StreamOutIndexes( shadowIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], OUT_BUFFER_SIZE * sizeof( triIndex_t ), vertexOffset );
 				numStreamedIndices += OUT_BUFFER_SIZE;
 			}
 
@@ -593,7 +875,7 @@ static void R_CreateShadowVolumeTriangles( triIndex_t *__restrict shadowIndices,
 
 			// NOTE: we rely on FetchNextBatch() to wait for all previous DMAs to complete
 			while( numShadowIndices - numStreamedIndices >= OUT_BUFFER_SIZE ) {
-				StreamOut( shadowIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], OUT_BUFFER_SIZE * sizeof( triIndex_t ) );
+				StreamOutIndexes( shadowIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], OUT_BUFFER_SIZE * sizeof( triIndex_t ), vertexOffset );
 				numStreamedIndices += OUT_BUFFER_SIZE;
 			}
 
@@ -661,17 +943,19 @@ static void R_CreateShadowVolumeTriangles( triIndex_t *__restrict shadowIndices,
 	}
 
 	while( numShadowIndices - numStreamedIndices >= OUT_BUFFER_SIZE ) {
-		StreamOut( shadowIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], OUT_BUFFER_SIZE * sizeof( triIndex_t ) );
+		StreamOutIndexes( shadowIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], OUT_BUFFER_SIZE * sizeof( triIndex_t ), vertexOffset );
 		numStreamedIndices += OUT_BUFFER_SIZE;
 	}
 	if ( numShadowIndices > numStreamedIndices ) {
 		assert( numShadowIndices - numStreamedIndices < OUT_BUFFER_SIZE );
-		StreamOut( shadowIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], ( numShadowIndices - numStreamedIndices ) * sizeof( triIndex_t ) );
+		StreamOutIndexes( shadowIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], ( numShadowIndices - numStreamedIndices ) * sizeof( triIndex_t ), vertexOffset );
 	}
 
 	numShadowIndexesTotal = numShadowIndices;
 
+#if defined( ID_WIN_X86_SSE2_INTRIN )
 	_mm_sfence();
+#endif
 
 #else	// NOTE: this code will not work on the SPU because it tries to write directly to the destination
 
@@ -761,7 +1045,7 @@ R_CreateLightTriangles
 =====================
 */
 void R_CreateLightTriangles( triIndex_t * __restrict lightIndices, triIndex_t * __restrict indexBuffer, int & numLightIndicesTotal,
-								const byte * __restrict culled, const triIndex_t * __restrict indexes, const int numIndexes ) {
+								const byte * __restrict culled, const triIndex_t * __restrict indexes, const int numIndexes, const int vertexOffset ) {
 	assert_spu_local_store( culled );
 	assert_not_spu_local_store( lightIndices );
 	assert_not_spu_local_store( indexes );
@@ -787,7 +1071,7 @@ void R_CreateLightTriangles( triIndex_t * __restrict lightIndices, triIndex_t * 
 
 		// NOTE: we rely on FetchNextBatch() to wait for all previous DMAs to complete
 		while( numLightIndices - numStreamedIndices >= OUT_BUFFER_SIZE ) {
-			StreamOut( lightIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], OUT_BUFFER_SIZE * sizeof( triIndex_t ) );
+			StreamOutIndexes( lightIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], OUT_BUFFER_SIZE * sizeof( triIndex_t ), vertexOffset );
 			numStreamedIndices += OUT_BUFFER_SIZE;
 		}
 
@@ -834,17 +1118,19 @@ void R_CreateLightTriangles( triIndex_t * __restrict lightIndices, triIndex_t * 
 	}
 
 	while( numLightIndices - numStreamedIndices >= OUT_BUFFER_SIZE ) {
-		StreamOut( lightIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], OUT_BUFFER_SIZE * sizeof( triIndex_t ) );
+		StreamOutIndexes( lightIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], OUT_BUFFER_SIZE * sizeof( triIndex_t ), vertexOffset );
 		numStreamedIndices += OUT_BUFFER_SIZE;
 	}
 	if ( numLightIndices > numStreamedIndices ) {
 		assert( numLightIndices - numStreamedIndices < OUT_BUFFER_SIZE );
-		StreamOut( lightIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], ( numLightIndices - numStreamedIndices ) * sizeof( triIndex_t ) );
+		StreamOutIndexes( lightIndices + numStreamedIndices, & indexBuffer[numStreamedIndices & OUT_BUFFER_MASK], ( numLightIndices - numStreamedIndices ) * sizeof( triIndex_t ), vertexOffset );
 	}
 
 	numLightIndicesTotal = numLightIndices;
 
+#if defined( ID_WIN_X86_SSE2_INTRIN )
 	_mm_sfence();
+#endif
 
 #else	// NOTE: this code will not work on the SPU because it tries to write directly to the destination
 
@@ -971,7 +1257,7 @@ void DynamicShadowVolumeJob( const dynamicShadowVolumeParms_t * parms ) {
 
 				// Create new triangles along the silhouette planes and optionally add end-cap triangles on the model and on the distant projection.
 				R_CreateShadowVolumeTriangles( parms->shadowIndices, parms->indexBuffer, numShadowIndices, parms->tempFacing,
-												parms->silEdges, parms->numSilEdges, parms->indexes, parms->numIndexes, renderShadowCaps );
+												parms->silEdges, parms->numSilEdges, parms->indexes, parms->numIndexes, renderShadowCaps, parms->vertOffset );
 
 				assert( numShadowIndices <= parms->maxShadowIndices );
 			}
@@ -979,7 +1265,7 @@ void DynamicShadowVolumeJob( const dynamicShadowVolumeParms_t * parms ) {
 
 		// Create new indices with only the triangles that are inside the light volume.
 		if ( parms->lightIndices != NULL ) {
-			R_CreateLightTriangles( parms->lightIndices, parms->indexBuffer, numLightIndices, parms->tempCulled, parms->indexes, parms->numIndexes );
+			R_CreateLightTriangles( parms->lightIndices, parms->indexBuffer, numLightIndices, parms->tempCulled, parms->indexes, parms->numIndexes, parms->vertOffset );
 
 			assert( numLightIndices <= parms->maxLightIndices );
 		}

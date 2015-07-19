@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -31,6 +32,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+#ifdef GL_ES_VERSION_2_0
+idCVar	r_forceUncompressedImageFormat( "r_forceUncompressedImageFormat", "1", CVAR_RENDERER | CVAR_BOOL, "unless DXT encoding is supported, don't use any compressed formats" );
+#endif
+
 /*
 ================
 BitsForFormat
@@ -51,6 +56,11 @@ int BitsForFormat( textureFormat_t format ) {
 		case FMT_DEPTH:		return 32;
 		case FMT_X16:		return 16;
 		case FMT_Y16_X16:	return 32;
+#ifdef GL_ES_VERSION_2_0
+		case FMT_ETC1:		return 4;
+		case FMT_ETC2_PUNCH:return 4;
+		case FMT_ETC2_ALPHA:return 8;
+#endif
 		default:
 			assert( 0 );
 			return 0;
@@ -75,7 +85,7 @@ ID_INLINE void idImage::DeriveOpts() {
 			case TD_DEPTH:
 				opts.format = FMT_DEPTH;
 				break;
-			case TD_DIFFUSE: 
+			case TD_DIFFUSE:
 				// TD_DIFFUSE gets only set to when its a diffuse texture for an interaction
 				opts.gammaMips = true;
 				opts.format = FMT_DXT5;
@@ -119,6 +129,26 @@ ID_INLINE void idImage::DeriveOpts() {
 				assert( false );
 				opts.format = FMT_RGBA8;
 		}
+
+#ifdef GL_ES_VERSION_2_0
+		if ( opts.format == FMT_DXT1 || opts.format == FMT_DXT5 && !glConfig.textureCompressionDXTAvailable ) {
+			if ( r_forceUncompressedImageFormat.GetBool() ) {
+				opts.format = FMT_RGBA8;
+			} else {
+				// NOTE: con't convert if colorFormat is CFM_NORMAL_DXT5
+				if ( usage == TD_DIFFUSE && glConfig.textureCompressionETC1Available ) {
+					// Diffuse is the only place CFM_YCOCG_DXT5 gets used. CFM_YCOCG_DXT5 effectively eliminates the alpha channel, making ETC1 useful for it
+					opts.format = FMT_ETC1;
+				} else {
+					if ( glConfig.textureCompressionETC2Available ) {
+						opts.format = opts.format == FMT_DXT1 ? FMT_ETC2_PUNCH : FMT_ETC2_ALPHA;
+					} else {
+						opts.format = FMT_RGBA8;
+					}
+				}
+			}
+		}
+#endif
 	}
 
 	if ( opts.numLevels == 0 ) {
@@ -132,7 +162,11 @@ ID_INLINE void idImage::DeriveOpts() {
 			while ( temp_width > 1 || temp_height > 1 ) {
 				temp_width >>= 1;
 				temp_height >>= 1;
+#ifdef GL_ES_VERSION_2_0
+				if ( ( opts.format == FMT_DXT1 || opts.format == FMT_DXT5 || opts.format == FMT_ETC1 || opts.format == FMT_ETC2_PUNCH || opts.format == FMT_ETC2_ALPHA ) &&
+#else
 				if ( ( opts.format == FMT_DXT1 || opts.format == FMT_DXT5 ) &&
+#endif
 					( ( temp_width & 0x3 ) != 0 || ( temp_height & 0x3 ) != 0 ) ) {
 						break;
 				}
@@ -182,6 +216,8 @@ void idImage::GenerateImage( const byte *pic, int width, int height, textureFilt
 		return;
 	}
 
+	idBinaryImage::OptimizeDesiredImageFormat2D( width, height, pic, opts.format, opts.colorFormat );
+
 	idBinaryImage im( GetName() );
 	im.Load2DFromMemory( width, height, pic, opts.numLevels, opts.format, opts.colorFormat, opts.gammaMips );
 
@@ -223,6 +259,8 @@ void idImage::GenerateCubeImage( const byte *pic[6], int size, textureFilter_t f
 		return;
 	}
 
+	idBinaryImage::OptimizeDesiredImageFormatCube( size, pic, opts.format );
+
 	idBinaryImage im( GetName() );
 	im.LoadCubeFromMemory( size, pic, opts.numLevels, opts.format, opts.gammaMips );
 
@@ -253,7 +291,6 @@ name contains GetName() upon entry
 		_name.SetFileExtension( extension );
 	}
 }
-
 
 /*
 ===============
@@ -338,6 +375,13 @@ void idImage::ActuallyLoadImage( bool fromBackEnd ) {
 			}
 		}
 	}
+
+#ifdef GL_ES_VERSION_2_0
+	if ( binaryFileTime != FILE_NOT_FOUND_TIMESTAMP && !im.ConvertFormat( opts.format ) ) {
+		idLib::Warning( "The image \"%s\" could not be converted to the desired format.\n", im.GetName() );
+	}
+#endif
+
 	const bimageFile_t & header = im.GetFileHeader();
 
 	if ( ( fileSystem->InProductionMode() && binaryFileTime != FILE_NOT_FOUND_TIMESTAMP ) || ( ( binaryFileTime != FILE_NOT_FOUND_TIMESTAMP )
@@ -394,7 +438,7 @@ void idImage::ActuallyLoadImage( bool fromBackEnd ) {
 				opts.numLevels = 1;
 				DeriveOpts();
 				AllocImage();
-				
+
 				// clear the data so it's not left uninitialized
 				idTempArray<byte> clear( opts.width * opts.height * 4 );
 				memset( clear.Ptr(), 0, clear.Size() );
@@ -417,7 +461,6 @@ void idImage::ActuallyLoadImage( bool fromBackEnd ) {
 	}
 
 	AllocImage();
-
 
 	for ( int i = 0; i < im.NumImages(); i++ ) {
 		const bimageImage_t & img = im.GetImageHeader( i );
@@ -480,13 +523,13 @@ CopyFramebuffer
 */
 void idImage::CopyFramebuffer( int x, int y, int imageWidth, int imageHeight ) {
 
-
 	qglBindTexture( ( opts.textureType == TT_CUBIC ) ? GL_TEXTURE_CUBE_MAP_EXT : GL_TEXTURE_2D, texnum );
 
 	qglReadBuffer( GL_BACK );
 
 	opts.width = imageWidth;
 	opts.height = imageHeight;
+
 	qglCopyTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, x, y, imageWidth, imageHeight, 0 );
 
 	// these shouldn't be necessary if the image was initialized properly
@@ -621,6 +664,11 @@ void idImage::Print() const {
 		NAME_FORMAT( DEPTH );
 		NAME_FORMAT( X16 );
 		NAME_FORMAT( Y16_X16 );
+#ifdef GL_ES_VERSION_2_0
+		NAME_FORMAT( ETC1 );
+		NAME_FORMAT( ETC2_PUNCH );
+		NAME_FORMAT( ETC2_ALPHA );
+#endif
 		default:
 			common->Printf( "<%3i>", opts.format );
 			break;

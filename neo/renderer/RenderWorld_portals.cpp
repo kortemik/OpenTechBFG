@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -125,7 +126,7 @@ Return true if the entity reference bounds do not intersect the current portal c
 bool idRenderWorldLocal::CullEntityByPortals( const idRenderEntityLocal *entity, const portalStack_t *ps ) {
 	if ( r_useEntityPortalCulling.GetInteger() == 1 ) {
 
-		ALIGNTYPE16 frustumCorners_t corners;
+		ALIGNTYPE16 frustumCorners_t corners ALIGNTYPE16_POST;
 		idRenderMatrix::GetFrustumCorners( corners, entity->inverseBaseModelProject, bounds_unitCube );
 		for ( int i = 0; i < ps->numPortalPlanes; i++ ) {
 			if ( idRenderMatrix::CullFrustumCornersToPlane( corners, ps->portalPlanes[i] ) == FRUSTUM_CULL_FRONT ) {
@@ -218,7 +219,7 @@ void idRenderWorldLocal::AddAreaViewEntities( int areaNum, const portalStack_t *
 					&& entity->parms.suppressSurfaceInViewID == tr.viewDef->renderView.viewID ) {
 				continue;
 			}
-			if ( entity->parms.allowSurfaceInViewID 
+			if ( entity->parms.allowSurfaceInViewID
 					&& entity->parms.allowSurfaceInViewID != tr.viewDef->renderView.viewID ) {
 				continue;
 			}
@@ -248,7 +249,7 @@ Return true if the light frustum does not intersect the current portal chain.
 bool idRenderWorldLocal::CullLightByPortals( const idRenderLightLocal *light, const portalStack_t *ps ) {
 	if ( r_useLightPortalCulling.GetInteger() == 1 ) {
 
-		ALIGNTYPE16 frustumCorners_t corners;
+		ALIGNTYPE16 frustumCorners_t corners ALIGNTYPE16_POST;
 		idRenderMatrix::GetFrustumCorners( corners, light->inverseBaseLightProject, bounds_zeroOneCube );
 		for ( int i = 0; i < ps->numPortalPlanes; i++ ) {
 			if ( idRenderMatrix::CullFrustumCornersToPlane( corners, ps->portalPlanes[i] ) == FRUSTUM_CULL_FRONT ) {
@@ -411,7 +412,7 @@ bool idRenderWorldLocal::PortalIsFoggedOut( const portal_t *p ) {
 	const int size = lightShader->GetNumRegisters() * sizeof( float );
 	float * regs = (float *)_alloca( size );
 
-	lightShader->EvaluateRegisters( regs, ldef->parms.shaderParms, 
+	lightShader->EvaluateRegisters( regs, ldef->parms.shaderParms,
 		tr.viewDef->renderView.shaderParms, tr.viewDef->renderView.time[0] * 0.001f, ldef->parms.referenceSound );
 
 	const shaderStage_t	*stage = lightShader->GetStage(0);
@@ -524,7 +525,7 @@ void idRenderWorldLocal::FloodViewThroughArea_r( const idVec3 & origin, int area
 		// find the screen pixel bounding box of the remaining portal
 		// so we can scissor things outside it
 		newStack.rect = ScreenRectFromWinding( &w, &tr.identitySpace );
-		
+
 		// slop might have spread it a pixel outside, so trim it back
 		newStack.rect.Intersect( ps->rect );
 
@@ -728,7 +729,7 @@ Light linking into the BSP tree by flooding through portals
 idRenderWorldLocal::FloodLightThroughArea_r
 ===================
 */
-void idRenderWorldLocal::FloodLightThroughArea_r( idRenderLightLocal *light, int areaNum, 
+void idRenderWorldLocal::FloodLightThroughArea_r( idRenderLightLocal *light, int areaNum,
 								 const portalStack_t *ps ) {
 	assert( ps != NULL ); // compiler warning
 	portal_t*		p = NULL;
@@ -744,7 +745,7 @@ void idRenderWorldLocal::FloodLightThroughArea_r( idRenderLightLocal *light, int
 	area = &portalAreas[ areaNum ];
 
 	// add an areaRef
-	AddLightRefToArea( light, area );	
+	AddLightRefToArea( light, area );
 
 	// go through all the portals
 	for ( p = area->portals; p; p = p->next ) {
@@ -1045,11 +1046,15 @@ void idRenderWorldLocal::ShowPortals() {
 				GL_Color( 0, 1, 0 );
 			}
 
+#ifndef GL_ES_VERSION_2_0
 			qglBegin( GL_LINE_LOOP );
 			for ( j = 0; j < w->GetNumPoints(); j++ ) {
 				qglVertex3fv( (*w)[j].ToFloatPtr() );
 			}
 			qglEnd();
+#else
+			//TODO
+#endif
 		}
 	}
 }

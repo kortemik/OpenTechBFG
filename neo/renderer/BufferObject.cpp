@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -41,6 +42,7 @@ IsWriteCombined
 ==================
 */
 bool IsWriteCombined( void * base ) {
+#ifdef ID_WIN32
 	MEMORY_BASIC_INFORMATION info;
 	SIZE_T size = VirtualQueryEx( GetCurrentProcess(), base, &info, sizeof( info ) );
 	if ( size == 0 ) {
@@ -50,6 +52,9 @@ bool IsWriteCombined( void * base ) {
 	}
 	bool isWriteCombined = ( ( info.AllocationProtect & PAGE_WRITECOMBINE ) != 0 );
 	return isWriteCombined;
+#else
+	return true; // XXX Doesn't really matter?
+#endif
 }
 
 
@@ -72,6 +77,7 @@ void UnbindBufferObjects() {
 	qglBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, 0 );
 }
 
+#if defined( ID_WIN_X86_SSE2_INTRIN ) || defined( ID_QNX_X86_SSE2_INTRIN )
 
 void CopyBuffer( byte * dst, const byte * src, int numBytes ) {
 	assert_16_byte_aligned( dst );
@@ -109,6 +115,79 @@ void CopyBuffer( byte * dst, const byte * src, int numBytes ) {
 	_mm_sfence();
 }
 
+#elif defined( ID_QNX_ARM_NEON )
+
+void CopyBuffer( byte * dst, const byte * src, int numBytes ) {
+	assert_16_byte_aligned( dst );
+	assert_16_byte_aligned( src );
+
+	int i = 0;
+	for ( ; i + 128 <= numBytes; i += 128 ) {
+#ifdef ID_QNX_ARM_NEON_INTRIN
+		uint32x4_t d0 = vld1q_u32( (uint32_t *)&src[i + 0*16] );
+		uint32x4_t d1 = vld1q_u32( (uint32_t *)&src[i + 1*16] );
+		uint32x4_t d2 = vld1q_u32( (uint32_t *)&src[i + 2*16] );
+		uint32x4_t d3 = vld1q_u32( (uint32_t *)&src[i + 3*16] );
+		uint32x4_t d4 = vld1q_u32( (uint32_t *)&src[i + 4*16] );
+		uint32x4_t d5 = vld1q_u32( (uint32_t *)&src[i + 5*16] );
+		uint32x4_t d6 = vld1q_u32( (uint32_t *)&src[i + 6*16] );
+		uint32x4_t d7 = vld1q_u32( (uint32_t *)&src[i + 7*16] );
+		vst1q_u32( (uint32_t *)&dst[i + 0*16], d0 );
+		vst1q_u32( (uint32_t *)&dst[i + 1*16], d1 );
+		vst1q_u32( (uint32_t *)&dst[i + 2*16], d2 );
+		vst1q_u32( (uint32_t *)&dst[i + 3*16], d3 );
+		vst1q_u32( (uint32_t *)&dst[i + 4*16], d4 );
+		vst1q_u32( (uint32_t *)&dst[i + 5*16], d5 );
+		vst1q_u32( (uint32_t *)&dst[i + 6*16], d6 );
+		vst1q_u32( (uint32_t *)&dst[i + 7*16], d7 );
+#else
+		__asm__ __volatile__(
+			"ADD r0, %[src], %[i]\n"
+			"ADD r1, %[dst], %[i]\n"
+			"VLD1.32 {D0, D1, D2, D3}, [r0]!\n"
+			"VLD1.32 {D4, D5, D6, D7}, [r0]!\n"
+			"VLD1.32 {D8, D9, D10, D11}, [r0]!\n"
+			"VLD1.32 {D12, D13, D14, D15}, [r0]!\n"
+			"VST1.32 {D0, D1, D2, D3}, [r1]!\n"
+			"VST1.32 {D4, D5, D6, D7}, [r1]!\n"
+			"VST1.32 {D8, D9, D10, D11}, [r1]!\n"
+			"VST1.32 {D12, D13, D14, D15}, [r1]!"
+			: [dst] "+&r" (dst)
+			: [src] "r" (src), [i] "r" (i)
+			: "r0", "r1", "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "memory" );
+#endif
+	}
+	for ( ; i + 16 <= numBytes; i += 16 ) {
+#ifdef ID_QNX_ARM_NEON_INTRIN
+		uint32x4_t d = vld1q_u32( (uint32_t *)&src[i] );
+		vst1q_u32( (uint32_t *)&dst[i], d );
+#else
+		__asm__ __volatile__(
+			"ADD r0, %[src], %[i]\n"
+			"ADD r1, %[dst], %[i]\n"
+			"VLD1.32 {D0, D1}, [r0]\n"
+			"VST1.32 {D0, D1}, [r1]"
+			: [dst] "+&r" (dst) : [src] "r" (src), [i] "r" (i) : "r0", "r1", "q0", "memory");
+#endif
+	}
+	for ( ; i + 4 <= numBytes; i += 4 ) {
+		*(uint32 *)&dst[i] = *(const uint32 *)&src[i];
+	}
+	for ( ; i < numBytes; i++ ) {
+		dst[i] = src[i];
+	}
+	__asm__ __volatile__("DMB ST" ::: "memory");
+}
+
+#else
+
+void CopyBuffer( byte * dst, const byte * src, int numBytes ) {
+	assert_16_byte_aligned( dst );
+	assert_16_byte_aligned( src );
+	memcpy( dst, src, numBytes );
+}
+
+#endif
 
 /*
 ================================================================================================
@@ -769,12 +848,12 @@ float * idJointBuffer::MapBuffer( bufferMapType_t mapType ) const {
 	assert( mapType == BM_WRITE );
 	assert( apiObject != NULL );
 
-	int numBytes = GetAllocedSize();
+	//int numBytes = GetAllocedSize();
 
 	void * buffer = NULL;
 
 	qglBindBufferARB( GL_UNIFORM_BUFFER, reinterpret_cast< GLuint >( apiObject ) );
-	numBytes = numBytes;
+	//numBytes = numBytes;
 	assert( GetOffset() == 0 );
 	//buffer = qglMapBufferARB( GL_UNIFORM_BUFFER, GL_WRITE_ONLY_ARB );
 	buffer = qglMapBufferRange( GL_UNIFORM_BUFFER, 0, GetAllocedSize(), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_UNSYNCHRONIZED_BIT );

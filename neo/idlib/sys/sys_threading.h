@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -38,6 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 ================================================================================================
 */
 
+#ifdef ID_WIN32
 	typedef CRITICAL_SECTION		mutexHandle_t;
 	typedef HANDLE					signalHandle_t;
 	typedef LONG					interlockedInt_t;
@@ -47,6 +49,32 @@ If you have questions concerning this license or the applicable additional terms
 	// MemoryBarrier() inserts and CPU instruction that keeps the CPU from reordering reads and writes.
 	#pragma intrinsic(_ReadWriteBarrier)
 	#define SYS_MEMORYBARRIER		_ReadWriteBarrier(); MemoryBarrier()
+#elif defined(ID_QNX)
+	class idSysThreadSignal {
+	public:
+		idSysThreadSignal( bool manReset, bool initState ) : manualReset( manReset ), triggered( initState ) {
+			pthread_condattr_t attr;
+			pthread_condattr_init( &attr);
+			pthread_condattr_setclock( &attr, CLOCK_MONOTONIC);
+			pthread_mutex_init( &mutex, NULL );
+			pthread_cond_init( &cond, &attr );
+			pthread_condattr_destroy( &attr );
+		}
+		~idSysThreadSignal() {
+			pthread_mutex_destroy( &mutex );
+			pthread_cond_destroy( &cond );
+		}
+		pthread_mutex_t mutex;
+		pthread_cond_t cond;
+		bool triggered;
+		bool manualReset;
+	};
+
+	typedef pthread_mutex_t			mutexHandle_t;
+	typedef idSysThreadSignal*		signalHandle_t;
+	typedef int						interlockedInt_t;
+	#define SYS_MEMORYBARRIER		__sync_synchronize();
+#endif
 
 
 
@@ -61,10 +89,10 @@ If you have questions concerning this license or the applicable additional terms
 ================================================================================================
 */
 
-
+#ifdef ID_WIN32
 	class idSysThreadLocalStorage {
 	public:
-		idSysThreadLocalStorage() { 
+		idSysThreadLocalStorage() {
 			tlsIndex = TlsAlloc();
 		}
 		idSysThreadLocalStorage( const ptrdiff_t &val ) {
@@ -80,9 +108,32 @@ If you have questions concerning this license or the applicable additional terms
 		const ptrdiff_t & operator = ( const ptrdiff_t &val ) {
 			TlsSetValue( tlsIndex, (LPVOID)val );
 			return val;
-		}	
+		}
 		DWORD	tlsIndex;
 	};
+#elif defined(ID_QNX)
+	class idSysThreadLocalStorage {
+	public:
+		idSysThreadLocalStorage() {
+			pthread_key_create( &tlsKey, NULL );
+		}
+		idSysThreadLocalStorage( const ptrdiff_t &val ) {
+			pthread_key_create( &tlsKey, NULL );
+			pthread_setspecific( tlsKey, (void*) val );
+		}
+		~idSysThreadLocalStorage() {
+			pthread_key_delete( tlsKey );
+		}
+		operator ptrdiff_t() {
+			return (ptrdiff_t)pthread_getspecific( tlsKey );
+		}
+		const ptrdiff_t & operator = ( const ptrdiff_t &val ) {
+			pthread_setspecific( tlsKey, (void*) val );
+			return val;
+		}
+		pthread_key_t	tlsKey;
+	};
+#endif
 
 #define ID_TLS idSysThreadLocalStorage
 
@@ -123,8 +174,8 @@ enum xthreadPriority {
 uintptr_t			Sys_GetCurrentThreadID();
 
 // returns a threadHandle
-uintptr_t			Sys_CreateThread( xthread_t function, void *parms, xthreadPriority priority, 
-									  const char *name, core_t core, int stackSize = DEFAULT_THREAD_STACK_SIZE, 
+uintptr_t			Sys_CreateThread( xthread_t function, void *parms, xthreadPriority priority,
+									  const char *name, core_t core, int stackSize = DEFAULT_THREAD_STACK_SIZE,
 									  bool suspended = false );
 
 void				Sys_WaitForThread( uintptr_t threadHandle );

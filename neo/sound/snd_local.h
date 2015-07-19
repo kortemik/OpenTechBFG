@@ -2,9 +2,11 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2013 Robert Beckebans
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -82,6 +84,7 @@ typedef enum {
 
 #define OPERATION_SET 1
 
+#ifdef ID_WIN32
 #include <dxsdkver.h>
 
 #include <xaudio2.h>
@@ -91,6 +94,26 @@ typedef enum {
 #include "XAudio2/XA2_SoundSample.h"
 #include "XAudio2/XA2_SoundVoice.h"
 #include "XAudio2/XA2_SoundHardware.h"
+#elif defined(ID_QNX)
+#include <AL/al.h>
+#include <AL/alc.h>
+#include <AL/alext.h>
+
+ID_INLINE_EXTERN ALenum CheckALErrors_( const char* filename, int line )
+{
+	ALenum err = alGetError();
+	if( err != AL_NO_ERROR )
+	{
+		idLib::Printf( "OpenAL Error: %s (0x%x), @ %s %d\n", alGetString( err ), err, filename, line );
+	}
+	return err;
+}
+#define CheckALErrors() CheckALErrors_(__FILE__, __LINE__)
+
+#include "OpenAL/AL_SoundSample.h"
+#include "OpenAL/AL_SoundVoice.h"
+#include "OpenAL/AL_SoundHardware.h"
+#endif
 
 
 
@@ -156,7 +179,7 @@ public:
 	float					volumeDB;			// last volume at which this channel will play (calculated in UpdateVolume)
 	float					currentAmplitude;	// current amplitude on the hardware voice
 
-	// hardwareVoice will be freed and NULL'd when a sound is out of range, 
+	// hardwareVoice will be freed and NULL'd when a sound is out of range,
 	// and reallocated when it comes back in range
 	idSoundVoice *			hardwareVoice;
 
@@ -277,7 +300,7 @@ public:
 	float					slowmoSpeed;
 	bool					enviroSuitActive;
 
-public: 
+public:
 	struct soundPortalTrace_t {
 		int		portalArea;
 		const soundPortalTrace_t * prevStack;
@@ -289,7 +312,7 @@ public:
 
 /*
 ================================================
-idSoundEmitterLocal 
+idSoundEmitterLocal
 ================================================
 */
 class idSoundEmitterLocal : public idSoundEmitter {
@@ -397,6 +420,7 @@ public:
 	virtual void			FreeStreamBuffers();
 
 	virtual void *			GetIXAudio2() const;
+	virtual const idSoundHardware *GetHardware() const { return &hardware; }
 
 	// for the sound level meter window
 	virtual cinData_t		ImageForTime( const int milliseconds, const bool waveform );
@@ -436,8 +460,8 @@ public:
 			sample( NULL ),
 			bufferNumber( 0 )
 		{ }
-		idSoundVoice_XAudio2 *	voice;
-		idSoundSample_XAudio2 * sample;
+		idSoundVoice_Buffer *	voice;
+		idSoundSample_Buffer * sample;
 		int bufferNumber;
 	};
 
@@ -459,7 +483,7 @@ public:
 	idSoundHardware				hardware;
 
 	idRandom2					random;
-	
+
 	int							soundTime;
 	bool						muted;
 	bool						musicMuted;

@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -31,11 +32,109 @@ If you have questions concerning this license or the applicable additional terms
 /*
 ================================================================================================
 
+	Platform Specific ID_ Defines
+
+	The ID_ defines are the only platform defines we should be using.
+
+================================================================================================
+*/
+
+#undef ID_PC
+#undef ID_PC_WIN
+#undef ID_PC_WIN64
+#undef ID_CONSOLE
+#undef ID_QNX
+#undef ID_QNX_ARM
+#undef ID_QNX_X86
+#undef ID_CONSOLE_QNX
+#undef ID_WIN32
+#undef ID_LITTLE_ENDIAN
+
+#if defined(_WIN32)
+	// _WIN32 always defined
+	// _WIN64 also defined for x64 target
+	#if !defined( _MANAGED )
+		#if !defined( _WIN64 )
+			#define ID_WIN_X86_ASM
+			#define ID_WIN_X86_MMX_ASM
+			#define ID_WIN_X86_MMX_INTRIN
+			#define ID_WIN_X86_SSE_ASM
+			#define ID_WIN_X86_SSE_INTRIN
+			#define ID_WIN_X86_SSE2_ASM
+			#define ID_WIN_X86_SSE2_INTRIN
+			// the 32 bit build is now as close to the console builds as possible
+			#define ID_CONSOLE
+		#else
+			#define ID_PC_WIN64
+			#define ID_WIN_X86_MMX_INTRIN
+			#define ID_WIN_X86_SSE_INTRIN
+			#define ID_WIN_X86_SSE2_INTRIN
+			#define ID_WIN_X86_SSE3_INTRIN
+		#endif
+	#endif
+
+	#define ID_PC
+	#define ID_PC_WIN
+	#define ID_WIN32
+	#define ID_LITTLE_ENDIAN
+#elif defined(__QNXNTO__)
+	#ifdef __ARM__
+		#define ID_QNX_ARM_ASM
+		#ifdef __ARM_NEON__
+			#define ID_QNX_ARM_NEON
+			#define ID_QNX_ARM_NEON_ASM
+			#if defined(NO_INTRIN) || defined(NO_NEON_INTRIN)
+				#define ID_QNX_ARM_NEON_INTRIN
+			#endif
+		#endif
+	#else
+		#define ID_QNX_X86_ASM
+		#ifdef __MMX__
+			#define ID_QNX_X86_MMX_ASM
+			#if defined(NO_INTRIN) || defined(NO_MMX_INTRIN)
+				#define ID_QNX_X86_MMX_INTRIN
+			#endif
+		#endif
+		#ifdef __SSE__
+			#define ID_QNX_X86_SSE_ASM
+			#if defined(NO_INTRIN) || defined(NO_SSE_INTRIN)
+				#define ID_QNX_X86_SSE_INTRIN
+			#endif
+		#endif
+		#ifdef __SSE2__
+			#define ID_QNX_X86_SSE2_ASM
+			#if defined(NO_INTRIN) || defined(NO_SSE2_INTRIN)
+				#define ID_QNX_X86_SSE2_INTRIN
+			#endif
+		#endif
+		#ifdef __SSE3__
+			#define ID_QNX_X86_SSE3_ASM
+			#if defined(NO_INTRIN) || defined(NO_SSE3_INTRIN)
+				#define ID_QNX_X86_SSE3_INTRIN
+			#endif
+		#endif
+	#endif
+
+	#define ID_CONSOLE
+	#define ID_CONSOLE_QNX
+	#define ID_QNX
+	#define ID_LITTLE_ENDIAN
+	#define ID_OPENGL_ES
+#else
+#error Unknown Platform
+#endif
+
+#define ID_OPENGL
+
+/*
+================================================================================================
+
 	PC Windows
 
 ================================================================================================
 */
 
+#ifdef ID_PC_WIN
 
 #define	CPUSTRING						"x86"
 
@@ -45,6 +144,8 @@ If you have questions concerning this license or the applicable additional terms
 #define ALIGN16( x )					__declspec(align(16)) x
 #define ALIGNTYPE16						__declspec(align(16))
 #define ALIGNTYPE128					__declspec(align(128))
+#define ALIGNTYPE16_POST
+#define ALIGNTYPE128_POST
 #define FORMAT_PRINTF( x )
 
 #define PATHSEPARATOR_STR				"\\"
@@ -67,6 +168,78 @@ If you have questions concerning this license or the applicable additional terms
 // we should never rely on this define in our code. this is here so dodgy external libraries don't get confused
 #ifndef WIN32
 	#define WIN32
+#endif
+
+#endif
+
+/*
+================================================================================================
+
+	Console QNX (BlackBerry)
+
+================================================================================================
+*/
+
+#ifdef ID_QNX
+
+#ifdef __ARM__
+	#define CPUSTRING					"arm"
+	#define ID_QNX_ARM
+#else
+	#define CPUSTRING					"x86"
+	#define ID_QNX_X86
+#endif
+
+#define	BUILD_STRING					"qnx-" CPUSTRING
+#define BUILD_OS_ID						1
+
+#define ALIGN16( x )					x __attribute__((__aligned__(16)))
+#define ALIGNTYPE16
+#define ALIGNTYPE128
+#define ALIGNTYPE16_POST				__attribute__((__aligned__(16)))
+#define ALIGNTYPE128_POST				__attribute__((__aligned__(128)))
+#define FORMAT_PRINTF( x )
+
+#define PATHSEPARATOR_STR				"/"
+#define PATHSEPARATOR_CHAR				'/'
+#define NEWLINE							"\n"
+
+#define ID_INLINE						__inline__
+#define ID_FORCE_INLINE					__inline__ __attribute__((always_inline))
+
+#define ID_INLINE_EXTERN				extern __inline__
+#define ID_FORCE_INLINE_EXTERN			extern __inline__ __attribute__((always_inline))
+
+//Identification code for SLOG2. 2004 was the date Doom 3 was released
+#define SLOG_CODE						2004
+
+#ifndef _alloca
+#define _alloca							alloca
+#endif
+
+#ifndef UINT_PTR
+#define UINT_PTR uintptr_t
+#endif
+
+//GCC warns us if the formats don't match the args anyway
+#define VERIFY_FORMAT_STRING
+
+// (From Windows) We need to inform the compiler that Error() and FatalError() will
+// never return, so any conditions that leads to them being called are
+// guaranteed to be false in the following code
+#define NO_RETURN __attribute__((noreturn))
+
+#define CALLBACK
+
+#define USE_OS_ZLIB
+#define USE_OS_LIBJPEG
+#define USE_32BIT_INDEXES
+
+// Needed to be able to compile with spawn.h
+#if defined(__cplusplus) && !defined(__STDC_CONSTANT_MACROS)
+#define __STDC_CONSTANT_MACROS
+#endif
+
 #endif
 
 /*
@@ -108,6 +281,8 @@ bulk of the codebase, so it is the best place for analyze pragmas.
 ================================================================================================
 */
 
+#if defined( ID_WIN32 )
+
 // disable some /analyze warnings here
 #pragma warning( disable: 6255 )	// warning C6255: _alloca indicates failure by raising a stack overflow exception. Consider using _malloca instead. (Note: _malloca requires _freea.)
 #pragma warning( disable: 6262 )	// warning C6262: Function uses '36924' bytes of stack: exceeds /analyze:stacksize'32768'. Consider moving some data to heap
@@ -135,6 +310,7 @@ bulk of the codebase, so it is the best place for analyze pragmas.
 // guaranteed to be false in the following code
 #define NO_RETURN __declspec(noreturn)
 
+#endif
 
 // I don't want to disable "warning C6031: Return value ignored" from /analyze
 // but there are several cases with sprintf where we pre-initialized the variables

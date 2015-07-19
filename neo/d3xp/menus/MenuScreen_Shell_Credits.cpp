@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -45,12 +46,12 @@ void idMenuScreen_Shell_Credits::SetupCreditList() {
 				return idSWFScriptVar();
 			}
 
-			screen->UpdateCredits();			
+			screen->UpdateCredits();
 			return idSWFScriptVar();
 		}
 	private:
 		idMenuScreen_Shell_Credits * screen;
-	};	
+	};
 
 	if ( GetSWFObject() ) {
 		GetSWFObject()->SetGlobal( "updateCredits", new ( TAG_SWF ) idRefreshCredits( this ) );
@@ -58,6 +59,14 @@ void idMenuScreen_Shell_Credits::SetupCreditList() {
 
 
 	creditList.Clear();
+	creditList.Append( creditInfo_t( 3,	"DOOM 3 BFG EDITION for BlackBerry"						) );
+	creditList.Append( creditInfo_t() );
+	creditList.Append( creditInfo_t( 1,	"Lead Programmer"										) );
+	creditList.Append( creditInfo_t( 0,	"Vincent Simonetti - Most of BlackBerry/QNX code"		) );
+	creditList.Append( creditInfo_t() );
+	creditList.Append( creditInfo_t( 0,	"Check GitHub for more details"							) );
+	creditList.Append( creditInfo_t() );
+	creditList.Append( creditInfo_t() );
 	creditList.Append( creditInfo_t( 3,	"DOOM 3 BFG EDITION"									) );
 	creditList.Append( creditInfo_t() );
 	creditList.Append( creditInfo_t( 2,	"DEVELOPMENT TEAM"										) );
@@ -145,14 +154,14 @@ void idMenuScreen_Shell_Credits::SetupCreditList() {
 	creditList.Append( creditInfo_t( 1,	"Technical Director "									) );
 	creditList.Append( creditInfo_t( 0,	"John Carmack"											) );
 	creditList.Append( creditInfo_t() );
-	creditList.Append( creditInfo_t( 1,	"Lead Programmer"										) );	
-	creditList.Append( creditInfo_t( 0,	"Robert A. Duffy"										) );	
-	creditList.Append( creditInfo_t() );	
-	creditList.Append( creditInfo_t( 1,	"Lead Designer"											) );
-	creditList.Append( creditInfo_t( 0,	"Tim Willits"											) );	
+	creditList.Append( creditInfo_t( 1,	"Lead Programmer"										) );
+	creditList.Append( creditInfo_t( 0,	"Robert A. Duffy"										) );
 	creditList.Append( creditInfo_t() );
-	creditList.Append( creditInfo_t( 1,	"Lead Artist"											) );	
-	creditList.Append( creditInfo_t( 0,	"Kenneth Scott"											) );	
+	creditList.Append( creditInfo_t( 1,	"Lead Designer"											) );
+	creditList.Append( creditInfo_t( 0,	"Tim Willits"											) );
+	creditList.Append( creditInfo_t() );
+	creditList.Append( creditInfo_t( 1,	"Lead Artist"											) );
+	creditList.Append( creditInfo_t( 0,	"Kenneth Scott"											) );
 	creditList.Append( creditInfo_t() );
 	creditList.Append( creditInfo_t( 1,	"Animation"												) );
 	creditList.Append( creditInfo_t( 0,	"James Houska"											) );
@@ -265,7 +274,7 @@ void idMenuScreen_Shell_Credits::SetupCreditList() {
 	creditList.Append( creditInfo_t( 1,	"Motion Capture Services"								) );
 	creditList.Append( creditInfo_t( 0,	"Janimation"											) );
 	creditList.Append( creditInfo_t() );
-	creditList.Append( creditInfo_t( 1,	"UAC Promotional Videos"								) );	
+	creditList.Append( creditInfo_t( 1,	"UAC Promotional Videos"								) );
 	creditList.Append( creditInfo_t( 0,	"Six Foot Studios"										) );
 	creditList.Append( creditInfo_t() );
 	creditList.Append( creditInfo_t( 1,	"Additional Multiplayer Design"							) );
@@ -401,7 +410,7 @@ void idMenuScreen_Shell_Credits::SetupCreditList() {
 	creditList.Append( creditInfo_t( 0,	"Jason Wilkin"											) );
 	creditList.Append( creditInfo_t( 0,	"John Benoit"											) );
 	creditList.Append( creditInfo_t( 0,	"Jacob Clayman"											) );
-	creditList.Append( creditInfo_t( 0,	"Colin McInerney"										) );	
+	creditList.Append( creditInfo_t( 0,	"Colin McInerney"										) );
 	creditList.Append( creditInfo_t() );
 	creditList.Append( creditInfo_t( 1,	"Additional QA"											) );
 	creditList.Append( creditInfo_t( 0,	"James Costantino"										) );
@@ -692,7 +701,7 @@ void idMenuScreen_Shell_Credits::SetupCreditList() {
 	creditList.Append( creditInfo_t() );
 	creditList.Append( creditInfo_t( 1,	"Web Director"											) );
 	creditList.Append( creditInfo_t( 0,	"Tanaka Keisuke"										) );
-	creditList.Append( creditInfo_t( 0,	"Kosuke Fujita"											) );		 
+	creditList.Append( creditInfo_t( 0,	"Kosuke Fujita"											) );
 };
 
 /*
@@ -710,7 +719,7 @@ void idMenuScreen_Shell_Credits::Initialize( idMenuHandler * data ) {
 	SetSpritePath( "menuCredits" );
 
 	btnBack = new (TAG_SWF) idMenuWidget_Button();
-	btnBack->Initialize( data );	
+	btnBack->Initialize( data );
 	btnBack->SetLabel( "#str_02305" );
 	btnBack->SetSpritePath( GetSpritePath(), "info", "btnBack" );
 	btnBack->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_GO_BACK );
@@ -751,7 +760,7 @@ void idMenuScreen_Shell_Credits::Update() {
 				}
 				buttonInfo->action.Set( WIDGET_ACTION_GO_BACK );
 			}
-		}		
+		}
 	}
 
 	idSWFScriptObject & root = GetSWFObject()->GetRootObject();
@@ -833,7 +842,7 @@ bool idMenuScreen_Shell_Credits::HandleAction( idWidgetAction & action, const id
 			} else {
 				menuData->SetNextScreen( SHELL_AREA_ROOT, MENU_TRANSITION_SIMPLE );
 			}
-			
+
 			return true;
 		}
 	}
@@ -873,7 +882,7 @@ void idMenuScreen_Shell_Credits::UpdateCredits() {
 
 	idSWFScriptObject * options = GetSWFObject()->GetRootObject().GetNestedObj( "menuCredits", "info", "options" );
 	if ( options != NULL ) {
-		for ( int i = 15; i >= 0; --i ) {			
+		for ( int i = 15; i >= 0; --i ) {
 			int curIndex = creditIndex - i;
 			idSWFTextInstance * heading = options->GetNestedText( va( "item%d", 15 - i ), "heading" );
 			idSWFTextInstance * subHeading = options->GetNestedText( va( "item%d", 15 - i ), "subHeading" );
@@ -894,7 +903,7 @@ void idMenuScreen_Shell_Credits::UpdateCredits() {
 					subHeading->SetText( type == 2 ? entry : "" );
 					subHeading->SetStrokeInfo( true );
 				}
-				
+
 				if ( title ) {
 					title->SetText( type == 1 ? entry : "" );
 					title->SetStrokeInfo( true );
@@ -906,7 +915,7 @@ void idMenuScreen_Shell_Credits::UpdateCredits() {
 				}
 
 			} else {
-				
+
 				if ( heading ) {
 					heading->SetText( "" );
 				}

@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -53,7 +54,11 @@ model like for instance a world model.
 #define TEMP_FACING( numIndexes )		TEMP_ROUND16( ( ( numIndexes / 3 + 3 ) & ~3 ) + 1 )	// rounded up for SIMD, plus 1 for dangling edges
 #define TEMP_CULL( numIndexes )			TEMP_ROUND16( ( ( numIndexes / 3 + 3 ) & ~3 ) )		// rounded up for SIMD
 #define TEMP_VERTS( numVerts )			TEMP_ROUND16( numVerts * sizeof( idVec4 ) )
+#ifdef TRIINDEX_IS_32BIT
+#define OUTPUT_INDEX_BUFFER_SIZE		8192
+#else
 #define OUTPUT_INDEX_BUFFER_SIZE		4096
+#endif
 
 struct silEdge_t {
 	// NOTE: using triIndex_t for the planes is dubious, as there can be 2x the faces as verts
@@ -70,6 +75,7 @@ struct dynamicShadowVolumeParms_t {
 	// input
 	const idDrawVert *				verts;					// streamed in from main memory
 	int								numVerts;
+	int								vertOffset;
 	const triIndex_t *				indexes;				// streamed in from main memory
 	int								numIndexes;
 	const silEdge_t	*				silEdges;				// streamed in from main memory

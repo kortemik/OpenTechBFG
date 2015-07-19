@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -36,7 +37,7 @@ static const int PC_ATTRIB_INDEX_COLOR2		= 4;
 static const int PC_ATTRIB_INDEX_ST			= 8;
 static const int PC_ATTRIB_INDEX_TANGENT	= 9;
 
-// This enum list corresponds to the global constant register indecies as defined in global.inc for all
+// This enum list corresponds to the global constant register indices as defined in global.inc for all
 // shaders.  We used a shared pool to keeps things simple.  If something changes here then it also
 // needs to change in global.inc and vice versa
 enum renderParm_t {
@@ -67,7 +68,7 @@ enum renderParm_t {
 	RENDERPARM_VERTEXCOLOR_ADD,
 
 	// The following are new and can be in any order
-	
+
 	RENDERPARM_COLOR,
 	RENDERPARM_VIEWORIGIN,
 	RENDERPARM_GLOBALEYEPOS,
@@ -112,6 +113,8 @@ enum renderParm_t {
 	RENDERPARM_OVERBRIGHT,
 	RENDERPARM_ENABLE_SKINNING,
 	RENDERPARM_ALPHA_TEST,
+
+	RENDERPARM_TEXBIAS,
 
 	RENDERPARM_TOTAL,
 	RENDERPARM_USER = 128,
@@ -253,7 +256,12 @@ protected:
 	GLuint	LoadShader( GLenum target, const char * name, const char * startToken );
 	bool	CompileGLSL( GLenum target, const char * name );
 	GLuint	LoadGLSLShader( GLenum target, const char * name, idList<int> & uniforms );
+	bool	SaveCGShader( GLenum target, const char * name );
 	void	LoadGLSLProgram( const int programIndex, const int vertexShaderIndex, const int fragmentShaderIndex );
+
+	int GetProgramCount() const { return glslPrograms.Num(); }
+	const char *GetProgramName( int index ) const;
+	static void	R_ExportCGShaders( const idCmdArgs &args );
 
 	static const GLuint INVALID_PROGID = 0xFFFFFFFF;
 
@@ -277,7 +285,8 @@ protected:
 							vertexShaderIndex( -1 ),
 							fragmentShaderIndex( -1 ),
 							vertexUniformArray( -1 ),
-							fragmentUniformArray( -1 ) {}
+							fragmentUniformArray( -1 ),
+							texBiasUniform( -1 ) {}
 		idStr		name;
 		GLuint		progId;
 		int			vertexShaderIndex;
@@ -285,6 +294,7 @@ protected:
 		GLint		vertexUniformArray;
 		GLint		fragmentUniformArray;
 		idList<glslUniformLocation_t> uniformLocations;
+		int			texBiasUniform;
 	};
 	int	currentRenderProgram;
 	idList<glslProgram_t, TAG_RENDER> glslPrograms;

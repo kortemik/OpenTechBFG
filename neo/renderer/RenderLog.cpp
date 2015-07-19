@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -72,7 +73,7 @@ PIX events on all platforms
 
 /*
 ================================================
-pixEvent_t 
+pixEvent_t
 ================================================
 */
 struct pixEvent_t {
@@ -188,7 +189,7 @@ void PC_EndFrame() {
 	}
 	idLib::Printf( "%2d: %1.2f (GPU) %1.3f (CPU) = total\n", numPixEvents, totalGPU / 1000000.0f, totalCPU / 1000.0f );
 	memset( pixEvents, 0, numPixLevels * sizeof( pixEvents[0] ) );
-	
+
 	numPixEvents = 0;
 	numPixLevels = 0;
 #endif
@@ -245,7 +246,7 @@ void idRenderLog::StartFrame() {
 
 	char qpath[128];
 	sprintf( qpath, "renderlogPC_%04i.txt", r_logFile.GetInteger() );
-	idStr finalPath = fileSystem->RelativePathToOSPath( qpath );		
+	idStr finalPath = fileSystem->RelativePathToOSPath( qpath );
 	sprintf( ospath, "%s", finalPath.c_str() );
 	/*
 	for ( int i = 0; i < 9999 ; i++ ) {
@@ -266,7 +267,7 @@ void idRenderLog::StartFrame() {
 		logFile = NULL;
 	}
 
-	logFile = fileSystem->OpenFileWrite( ospath );	
+	logFile = fileSystem->OpenFileWrite( ospath );
 	if ( logFile == NULL ) {
 		idLib::Warning( "Failed to open logfile %s", ospath );
 		return;
@@ -345,7 +346,11 @@ void idRenderLog::OpenBlock( const char *label ) {
 	PC_BeginNamedEvent( label );
 
 	if ( logFile != NULL ) {
+#ifdef ID_QNX
+		LogOpenBlock_GCCWorkaround( RENDER_LOG_INDENT_MAIN_BLOCK, label );
+#else
 		LogOpenBlock( RENDER_LOG_INDENT_MAIN_BLOCK, label, NULL );
+#endif
 	}
 }
 
@@ -383,6 +388,26 @@ void idRenderLog::Printf( const char *fmt, ... ) {
 	va_end( marker );
 //	logFile->Flush();		this makes it take waaaay too long
 }
+
+#ifdef ID_QNX
+
+/*
+========================
+idRenderLog::LogOpenBlock_GCCWorkaround
+
+GCC 4.6.3 is used and happens to have a "feature" where va_list is not a pointer. Meaning it can't be set to NULL (in OpenBlock).
+This is to prevent what is assumed to be a risky idea of creating a va_list from a function that doesn't have a ... param.
+========================
+*/
+void idRenderLog::LogOpenBlock_GCCWorkaround( renderLogIndentLabel_t label, const char * fmt, ... ) {
+
+	va_list list;
+	va_start( list, fmt );
+	LogOpenBlock( label, fmt, list );
+	va_end( list );
+}
+
+#endif
 
 /*
 ========================

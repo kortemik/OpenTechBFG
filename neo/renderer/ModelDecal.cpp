@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -274,6 +275,7 @@ static void R_DecalPointCullStatic( byte * cullBits, const idPlane * planes, con
 	assert_16_byte_aligned( cullBits );
 	assert_16_byte_aligned( verts );
 
+#ifdef ID_WIN_X86_SSE2_INTRIN
 
 	idODSStreamedArray< idDrawVert, 16, SBT_DOUBLE, 4 > vertsODS( verts, numVerts );
 
@@ -376,6 +378,37 @@ static void R_DecalPointCullStatic( byte * cullBits, const idPlane * planes, con
 		}
 	}
 
+#else
+
+	idODSStreamedArray< idDrawVert, 16, SBT_DOUBLE, 1 > vertsODS( verts, numVerts );
+
+	for ( int i = 0; i < numVerts; ) {
+
+		const int nextNumVerts = vertsODS.FetchNextBatch() - 1;
+
+		for ( ; i <= nextNumVerts; i++ ) {
+			const idVec3 & v = vertsODS[i].xyz;
+
+			const float d0 = planes[0].Distance( v );
+			const float d1 = planes[1].Distance( v );
+			const float d2 = planes[2].Distance( v );
+			const float d3 = planes[3].Distance( v );
+			const float d4 = planes[4].Distance( v );
+			const float d5 = planes[5].Distance( v );
+
+			byte bits;
+			bits  = IEEE_FLT_SIGNBITNOTSET( d0 ) << 0;
+			bits |= IEEE_FLT_SIGNBITNOTSET( d1 ) << 1;
+			bits |= IEEE_FLT_SIGNBITNOTSET( d2 ) << 2;
+			bits |= IEEE_FLT_SIGNBITNOTSET( d3 ) << 3;
+			bits |= IEEE_FLT_SIGNBITNOTSET( d4 ) << 4;
+			bits |= IEEE_FLT_SIGNBITNOTSET( d5 ) << 5;
+
+			cullBits[i] = bits;
+		}
+	}
+
+#endif
 }
 
 /*
@@ -564,7 +597,7 @@ R_CopyDecalSurface
 =====================
 */
 static void R_CopyDecalSurface( idDrawVert * verts, int numVerts, triIndex_t * indexes, int numIndexes,
-									const decal_t * decal, const float fadeColor[4] ) {
+									const decal_t * decal, const float fadeColor[4], int vertexOffset ) {
 	assert_16_byte_aligned( &verts[numVerts] );
 	assert_16_byte_aligned( &indexes[numIndexes] );
 	assert_16_byte_aligned( decal->indexes );
@@ -573,9 +606,12 @@ static void R_CopyDecalSurface( idDrawVert * verts, int numVerts, triIndex_t * i
 	assert( ( ( decal->numIndexes * sizeof( triIndex_t ) ) & 15 ) == 0 );
 	assert_16_byte_aligned( fadeColor );
 
+#ifdef ID_WIN_X86_SSE2_INTRIN
 
-	const __m128i vector_int_num_verts = _mm_shuffle_epi32( _mm_cvtsi32_si128( numVerts ), 0 );
+	const __m128i vector_int_num_verts = _mm_shuffle_epi32( _mm_cvtsi32_si128( numVerts + vertexOffset ), 0 );
+#ifndef TRIINDEX_IS_32BIT
 	const __m128i vector_short_num_verts = _mm_packs_epi32( vector_int_num_verts, vector_int_num_verts );
+#endif
 	const __m128 vector_fade_color = _mm_load_ps( fadeColor );
 	const __m128i vector_color_mask = _mm_set_epi32( 0, -1, 0, 0 );
 
@@ -600,6 +636,17 @@ static void R_CopyDecalSurface( idDrawVert * verts, int numVerts, triIndex_t * i
 	}
 
 	// copy indexes
+#ifdef TRIINDEX_IS_32BIT
+	assert( ( decal->numIndexes & 3 ) == 0 );
+	assert( sizeof( triIndex_t ) == 4 );
+	for ( int i = 0; i < decal->numIndexes; i += 4 ) {
+		__m128i vi = _mm_load_si128( (const __m128i *)&decal->indexes[i] );
+
+		vi = _mm_add_epi32( vi, vector_int_num_verts );
+
+		_mm_stream_si128( (__m128i *)&indexes[numIndexes + i], vi );
+	}
+#else
 	assert( ( decal->numIndexes & 7 ) == 0 );
 	assert( sizeof( triIndex_t ) == 2 );
 	for ( int i = 0; i < decal->numIndexes; i += 8 ) {
@@ -609,9 +656,30 @@ static void R_CopyDecalSurface( idDrawVert * verts, int numVerts, triIndex_t * i
 
 		_mm_stream_si128( (__m128i *)&indexes[numIndexes + i], vi );
 	}
+#endif
 
 	_mm_sfence();
 
+#else
+
+	// copy vertices and apply depth/time based fading
+	for ( int i = 0; i < decal->numVerts; i++ ) {
+		// NOTE: bad out-of-order write-combined write, SIMD code does the right thing
+		verts[numVerts + i] = decal->verts[i];
+		for ( int j = 0; j < 4; j++ ) {
+			verts[numVerts + i].color[j] = idMath::Ftob( fadeColor[j] * decal->vertDepthFade[i] );
+		}
+	}
+
+	// copy indices
+	assert( ( decal->numIndexes & 1 ) == 0 );
+	for ( int i = 0; i < decal->numIndexes; i += 2 ) {
+		assert( decal->indexes[i + 0] < decal->numVerts && decal->indexes[i + 1] < decal->numVerts );
+		assert( ( numVerts + decal->indexes[i + 0] + vertexOffset ) < TRIINDEX_MAX_SIZE && ( numVerts + decal->indexes[i + 1] + vertexOffset ) < TRIINDEX_MAX_SIZE );
+		WriteIndexPair( &indexes[numIndexes + i], numVerts + decal->indexes[i + 0] + vertexOffset, numVerts + decal->indexes[i + 1] + vertexOffset );
+	}
+
+#endif
 }
 
 /*
@@ -673,6 +741,8 @@ drawSurf_t * idRenderModelDecal::CreateDecalDrawSurf( const viewEntity_t *space,
 	newTri->ambientCache = vertexCache.AllocVertex( NULL, ALIGN( maxVerts * sizeof( idDrawVert ), VERTEX_CACHE_ALIGN ) );
 	newTri->indexCache = vertexCache.AllocIndex( NULL, ALIGN( maxIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN ) );
 
+	const int vertexOffset = vertexCache.GetCacheVertexOffset( newTri->ambientCache ) / sizeof ( idDrawVert );
+
 	idDrawVert * mappedVerts = (idDrawVert *)vertexCache.MappedVertexBuffer( newTri->ambientCache );
 	triIndex_t * mappedIndexes = (triIndex_t *)vertexCache.MappedIndexBuffer( newTri->indexCache );
 
@@ -704,14 +774,14 @@ drawSurf_t * idRenderModelDecal::CreateDecalDrawSurf( const viewEntity_t *space,
 
 		const float f = ( deltaTime > decalInfo.stayTime ) ? ( (float) fadeTime / decalInfo.fadeTime ) : 0.0f;
 
-		ALIGNTYPE16 float fadeColor[4];
+		ALIGNTYPE16 float fadeColor[4] ALIGNTYPE16_POST;
 		for ( int j = 0; j < 4; j++ ) {
 			fadeColor[j] = 255.0f * ( decalInfo.start[j] + ( decalInfo.end[j] - decalInfo.start[j] ) * f );
 		}
 
 		// use SIMD optimized routine to copy the vertices and indices directly to write-combined memory
 		// this also applies any depth/time based fading while copying
-		R_CopyDecalSurface( mappedVerts, numVerts, mappedIndexes, numIndexes, &decal, fadeColor );
+		R_CopyDecalSurface( mappedVerts, numVerts, mappedIndexes, numIndexes, &decal, fadeColor, vertexOffset );
 
 		numVerts += decal.numVerts;
 		numIndexes += decal.numIndexes;

@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -83,6 +84,12 @@ void idSysLocal::FPU_SetFTZ( bool enable ) {
 
 void idSysLocal::FPU_SetDAZ( bool enable ) {
 	Sys_FPU_SetDAZ( enable );
+}
+
+void idSysLocal::FPU_VFP_SetLEN_STRIDE( int length, int stride ) {
+#ifdef ID_QNX_ARM
+	Sys_FPU_VFP_SetLEN_STRIDE( length, stride );
+#endif
 }
 
 bool idSysLocal::LockMemory( void *ptr, int bytes ) {
@@ -165,7 +172,7 @@ const char *Sys_TimeStampToStr( ID_TIME_T timeStamp ) {
 	}
 
 	idStr out;
-	
+
 	idStr lang = cvarSystem->GetCVarString( "sys_lang" );
 	if ( lang.Icmp( ID_LANG_ENGLISH ) == 0 ) {
 		// english gets "month/day/year  hour:min" + "am" or "pm"

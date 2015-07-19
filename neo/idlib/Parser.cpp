@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -629,7 +630,7 @@ void idParser::AddBuiltinDefines() {
 		char *string;
 		int id;
 	} builtin[] = {
-		{ "__LINE__",	BUILTIN_LINE }, 
+		{ "__LINE__",	BUILTIN_LINE },
 		{ "__FILE__",	BUILTIN_FILE },
 		{ "__DATE__",	BUILTIN_DATE },
 		{ "__TIME__",	BUILTIN_TIME },
@@ -675,7 +676,7 @@ static idStr PreProcessorDate() {
 	}
 	idStr	str = "\"";
 	// skip DAY, extract MMM DD
-	for ( int i = 4 ; i < 10 ; i++ ) { 
+	for ( int i = 4 ; i < 10 ; i++ ) {
 		str.Append( curtime[i] );
 	}
 	// skip time, extract space+YYYY
@@ -862,7 +863,7 @@ int idParser::ExpandDefine( idToken *deftoken, define_t *define, idToken **first
 			// add the token to the list
 			t->next = NULL;
 // the token being read from the define list should use the line number of
-// the original file, not the header file			
+// the original file, not the header file
 			t->line = deftoken->line;
 
 			if ( last ) last->next = t;
@@ -942,7 +943,7 @@ int idParser::ReadLine( idToken *token ) {
 		if (!idParser::ReadSourceToken( token )) {
 			return false;
 		}
-		
+
 		if (token->linesCrossed > crossline) {
 			idParser::UnreadSourceToken( token );
 			return false;
@@ -1548,7 +1549,7 @@ int idParser::EvaluateTokens( idToken *tokens, signed long int *intvalue, double
 							break;
 						}
 					}
-					
+
 					case P_MUL:
 					case P_DIV:
 					case P_MOD:
@@ -2138,7 +2139,11 @@ int idParser::Directive_eval() {
 	token.whiteSpaceEnd_p = NULL;
 	token.linesCrossed = 0;
 	token.flags = 0;
+#ifdef ID_WIN32
 	sprintf(buf, "%d", abs(value));
+#else
+	sprintf(buf, "%d", labs(value));
+#endif
 	token = buf;
 	token.type = TT_NUMBER;
 	token.subtype = TT_INTEGER|TT_LONG|TT_DECIMAL;
@@ -2277,12 +2282,21 @@ int idParser::DollarDirective_evalint() {
 	token.whiteSpaceEnd_p = NULL;
 	token.linesCrossed = 0;
 	token.flags = 0;
+#ifdef ID_WIN32
 	sprintf( buf, "%d", abs( value ) );
+#else
+	sprintf( buf, "%d", labs( value ) );
+#endif
 	token = buf;
 	token.type = TT_NUMBER;
 	token.subtype = TT_INTEGER | TT_LONG | TT_DECIMAL | TT_VALUESVALID;
+#ifdef ID_WIN32
 	token.intvalue = abs( value );
 	token.floatvalue = abs( value );
+#else
+	token.intvalue = labs( value );
+	token.floatvalue = labs( value );
+#endif
 	idParser::UnreadSourceToken( &token );
 	if ( value < 0 ) {
 		idParser::UnreadSignToken();
@@ -2672,7 +2686,7 @@ const char *idParser::ParseBracedSectionExact( idStr &out, int tabs ) {
 ========================
 idParser::ParseBracedSection
 
-The next token should be an open brace. Parses until a matching close brace is found. Internal 
+The next token should be an open brace. Parses until a matching close brace is found. Internal
 brace depths are properly skipped.
 ========================
 */
@@ -2957,19 +2971,19 @@ void idParser::GetStringFromMarker( idStr& out, bool clean ) {
 	if ( marker_p == NULL ) {
 		marker_p = scriptstack->buffer;
 	}
-		
+
 	if ( tokens ) {
 		p = (char*)tokens->whiteSpaceStart_p;
 	} else {
 		p = (char*)scriptstack->script_p;
 	}
-	
+
 	// Set the end character to NULL to give us a complete string
 	save = *p;
 	*p = 0;
-	
+
 	// If cleaning then reparse
-	if ( clean ) {	
+	if ( clean ) {
 		idParser temp( marker_p, strlen( marker_p ), "temp", flags );
 		idToken token;
 		while ( temp.ReadToken ( &token ) ) {
@@ -2978,9 +2992,9 @@ void idParser::GetStringFromMarker( idStr& out, bool clean ) {
 	} else {
 		out = marker_p;
 	}
-	
+
 	// restore the character we set to NULL
-	*p = save;		
+	*p = save;
 }
 
 /*

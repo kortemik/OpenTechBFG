@@ -1,9 +1,11 @@
 Doom 3 BFG Edition GPL Source Code
+                  ^ for BlackBerry
 ==================================
 
 This file contains the following sections:
 
 GENERAL NOTES
+THANKS
 LICENSE
 
 GENERAL NOTES
@@ -30,6 +32,33 @@ We expect the solution file is compatible with the Express releases
 You will need the Microsoft DirectX SDK installed as well.
 If it does not reside in "C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)"
 you will need to update the project files accordingly.
+
+Compiling on BlackBerry 10:
+---------------------------
+
+Make sure that Momentics 10.2 or higher is installed. Only works on the BlackBerry Z30
+right now since it has OpenGL ES 3.0 support.
+
+A set of projects are located within the blackberry folder. Import these projects and
+compile doom3bfg.
+
+## Data:
+Currently, in order to get to run, images and shaders must be modified to convert
+to a format that OpenGL ES 3.0 can handle.
+
+Steps for now (as of last change to this file):
+- Convert shaders to HLSL, so OpenGL ES version of project can convert them to a GLSL ES
+    compatible version of GLSL. Do this by using Win32 project, and calling
+    idRenderProgManager::SaveCGShader to convert the shader from its current GLSL format 
+    to "Cg" (which looks more like a bastardized HLSL/Cg hybrid).
+- Convert all DXT textures to ETC format. This can be done using either the built in
+    conversion (which is very slow and doesn't cache the files by default) or to write
+    an offline conversion program to convert each texture from it's generated format (bimage)
+    to a normal texture, then compress it, then convert it back into it's generated format.
+- Rebuild all resource files unless you are willing to take an IO performance hit from each
+    file being open, read, and closed during execution compared to opening a resource file
+    once, parsing it's metadata, and it never getting touched again until level load time 
+    where it will only be read.
 
 
 Steam:
@@ -60,6 +89,15 @@ it is likely that you can find modified and improved versions of the engine in
 various open source projects across the internet.
 
 Depending what is your interest with the source code, those may be a better starting point.
+
+
+THANKS
+======
+- Robert Beckebans (RobertBeckebans) for RBDOOM-3-BFG:
+    Already written OpenAL implementation
+    POSIX Sys_ListFiles
+    Proof that extern inline works in C++, which otherwise was "not really supported" (so the internet says)
+    A working project to use as a reference if a portion of Doom 3 BFG for BlackBerry fails to work/compile
 
 
 LICENSE
@@ -255,3 +293,43 @@ If you'd like to continue hacking on TiMidity, feel free. I'm
 hereby extending the TiMidity license agreement: you can now 
 select the most convenient license for your needs from (1) the
 GNU GPL, (2) the GNU LGPL, or (3) the Perl Artistic License.  
+
+libfgen
+---------------------------------------------------------------------------
+neo/renderer/ETC/fgen
+
+fgen -- Library for optimization using a genetic algorithm or particle swarm optimization.
+Copyright 2012, Harm Hanemaaijer
+
+fgen is free software: you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+fgen is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with fgen.  If not, see <http://www.gnu.org/licenses/>.
+
+texgenpack
+---------------------------------------------------------------------------
+neo/renderer/ETC/texgenpack
+
+texgenpack -- a genetic algorithm texture compressor.
+Copyright 2013 Harm Hanemaaijer
+
+texgenpack is free software: you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+texgenpack is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with texgenpack.  If not, see <http://www.gnu.org/licenses/>.

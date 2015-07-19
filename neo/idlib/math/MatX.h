@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -389,9 +390,23 @@ idMatX::operator=
 ID_INLINE idMatX &idMatX::operator=( const idMatX &a ) {
 	SetSize( a.numRows, a.numColumns );
 	int s = a.numRows * a.numColumns;
-#ifdef MATX_SIMD
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( MATX_SIMD )
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( mat + i, _mm_load_ps( a.mat + i ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( MATX_SIMD )
+	for ( int i = 0; i < s; i += 4 ) {
+		vst1q_f32( (float32_t *)(mat + i), vld1q_f32( (float32_t *)(a.mat + i) ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM ) && defined( MATX_SIMD )
+	for ( int i = 0; i < s; i += 4 ) {
+		__asm__ __volatile__(
+				"MOV r1, #4\n"
+				"MLA r0, %[i], r1, %[s]\n"
+				"MLA r1, %[i], r1, %[d]\n"
+				"VLD1.32 {D0, D1}, [r0]\n"
+				"VST1.32 {D0, D1}, [r1]"
+				: [d] "+r" (mat) : [i] "r" (i), [s] "r" (a.mat) : "r0", "r1", "q0", "memory");
 	}
 #else
 	memcpy( mat, a.mat, s * sizeof( float ) );
@@ -410,10 +425,28 @@ ID_INLINE idMatX idMatX::operator*( const float a ) const {
 
 	m.SetTempSize( numRows, numColumns );
 	int s = numRows * numColumns;
-#ifdef MATX_SIMD
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( MATX_SIMD )
 	__m128 va = _mm_load1_ps( & a );
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( m.mat + i, _mm_mul_ps( _mm_load_ps( mat + i ), va ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( MATX_SIMD )
+	float32x4_t va = vld1q_dup_f32( & a );
+	for ( int i = 0; i < s; i += 4 ) {
+		vst1q_f32( (float32_t *)(m.mat + i), vmulq_f32( vld1q_f32( (float32_t *)(mat + i) ), va ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM ) && defined( MATX_SIMD )
+	for ( int i = 0; i < s; i += 4 ) {
+		__asm__ __volatile__(
+				"MOV r1, #4\n"
+				"MLA r0, %[i], r1, %[s]\n"
+				"MLA r1, %[i], r1, %[d]\n"
+				"VLD1.32 {D2[0]}, [%[f]]\n"
+				"VLD1.32 {D0, D1}, [r0]\n"
+				"VMUL.F32 D0, D0, D2[0]\n"
+				"VMUL.F32 D1, D1, D2[0]\n"
+				"VST1.32 {D0, D1}, [r1]"
+				: [d] "+r" (m.mat) : [i] "r" (i), [s] "r" (mat), [f] "r" (&a) : "r0", "r1", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < s; i++ ) {
@@ -462,9 +495,27 @@ ID_INLINE idMatX idMatX::operator+( const idMatX &a ) const {
 	assert( numRows == a.numRows && numColumns == a.numColumns );
 	m.SetTempSize( numRows, numColumns );
 	int s = numRows * numColumns;
-#ifdef MATX_SIMD
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( MATX_SIMD )
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( m.mat + i, _mm_add_ps( _mm_load_ps( mat + i ), _mm_load_ps( a.mat + i ) ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( MATX_SIMD )
+	for ( int i = 0; i < s; i += 4 ) {
+		vst1q_f32( (float32_t *)(m.mat + i), vaddq_f32( vld1q_f32( (float32_t *)(mat + i) ), vld1q_f32( (float32_t *)(a.mat + i) ) ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM ) && defined( MATX_SIMD )
+	for ( int i = 0; i < s; i += 4 ) {
+		__asm__ __volatile__(
+				"MOV r2, #4\n"
+				"MLA r0, %[i], r2, %[s]\n"
+				"MLA r1, %[i], r2, %[d]\n"
+				"MLA r2, %[i], r2, %[e]\n"
+				"VLD1.32 {D0, D1}, [r0]\n"
+				"VLD1.32 {D2, D3}, [r2]\n"
+				"VADD.F32 D0, D0, D2\n"
+				"VADD.F32 D1, D1, D3\n"
+				"VST1.32 {D0, D1}, [r1]"
+				: [d] "+r" (m.mat) : [i] "r" (i), [s] "r" (mat), [e] "r" (a.mat) : "r0", "r1", "r2", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < s; i++ ) {
@@ -485,9 +536,27 @@ ID_INLINE idMatX idMatX::operator-( const idMatX &a ) const {
 	assert( numRows == a.numRows && numColumns == a.numColumns );
 	m.SetTempSize( numRows, numColumns );
 	int s = numRows * numColumns;
-#ifdef MATX_SIMD
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( MATX_SIMD )
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( m.mat + i, _mm_sub_ps( _mm_load_ps( mat + i ), _mm_load_ps( a.mat + i ) ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( MATX_SIMD )
+	for ( int i = 0; i < s; i += 4 ) {
+		vst1q_f32( (float32_t *)(m.mat + i), vsubq_f32( vld1q_f32( (float32_t *)(mat + i) ), vld1q_f32( (float32_t *)(a.mat + i) ) ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM ) && defined( MATX_SIMD )
+	for ( int i = 0; i < s; i += 4 ) {
+		__asm__ __volatile__(
+				"MOV r2, #4\n"
+				"MLA r0, %[i], r2, %[s]\n"
+				"MLA r1, %[i], r2, %[d]\n"
+				"MLA r2, %[i], r2, %[e]\n"
+				"VLD1.32 {D0, D1}, [r0]\n"
+				"VLD1.32 {D2, D3}, [r2]\n"
+				"VSUB.F32 D0, D0, D2\n"
+				"VSUB.F32 D1, D1, D3\n"
+				"VST1.32 {D0, D1}, [r1]"
+				: [d] "+r" (m.mat) : [i] "r" (i), [s] "r" (mat), [e] "r" (a.mat) : "r0", "r1", "r2", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < s; i++ ) {
@@ -504,10 +573,27 @@ idMatX::operator*=
 */
 ID_INLINE idMatX &idMatX::operator*=( const float a ) {
 	int s = numRows * numColumns;
-#ifdef MATX_SIMD
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( MATX_SIMD )
 	__m128 va = _mm_load1_ps( & a );
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( mat + i, _mm_mul_ps( _mm_load_ps( mat + i ), va ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( MATX_SIMD )
+	float32x4_t va = vld1q_dup_f32( & a );
+	for ( int i = 0; i < s; i += 4 ) {
+		vst1q_f32( (float32_t *)(mat + i), vmulq_f32( vld1q_f32( (float32_t *)(mat + i) ), va ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM ) && defined( MATX_SIMD )
+	for ( int i = 0; i < s; i += 4 ) {
+		__asm__ __volatile__(
+				"MOV r0, #4\n"
+				"MLA r0, %[i], r0, %[s]\n"
+				"VLD1.32 {D2[0]}, [%[f]]\n"
+				"VLD1.32 {D0, D1}, [r0]\n"
+				"VMUL.F32 D0, D0, D2[0]\n"
+				"VMUL.F32 D1, D1, D2[0]\n"
+				"VST1.32 {D0, D1}, [r0]"
+				: [s] "+r" (mat) : [i] "r" (i), [f] "r" (&a) : "r0", "q0", "memory");
 	}
 #else
 	for ( int i = 0; i < s; i++ ) {
@@ -537,9 +623,26 @@ idMatX::operator+=
 ID_INLINE idMatX &idMatX::operator+=( const idMatX &a ) {
 	assert( numRows == a.numRows && numColumns == a.numColumns );
 	int s = numRows * numColumns;
-#ifdef MATX_SIMD
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( MATX_SIMD )
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( mat + i, _mm_add_ps( _mm_load_ps( mat + i ), _mm_load_ps( a.mat + i ) ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( MATX_SIMD )
+	for ( int i = 0; i < s; i += 4 ) {
+		vst1q_f32( (float32_t *)(mat + i), vaddq_f32( vld1q_f32( (float32_t *)(mat + i) ), vld1q_f32( (float32_t *)(a.mat + i) ) ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM ) && defined( MATX_SIMD )
+	for ( int i = 0; i < s; i += 4 ) {
+		__asm__ __volatile__(
+				"MOV r1, #4\n"
+				"MLA r0, %[i], r1, %[s]\n"
+				"MLA r1, %[i], r1, %[e]\n"
+				"VLD1.32 {D0, D1}, [r0]\n"
+				"VLD1.32 {D2, D3}, [r1]\n"
+				"VADD.F32 D0, D0, D2\n"
+				"VADD.F32 D1, D1, D3\n"
+				"VST1.32 {D0, D1}, [r0]"
+				: [s] "+r" (mat) : [i] "r" (i), [e] "r" (a.mat) : "r0", "r1", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < s; i++ ) {
@@ -558,9 +661,26 @@ idMatX::operator-=
 ID_INLINE idMatX &idMatX::operator-=( const idMatX &a ) {
 	assert( numRows == a.numRows && numColumns == a.numColumns );
 	int s = numRows * numColumns;
-#ifdef MATX_SIMD
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( MATX_SIMD )
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( mat + i, _mm_sub_ps( _mm_load_ps( mat + i ), _mm_load_ps( a.mat + i ) ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( MATX_SIMD )
+	for ( int i = 0; i < s; i += 4 ) {
+		vst1q_f32( (float32_t *)(mat + i), vsubq_f32( vld1q_f32( (float32_t *)(mat + i) ), vld1q_f32( (float32_t *)(a.mat + i) ) ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM ) && defined( MATX_SIMD )
+	for ( int i = 0; i < s; i += 4 ) {
+		__asm__ __volatile__(
+				"MOV r1, #4\n"
+				"MLA r0, %[i], r1, %[s]\n"
+				"MLA r1, %[i], r1, %[e]\n"
+				"VLD1.32 {D0, D1}, [r0]\n"
+				"VLD1.32 {D2, D3}, [r1]\n"
+				"VSUB.F32 D0, D0, D2\n"
+				"VSUB.F32 D1, D1, D3\n"
+				"VST1.32 {D0, D1}, [r0]"
+				: [s] "+r" (mat) : [i] "r" (i), [e] "r" (a.mat) : "r0", "r1", "q0", "q1", "memory");
 	}
 #else
 	for ( int i = 0; i < s; i++ ) {
@@ -582,7 +702,7 @@ ID_INLINE idMatX operator*( const float a, idMatX const &m ) {
 
 /*
 ========================
-operator* 
+operator*
 ========================
 */
 ID_INLINE idVecX operator*( const idVecX &vec, const idMatX &m ) {
@@ -744,9 +864,23 @@ idMatX::Zero
 */
 ID_INLINE void idMatX::Zero() {
 	int s = numRows * numColumns;
-#ifdef MATX_SIMD
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( MATX_SIMD )
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( mat + i, _mm_setzero_ps() );
+	}
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( MATX_SIMD )
+	int32x4_t va = vdupq_n_s32( 0 );
+	for ( int i = 0; i < s; i += 4 ) {
+		vst1q_s32( (int32_t *)(mat + i), va );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM ) && defined( MATX_SIMD )
+	for ( int i = 0; i < s; i += 4 ) {
+		__asm__ __volatile__(
+				"MOV r0, #4\n"
+				"MLA r0, %[i], r0, %[s]\n"
+				"VBIC.I32 q0, #0\n"
+				"VST1.32 {d0, d1}, [r0]"
+				: [s] "+r" (mat) : [i] "r" (i) : "r0", "q0", "memory");
 	}
 #else
 	s;
@@ -838,10 +972,25 @@ idMatX::Negate
 */
 ID_INLINE void idMatX::Negate() {
 	int s = numRows * numColumns;
-#ifdef MATX_SIMD
+#if ( defined( ID_WIN_X86_SSE_INTRIN ) || defined( ID_QNX_X86_SSE_INTRIN ) ) && defined( MATX_SIMD )
 	ALIGN16( const unsigned int signBit[4] ) = { IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK, IEEE_FLT_SIGN_MASK };
 	for ( int i = 0; i < s; i += 4 ) {
 		_mm_store_ps( mat + i, _mm_xor_ps( _mm_load_ps( mat + i ), (__m128 &) signBit[0] ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_INTRIN ) && defined( MATX_SIMD )
+	for ( int i = 0; i < s; i += 4 ) {
+		vst1q_f32( (float32_t *)(mat + i), vnegq_f32( vld1q_f32( (float32_t *)(mat + i) ) ) );
+	}
+#elif defined( ID_QNX_ARM_NEON_ASM ) && defined( MATX_SIMD )
+	for ( int i = 0; i < s; i += 4 ) {
+		__asm__ __volatile__(
+				"MOV r0, #4\n"
+				"MLA r0, %[i], r0, %[s]\n"
+				"VLD1.32 {D0, D1}, [r0]\n"
+				"VNEG.F32 D0, D0\n"
+				"VNEG.F32 D1, D1\n"
+				"VST1.32 {D0, D1}, [r0]"
+				: [s] "+r" (mat) : [i] "r" (i) : "r0", "q0", "memory");
 	}
 #else
 	for ( int i = 0; i < s; i++ ) {

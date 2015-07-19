@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -32,10 +33,12 @@ If you have questions concerning this license or the applicable additional terms
 #include "tr_local.h"
 #include "Model_local.h"
 
+#ifdef ID_WIN_X86_SSE2_INTRIN
 
 static const __m128 vector_float_posInfinity		= { idMath::INFINITY, idMath::INFINITY, idMath::INFINITY, idMath::INFINITY };
 static const __m128 vector_float_negInfinity		= { -idMath::INFINITY, -idMath::INFINITY, -idMath::INFINITY, -idMath::INFINITY };
 
+#endif
 
 static const char *MD5_SnapshotName = "_MD5_Snapshot_";
 
@@ -501,6 +504,7 @@ idMD5Mesh::CalculateBounds
 ====================
 */
 void idMD5Mesh::CalculateBounds( const idJointMat * entJoints, idBounds & bounds ) const {
+#ifdef ID_WIN_X86_SSE2_INTRIN
 
 	__m128 minX = vector_float_posInfinity;
 	__m128 minY = vector_float_posInfinity;
@@ -534,6 +538,16 @@ void idMD5Mesh::CalculateBounds( const idJointMat * entJoints, idBounds & bounds
 	_mm_store_ss( bounds.ToFloatPtr() + 4, _mm_splat_ps( maxY, 3 ) );
 	_mm_store_ss( bounds.ToFloatPtr() + 5, _mm_splat_ps( maxZ, 3 ) );
 
+#else
+
+	bounds.Clear();
+	for ( int i = 0; i < numMeshJoints; i++ ) {
+		const idJointMat & joint = entJoints[meshJoints[i]];
+		bounds.AddPoint( joint.GetTranslation() );
+	}
+	bounds.ExpandSelf( maxJointVertDist );
+
+#endif
 }
 
 /*
@@ -669,6 +683,13 @@ bool idRenderModelMD5::LoadBinaryModel( idFile * file, const ID_TIME_T sourceTim
 
 	file->ReadBig( tempNum );
 	meshes.SetNum( tempNum );
+#ifdef TRIINDEX_IS_32BIT
+	uint16 * tmpIndices = NULL;
+	int tmpIndicesSize = 0;
+	uint16 tmp[4];
+#endif
+	triIndex_t * tmpAmbientIndices = NULL;
+	int tmpAmbientIndicesSize = 0;
 	for ( int i = 0; i < meshes.Num(); i++ ) {
 
 		idStr materialName;
@@ -678,7 +699,7 @@ bool idRenderModelMD5::LoadBinaryModel( idFile * file, const ID_TIME_T sourceTim
 		} else {
 			meshes[i].shader = declManager->FindMaterial( materialName );
 		}
-		
+
 		file->ReadBig( meshes[i].numVerts );
 		file->ReadBig( meshes[i].numTris );
 
@@ -699,7 +720,7 @@ bool idRenderModelMD5::LoadBinaryModel( idFile * file, const ID_TIME_T sourceTim
 
 		srfTriangles_t	tri;
 		memset( &tri, 0, sizeof( srfTriangles_t ) );
-		
+
 		if ( deform.numOutputVerts > 0 ) {
 			R_AllocStaticTriSurfVerts( &tri, deform.numOutputVerts );
 			deform.verts = tri.verts;
@@ -711,10 +732,26 @@ bool idRenderModelMD5::LoadBinaryModel( idFile * file, const ID_TIME_T sourceTim
 			R_AllocStaticTriSurfSilIndexes( &tri, deform.numIndexes );
 			deform.indexes = tri.indexes;
 			deform.silIndexes = tri.silIndexes;
+#ifdef TRIINDEX_IS_32BIT
+			if ( !tmpIndices || deform.numIndexes > tmpIndicesSize ) {
+				if ( tmpIndices ) {
+					Mem_Free( tmpIndices );
+				}
+				tmpIndices = (uint16 *)Mem_Alloc( deform.numIndexes * sizeof( uint16 ) * 2, TAG_TEMP );
+				tmpIndicesSize = deform.numIndexes;
+			}
+			file->ReadBigArray( tmpIndices, deform.numIndexes );
+			file->ReadBigArray( &tmpIndices[deform.numIndexes], deform.numIndexes );
+			for ( int k = 0; k < deform.numIndexes; k++ ) {
+				deform.indexes[k]		= tmpIndices[k];
+				deform.silIndexes[k]	= tmpIndices[k + deform.numIndexes];
+			}
+#else
 			file->ReadBigArray( deform.indexes, deform.numIndexes );
 			file->ReadBigArray( deform.silIndexes, deform.numIndexes );
+#endif
 		}
-		
+
 		if ( deform.numMirroredVerts > 0 ) {
 			R_AllocStaticTriSurfMirroredVerts( &tri, deform.numMirroredVerts );
 			deform.mirroredVerts = tri.mirroredVerts;
@@ -732,10 +769,18 @@ bool idRenderModelMD5::LoadBinaryModel( idFile * file, const ID_TIME_T sourceTim
 			deform.silEdges = tri.silEdges;
 			assert( deform.silEdges != NULL );
 			for ( int j = 0; j < deform.numSilEdges; j++ ) {
+#ifdef TRIINDEX_IS_32BIT
+				file->ReadBigArray( tmp, 4 );
+				deform.silEdges[j].p1 = tmp[0];
+				deform.silEdges[j].p2 = tmp[1];
+				deform.silEdges[j].v1 = tmp[2];
+				deform.silEdges[j].v2 = tmp[3];
+#else
 				file->ReadBig( deform.silEdges[j].p1 );
 				file->ReadBig( deform.silEdges[j].p2 );
 				file->ReadBig( deform.silEdges[j].v1 );
 				file->ReadBig( deform.silEdges[j].v2 );
+#endif
 			}
 		}
 
@@ -743,12 +788,44 @@ bool idRenderModelMD5::LoadBinaryModel( idFile * file, const ID_TIME_T sourceTim
 		idShadowVertSkinned::CreateShadowCache( shadowVerts, deform.verts, deform.numOutputVerts );
 
 		deform.staticAmbientCache = vertexCache.AllocStaticVertex( deform.verts, ALIGN( deform.numOutputVerts * sizeof( idDrawVert ), VERTEX_CACHE_ALIGN ) );
-		deform.staticIndexCache = vertexCache.AllocStaticIndex( deform.indexes, ALIGN( deform.numIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN ) );
+
+		int vertexOffset = vertexCache.GetCacheVertexOffset( deform.staticAmbientCache ) / sizeof( idDrawVert );
+		int deformIndexSize = ALIGN( deform.numIndexes * sizeof( triIndex_t ), INDEX_CACHE_ALIGN );
+		const triIndex_t * indexes = deform.indexes;
+		if ( vertexOffset != 0 ) {
+			if ( !tmpAmbientIndices || tmpAmbientIndicesSize < deformIndexSize ) {
+				if ( tmpAmbientIndices ) {
+					Mem_Free16( tmpAmbientIndices );
+				}
+				tmpAmbientIndices = (triIndex_t *)Mem_Alloc16( deformIndexSize, TAG_TEMP );
+				tmpAmbientIndicesSize = deformIndexSize;
+			}
+			indexes = tmpAmbientIndices;
+			if ( deform.numIndexes & 1 ) {
+				for ( int i = 0; i < deform.numIndexes; i++ ) {
+					tmpAmbientIndices[i] = deform.indexes[i] + vertexOffset;
+				}
+			} else {
+				for ( int i = 0; i < deform.numIndexes; i += 2 ) {
+					WriteIndexPair( &tmpAmbientIndices[i], deform.indexes[i + 0] + vertexOffset, deform.indexes[i + 1] + vertexOffset );
+				}
+			}
+		}
+		deform.staticIndexCache = vertexCache.AllocStaticIndex( indexes, deformIndexSize );
+
 		deform.staticShadowCache = vertexCache.AllocStaticVertex( shadowVerts, ALIGN( deform.numOutputVerts * 2 * sizeof( idShadowVertSkinned ), VERTEX_CACHE_ALIGN ) );
 
 		Mem_Free( shadowVerts );
 
 		file->ReadBig( meshes[i].surfaceNum );
+	}
+#ifdef TRIINDEX_IS_32BIT
+	if ( tmpIndices ) {
+		Mem_Free( tmpIndices );
+	}
+#endif
+	if ( tmpAmbientIndices ) {
+		Mem_Free16( tmpAmbientIndices );
 	}
 
 	return true;
@@ -794,6 +871,11 @@ void idRenderModelMD5::WriteBinaryModel( idFile * file, ID_TIME_T *_timeStamp ) 
 	}
 
 	file->WriteBig( meshes.Num() );
+#ifdef TRIINDEX_IS_32BIT
+	uint16 * tmpIndices = NULL;
+	int tmpIndicesSize = 0;
+	uint16 tmp[4];
+#endif
 	for ( int i = 0; i < meshes.Num(); i++ ) {
 
 		if ( meshes[i].shader != NULL && meshes[i].shader->GetName() != NULL ) {
@@ -823,8 +905,24 @@ void idRenderModelMD5::WriteBinaryModel( idFile * file, ID_TIME_T *_timeStamp ) 
 		}
 
 		if ( deform.numIndexes > 0 ) {
+#ifdef TRIINDEX_IS_32BIT
+			if ( !tmpIndices || deform.numIndexes > tmpIndicesSize ) {
+				if ( tmpIndices ) {
+					Mem_Free( tmpIndices );
+				}
+				tmpIndices = (uint16 *)Mem_Alloc( deform.numIndexes * sizeof( uint16 ) * 2, TAG_TEMP );
+				tmpIndicesSize = deform.numIndexes;
+			}
+			for ( int k = 0; k < deform.numIndexes; k++ ) {
+				tmpIndices[k] = (uint16)deform.indexes[k];
+				tmpIndices[k + deform.numIndexes] = (uint16)deform.silIndexes[k];
+			}
+			file->WriteBigArray( tmpIndices, deform.numIndexes );
+			file->WriteBigArray( &tmpIndices[deform.numIndexes], deform.numIndexes );
+#else
 			file->WriteBigArray( deform.indexes, deform.numIndexes );
 			file->WriteBigArray( deform.silIndexes, deform.numIndexes );
+#endif
 		}
 
 		if ( deform.numMirroredVerts > 0 ) {
@@ -837,15 +935,28 @@ void idRenderModelMD5::WriteBinaryModel( idFile * file, ID_TIME_T *_timeStamp ) 
 
 		if ( deform.numSilEdges > 0 ) {
 			for ( int j = 0; j < deform.numSilEdges; j++ ) {
+#ifdef TRIINDEX_IS_32BIT
+				tmp[0] = (uint16)deform.silEdges[j].p1;
+				tmp[1] = (uint16)deform.silEdges[j].p2;
+				tmp[2] = (uint16)deform.silEdges[j].v1;
+				tmp[3] = (uint16)deform.silEdges[j].v2;
+				file->WriteBigArray( tmp, 4 );
+#else
 				file->WriteBig( deform.silEdges[j].p1 );
 				file->WriteBig( deform.silEdges[j].p2 );
 				file->WriteBig( deform.silEdges[j].v1 );
 				file->WriteBig( deform.silEdges[j].v2 );
+#endif
 			}
 		}
 
 		file->WriteBig( meshes[i].surfaceNum );
 	}
+#ifdef TRIINDEX_IS_32BIT
+	if ( tmpIndices ) {
+		Mem_Free( tmpIndices );
+	}
+#endif
 }
 
 /*
@@ -975,7 +1086,7 @@ void idRenderModelMD5::Print() const {
 		totalVerts += mesh->NumVerts();
 		totalTris += mesh->NumTris();
 		common->Printf( "%2i: %5i %5i %s\n", i, mesh->NumVerts(), mesh->NumTris(), mesh->shader->GetName() );
-	}	
+	}
 	common->Printf( "-----\n" );
 	common->Printf( "%4i verts.\n", totalVerts );
 	common->Printf( "%4i tris.\n", totalTris );
@@ -1038,7 +1149,7 @@ void idRenderModelMD5::DrawJoints( const renderEntity_t *ent, const viewDef_t *v
 
 	num = ent->numJoints;
 	joint = ent->joints;
-	md5Joint = joints.Ptr();	
+	md5Joint = joints.Ptr();
 	for( i = 0; i < num; i++, joint++, md5Joint++ ) {
 		pos = ent->origin + joint->ToVec3() * ent->axis;
 		if ( md5Joint->parent ) {
@@ -1085,6 +1196,7 @@ static void TransformJoints( idJointMat *__restrict outJoints, const int numJoin
 	assert_16_byte_aligned( inFloats1 );
 	assert_16_byte_aligned( inFloats2 );
 
+#ifdef ID_WIN_X86_SSE2_INTRIN
 
 	const __m128 mask_keep_last = __m128c( _mm_set_epi32( 0xFFFFFFFF, 0x00000000, 0x00000000, 0x00000000 ) );
 
@@ -1160,6 +1272,13 @@ static void TransformJoints( idJointMat *__restrict outJoints, const int numJoin
 		_mm_store_ps( outFloats + 1 * 12 + 8, ri1 );
 	}
 
+#else
+
+	for ( int i = 0; i < numJoints; i++ ) {
+		idJointMat::Multiply( outJoints[i], inJoints1[i], inJoints2[i] );
+	}
+
+#endif
 }
 
 /*
@@ -1233,9 +1352,9 @@ idRenderModel *idRenderModelMD5::InstantiateDynamicModel( const struct renderEnt
 	for ( int i = 0; i < meshes.Num(); i++, mesh++ ) {
 		// avoid deforming the surface if it will be a nodraw due to a skin remapping
 		const idMaterial *shader = mesh->shader;
-		
+
 		shader = R_RemapShaderBySkin( shader, ent->customSkin, ent->customShader );
-		
+
 		if ( !shader || ( !shader->IsDrawn() && !shader->SurfaceCastsShadow() ) ) {
 			staticModel->DeleteSurfaceWithId( i );
 			mesh->surfaceNum = -1;
@@ -1261,7 +1380,7 @@ idRenderModel *idRenderModelMD5::InstantiateDynamicModel( const struct renderEnt
 
 		// the deformation of the tangents can be deferred until each surface is added to the view
 		surf->geometry->staticModelWithJoints = staticModel;
-	
+
 		staticModel->bounds.AddBounds( surf->geometry->bounds );
 	}
 

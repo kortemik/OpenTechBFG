@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -38,11 +39,12 @@ If you have questions concerning this license or the applicable additional terms
 	#if !__MACH__ && __MWERKS__
 		#include <types.h>
 		#include <stat.h>
-#else
+	#else
 		#include <sys/types.h>
 		#include <sys/stat.h>
 	#endif
 	#include <unistd.h>
+	#include <fcntl.h>
 #endif
 
 
@@ -51,7 +53,7 @@ If you have questions concerning this license or the applicable additional terms
 
 DOOM FILESYSTEM
 
-All of Doom's data access is through a hierarchical file system, but the contents of 
+All of Doom's data access is through a hierarchical file system, but the contents of
 the file system can be transparently merged from several sources.
 
 A "relativePath" is a reference to game file data, which must include a terminating zero.
@@ -143,7 +145,7 @@ public:
 	virtual int				ReadFile( const char *relativePath, void **buffer, ID_TIME_T *timestamp );
 	virtual void			FreeFile( void *buffer );
 	virtual int				WriteFile( const char *relativePath, const void *buffer, int size, const char *basePath = "fs_savepath" );
-	virtual void			RemoveFile( const char *relativePath );	
+	virtual void			RemoveFile( const char *relativePath );
 	virtual	bool			RemoveDir( const char * relativePath );
 	virtual bool			RenameFile( const char * relativePath, const char * newName, const char * basePath = "fs_savepath" );
 	virtual idFile *		OpenFileReadFlags( const char *relativePath, int searchFlags, bool allowCopyFiles = true, const char* gamedir = NULL );
@@ -166,7 +168,7 @@ public:
 	virtual void			EnableBackgroundCache( bool enable );
 	virtual void			BeginLevelLoad( const char *name, char *_blockBuffer, int _blockBufferSize );
 	virtual void			EndLevelLoad();
-	virtual bool			InProductionMode() { return ( resourceFiles.Num() > 0 ) |  ( com_productionMode.GetInteger() != 0 ); }
+	virtual bool			InProductionMode() { return ( resourceFiles.Num() > 0 ) | ( com_productionMode.GetInteger() != 0 ); }
 	virtual bool			UsingResourceFiles() { return resourceFiles.Num() > 0; }
 	virtual void			UnloadMapResources( const char *name );
 	virtual void			UnloadResourceContainer( const char *name );
@@ -289,6 +291,7 @@ idCVar	fs_basepath( "fs_basepath", "", CVAR_SYSTEM | CVAR_INIT, "" );
 idCVar	fs_savepath( "fs_savepath", "", CVAR_SYSTEM | CVAR_INIT, "" );
 idCVar	fs_resourceLoadPriority( "fs_resourceLoadPriority", "1", CVAR_SYSTEM , "if 1, open requests will be honored from resource files first; if 0, the resource files are checked after normal search paths" );
 idCVar	fs_enableBackgroundCaching( "fs_enableBackgroundCaching", "1", CVAR_SYSTEM , "if 1 allow the 360 to precache game files in the background" );
+idCVar	fs_checkFilesIfNotInResource( "fs_checkFilesIfNotInResource", "0", CVAR_SYSTEM , "if a file is not in a resource file, and resource files are in use, then check file system instead of just the resource files" );
 
 idFileSystemLocal	fileSystemLocal;
 idFileSystem *		fileSystem = &fileSystemLocal;
@@ -344,7 +347,7 @@ Ignore case and separator char distinctions
 */
 bool idFileSystemLocal::FilenameCompare( const char *s1, const char *s2 ) const {
 	int		c1, c2;
-	
+
 	do {
 		c1 = *s1++;
 		c2 = *s2++;
@@ -362,12 +365,12 @@ bool idFileSystemLocal::FilenameCompare( const char *s1, const char *s2 ) const 
 		if ( c2 == '\\' || c2 == ':' ) {
 			c2 = '/';
 		}
-		
+
 		if ( c1 != c2 ) {
 			return true;		// strings not equal
 		}
 	} while( c1 );
-	
+
 	return false;		// strings are equal
 }
 
@@ -416,7 +419,7 @@ idFileSystemLocal::OpenOSFile
 idFileHandle idFileSystemLocal::OpenOSFile( const char *fileName, fsMode_t mode ) {
 	idFileHandle fp;
 
-
+#ifdef ID_WIN32
 	DWORD dwAccess = 0;
 	DWORD dwShare = 0;
 	DWORD dwCreate = 0;
@@ -437,12 +440,31 @@ idFileHandle idFileSystemLocal::OpenOSFile( const char *fileName, fsMode_t mode 
 		dwShare = FILE_SHARE_READ;
 		dwCreate = OPEN_ALWAYS;
 		dwFlags = FILE_ATTRIBUTE_NORMAL;
-					}
+	}
 
 	fp = CreateFile( fileName, dwAccess, dwShare, NULL, dwCreate, dwFlags, NULL );
 	if ( fp == INVALID_HANDLE_VALUE ) {
 		return NULL;
-				}
+	}
+#else
+	int access = 0;
+	mode_t fileMode = 0;
+
+	if ( mode == FS_WRITE ) {
+		access = O_RDWR | O_CREAT | O_TRUNC;
+		fileMode = S_IRWXU | S_IRGRP | S_IWGRP;
+	} else if ( mode == FS_READ ) {
+		access = O_RDONLY;
+	} else if ( mode == FS_APPEND ) {
+		access = O_RDWR;
+	}
+
+	fp = open( fileName, access, fileMode );
+	if ( fp == -1 ) {
+		return (idFileHandle)NULL;
+	}
+	fcntl( fp, F_SETFD, FD_CLOEXEC );
+#endif
 	return fp;
 }
 
@@ -452,7 +474,11 @@ idFileSystemLocal::CloseOSFile
 ================
 */
 void idFileSystemLocal::CloseOSFile( idFileHandle o ) {
+#ifdef ID_WIN32
 	::CloseHandle( o );
+#else
+	close( o );
+#endif
 }
 
 /*
@@ -461,7 +487,15 @@ idFileSystemLocal::DirectFileLength
 ================
 */
 int idFileSystemLocal::DirectFileLength( idFileHandle o ) {
+#ifdef ID_WIN32
 	return GetFileSize( o, NULL );
+#else
+	struct stat st;
+	if( fstat( o, &st ) != 0 ) {
+		return -1; //GetFileSize returns INVALID_FILE_SIZE (0xFFFFFFFF) on error/failure which is -1 when converted to an int.
+	}
+	return st.st_size;
+#endif
 }
 
 /*
@@ -473,20 +507,24 @@ Creates any directories needed to store the given filename
 */
 void idFileSystemLocal::CreateOSPath( const char *OSPath ) {
 	char	*ofs;
-	
+
 	// make absolutely sure that it can't back up the path
 	// FIXME: what about c: ?
 	if ( strstr( OSPath, ".." ) || strstr( OSPath, "::" ) ) {
-#ifdef _DEBUG		
+#ifdef _DEBUG
 		common->DPrintf( "refusing to create relative path \"%s\"\n", OSPath );
 #endif
 		return;
 	}
 
 	idStrStatic< MAX_OSPATH > path( OSPath );
+#ifdef ID_WIN32
 	path.SlashesToBackSlashes();
+#else
+	path.BackSlashesToSlashes();
+#endif
 	for( ofs = &path[ 1 ]; *ofs ; ofs++ ) {
-		if ( *ofs == PATHSEPARATOR_CHAR ) {	
+		if ( *ofs == PATHSEPARATOR_CHAR ) {
 			// create the directory
 			*ofs = 0;
 			Sys_Mkdir( path );
@@ -512,7 +550,7 @@ idFileSystemLocal::BeginLevelLoad
 =================
 */
 void idFileSystemLocal::BeginLevelLoad( const char *name, char *_blockBuffer, int _blockBufferSize ) {
-	
+
 	if ( name == NULL || *name == '\0' ) {
 		return;
 	}
@@ -530,7 +568,7 @@ void idFileSystemLocal::BeginLevelLoad( const char *name, char *_blockBuffer, in
 
 	ReOpenCacheFiles();
 	manifestName.StripPath();
-	
+
 	if ( resourceFiles.Num() > 0 ) {
 		AddResourceFile( va( "%s.resources", manifestName.c_str() ) );
 	}
@@ -541,7 +579,7 @@ void idFileSystemLocal::BeginLevelLoad( const char *name, char *_blockBuffer, in
 =================
 idFileSystemLocal::UnloadResourceContainer
 
-=================	
+=================
 */
 void idFileSystemLocal::UnloadResourceContainer( const char *name ) {
 	if ( name == NULL || *name == '\0' ) {
@@ -553,7 +591,7 @@ void idFileSystemLocal::UnloadResourceContainer( const char *name ) {
 /*
 =================
 idFileSystemLocal::UnloadMapResources
-=================	
+=================
 */
 void idFileSystemLocal::UnloadMapResources( const char *name ) {
 	if ( name == NULL || *name == '\0' || idStr::Icmp( "_startup", name ) == 0 ) {
@@ -569,7 +607,7 @@ void idFileSystemLocal::UnloadMapResources( const char *name ) {
 =================
 idFileSystemLocal::EndLevelLoad
 
-=================	
+=================
 */
 void idFileSystemLocal::EndLevelLoad() {
 	if ( fs_buildResources.GetBool() ) {
@@ -605,7 +643,7 @@ void idFileSystemLocal::EndLevelLoad() {
 	resourceBufferPtr = NULL;
 	resourceBufferAvailable = 0;
 	resourceBufferSize = 0;
-	
+
 }
 
 bool FileExistsInAllManifests( const char *filename, idList< idFileManifest > &manifests ) {
@@ -962,9 +1000,9 @@ void idFileSystemLocal::WriteResourcePacks() {
 	idStrList filesCommonToAllMaps( 16384 );		// files that are shared by all maps, will include startup files, renderprogs etc..
 	idPreloadManifest commonPreloads;				// preload entries that exist in all map preload files
 
-	idStr path = RelativePathToOSPath( "maps/", "fs_savepath" ); 
+	idStr path = RelativePathToOSPath( "maps/", "fs_savepath" );
 
-	idStrList manifestFiles;										
+	idStrList manifestFiles;
 	ListOSFiles( path, ".manifest", manifestFiles );
 	idStrList preloadFiles;
 	ListOSFiles( path, ".preload", preloadFiles );
@@ -1017,7 +1055,7 @@ void idFileSystemLocal::WriteResourcePacks() {
 			}
 		}
 	}
-	// common list of preload reosurces, image, sample or models 
+	// common list of preload reosurces, image, sample or models
 	for ( int i = 0; i < preloadManifests.Num(); i++ ) {
 		idPreloadManifest &preload = preloadManifests[ i ];
 		for ( int j = 0; j < preload.NumResources(); j++ ) {
@@ -1243,7 +1281,7 @@ Copy a fully specified file from one place to another`
 =================
 */
 void idFileSystemLocal::CopyFile( const char *fromOSPath, const char *toOSPath ) {
-		
+
 	idFile * src = OpenExplicitFileRead( fromOSPath );
 	if ( src == NULL ) {
 		idLib::Warning( "Could not open %s for read", fromOSPath );
@@ -1332,7 +1370,7 @@ void idFileSystemLocal::CopyFile( const char *fromOSPath, const char *toOSPath )
 				}
 
 			}
-		} 
+		}
 	}
 }
 
@@ -1550,11 +1588,19 @@ void idFileSystemLocal::RemoveFile( const char *relativePath ) {
 
 	if ( fs_basepath.GetString()[0] ) {
 		OSPath = BuildOSPath( fs_basepath.GetString(), gameFolder, relativePath );
+#ifdef ID_WIN32
 		::DeleteFile( OSPath );
+#else
+		remove( OSPath );
+#endif
 	}
 
 	OSPath = BuildOSPath( fs_savepath.GetString(), gameFolder, relativePath );
+#ifdef ID_WIN32
 	::DeleteFile( OSPath );
+#else
+	remove( OSPath );
+#endif
 }
 
 /*
@@ -1603,7 +1649,7 @@ int idFileSystemLocal::ReadFile( const char *relativePath, void **buffer, ID_TIM
 
 	if ( buffer ) {
 		*buffer = NULL;
-	} 
+	}
 
 	if ( buffer == NULL && timestamp != NULL && resourceFiles.Num() > 0 ) {
 		static idResourceCacheEntry rc;
@@ -1611,8 +1657,10 @@ int idFileSystemLocal::ReadFile( const char *relativePath, void **buffer, ID_TIM
 		if ( GetResourceCacheEntry( relativePath, rc ) ) {
 			*timestamp = 0;
 			size = rc.length;
-		} 
-		return size;
+		}
+		if ( *timestamp != FILE_NOT_FOUND_TIMESTAMP || !fs_checkFilesIfNotInResource.GetBool() ) {
+			return size;
+		}
 	}
 
 	buf = NULL;	// quiet compiler warning
@@ -1663,7 +1711,7 @@ int idFileSystemLocal::ReadFile( const char *relativePath, void **buffer, ID_TIM
 	if ( timestamp ) {
 		*timestamp = f->Timestamp();
 	}
-	
+
 	if ( !buffer ) {
 		CloseFile( f );
 		return len;
@@ -1754,6 +1802,7 @@ bool idFileSystemLocal::RenameFile( const char * relativePath, const char * newN
 	idStr oldOSPath = BuildOSPath( path, gameFolder, relativePath );
 	idStr newOSPath = BuildOSPath( path, gameFolder, newName );
 
+#ifdef ID_WIN32
 	// this gives atomic-delete-on-rename, like POSIX rename()
 	// There is a MoveFileTransacted() on vista and above, not sure if that means there
 	// is a race condition inside MoveFileEx...
@@ -1763,6 +1812,14 @@ bool idFileSystemLocal::RenameFile( const char * relativePath, const char * newN
 		const int err = GetLastError();
 		idLib::Warning( "RenameFile( %s, %s ) error %i", newOSPath.c_str(), oldOSPath.c_str(), err );
 	}
+#else
+	const bool success = rename( oldOSPath.c_str(), newOSPath.c_str() ) == 0;
+
+	if ( !success ) {
+		const int err = errno;
+		idLib::Warning( "RenameFile( %s, %s ) error %i", newOSPath.c_str(), oldOSPath.c_str(), err );
+	}
+#endif
 	return success;
 }
 
@@ -1849,12 +1906,12 @@ int idFileSystemLocal::GetFileList( const char *relativePath, const idStrList &e
 				if ( pathLength && idStr::Icmpn( rt.filename, relativePath, pathLength - 1 ) != 0 ) {
 					continue;
 				}
- 
+
 				// ensure we have a path, and not just a filename containing the path
 				if ( rt.filename[ pathLength ] == '\0' || rt.filename[pathLength - 1] != '/' ) {
 					continue;
 				}
- 
+
 				// make sure the file is not in a subdirectory
 				int j = pathLength;
 				for ( ; rt.filename[j+1] != '\0'; j++ ) {
@@ -2230,7 +2287,7 @@ Takes a text file and touches every file in it, use one file per line.
 ============
 */
 void idFileSystemLocal::TouchFileList_f( const idCmdArgs &args ) {
-	
+
 	if ( args.Argc() != 2 ) {
 		common->Printf( "Usage: touchFileList <filename>\n" );
 		return;
@@ -2338,10 +2395,10 @@ void idFileSystemLocal::CreateCRCsForResourceFileList( const idFileList & list )
 		crcFilename.SetFileExtension( ".crc" );
 		std::auto_ptr<idFile> crcOutputFile( fileSystem->OpenFileWrite( crcFilename, "fs_basepath" ) );
 		if ( crcOutputFile.get() == NULL ) {
-			idLib::Printf( "Error writing CRC file %s.\n", crcFilename );
+			idLib::Printf( "Error writing CRC file %s.\n", crcFilename.c_str() );
 			continue;
 		}
-		
+
 		const uint32 CRC_FILE_MAGIC = 0xCC00CC00; // I just made this up, it has no meaning.
 		const uint32 CRC_FILE_VERSION = 1;
 		crcOutputFile->WriteBig( CRC_FILE_MAGIC );
@@ -2364,7 +2421,7 @@ int idFileSystemLocal::AddResourceFile( const char * resourceFileName ) {
 		resourceFiles.Append( rc );
 		common->Printf( "Loaded resource file %s\n", resourceFile.c_str() );
 		return resourceFiles.Num() - 1;
-	} 
+	}
 	return -1;
 }
 
@@ -2502,14 +2559,14 @@ const char *cachedNormalFiles[] = {
 	"game:\\base\\_common.resources",
 	"game:\\base\\_ordered.resources",
 	"game:\\base\\video\\mars_rotation.bik"		// cache this to save the consumer from hearing SEEK.. SEEK... SEEK.. SEEK  SEEEK while at the main menu
-};	
+};
 const int numNormalFiles = sizeof( cachedNormalFiles ) / sizeof ( cachedNormalFiles[ 0 ] );
 
 const char *dontCacheFiles[] = {
 	"game:\\base\\maps\\*.*",	// these will fail silently on the files that are not on disc
 	"game:\\base\\video\\*.*",
 	"game:\\base\\sound\\*.*",
-};	
+};
 const int numDontCacheFiles = sizeof( dontCacheFiles ) / sizeof ( dontCacheFiles[ 0 ] );
 
 /*
@@ -2548,6 +2605,19 @@ void idFileSystemLocal::Startup() {
 	InitPrecache();
 
 	SetupGameDirectories( BASE_GAMEDIR );
+
+	// additional search paths
+	idStrList paths;
+	Sys_AdditionalSearchPaths( paths );
+	for ( int i = 0; i < paths.Num(); i++ ) {
+		idStr & path = paths[i];
+		if ( path.Length() &&
+				path.Icmp( BASE_GAMEDIR ) &&
+				path.Icmp( fs_game_base.GetString() ) &&
+				path.Icmp( fs_game.GetString() ) ) {
+			AddGameDirectory( path.c_str(), BASE_GAMEDIR );
+		}
+	}
 
 	// fs_game_base override
 	if ( fs_game_base.GetString()[0] &&
@@ -2723,8 +2793,8 @@ Returns NULL
 ========================
 */
 
-idFile * idFileSystemLocal::GetResourceFile( const char *fileName, bool memFile ) { 
-	
+idFile * idFileSystemLocal::GetResourceFile( const char *fileName, bool memFile ) {
+
 	if ( resourceFiles.Num() == 0 ) {
 		return NULL;
 	}
@@ -2759,7 +2829,7 @@ idFile * idFileSystemLocal::GetResourceFile( const char *fileName, bool memFile 
 					return mfile;
 				}
 			}
-		} 
+		}
 		return file;
 	}
 
@@ -2778,7 +2848,7 @@ separate file or a ZIP file.
 ===========
 */
 idFile *idFileSystemLocal::OpenFileReadFlags( const char *relativePath, int searchFlags, bool allowCopyFiles, const char* gamedir ) {
-	
+
 	if ( !IsInitialized() ) {
 		common->FatalError( "Filesystem call made without initialization\n" );
 		return NULL;
@@ -2796,11 +2866,11 @@ idFile *idFileSystemLocal::OpenFileReadFlags( const char *relativePath, int sear
 
 	// make absolutely sure that it can't back up the path.
 	// The searchpaths do guarantee that something will always
-	// be prepended, so we don't need to worry about "c:" or "//limbo" 
+	// be prepended, so we don't need to worry about "c:" or "//limbo"
 	if ( strstr( relativePath, ".." ) || strstr( relativePath, "::" ) ) {
 		return NULL;
 	}
-	
+
 	// edge case
 	if ( relativePath[0] == '\0' ) {
 		return NULL;
@@ -2929,11 +2999,11 @@ idFile *idFileSystemLocal::OpenFileReadFlags( const char *relativePath, int sear
 			return rf;
 		}
 	}
-	
+
 	if ( fs_debug.GetInteger( ) ) {
 		common->Printf( "Can't find %s\n", relativePath );
 	}
-	
+
 	return NULL;
 }
 
@@ -3181,7 +3251,7 @@ void idFileSystemLocal::FindDLL( const char *name, char _dllPath[ MAX_OSPATH ] )
 	char dllName[MAX_OSPATH];
 	sys->DLL_GetFileName( name, dllName, MAX_OSPATH );
 
-	// from executable directory first - this is handy for developement
+	// from executable directory first - this is handy for development
 	idStr dllPath = Sys_EXEPath( );
 	dllPath.StripFilename( );
 	dllPath.AppendPath( dllName );

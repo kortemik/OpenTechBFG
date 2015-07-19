@@ -2,9 +2,10 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2014 Vincent Simonetti
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -348,6 +349,7 @@ idKeyInput::LocalizedKeyName
 ========================
 */
 const char * idKeyInput::LocalizedKeyName( keyNum_t keynum ) {
+#ifdef ID_WIN32
 	if ( keynum < K_JOY1 ) {
 		// On the PC, we want to turn the scan code in to a key label that matches the currently selected keyboard layout
 		unsigned char keystate[256] = { 0 };
@@ -366,6 +368,7 @@ const char * idKeyInput::LocalizedKeyName( keyNum_t keynum ) {
 			return bindStr;
 		}
 	}
+#endif
 
 	// check for a key string
 	for ( keyname_t * kn = keynames; kn->name; kn++ ) {
@@ -435,7 +438,7 @@ void Key_Unbind_f( const idCmdArgs &args ) {
 		common->Printf( "unbind <key> : remove commands from a key\n" );
 		return;
 	}
-	
+
 	b = idKeyInput::StringToKeyNum( args.Argv(1) );
 	if ( b == -1 ) {
 		// If it wasn't a key, it could be a command
@@ -466,7 +469,7 @@ Key_Bind_f
 void Key_Bind_f( const idCmdArgs &args ) {
 	int			i, c, b;
 	char		cmd[MAX_STRING_CHARS];
-	
+
 	c = args.Argc();
 
 	if ( c < 2 ) {
@@ -488,7 +491,7 @@ void Key_Bind_f( const idCmdArgs &args ) {
 		}
 		return;
 	}
-	
+
 	// copy the rest of the command line
 	cmd[0] = 0;		// start out with a null string
 	for ( i = 2; i < c; i++ ) {
@@ -570,7 +573,7 @@ const char *idKeyInput::KeysFromBinding( const char *bind ) {
 			if ( keys[i].binding.Icmp( bind ) == 0 ) {
 				if ( keyName[0] != '\0' ) {
 					idStr::Append( keyName, sizeof( keyName ), idLocalization::GetString( "#str_07183" ) );
-				} 
+				}
 				idStr::Append( keyName, sizeof( keyName ), LocalizedKeyName( (keyNum_t)i ) );
 			}
 		}
@@ -598,7 +601,7 @@ keyBindings_t idKeyInput::KeyBindingsFromBinding( const char * bind, bool firstO
 		for ( int i = 0; i < K_LAST_KEY; i++ ) {
 			if ( keys[i].binding.Icmp( bind ) == 0 ) {
 				if ( i >= K_JOY1 && i <= K_JOY_DPAD_RIGHT ) {
-					const char * gamepadKey = ""; 
+					const char * gamepadKey = "";
 					if ( localized ) {
 						gamepadKey = LocalizedKeyName( (keyNum_t)i );
 					} else {
@@ -614,7 +617,7 @@ keyBindings_t idKeyInput::KeyBindingsFromBinding( const char * bind, bool firstO
 						gamepad.Append( gamepadKey );
 					}
 				} else if ( i >= K_MOUSE1 && i <= K_MWHEELUP ) {
-					const char * mouseKey = ""; 
+					const char * mouseKey = "";
 					if ( localized ) {
 						mouseKey = LocalizedKeyName( (keyNum_t)i );
 					} else {
@@ -630,7 +633,7 @@ keyBindings_t idKeyInput::KeyBindingsFromBinding( const char * bind, bool firstO
 						mouse.Append( mouseKey );
 					}
 				} else {
-					const char * tmp = ""; 
+					const char * tmp = "";
 					if ( localized ) {
 						tmp = LocalizedKeyName( (keyNum_t)i );
 					} else {
