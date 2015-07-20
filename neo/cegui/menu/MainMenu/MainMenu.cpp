@@ -111,7 +111,7 @@ bool MainMenu::Handle_CampaignClick( const CEGUI::EventArgs& )
 {
 	if( idCEGUI::IsInitialized() )
 	{
-		BFG::cmdSystem->BufferCommandText( BFG::CMD_EXEC_APPEND, "map demo.map\n" );
+		BFG::cmdSystem->BufferCommandText( BFG::CMD_EXEC_APPEND, "map testmaps/test\n" );
 		return true;
 	}
 	return false;
