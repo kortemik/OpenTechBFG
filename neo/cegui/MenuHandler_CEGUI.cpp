@@ -216,7 +216,7 @@ idMenuHandler_HUD::~idMenuHandler_HUD()
 
 void idMenuHandler_HUD::Update()
 {
-	common->Printf( "idMenuHandler_HUD::Update\n" );
+	// common->Printf( "idMenuHandler_HUD::Update\n" ); // FIXME: DG: don't spam.
 }
 void idMenuHandler_HUD::ActivateMenu( bool show )
 {
