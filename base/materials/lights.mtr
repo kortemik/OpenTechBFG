@@ -59,3 +59,26 @@ lights/nofalloff
 		zeroClamp
 	}
 }
+
+lights/fleshlight
+{
+	fleshlight
+	lightFalloffImage makeintensity( lights/squarelight1b.tga )
+	{
+		forceHighQuality
+		map lights/flashlight.tga
+		colored
+		zeroClamp
+	}
+}
+
+lights/fake_ies
+{
+	fake_ies
+	lightFalloffImage makeintensity( lights/squarelight1b.tga )
+	{
+	map lights/fake_ies.tga
+	colored
+	zeroClamp
+	}
+}
