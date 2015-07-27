@@ -94,21 +94,40 @@ void initSystem( void )
 	CEGUI::System::create( myRenderer );
 }
 
+void setRes( CEGUI::DefaultResourceProvider* rp, const char* name, const BFG::idStr& base, const char* dir = NULL )
+{
+	if( dir == NULL ) dir = name;
+	BFG::idStr tmp( base );
+	tmp += dir;
+	rp->setResourceGroupDirectory( name, tmp.c_str() );
+}
+
 void initResourceProvider( void )
 {
 	if( BFG::idCEGUI::IsInitialized() )
 	{
 		CEGUI::DefaultResourceProvider* rp = static_cast<CEGUI::DefaultResourceProvider*>
 											 ( CEGUI::System::getSingleton().getResourceProvider() );
-		rp->setResourceGroupDirectory( "schemes", "base/cegui/schemes/" );
-		rp->setResourceGroupDirectory( "imagesets", "base/cegui/imagesets/" );
-		rp->setResourceGroupDirectory( "fonts", "base/cegui/fonts/" );
-		rp->setResourceGroupDirectory( "layouts", "base/cegui/layouts/" );
-		rp->setResourceGroupDirectory( "looknfeels", "base/cegui/looknfeel/" );
-		rp->setResourceGroupDirectory( "lua_scripts", "base/cegui/lua_scripts/" );
+											 
+		// let's always load the cegui stuff from base/ for now..
+		// otherwise we'd have to make it look in both base/ and $fs_game/
+		const char* game = "base";
+		const char* basepath = BFG::cvarSystem->GetCVarString( "fs_basepath" ); // dir base/ is in
+		if( basepath == NULL || basepath[0] == '\0' ) basepath = ".";
+		BFG::idStr base( basepath );
+		base += "/";
+		base += game;
+		base += "/cegui/";
+		
+		setRes( rp, "schemes", base );
+		setRes( rp, "imagesets", base );
+		setRes( rp, "fonts", base );
+		setRes( rp, "layouts", base );
+		setRes( rp, "looknfeels", base, "looknfeel" );
+		setRes( rp, "lua_scripts", base );
 		// This is only really needed if you are using Xerces and need to
 		// specify the schemas location
-		rp->setResourceGroupDirectory( "schemas", "base/cegui/xml_schemas/" );
+		setRes( rp, "schemas", base );
 	}
 }
 
