@@ -10,6 +10,9 @@
 #if 0
 #include "FormattedListboxTextItem.h"
 
+namespace BFG
+{
+
 namespace CEGUIConsole
 {
 
@@ -174,5 +177,8 @@ void FormattedListboxTextItem::setupStringFormatter() const
 }
 
 //----------------------------------------------------------------------------//
-}
+} // namspace CEGUIConsole
+
+} // namespace BFG
+
 #endif

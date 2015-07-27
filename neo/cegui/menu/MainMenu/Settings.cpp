@@ -7,6 +7,9 @@
 
 #include <cegui/menu/MainMenu/Settings.h>
 
+namespace BFG
+{
+
 namespace CEGUIMenu
 {
 
@@ -56,3 +59,5 @@ void Settings::hide()
 }
 
 } /* namespace CEGUIMenu */
+
+} // namespace BFG

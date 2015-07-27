@@ -10,6 +10,9 @@
 
 #include "MenuSystem.h"
 
+namespace BFG
+{
+
 namespace CEGUIMenu
 {
 
@@ -39,3 +42,5 @@ void MenuSystem::Destroy()
 }
 
 } /* namespace CEGUIMenu */
+
+} // namespace BFG

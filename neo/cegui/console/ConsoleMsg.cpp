@@ -9,6 +9,9 @@
 
 #include "../idlib/Str.h"
 
+namespace BFG
+{
+
 namespace CEGUIConsole
 {
 
@@ -115,3 +118,5 @@ const CEGUI::String ConsoleMsg::Convert( const CEGUI::String convertString )
 }
 
 } /* namespace CEGUIConsole */
+
+} // namespace BFG

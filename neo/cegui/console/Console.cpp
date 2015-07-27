@@ -13,6 +13,9 @@
 #include "ConsoleMsg.h"
 #include "cegui/CEGUI_Hooks.h" // for initialization check
 
+namespace BFG
+{
+
 namespace CEGUIConsole
 {
 
@@ -178,4 +181,6 @@ bool Console::ProcessEvent( const BFG::sysEvent_t* event, bool forceAccept )
 } /* namespace CEGUIConsole */
 
 static CEGUIConsole::Console localConsole;
-BFG::idConsole* BFG::console = &localConsole;
+idConsole* console = &localConsole;
+
+} // namespace BFG

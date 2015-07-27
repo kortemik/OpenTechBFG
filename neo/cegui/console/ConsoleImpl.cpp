@@ -17,6 +17,9 @@
 #include "../framework/ConsoleHistory.h"
 #include "../framework/CmdSystem.h"
 
+namespace BFG
+{
+
 namespace CEGUIConsole
 {
 
@@ -258,3 +261,5 @@ void ConsoleImpl::TabCompleteListAdd( CEGUI::String option )
 }
 
 } /* namespace CEGUIConsole */
+
+} // namespace BFG

@@ -7,6 +7,9 @@
 
 #include <cegui/console/ConsoleQueue.h>
 
+namespace BFG
+{
+
 namespace CEGUIConsole
 {
 
@@ -21,3 +24,5 @@ ConsoleQueue::~ConsoleQueue()
 }
 
 } /* namespace CEGUIConsole */
+
+} // namespace BFG

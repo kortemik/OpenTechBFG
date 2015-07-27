@@ -11,6 +11,9 @@
 #include "../idlib/Str.h"
 #include "../wrap_cegui.h"
 
+namespace BFG
+{
+
 namespace CEGUIConsole
 {
 
@@ -33,5 +36,7 @@ private:
 
 
 } /* namespace CEGUIConsole */
+
+} // namespace BFG
 
 #endif /* CEGUICONSOLEMSG_H_ */

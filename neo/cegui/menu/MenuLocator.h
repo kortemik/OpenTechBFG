@@ -11,6 +11,9 @@
 #include "MenuInterface.h"
 #include "NullMenu.h"
 
+namespace BFG
+{
+
 namespace CEGUIMenu
 {
 
@@ -41,6 +44,8 @@ private:
 };
 
 } /* namespace CEGUIMenu */
+
+} // namespace BFG
 
 #endif /* _MENULOCATOR_H_ */
 

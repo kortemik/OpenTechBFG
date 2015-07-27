@@ -10,6 +10,9 @@
 
 #include "../wrap_cegui.h"
 
+namespace BFG
+{
+
 namespace CEGUIConsole
 {
 
@@ -25,5 +28,7 @@ public:
 };
 
 } /* namespace CEGUIConsole */
+
+} // namespace BFG
 
 #endif /* CONSOLEEDITBOX_H_ */

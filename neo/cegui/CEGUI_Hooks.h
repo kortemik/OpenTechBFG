@@ -36,6 +36,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../sys/sys_public.h"
 
+namespace BFG
+{
 namespace idCEGUI
 {
 bool Init();
@@ -46,7 +48,7 @@ bool IsInitialized();
 void NotifyDisplaySizeChanged( int width, int height );
 
 // inject a sys event (keyboard, mouse, unicode character)
-bool InjectSysEvent( const BFG::sysEvent_t* keyEvent );
+bool InjectSysEvent( const sysEvent_t* keyEvent );
 
 // inject the current mouse wheel delta for scrolling
 bool InjectMouseWheel( int delta );
@@ -56,8 +58,9 @@ void Update();
 // TODO: or is there a good reason to update the timepulse at another time (maybe at the beginning of a frame)?
 
 void Destroy();
-}
+} // namespace idCEGUI
 
+} // namespace BFG
 
 #endif /* NEO_CEGUI_CEGUI_HOOKS_H_ */
 

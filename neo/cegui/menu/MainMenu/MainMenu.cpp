@@ -6,6 +6,9 @@
 
 #include "Settings.h"
 
+namespace BFG
+{
+
 namespace CEGUIMenu
 {
 MainMenu::MainMenu() :
@@ -156,3 +159,5 @@ bool MainMenu::Handle_QuitClick( const CEGUI::EventArgs& )
 }
 
 } /* namespace CEGUIMenu */
+
+} // namespace BFG

@@ -12,6 +12,8 @@
 #include "GameMenu.h"
 #include "cegui/wrap_cegui.h"
 
+namespace BFG
+{
 
 namespace CEGUIMenu
 {
@@ -45,5 +47,7 @@ private:
 };
 
 } /* namespace CEGUIMenu */
+
+} // namespace BFG
 
 #endif /* GAMEMENU_H */
