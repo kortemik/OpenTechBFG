@@ -10,6 +10,9 @@
 
 #include "framework/Console.h"
 
+namespace BFG
+{
+
 namespace CEGUIConsole
 {
 
@@ -59,5 +62,7 @@ private:
 };
 
 } /* namespace CEGUIConsole */
+
+} // namespace BFG
 
 #endif /* CEGUICONSOLE_H_ */

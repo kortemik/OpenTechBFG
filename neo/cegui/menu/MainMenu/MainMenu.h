@@ -6,6 +6,8 @@
 #include "cegui/wrap_cegui.h"
 #include "cegui/CEGUI_Hooks.h"
 
+namespace BFG
+{
 
 namespace CEGUIMenu
 {
@@ -39,5 +41,7 @@ private:
 
 
 } /* namespace CEGUIMenu */
+
+} // namespace BFG
 
 #endif /* MainMenu_H_ */

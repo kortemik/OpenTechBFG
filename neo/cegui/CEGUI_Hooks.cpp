@@ -96,7 +96,7 @@ void initSystem( void )
 
 void initResourceProvider( void )
 {
-	if( idCEGUI::IsInitialized() )
+	if( BFG::idCEGUI::IsInitialized() )
 	{
 		CEGUI::DefaultResourceProvider* rp = static_cast<CEGUI::DefaultResourceProvider*>
 											 ( CEGUI::System::getSingleton().getResourceProvider() );
@@ -114,7 +114,7 @@ void initResourceProvider( void )
 
 void initResourceGroups( void )
 {
-	if( idCEGUI::IsInitialized() )
+	if( BFG::idCEGUI::IsInitialized() )
 	{
 		// set the default resource groups to be used
 		CEGUI::ImageManager::setImagesetDefaultResourceGroup( "imagesets" );
@@ -134,7 +134,7 @@ void initResourceGroups( void )
 
 void initResources( void )
 {
-	if( idCEGUI::IsInitialized() )
+	if( BFG::idCEGUI::IsInitialized() )
 	{
 		CEGUI::SchemeManager::getSingleton().createFromFile( "TaharezLook.scheme" );
 		CEGUI::FontManager::getSingleton().createFromFile( "DejaVuSans-10.font" );
@@ -147,7 +147,7 @@ void initResources( void )
 
 void createWindow( void )
 {
-	if( idCEGUI::IsInitialized() )
+	if( BFG::idCEGUI::IsInitialized() )
 	{
 		CEGUI::WindowManager& wmgr = CEGUI::WindowManager::getSingleton();
 		CEGUI::Window* myRoot = wmgr.createWindow( "DefaultWindow", "root" );
@@ -168,7 +168,7 @@ void createWindow( void )
 // keyboard keys, mouse keys, mousewheel (TODO: really?)
 bool HandleKeyEvent( const BFG::sysEvent_t& keyEvent )
 {
-	if( idCEGUI::IsInitialized() )
+	if( BFG::idCEGUI::IsInitialized() )
 	{
 		assert( keyEvent.evType == BFG::SE_KEY );
 		
@@ -207,7 +207,7 @@ bool HandleKeyEvent( const BFG::sysEvent_t& keyEvent )
 	return false;
 }
 
-CEGUIMenu::MenuSystem* ourMenuSystem;
+BFG::CEGUIMenu::MenuSystem* ourMenuSystem;
 
 void Startup()
 {
@@ -216,7 +216,7 @@ void Startup()
 	BFG::console->Init();
 	
 	// MenuSystem
-	ourMenuSystem = new CEGUIMenu::MenuSystem();
+	ourMenuSystem = new BFG::CEGUIMenu::MenuSystem();
 	ourMenuSystem->Init();
 }
 
@@ -231,6 +231,9 @@ void Shutdown()
 }
 
 } //anon namespace
+
+namespace BFG
+{
 
 bool idCEGUI::Init()
 {
@@ -324,4 +327,6 @@ bool idCEGUI::IsInitialized()
 	// checks if cegui is up and running
 	return CEGUI::System::getSingletonPtr() != NULL;
 }
+
+} // namespace BFG
 #endif // USE_CEGUI

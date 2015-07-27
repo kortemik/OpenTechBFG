@@ -11,6 +11,9 @@
 
 #include "../wrap_cegui.h"
 
+namespace BFG
+{
+
 namespace CEGUIConsole
 {
 
@@ -55,7 +58,9 @@ protected:
 	mutable CEGUI::Size d_formattingAreaSize;
 };
 
-}
+} // namespace CEGUIConsole
+
+} // namespace BFG
 
 #endif /* FORMATTEDLISTBOXTEXTITEM_H_ */
 #endif

@@ -8,6 +8,9 @@
 #ifndef MENUINTERFACE_H_
 #define MENUINTERFACE_H_
 
+namespace BFG
+{
+
 namespace CEGUIMenu
 {
 
@@ -25,5 +28,7 @@ public:
 };
 
 } /* namespace CEGUIMenu */
+
+} // namespace BFG
 
 #endif /* MENUINTERFACE_H_ */

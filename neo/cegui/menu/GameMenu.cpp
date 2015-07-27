@@ -8,6 +8,9 @@
 #include "GameMenu.h"
 #include "../CEGUI_Hooks.h"
 
+namespace BFG
+{
+
 namespace CEGUIMenu
 {
 
@@ -51,3 +54,5 @@ bool GameMenu::isVisible()
 
 
 } /* namespace CEGUIMenu */
+
+} // namespace BFG

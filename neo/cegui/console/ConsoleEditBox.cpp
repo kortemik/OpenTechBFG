@@ -7,6 +7,9 @@
 
 #include <cegui/console/ConsoleEditBox.h>
 
+namespace BFG
+{
+
 namespace CEGUIConsole
 {
 
@@ -81,3 +84,6 @@ void ConsoleEditBox::onKeyDown( CEGUI::KeyEventArgs& e )
 }
 
 } /* namespace CEGUIConsole */
+
+} // namespace BFG
+

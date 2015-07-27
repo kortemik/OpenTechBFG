@@ -10,6 +10,9 @@
 
 #include <cegui/menu/GameMenu.h>
 
+namespace BFG
+{
+
 namespace CEGUIMenu
 {
 
@@ -32,5 +35,7 @@ private:
 };
 
 } /* namespace CEGUIMenu */
+
+} // namespace BFG
 
 #endif /* SETTINGS_H_ */

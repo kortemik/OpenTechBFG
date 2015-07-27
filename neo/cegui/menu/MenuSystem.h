@@ -10,6 +10,9 @@
 
 #include "MenuInterface.h"
 
+namespace BFG
+{
+
 namespace CEGUIMenu
 {
 
@@ -26,5 +29,7 @@ private:
 };
 
 } /* namespace CEGUIMenu */
+
+} // namespace BFG
 
 #endif /* MENUSYSTEM_H_ */

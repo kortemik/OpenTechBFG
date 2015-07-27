@@ -10,6 +10,9 @@
 
 #include <cegui/menu/MenuInterface.h>
 
+namespace BFG
+{
+
 namespace CEGUIMenu
 {
 
@@ -27,5 +30,7 @@ public:
 };
 
 } /* namespace CEGUIMenu */
+
+} // namespace BFG
 
 #endif /* NULLMENU_H_ */
