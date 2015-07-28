@@ -127,7 +127,7 @@ void initResourceProvider( void )
 		setRes( rp, "lua_scripts", base );
 		// This is only really needed if you are using Xerces and need to
 		// specify the schemas location
-		setRes( rp, "schemas", base );
+		setRes( rp, "schemas", base, "xml_schemas" );
 	}
 }
 
