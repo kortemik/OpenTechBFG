@@ -38,10 +38,14 @@ If you have questions concerning this license or the applicable additional terms
 namespace BFG
 {
 
+// DG: using GAME_NAME for save location, too.
+//     on windows it should be %USERPROFILE%\Saved Games\$GAME_NAME\, on Linux $HOME/.config/$GAME_NAME/
+//     on OSX /Users/$username/Library/Application Support/$GAME_NAME/
 #define GAME_NAME						"OpenTechEngine"		// appears on window titles and errors
 
 // RB: changed home folder so we don't break the savegame of the original game
-#define SAVE_PATH						"\\id Software\\RBDOOM 3 BFG"
+// DG: SAVE_PATH was only used on Windows anyway, we just construct the savegame path from GAME_NAME.
+// #define SAVE_PATH						"\\id Software\\RBDOOM 3 BFG"
 
 #define ENGINE_VERSION					"BFG $Id$"	// printed in console
 // RB end

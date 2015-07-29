@@ -577,10 +577,10 @@ const char *Sys_DefaultSavePath() {
 		SHGetFolderPath( NULL, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, NULL, SHGFP_TYPE_CURRENT, savePath );
 #endif
 		// RB end
-		strcat( savePath, "\\My Games" );
+		strcat( savePath, "\\My Games\\" );
 	}
 
-	strcat( savePath, SAVE_PATH );
+	strcat( savePath, GAME_NAME );
 
 	return savePath;
 }

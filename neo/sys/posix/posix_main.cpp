@@ -118,14 +118,34 @@ static char exit_spawn[ 1024 ];
 const char* Sys_DefaultSavePath()
 {
 #if defined(__APPLE__)
-	char* base_path = SDL_GetPrefPath( "", "RBDOOM-3-BFG" );
+	char* base_path = SDL_GetPrefPath( "", GAME_NAME );
 	if( base_path )
 	{
 		savepath = SDL_strdup( base_path );
 		SDL_free( base_path );
 	}
 #else
-	sprintf( savepath, "%s/.rbdoom3bfg", getenv( "HOME" ) );
+	// $XDG_CONFIG_HOME/$GAME_NAME aka $HOME/.config/$GAME_NAME
+	const char* cfgHome = getenv( "XDG_CONFIG_HOME" );
+	if( cfgHome != NULL )
+	{
+		savepath = cfgHome;
+	}
+	else
+	{
+		const char* home = getenv( "HOME" );
+		if( home == NULL )
+		{
+			common->Warning( "Couldn't get $HOME environment variable, will save relative to current dir!" );
+			savepath = ".";
+			return savepath.c_str();
+		}
+		savepath = home;
+		savepath += "/.config";
+	}
+	
+	savepath += '/';
+	savepath += GAME_NAME;
 #endif
 	
 	return savepath.c_str();
