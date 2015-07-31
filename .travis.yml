@@ -11,9 +11,11 @@ matrix:
     - os: osx  
 
 compiler:
-  - CXX=g++-4.9; g++
+  - CXX=g++-4.9; true
   - clang
-  - CXX=g++-mingw-w64-x86-64; g++
+  - llvm
+  - CXX=g++-mingw-w64-x86-64; true
+
 
 env:
   global:
@@ -34,11 +36,14 @@ addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
+      - llvm-toolchain-precise-3.7
+      - debian-sid
     packages:
       - libsdl1.2-dev
       - libopenal-dev
       - gcc-4.9
       - g++-4.9
+      - llvm
       - cmake
       - g++-mingw-w64-x86-64
       - gcc-mingw-w64-x86-64
