@@ -33,12 +33,11 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - libsdl1.2-dev
+      - libsdl2-dev
       - libopenal-dev
       - gcc
-      - g++;
       - cmake
       - g++-mingw-w64-x86-64
-      - 
 
 before_install:
   # this is allowed to fail so that pull requests can be built too
