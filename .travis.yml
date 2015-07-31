@@ -11,9 +11,9 @@ matrix:
     - os: osx  
 
 compiler:
-  - CXX=g++-4.9; true
-  - clang
-  - CXX=g++-mingw-w64-x86-64; true
+  - CXX=/usr/lib/ccache/g++-4.9; true
+  - CXX=/usr/lib/ccache/clang; true
+  - CXX=/usr/lib/ccache/g++-mingw-w64-x86-64; true
 
 cache: ccache
 
