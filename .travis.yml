@@ -30,8 +30,7 @@ addons:
     branch_pattern: coverity
   apt:
     sources:
-      - ubuntu-toolchain-r-test
-      - r-packages-trusty
+      - debian-sid
     packages:
       - libsdl1.2-dev
       - libsdl2-dev
