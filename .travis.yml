@@ -2,20 +2,16 @@ language: cpp
 
 sudo: false
 
-ubuntu-version: 14.04
-
-distributions:
-  - ubuntu-trusty
-
 os:
   - linux
   - osx
+  
 matrix:
   allow_failures:
     - os: osx  
 
 compiler:
-  - gcc
+  - CXX=g++-4.9
   - clang
   - CXX=g++-mingw-w64-x86-64; g++
 
@@ -34,11 +30,15 @@ addons:
     build_command_prepend: 'mkdir build && cd build &&  if [ \"$CXX\" = \"g++-mingw-w64-x86-64\" ]; then cmake -G \"Eclipse CDT4 - Unix Makefiles\" -DCMAKE_TOOLCHAIN_FILE=../scripts/mingw32.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug -DSDL2=OFF -DBUNDLED_FREETYPE=ON -DBUNDLED_OPENAL=ON ../ ;else cmake -G \"Eclipse CDT4 - Unix Makefiles\" -DCMAKE_BUILD_TYPE=Debug -DSDL2=OFF ../;fi'
     build_command:   "make -j 9"
     branch_pattern: coverity
+
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
       - libsdl1.2-dev
       - libopenal-dev
-      - gcc
+      - gcc-4.9
+      - g++-4.9
       - cmake
       - g++-mingw-w64-x86-64
       - gcc-mingw-w64-x86-64
