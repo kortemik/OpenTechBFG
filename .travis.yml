@@ -38,7 +38,14 @@ addons:
     sources:
       - ubuntu-toolchain-r-test
       - llvm-toolchain-precise-3.7
+      - debian-sid	  
     packages:
+      - libc-bin
+      - libc-dev-bin
+      - libc6
+      - libc6-dev
+      - libc6-i686
+      - locales
       - libsdl1.2-dev
       - libsdl2-dev
       - libopenal-dev
@@ -46,13 +53,9 @@ addons:
       - g++-4.9
       - llvm
       - cmake
-
-    #sources:
-    #  - debian-sid
-    #packages:
-    #  - g++-mingw-w64-x86-64
-    #  - gcc-mingw-w64-x86-64
-    #  - binutils-mingw-w64-x86-64
+      - g++-mingw-w64-x86-64
+      - gcc-mingw-w64-x86-64
+      - binutils-mingw-w64-x86-64
 
 before_install:
   # this is allowed to fail so that pull requests can be built too
