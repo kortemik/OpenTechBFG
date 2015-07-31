@@ -11,7 +11,7 @@ matrix:
     - os: osx  
 
 compiler:
-  - CXX=g++-4.9; ; g++
+  - CXX=g++-4.9; g++
   - clang
   - CXX=g++-mingw-w64-x86-64; g++
 
