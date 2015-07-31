@@ -32,6 +32,7 @@ addons:
     sources:
       - debian-sid
     packages:
+      - locales
       - libsdl1.2-dev
       - libsdl2-dev
       - libopenal-dev
