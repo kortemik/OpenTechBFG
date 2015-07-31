@@ -15,7 +15,9 @@ compiler:
   - clang
   - CC=/usr/lib/ccache/x86_64-w64-mingw32-gcc; CXX=/usr/lib/ccache/x86_64-w64-mingw32-g++; true
 
-cache: ccache
+cache:
+  directories:
+    - $HOME/.ccache
 
 env:
   global:
