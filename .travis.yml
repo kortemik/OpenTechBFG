@@ -41,8 +41,8 @@ addons:
     packages:
       - libsdl1.2-dev
       - libopenal-dev
-      - gcc-4.9
-      - g++-4.9
+      - precise/gcc-4.9
+      - precise/g++-4.9
       - llvm
       - cmake
       - g++-mingw-w64-x86-64
