@@ -44,7 +44,6 @@ addons:
       - libc-dev-bin
       - libc6
       - libc6-dev
-      - libc6-i686
       - locales
       - libsdl1.2-dev
       - libsdl2-dev
