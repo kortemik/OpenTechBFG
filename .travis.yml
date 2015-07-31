@@ -39,12 +39,12 @@ addons:
       - llvm-toolchain-precise-3.7
       - debian-sid
     packages:
-      - libsdl1.2-dev
-      - libopenal-dev
-      - precise/gcc-4.9
-      - precise/g++-4.9
-      - llvm
-      - cmake
+      #- libsdl1.2-dev
+      #- libopenal-dev
+      #- gcc-4.9
+      #- g++-4.9
+      #- llvm
+      #- cmake
       - g++-mingw-w64-x86-64
       - gcc-mingw-w64-x86-64
       - binutils-mingw-w64-x86-64
