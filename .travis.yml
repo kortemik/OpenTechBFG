@@ -35,6 +35,7 @@ addons:
       - gcc
       - cmake
       - g++-mingw-w64-x86-64
+      - gcc-mingw-w64-x86-64
 
 before_install:
   # this is allowed to fail so that pull requests can be built too
