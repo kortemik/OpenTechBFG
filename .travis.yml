@@ -37,14 +37,8 @@ addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
-      - llvm-toolchain-precise-3.7
-      - debian-sid	  
+      - llvm-toolchain-precise-3.7  
     packages:
-      - libc-bin
-      - libc-dev-bin
-      - libc6
-      - libc6-dev
-      - locales
       - libsdl1.2-dev
       - libsdl2-dev
       - libopenal-dev
