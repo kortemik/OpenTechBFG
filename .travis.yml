@@ -16,6 +16,7 @@ compiler:
   - llvm
   - CXX=g++-mingw-w64-x86-64; true
 
+cache: ccache
 
 env:
   global:
@@ -46,12 +47,12 @@ addons:
       - llvm
       - cmake
 
-    sources:
-      - debian-sid
-    packages:
-      - g++-mingw-w64-x86-64
-      - gcc-mingw-w64-x86-64
-      - binutils-mingw-w64-x86-64
+    #sources:
+    #  - debian-sid
+    #packages:
+    #  - g++-mingw-w64-x86-64
+    #  - gcc-mingw-w64-x86-64
+    #  - binutils-mingw-w64-x86-64
 
 before_install:
   # this is allowed to fail so that pull requests can be built too
