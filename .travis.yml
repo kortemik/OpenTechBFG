@@ -36,7 +36,7 @@ addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
-      - llvm-toolchain-precise-3.7  
+      - llvm-toolchain-precise
     packages:
       - libsdl1.2-dev
       #- libsdl2-dev
@@ -44,6 +44,7 @@ addons:
       - gcc-4.9
       - g++-4.9
       - llvm
+      - ccache
       - cmake
       - g++-mingw-w64-x86-64
       - gcc-mingw-w64-x86-64
