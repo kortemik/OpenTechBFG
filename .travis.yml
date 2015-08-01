@@ -13,7 +13,8 @@ matrix:
 compiler:
   - CC=/usr/lib/ccache/gcc-4.9; CXX=/usr/lib/ccache/g++-4.9; true
   - clang
-  - CC=gcc-mingw-w64-x86-64; CXX=g++-mingw-w64-x86-64; true
+  # this is just a package name, the real settings are in CMAKE_TOOLCHAIN_FILE
+  - CXX=g++-mingw-w64-x86-64; true
 
 cache:
   directories:
