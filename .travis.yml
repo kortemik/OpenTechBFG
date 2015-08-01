@@ -13,7 +13,7 @@ matrix:
 compiler:
   - CC=/usr/lib/ccache/gcc-4.9; CXX=/usr/lib/ccache/g++-4.9; true
   - clang
-  - CC=/usr/lib/ccache/x86_64-w64-mingw32-gcc; CXX=/usr/lib/ccache/x86_64-w64-mingw32-g++; true
+  - CC=gcc-mingw-w64-x86-64; CXX=g++-mingw-w64-x86-64; true
 
 cache:
   directories:
