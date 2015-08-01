@@ -32,7 +32,7 @@ addons:
       description: "Build submitted via Travis CI"
     notification_email: kordex@gmail.com
     build_command_prepend: 'mkdir build && cd build &&  if [ \"$CXX\" = \"g++-mingw-w64-x86-64\" ]; then cmake -G \"Eclipse CDT4 - Unix Makefiles\" -DCMAKE_TOOLCHAIN_FILE=../scripts/mingw32.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug -DSDL2=OFF -DBUNDLED_FREETYPE=ON -DBUNDLED_OPENAL=ON ../ ;else cmake -G \"Eclipse CDT4 - Unix Makefiles\" -DCMAKE_BUILD_TYPE=Debug -DSDL2=OFF ../;fi'
-    build_command:   "make -j 9"
+    build_command: "make -j 9"
     branch_pattern: coverity
 
   apt:
