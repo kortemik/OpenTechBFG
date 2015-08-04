@@ -22,7 +22,7 @@ build:
 
 test: off
 
-deploy_script:
+on_success:
 - ps: >-
     nuget install secure-file -ExcludeVersion
 
