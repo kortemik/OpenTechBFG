@@ -43,7 +43,7 @@ script:
 after_success:
  - cd ..
  - if [ "$CXX" = "g++" ]; then sh .travis/scripts/after_success.gcc.sh ; fi
- - if [ "$CXX" = "clang" ]; then sh .travis/scripts/after_success.clang.sh ; fi
+ - if [ "$CXX" = "clang++" ]; then sh .travis/scripts/after_success.clang.sh ; fi
  - if [ "$CXX" = "mingw" ]; then sh .travis/scripts/after_success.mingw.sh ; fi
 
 after_failure:
