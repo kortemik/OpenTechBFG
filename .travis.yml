@@ -35,17 +35,14 @@ install:
  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then sh .travis/scripts/install.osx.sh ; fi
 
 script: 
- - mkdir -p build 
- - cd build 
+ - mkdir -p build && cd build
  - if [ "$CXX" = "mingw" ]; then cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../scripts/mingw32.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug -DSDL2=OFF -DBUNDLED_FREETYPE=ON -DBUNDLED_OPENAL=ON ../ ;else cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DSDL2=OFF ../;fi
  - make
 
 after_success:
- - cd ..
  - if [ "$CXX" = "g++" ]; then sh .travis/scripts/after_success.gcc.sh ; fi
  - if [ "$CXX" = "clang++" ]; then sh .travis/scripts/after_success.clang.sh ; fi
  - if [ "$CXX" = "mingw" ]; then sh .travis/scripts/after_success.mingw.sh ; fi
 
 after_failure:
- - cd ..
  - sh .travis/scripts/after_failure.sh
