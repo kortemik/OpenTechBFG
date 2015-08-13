@@ -1,8 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <GUILayout version="4" >
-  <Window type="DefaultWindow" name="Bindings" >
-    <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
-    <Property name="MaxSize" value="{{1,0},{1,0}}" />
-  </Window>
+    <Window type="DefaultWindow" name="Bindings" >
+        <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+        <Window type="VerticalLayoutContainer" name="VerticalLayoutContainer" >
+            <Property name="Area" value="{{0,0},{0,0},{0,1920},{0,1080}}" />
+            <Property name="MinSize" value="{{0,1},{0,1}}" />
+            <Window type="TaharezLook/StaticText" name="StaticText" >
+                <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+                <Property name="Text" value="Bindings" />
+                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                <Property name="MinSize" value="{{0,1},{0,1}}" />
+                <Property name="HorzScrollPageSize" value="1902" />
+                <Property name="VertScrollPageSize" value="1062" />
+                <Property name="HorizontalAlignment" value="Centre" />
+                <Property name="HorzScrollDocumentSize" value="102" />
+                <Property name="VertScrollDocumentSize" value="27.9375" />
+            </Window>
+        </Window>
+    </Window>
 </GUILayout>

@@ -32,6 +32,9 @@ protected:
 	
 private:
 	void hide();
+
+	GameMenu *controls;
+
 };
 
 } /* namespace CEGUIMenu */

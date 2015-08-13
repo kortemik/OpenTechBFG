@@ -6,6 +6,7 @@
  */
 
 #include <cegui/menu/MainMenu/Settings.h>
+#include "Controls.h"
 
 namespace BFG
 {
@@ -14,9 +15,9 @@ namespace CEGUIMenu
 {
 
 Settings::Settings() :
-	GameMenu( "MainMenu/Settings.layout" )
+	GameMenu( "MainMenu/Settings.layout" ),
+	controls()
 {
-
 
 }
 
@@ -36,12 +37,15 @@ void Settings::init()
 
 void Settings::destroy()
 {
-
+	delete controls;
 }
 
 void Settings::LoadNestedWindows()
 {
-
+	controls = new Controls();
+	controls->init();
+	CEGUI::TabControl *settingTabs = static_cast<CEGUI::TabControl*>(window->getChild("TabScreen"));
+	settingTabs->addTab(controls->getWindowPtr());
 }
 
 void Settings::RegisterHandlers()
