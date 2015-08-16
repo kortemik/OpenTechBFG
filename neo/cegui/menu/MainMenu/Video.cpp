@@ -6,6 +6,8 @@
  */
 
 #include <cegui/menu/MainMenu/Video.h>
+#include "VideoGeneral.h"
+#include "Video3DOptions.h"
 
 namespace BFG {
 namespace CEGUIMenu {

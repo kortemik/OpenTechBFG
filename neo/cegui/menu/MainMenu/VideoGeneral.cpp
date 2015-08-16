@@ -5,39 +5,39 @@
  *      Author: kordex
  */
 
-#include <cegui/menu/MainMenu/VideoMain.h>
+#include <cegui/menu/MainMenu/VideoGeneral.h>
 
 namespace BFG {
 namespace CEGUIMenu {
 
-VideoMain::VideoMain() :
+VideoGeneral::VideoGeneral() :
 		GameMenu("MainMenu/Settings/Video/Main.layout")
 {
 	// TODO Auto-generated constructor stub
 
 }
 
-VideoMain::~VideoMain() {
+VideoGeneral::~VideoGeneral() {
 	// TODO Auto-generated destructor stub
 }
 
-void VideoMain::init()
+void VideoGeneral::init()
 {
 	CreateCEGUIWindow();
 	setVisible( true );
-	window->setText("Main");
+	window->setText("General");
 }
 
-void VideoMain::destroy()
+void VideoGeneral::destroy()
 {
 
 }
 
-void VideoMain::LoadNestedWindows()
+void VideoGeneral::LoadNestedWindows()
 {
 
 }
-void VideoMain::RegisterHandlers()
+void VideoGeneral::RegisterHandlers()
 {
 
 }

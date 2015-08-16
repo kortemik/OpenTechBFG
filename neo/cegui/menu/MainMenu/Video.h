@@ -9,8 +9,6 @@
 #define _MAINMENU_VIDEO_H_
 
 #include <cegui/menu/GameMenu.h>
-#include "VideoMain.h"
-#include "Video3DOptions.h"
 
 namespace BFG {
 namespace CEGUIMenu {
