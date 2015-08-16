@@ -1,22 +1,22 @@
 /*
- * Bindings.h
+ * Mouse.h
  *
- *  Created on: Aug 13, 2015
+ *  Created on: Aug 16, 2015
  *      Author: kordex
  */
 
-#ifndef _MAINMENU_BINDINGS_H_
-#define _MAINMENU_BINDINGS_H_
+#ifndef _MAINMENU_MOUSE_H_
+#define _MAINMENU_MOUSE_H_
 
 #include <cegui/menu/GameMenu.h>
 
 namespace BFG {
 namespace CEGUIMenu {
 
-class Bindings: public GameMenu {
+class Mouse: public GameMenu {
 public:
-	Bindings();
-	virtual ~Bindings();
+	Mouse();
+	virtual ~Mouse();
 
 	virtual void init();
 	virtual void destroy();
@@ -31,4 +31,4 @@ protected:
 } /* namespace CEGUIMenu */
 } /* namespace BFG */
 
-#endif /* _MAINMENU_BINDINGS_H_ */
+#endif /* _MAINMENU_MOUSE_H_ */

@@ -7,6 +7,7 @@
         <Window type="VerticalLayoutContainer" name="VerticalLayoutContainer" >
             <Property name="Area" value="{{0,0},{0,0},{0,1920},{0,1080}}" />
             <Property name="MinSize" value="{{0,1},{0,1}}" />
+	    <Property name="Text" value="Bindings" />
             <Window type="TaharezLook/StaticText" name="StaticText" >
                 <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
                 <Property name="Text" value="Bindings" />

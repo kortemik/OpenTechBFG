@@ -33,7 +33,11 @@ protected:
 private:
 	void hide();
 
+	GameMenu *advanced;
+	GameMenu *audio;
 	GameMenu *controls;
+	GameMenu *options;
+	GameMenu *video;
 
 };
 

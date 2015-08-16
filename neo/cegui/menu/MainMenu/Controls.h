@@ -5,8 +5,8 @@
  *      Author: kordex
  */
 
-#ifndef CONTROLS_H_
-#define CONTROLS_H_
+#ifndef _MAINMENU_CONTROLS_H_
+#define _MAINMENU_CONTROLS_H_
 
 #include <cegui/menu/GameMenu.h>
 
@@ -28,10 +28,12 @@ protected:
 
 private:
 	GameMenu *bindings;
+	GameMenu *controller;
+	GameMenu *mouse;
 
 };
 
 } /* namespace CEGUIMenu */
 } /* namespace BFG */
 
-#endif /* CONTROLS_H_ */
+#endif /* _MAINMENU_CONTROLS_H_ */

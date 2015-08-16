@@ -1,22 +1,24 @@
 /*
- * Bindings.h
+ * Video.h
  *
- *  Created on: Aug 13, 2015
+ *  Created on: Aug 16, 2015
  *      Author: kordex
  */
 
-#ifndef _MAINMENU_BINDINGS_H_
-#define _MAINMENU_BINDINGS_H_
+#ifndef _MAINMENU_VIDEO_H_
+#define _MAINMENU_VIDEO_H_
 
 #include <cegui/menu/GameMenu.h>
+#include "VideoMain.h"
+#include "Video3DOptions.h"
 
 namespace BFG {
 namespace CEGUIMenu {
 
-class Bindings: public GameMenu {
+class Video: public GameMenu {
 public:
-	Bindings();
-	virtual ~Bindings();
+	Video();
+	virtual ~Video();
 
 	virtual void init();
 	virtual void destroy();
@@ -26,9 +28,13 @@ protected:
 	virtual void RegisterHandlers();
 	virtual void LoadNestedWindows();
 
+private:
+	GameMenu *video3doptions;
+	GameMenu *videomain;
+
 };
 
 } /* namespace CEGUIMenu */
 } /* namespace BFG */
 
-#endif /* _MAINMENU_BINDINGS_H_ */
+#endif /* _MAINMENU_VIDEO_H_ */

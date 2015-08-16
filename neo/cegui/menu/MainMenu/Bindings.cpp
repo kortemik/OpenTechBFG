@@ -24,6 +24,7 @@ void Bindings::init()
 {
 	CreateCEGUIWindow();
 	setVisible( true );
+	window->setText("Bindings");
 }
 
 void Bindings::destroy()

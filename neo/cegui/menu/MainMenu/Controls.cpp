@@ -7,13 +7,17 @@
 
 #include <cegui/menu/MainMenu/Controls.h>
 #include "Bindings.h"
+#include "Controller.h"
+#include "Mouse.h"
 
 namespace BFG {
 namespace CEGUIMenu {
 
 Controls::Controls() :
 	GameMenu("MainMenu/Settings/Controls.layout"),
-	bindings()
+	bindings(),
+	controller(),
+	mouse()
 {
 
 }
@@ -26,13 +30,15 @@ void Controls::init()
 {
 	CreateCEGUIWindow();
 	setVisible( true );
-
+	window->setText("Controls");
 	LoadNestedWindows();
 }
 
 void Controls::destroy()
 {
 	delete bindings;
+	delete controller;
+	delete mouse;
 }
 
 void Controls::RegisterHandlers()
@@ -42,10 +48,30 @@ void Controls::RegisterHandlers()
 
 void Controls::LoadNestedWindows()
 {
+	// tab control
+	CEGUI::TabControl *controlTabs = static_cast<CEGUI::TabControl*>(window);
+
+	/*
+	 * bindings
+	 */
 	bindings = new Bindings();
 	bindings->init();
-	CEGUI::TabControl *controlTabs = static_cast<CEGUI::TabControl*>(window);
 	controlTabs->addTab(bindings->getWindowPtr());
+
+	/*
+	 * controller
+	 */
+	controller = new Controller();
+	controller->init();
+	controlTabs->addTab(controller->getWindowPtr());
+
+
+	/*
+	 * mouse
+	 */
+	mouse = new Mouse();
+	mouse->init();
+	controlTabs->addTab(mouse->getWindowPtr());
 }
 
 
