@@ -36,7 +36,11 @@ private:
 	bool Handle_CreditsClick( const CEGUI::EventArgs& );
 	bool Handle_QuitClick( const CEGUI::EventArgs& );
 	
+	GameMenu* campaign;
+	GameMenu* multiplayer;
 	GameMenu* settings;
+	GameMenu* credits;
+	GameMenu* quit;
 };
 
 

@@ -21,7 +21,11 @@ namespace CEGUIMenu
 
 Settings::Settings() :
 	GameMenu( "MainMenu/Settings.layout" ),
-	controls()
+	advanced(),
+	audio(),
+	controls(),
+	options(),
+	video()
 {
 
 }
@@ -37,18 +41,29 @@ void Settings::init()
 	setVisible( false );
 	
 	LoadNestedWindows();
-	RegisterHandlers();
+
+	window->setText("Settings");
+
 }
 
 void Settings::destroy()
 {
+	advanced->destroy();
+	delete advanced;
+	audio->destroy();
+	delete audio;
+	controls->destroy();
 	delete controls;
+	options->destroy();
+	delete options;
+	video->destroy();
+	delete video;
 }
 
 void Settings::LoadNestedWindows()
 {
 	// tab control
-	CEGUI::TabControl *settingTabs = static_cast<CEGUI::TabControl*>(window->getChild("TabScreen"));
+	CEGUI::TabControl *settingTabs = static_cast<CEGUI::TabControl*>(window);
 
 	/*
 	 * advanced
@@ -88,16 +103,7 @@ void Settings::LoadNestedWindows()
 
 void Settings::RegisterHandlers()
 {
-	window->subscribeEvent(
-		CEGUI::FrameWindow::EventCloseClicked,
-		&Settings::hide,
-		( this )
-	);
-}
 
-void Settings::hide()
-{
-	setVisible( false );
 }
 
 } /* namespace CEGUIMenu */

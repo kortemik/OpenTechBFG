@@ -31,7 +31,6 @@ protected:
 	virtual void RegisterHandlers();
 	
 private:
-	void hide();
 
 	GameMenu *advanced;
 	GameMenu *audio;

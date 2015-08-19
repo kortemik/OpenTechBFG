@@ -28,7 +28,7 @@ protected:
 
 private:
 	GameMenu *video3doptions;
-	GameMenu *videomain;
+	GameMenu *videogeneral;
 
 };
 

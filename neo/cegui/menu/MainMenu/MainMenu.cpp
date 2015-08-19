@@ -4,7 +4,11 @@
 
 #include "../framework/CmdSystem.h"
 
+#include "Campaign.h"
+#include "Multiplayer.h"
 #include "Settings.h"
+#include "Credits.h"
+#include "Quit.h"
 
 namespace BFG
 {
@@ -13,7 +17,11 @@ namespace CEGUIMenu
 {
 MainMenu::MainMenu() :
 	GameMenu( "MainMenu/MainMenu.layout" ),
-	settings()
+	campaign(),
+	multiplayer(),
+	settings(),
+	credits(),
+	quit()
 {
 
 }
@@ -35,7 +43,20 @@ void MainMenu::init()
 
 void MainMenu::destroy()
 {
+	campaign->destroy();
+	delete campaign;
+
+	multiplayer->destroy();
+	delete multiplayer;
+
+	settings->destroy();
 	delete settings;
+
+	credits->destroy();
+	delete credits;
+
+	quit->destroy();
+	delete quit;
 }
 
 void MainMenu::AttachCEGUIRootWindow()
@@ -50,16 +71,48 @@ void MainMenu::AttachCEGUIRootWindow()
 
 void MainMenu::LoadNestedWindows()
 {
+	CEGUI::TabControl *tabScreen = static_cast<CEGUI::TabControl*>(window->getChild("TabScreen"));
+	/*
+	 * campaign
+	 */
+	campaign = new Campaign();
+	campaign->init();
+	tabScreen->addTab(campaign->getWindowPtr());
+
+	/*
+	 * multiplayer
+	 */
+	multiplayer = new Multiplayer();
+	multiplayer->init();
+	tabScreen->addTab(multiplayer->getWindowPtr());
+
+	/*
+	 * settings
+	 */
 	settings = new Settings();
 	settings->init();
-	window->addChild( settings->getWindowPtr() );
+	tabScreen->addTab( settings->getWindowPtr() );
+
+	/*
+	 * credits
+	 */
+	credits = new Credits();
+	credits->init();
+	tabScreen->addTab(credits->getWindowPtr());
+
+	/*
+	 * quit
+	 */
+	quit = new Quit();
+	quit->init();
+	tabScreen->addTab(quit->getWindowPtr());
 }
 
 void MainMenu::RegisterHandlers()
 {
 	if( idCEGUI::IsInitialized() )
 	{
-	
+	/*
 		window->getChild( "MenuVertical/TopSelect/Campaign" )->subscribeEvent(
 			CEGUI::PushButton::EventClicked,
 			&MainMenu::Handle_CampaignClick,
@@ -89,6 +142,7 @@ void MainMenu::RegisterHandlers()
 			&MainMenu::Handle_QuitClick,
 			( this )
 		);
+		*/
 	}
 }
 

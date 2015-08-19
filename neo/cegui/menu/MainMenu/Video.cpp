@@ -33,7 +33,11 @@ void Video::init()
 
 void Video::destroy()
 {
+	videogeneral->destroy();
+	delete videogeneral;
 
+	video3doptions->destroy();
+	delete video3doptions;
 }
 
 void Video::LoadNestedWindows()
@@ -44,9 +48,9 @@ void Video::LoadNestedWindows()
 	/*
 	 * VideoMain
 	 */
-	videomain = new VideoMain();
-	videomain->init();
-	controlTabs->addTab(videomain->getWindowPtr());
+	videogeneral = new VideoGeneral();
+	videogeneral->init();
+	controlTabs->addTab(videogeneral->getWindowPtr());
 
 	/*
 	 * Video3DOptions
