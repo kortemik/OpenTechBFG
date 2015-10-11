@@ -18,10 +18,6 @@ option(SDL2
 option(OPENAL
   "Use OpenAL soft instead of XAudio2" OFF)
 
-
-option(OPENAL
-  "Use OpenAL soft instead of XAudio2" OFF)
-
 if(NOT MSVC)
   # on other platforms we must use openal because they don't have xaudio - and mingw is missing XAudio2.h
   # FIXME: can we somehow have it default to OFF on windows and ON everywhere else?
@@ -117,7 +113,7 @@ if(BUNDLED_CEGUI)
   # freetype, if not found, we build ours
   find_package(Freetype)
   
-  if(NOT FREETYPE_FOUND)
+  if(BUNDLED_FREETYPE OR NOT FREETYPE_FOUND)
     add_subdirectory(libs/freetype)
     set(BUNDLED_FREETYPE ON CACHE BOOL "Select BUNDLED_FREETYPE for cegui" FORCE)
   endif()
