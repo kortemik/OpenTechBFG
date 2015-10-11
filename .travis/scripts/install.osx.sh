@@ -1,3 +1,4 @@
 #!/bin/bash
 
-echo "no-op"
+brew update
+brew outdated sdl2 || brew upgrade sdl2
