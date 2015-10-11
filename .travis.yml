@@ -37,8 +37,8 @@ install:
  
 script: 
  - mkdir -p build && cd build
- - if [ "$TRAVIS_OS_NAME" = "linux" ]; then bash .travis/scripts/build.linux.sh ; fi
- - if [ "$TRAVIS_OS_NAME" = "osx" ]; then bash .travis/scripts/build.osx.sh ; fi
+ - if [ "$TRAVIS_OS_NAME" = "linux" ]; then bash ../.travis/scripts/build.linux.sh ; fi
+ - if [ "$TRAVIS_OS_NAME" = "osx" ]; then bash ../.travis/scripts/build.osx.sh ; fi
  - make
  - cd ..
 
