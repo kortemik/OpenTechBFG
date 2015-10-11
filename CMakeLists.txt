@@ -113,7 +113,7 @@ if(BUNDLED_CEGUI)
   # freetype, if not found, we build ours
   find_package(Freetype)
   
-  if(NOT FREETYPE_FOUND OR APPLE)
+  if(NOT FREETYPE_FOUND)
     add_subdirectory(libs/freetype)
     set(BUNDLED_FREETYPE ON CACHE BOOL "Select BUNDLED_FREETYPE for cegui" FORCE)
   endif()
