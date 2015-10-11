@@ -16,6 +16,7 @@ env:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
    #   via the "travis encrypt" command using the project repo's public key
    - secure: "UE8I6ubHMARmKBNBtDDW34DI+PlFe/g2XR4DStfAg34R193nevkpDj+WqBN88VCxN9Z57CMI5fweQUc6r5L5ZuQns8XKe4lu0AmtroOHf+e/FUDlSGz9DUZZk6oTwEtKrsg548ZTanU+fiFkwbvKwx/nHLdYzsI8PYgmw7vci8w="
+   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then SDL_INCLUDE_DIR=/usr/local/opt/sdl/include SDL_LIBRARY=/usr/local/opt/sdl/lib ; fi
 
 addons:
   coverity_scan:
