@@ -1,4 +1,4 @@
 #!/bin/bash
 
-#brew update
-#brew install sdl
+brew update
+brew install sdl
