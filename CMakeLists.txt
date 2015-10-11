@@ -18,10 +18,6 @@ option(SDL2
 option(OPENAL
   "Use OpenAL soft instead of XAudio2" OFF)
 
-
-option(OPENAL
-  "Use OpenAL soft instead of XAudio2" OFF)
-
 if(NOT MSVC)
   # on other platforms we must use openal because they don't have xaudio - and mingw is missing XAudio2.h
   # FIXME: can we somehow have it default to OFF on windows and ON everywhere else?
