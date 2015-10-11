@@ -79,7 +79,6 @@ target_link_libraries(OpenTechEngine
   ${MINIZIP_LIBRARY}
   ${IRRXML_LIBRARY}
   ${GLEW_LIBRARY}
-  ${FREETYPE_LIBRARY}
   ${OGGVORBIS_LIBRARY}
   ${OPENGL_LIBRARIES}
   pthread

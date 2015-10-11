@@ -148,7 +148,6 @@ target_link_libraries(OpenTechEngine
   ${MINIZIP_LIBRARY}
   ${IRRXML_LIBRARY}
   ${GLEW_LIBRARY}
-  ${FREETYPE_LIBRARY}
   ${OGGVORBIS_LIBRARY}
   ${DIRECTX_LIBRARIES}
   opengl32

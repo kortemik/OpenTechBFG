@@ -62,9 +62,6 @@ option(BUNDLED_IRRXML
 option(BUNDLED_GLEW
   "Use bundled glew" ON)
 
-option(BUNDLED_FREETYPE
-  "Use bundled freetype")
-
 option(BUNDLED_OGGVORBIS
   "Use bundled oggvorbis" OFF)
   
@@ -104,11 +101,6 @@ if(BUNDLED_GLEW)
   add_subdirectory(libs/glew)
 endif()
 
-# freetype
-if(BUNDLED_FREETYPE)
-  add_subdirectory(libs/freetype)
-endif()
-
 # openal
 if(BUNDLED_OPENAL)
 #  add_subdirectory(libs/openal)
@@ -121,6 +113,15 @@ endif()
 
 # cegui
 if(BUNDLED_CEGUI)
+
+  # freetype, if not found, we build ours
+  find_package(Freetype)
+  
+  if(NOT FREETYPE_FOUND)
+    add_subdirectory(libs/freetype)
+    set(BUNDLED_FREETYPE ON CACHE BOOL "Select BUNDLED_FREETYPE for cegui" FORCE)
+  endif()
+  
   # set RPATH for Unix-y systems (except for OS X), so they can find the cegui libs.
   # must be done here so it's used for both the OpenTech executable and the cegui libs
   if(UNIX AND NOT APPLE AND NOT WIN32)
