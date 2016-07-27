@@ -27,8 +27,10 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 //#include "../../idlib/precompiled.h"
+#include "idlib/Lib.h"
 #include "../posix/posix_public.h"
 #include "sys/sys_public.h"
+#include "framework/CmdSystem.h"
 //#include "../sys_local.h"
 
 #include <pthread.h>
@@ -37,6 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
+#include <stdlib.h>
 
 #include <sys/sysctl.h>
 #include <mach/clock.h>
