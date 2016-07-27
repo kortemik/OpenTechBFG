@@ -33,7 +33,7 @@ option(IDTOOLS
 option(CEGUI
   "Use cegui" ON)
 
-if(WIN32 AND (CMAKE_COMPILER_IS_GNUCC OR NOT $ENV{VSINSTALLDIR}))
+if((WIN32 AND (CMAKE_COMPILER_IS_GNUCC OR NOT $ENV{VSINSTALLDIR})) OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   # breakpad doesn't work on mingw out of the box
   # and it requires DIA SDK which is under VSINSTALLDIR
   option(BREAKPAD
