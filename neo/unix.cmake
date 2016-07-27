@@ -48,10 +48,14 @@ list(APPEND OpenTechBFG_SOURCES
   ${SDL_INCLUDES} ${SDL_SOURCES})
 
 if(OPENAL)
-  find_package(OpenAL REQUIRED)
-  add_definitions(-DUSE_OPENAL)
-  set(OPENAL_LIBRARY openal)
-  
+  if(BUNDLED_OPENAL)
+    include_directories(${CMAKE_SOURCE_DIR}/libs/openal-soft/openal-soft.git/include)
+    set(OPENAL_LIBRARY openal)
+  else()
+    find_package(OpenAL REQUIRED)
+    add_definitions(-DUSE_OPENAL)
+    set(OPENAL_LIBRARY openal)
+  endif()
   list(APPEND OpenTechBFG_INCLUDES ${OPENAL_INCLUDES})
   list(APPEND OpenTechBFG_SOURCES ${OPENAL_SOURCES})
 else()
