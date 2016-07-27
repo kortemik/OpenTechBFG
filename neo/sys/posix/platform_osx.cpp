@@ -447,7 +447,11 @@ int clock_gettime( clk_id_t clock, struct timespec* tp )
 main
 ===============
 */
+#if SDL_VERSION_ATLEAST(2, 0, 0)
 int main( int argc, const char** argv )
+#else
+int main( int argc, char** argv )
+#endif
 {
 	// DG: needed for Sys_ReLaunch()
 	cmdargc = argc;
