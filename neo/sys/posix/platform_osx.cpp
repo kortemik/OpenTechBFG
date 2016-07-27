@@ -53,7 +53,12 @@ If you have questions concerning this license or the applicable additional terms
 namespace BFG
 {
 
+#if 0 // SDL2
 static const char** cmdargv = NULL;
+#else
+static char** cmdargv = NULL;
+#endif
+
 static int cmdargc = 0;
 // DG end
 
@@ -447,7 +452,7 @@ int clock_gettime( clk_id_t clock, struct timespec* tp )
 main
 ===============
 */
-#if SDL_VERSION_ATLEAST(2, 0, 0)
+#if 0 // SDL2
 int main( int argc, const char** argv )
 #else
 int main( int argc, char** argv )
