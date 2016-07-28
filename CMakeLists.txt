@@ -80,8 +80,14 @@ if(NOT MSVC)
   set(BUNDLED_OPENAL TRUE)
 endif()
 
-option(BUNDLED_SDL
-  "Use bundled SDL" ON)
+if(WIN32)
+  option(BUNDLED_SDL
+    "Use bundled SDL" OFF)
+else()
+  option(BUNDLED_SDL
+    "Use bundled SDL" ON)
+endif()
+
 
 option(BUNDLED_CEGUI
   "Use bundled CEGUI" ON)
