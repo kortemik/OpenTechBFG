@@ -24,10 +24,6 @@ else()
   find_package(SDL REQUIRED)
   include_directories(${SDL_INCLUDE_DIR})
   set(SDLx_LIBRARY ${SDL_LIBRARY})
-
-  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(SDLxMAIN_LIBRARY ${SDLMAIN_LIBRARY})
-  endif()
 endif()
 
 if(BUNDLED_CEGUI)
@@ -110,7 +106,6 @@ target_link_libraries(OpenTechEngine
   ${DL_LIBRARY}
   ${RT_LIBRARY}
   ${SDLx_LIBRARY}
-  ${SDLxMAIN_LIBRARY}
   ${OPENAL_LIBRARY}
   ${BREAKPAD_LIBRARY}
   ${FFMPEG_LIBRARIES}
