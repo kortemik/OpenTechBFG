@@ -363,12 +363,12 @@ void Sys_ReLaunch()
 		
 		// + 3 because "+set" "com_skipIntroVideos" "1" - and note that while we'll skip
 		// one (the first) cmdargv argument, we need one more pointer for NULL at the end.
-		int argc = cmdargc + 3;
+		int argc = ::cmdargc + 3;
 		const char** argv = ( const char** )calloc( argc, sizeof( char* ) );
 		
 		int i;
-		for( i = 0; i < cmdargc - 1; ++i )
-			argv[i] = cmdargv[i + 1]; // ignore cmdargv[0] == executable name
+		for( i = 0; i < ::cmdargc - 1; ++i )
+			argv[i] = ::cmdargv[i + 1]; // ignore cmdargv[0] == executable name
 			
 		// add +set com_skipIntroVideos 1
 		argv[i++] = "+set";
