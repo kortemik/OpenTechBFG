@@ -52,6 +52,9 @@ If you have questions concerning this license or the applicable additional terms
 
 namespace BFG
 {
+
+static const char** cmdargv = NULL;
+static int cmdargc = 0;
 // DG end
 
 /*
@@ -363,12 +366,12 @@ void Sys_ReLaunch()
 		
 		// + 3 because "+set" "com_skipIntroVideos" "1" - and note that while we'll skip
 		// one (the first) cmdargv argument, we need one more pointer for NULL at the end.
-		int argc = ::cmdargc + 3;
+		int argc = cmdargc + 3;
 		const char** argv = ( const char** )calloc( argc, sizeof( char* ) );
 		
 		int i;
-		for( i = 0; i < ::cmdargc - 1; ++i )
-			argv[i] = ::cmdargv[i + 1]; // ignore cmdargv[0] == executable name
+		for( i = 0; i < cmdargc - 1; ++i )
+			argv[i] = cmdargv[i + 1]; // ignore cmdargv[0] == executable name
 			
 		// add +set com_skipIntroVideos 1
 		argv[i++] = "+set";
@@ -446,15 +449,11 @@ int clock_gettime( clk_id_t clock, struct timespec* tp )
 main
 ===============
 */
-static const char** cmdargv = NULL;
-
-static int cmdargc = 0;
-
 int main( int argc, const char** argv )
 {
 	// DG: needed for Sys_ReLaunch()
-	cmdargc = argc;
-	cmdargv = argv;
+	BFG::cmdargc = argc;
+	BFG::cmdargv = argv;
 	// DG end
 	
 	BFG::Posix_EarlyInit( );
