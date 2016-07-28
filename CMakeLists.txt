@@ -13,7 +13,7 @@ option(MONOLITH
   "Embed game logic into main executable" ON)
 
 option(SDL2
-  "Use SDL2 instead of SDL1.2" OFF)
+  "Use SDL2 instead of SDL1.2" ON)
 
 option(OPENAL
   "Use OpenAL soft instead of XAudio2" OFF)
@@ -81,7 +81,7 @@ if(NOT MSVC)
 endif()
 
 option(BUNDLED_SDL
-  "Use bundled SDL" OFF)
+  "Use bundled SDL" ON)
 
 option(BUNDLED_CEGUI
   "Use bundled CEGUI" ON)
@@ -125,7 +125,7 @@ endif()
 
 # sdl
 if(BUNDLED_SDL)
-#  add_subdirectory(libs/sdl)
+  add_subdirectory(libs/sdl)
 endif()
 
 # cegui
