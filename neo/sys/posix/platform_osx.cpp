@@ -47,10 +47,12 @@ If you have questions concerning this license or the applicable additional terms
 #include <mach/mach.h>
 #include <mach-o/dyld.h>
 
-#include <SDL.h>
-
 // DG: needed for Sys_ReLaunch()
 #include <dirent.h>
+
+#ifdef main
+#undef main
+#endif
 
 namespace BFG
 {
