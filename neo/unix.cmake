@@ -19,8 +19,9 @@ endif()
 if(SDL2)
   if(BUNDLED_SDL)
     include_directories(${CMAKE_SOURCE_DIR}/libs/sdl/SDL.git/include)
-    link_directories(${CMAKE_BINARY_DIR}/libs/sdl)
-    set(SDLx_LIBRARY "SDL2")
+    link_directories(${CMAKE_BINARY_DIR}/libs/sdl/SDL.git)
+    set(SDLx_LIBRARY "libSDL2.a")
+    set(SDLxMAIN_LIBRARY "libSDL2main.a")
   else()
     find_package(SDL2 REQUIRED)
     include_directories(${SDL2_INCLUDE_DIR})
@@ -112,6 +113,7 @@ target_link_libraries(OpenTechEngine
   ${DL_LIBRARY}
   ${RT_LIBRARY}
   ${SDLx_LIBRARY}
+  ${SDLxMAIN_LIBRARY}
   ${OPENAL_LIBRARY}
   ${BREAKPAD_LIBRARY}
   ${FFMPEG_LIBRARIES}
