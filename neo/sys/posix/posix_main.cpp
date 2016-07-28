@@ -117,7 +117,8 @@ static char exit_spawn[ 1024 ];
  */
 const char* Sys_DefaultSavePath()
 {
-#if defined(__APPLE__) && SDL_VERSION_ATLEAST(2, 0, 0)
+#if 0 // SDL1
+#if defined(__APPLE__)
 	char* base_path = SDL_GetPrefPath( "", GAME_NAME );
 	if( base_path )
 	{

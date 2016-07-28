@@ -24,6 +24,10 @@ else()
   find_package(SDL REQUIRED)
   include_directories(${SDL_INCLUDE_DIR})
   set(SDLx_LIBRARY ${SDL_LIBRARY})
+
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(SDLxMAIN_LIBRARY ${SDLMAIN_LIBRARY})
+  endif()
 endif()
 
 if(BUNDLED_CEGUI)
@@ -77,9 +81,12 @@ GET_DIRECTORY_PROPERTY(_directory_flags DEFINITIONS)
 LIST(APPEND _compiler_FLAGS ${_directory_flags})
 SEPARATE_ARGUMENTS(_compiler_FLAGS)
 
-add_executable(OpenTechEngine ${OpenTechBFG_SOURCES})
+if("${CMAKE_SYSTEM}" MATCHES "Darwin")
+  add_executable(OpenTechEngine MACOSX_BUNDLE ${OpenTechBFG_SOURCES})
+else()
+  add_executable(OpenTechEngine ${OpenTechBFG_SOURCES})
+endif()
 
-#if(NOT WIN32)
 if(NOT "${CMAKE_SYSTEM}" MATCHES "Darwin")
   set(RT_LIBRARY rt)
 endif()
@@ -102,6 +109,7 @@ target_link_libraries(OpenTechEngine
   ${DL_LIBRARY}
   ${RT_LIBRARY}
   ${SDLx_LIBRARY}
+  ${SDLxMAIN_LIBRARY}
   ${OPENAL_LIBRARY}
   ${BREAKPAD_LIBRARY}
   ${FFMPEG_LIBRARIES}
