@@ -4,12 +4,11 @@ os:
   - osx
 matrix:
   fast_finish: true
-  allow_failures:
-    - os: osx  
 compiler:
   - gcc
   - clang
   - CXX=mingw; export CXX; true
+cache: ccache
 
 env:
   global:
